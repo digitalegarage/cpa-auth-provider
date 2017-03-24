@@ -1,13 +1,14 @@
 # OAuth 2 Client
 Single sign on services allow your users to log into multiple
 services and apps with a single account.
-A prerequisite for this tutorial is actually having the
-identity-provider running. (See previous tutorial.)
-## Why OAuth 2.0
+As a prerequisite for this tutorial you need to be running
+the identity-provider. (See previous tutorial.)
+## Why OAuth 2.0?
 OAuth 2.0 is an internet standard protocol and allows easy
-adoption of other identity services.
+adoption by using existing libraries. It also enables fast
+integration of other services that use the same protocol.
 
-## How
+## How does it work?
 A user is represented by access tokens.
 
 In order to get an access token for an user, the service or
