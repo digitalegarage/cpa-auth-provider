@@ -39,11 +39,11 @@ OAuth2Strategy.prototype.userProfile = function (accessToken, done) {
 
 	function callback(error, response, body) {
 		if (error || response.statusCode !== 200) {
-			done(error);
+			return done(error);
 		}
 		var info = JSON.parse(body);
 
-		done(null, info.user);
+		return done(null, info.user);
 	}
 
 	request(options, callback);
@@ -156,7 +156,7 @@ function setup(router) {
 					}
 					res.redirect('/auth_code');
 				}
-			)
+			);
 		}
 	);
 }

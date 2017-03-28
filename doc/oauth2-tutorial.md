@@ -3,6 +3,7 @@ Single sign on services allow your users to log into multiple
 services and apps with a single account.
 As a prerequisite for this tutorial you need to be running
 the identity-provider. (See previous tutorial.)
+
 ## Why OAuth 2.0?
 OAuth 2.0 is an internet standard protocol and allows easy
 adoption by using existing libraries. It also enables fast
@@ -24,7 +25,7 @@ secret.
 * generate client_id and client_secret for OAuth 2.0
 
 ## Task 2: Setup passport strategy
-For JavaScript there's a simple module available for passport
+For node there's a simple module available for passport
 to use OAuth 2.0.
 
 In a first step you need to configure the passport-oauth2
@@ -72,10 +73,10 @@ OAuth2Strategy.prototype.userProfile = function (accessToken, done) {
 	
 	function callback(error, response, body) {
 		if (error || response.statusCode !== 200) {
-			done(error);
+			return done(error);
 		}
 		var info = JSON.parse(body);
-		done(null, info.user);
+		return done(null, info.user);
 	}
 };
 ```
@@ -131,4 +132,11 @@ the user to `/auth_code/oauth`.
 </html>
 ```
 
+## The complete Sample
+There's also a sample implementation available as part of
+the code. See /oauth2-client/routes/auth-code-flow.js and
+/oauth2-client/views/auth_code.ejs
+
+The sample code at /oauth2-client also contains implementations
+of implicit grant flow and resource password owner flow.
 
