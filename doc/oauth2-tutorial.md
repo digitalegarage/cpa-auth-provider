@@ -20,9 +20,19 @@ identity if the service has a valid client id and client
 secret.
 
 ## Task 1: Create client_id and client_secret
-* log into identity provider
-* create new app
-* generate client_id and client_secret for OAuth 2.0
+It's important to have finished the previous tutorial and
+an identity provider up and running. First, you'll need to
+generate client_id and client_secret from it.
+
+To get those, you need to login to the identity provider
+with an admin account. There, access the admin pages and
+enter Clients page, for the default deployment on localhost
+this is `http://localhost:3000/admin/clients`.
+
+There, add a new oauth2 client and take note of client_id
+and client_secret. You can go back to the page later to
+replace the client_secret - but this will invalidate a previous
+one.
 
 ## Task 2: Setup passport strategy
 For node there's a simple module available for passport
