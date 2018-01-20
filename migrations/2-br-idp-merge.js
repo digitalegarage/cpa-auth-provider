@@ -47,20 +47,20 @@ var migrationCommands = [{
             "Permissions",
             {
                 "id": {
-                    "type": INTEGER,
+                    "type": Sequelize.INTEGER,
                     "autoIncrement": true,
                     "primaryKey": true
                 },
                 "label": {
-                    "type": VARCHAR(255),
+                    "type": Sequelize.VARCHAR(255),
                     "unique": true
                 },
                 "created_at": {
-                    "type": DATETIME,
+                    "type": Sequelize.DATETIME,
                     "allowNull": false
                 },
                 "updated_at": {
-                    "type": DATETIME,
+                    "type": Sequelize.DATETIME,
                     "allowNull": false
                 }
             },
@@ -73,39 +73,39 @@ var migrationCommands = [{
             "ValidationCodes",
             {
                 "id": {
-                    "type": INTEGER,
+                    "type": Sequelize.INTEGER,
                     "autoIncrement": true,
                     "primaryKey": true
                 },
                 "date": {
-                    "type": BIGINT,
+                    "type": Sequelize.BIGINT,
                     "validate": {
                         "notEmpty": true
                     }
                 },
                 "value": {
-                    "type": VARCHAR(255),
+                    "type": Sequelize.VARCHAR(255),
                     "validate": {
                         "notEmpty": true
                     }
                 },
                 "type": {
-                    "type": TEXT,
+                    "type": Sequelize.TEXT,
                     "validate": {
                         "notEmpty": true
                     },
                     "defaultValue": "email"
                 },
                 "created_at": {
-                    "type": DATETIME,
+                    "type": Sequelize.DATETIME,
                     "allowNull": false
                 },
                 "updated_at": {
-                    "type": DATETIME,
+                    "type": Sequelize.DATETIME,
                     "allowNull": false
                 },
                 "user_id": {
-                    "type": INTEGER,
+                    "type": Sequelize.INTEGER,
                     "onUpdate": "CASCADE",
                     "onDelete": "SET NULL",
                     "references": {
@@ -124,38 +124,38 @@ var migrationCommands = [{
             "OAuth2RefreshTokens",
             {
                 "id": {
-                    "type": INTEGER,
+                    "type": Sequelize.INTEGER,
                     "autoIncrement": true,
                     "primaryKey": true
                 },
                 "key": {
-                    "type": VARCHAR(255),
+                    "type": Sequelize.VARCHAR(255),
                     "validate": {
                         "notEmpty": true
                     }
                 },
                 "expires_at": {
-                    "type": BIGINT,
+                    "type": Sequelize.BIGINT,
                     "validate": {
                         "notEmpty": true
                     }
                 },
                 "scope": {
-                    "type": VARCHAR(255)
+                    "type": Sequelize.VARCHAR(255)
                 },
                 "consumed": {
-                    "type": TINYINT(1)
+                    "type": Sequelize.TINYINT(1)
                 },
                 "created_at": {
-                    "type": DATETIME,
+                    "type": Sequelize.DATETIME,
                     "allowNull": false
                 },
                 "updated_at": {
-                    "type": DATETIME,
+                    "type": Sequelize.DATETIME,
                     "allowNull": false
                 },
                 "user_id": {
-                    "type": INTEGER,
+                    "type": Sequelize.INTEGER,
                     "onUpdate": "CASCADE",
                     "onDelete": "SET NULL",
                     "references": {
@@ -165,7 +165,7 @@ var migrationCommands = [{
                     "allowNull": true
                 },
                 "oauth2_client_id": {
-                    "type": INTEGER,
+                    "type": Sequelize.INTEGER,
                     "onUpdate": "CASCADE",
                     "onDelete": "SET NULL",
                     "references": {
@@ -184,7 +184,7 @@ var migrationCommands = [{
             "Users",
             "password_changed_at",
             {
-                "type": BIGINT
+                "type": Sequelize.BIGINT
             }
         ]
     },
@@ -194,7 +194,7 @@ var migrationCommands = [{
             "OAuth2Clients",
             "jwt_code",
             {
-                "type": VARCHAR(255),
+                "type": Sequelize.VARCHAR(255),
                 "allowNull": true
             }
         ]
@@ -205,7 +205,7 @@ var migrationCommands = [{
             "Users",
             "permission_id",
             {
-                "type": INTEGER,
+                "type": Sequelize.INTEGER,
                 "onUpdate": "CASCADE",
                 "onDelete": "SET NULL",
                 "references": {
@@ -222,7 +222,7 @@ var migrationCommands = [{
             "Users",
             "last_login_at",
             {
-                "type": BIGINT
+                "type": Sequelize.BIGINT
             }
         ]
     },
@@ -232,7 +232,7 @@ var migrationCommands = [{
             "UserProfiles",
             "language",
             {
-                "type": VARCHAR(255)
+                "type": Sequelize.VARCHAR(255)
             }
         ]
     },
@@ -242,7 +242,7 @@ var migrationCommands = [{
             "Users",
             "verified",
             {
-                "type": TINYINT(1)
+                "type": Sequelize.TINYINT(1)
             }
         ]
     },
@@ -252,7 +252,7 @@ var migrationCommands = [{
             "Users",
             "email",
             {
-                "type": VARCHAR(255),
+                "type": Sequelize.VARCHAR(255),
                 "unique": true
             }
         ]
