@@ -3,40 +3,30 @@
     <mj-container background-color='#edece8'>
       <mj-section background-color='#ffffff'>
         <mj-column>
-          <mj-image width="270" src="https://login.br.de/img/BR_Mediathek_Logo.png" alt="BR Mediathek" align="left"/>
+          <mj-image width="270" src="https://login-news.ebu.io/img/evsn.png" alt="Eurovision Special News Content Discovery Platform" align="left"/>
           <mj-text>
-            Servus,
-          </mj-text>
-          <mj-text>
-            in Deinem Nutzerkonto der BR Mediathek wurde beantragt, Dein Nutzerkonto unter der E-Mail-Adresse
-            {{USEREMAIL}} zu löschen.
+            Hello,
           </mj-text>
           <mj-text>
-            Wir hoffen, dass Du trotzdem noch viel Spaß in der BR Mediathek hast. Auch ohne Nutzerkonto stehen
-            Dir weiterhin alle Inhalte zur Verfügung. Allerdings können wir Dir nicht alle Features bieten.
-          </mj-text>
-          <mj-text padding-bottom='0px'>
-            Viel Spaß beim Stöbern und Schauen!
-          </mj-text>
-          <mj-text color='#0082c5' padding-top='0px'>
-            Dein BR Mediatheks-Team
+            you requested to delete your user account in Eurovision Special News Content Discovery Platform with the email address
+            {{USEREMAIL}}.
           </mj-text>
           <mj-divider border-color='#dddddd' border-width='1px' padding-bottom='0px'></mj-divider>
           <mj-text padding-bottom='0px'>
-            Du wolltest Dein Nutzerkonto nicht löschen?
+            You didn't want to delete your account?
           </mj-text>
           <mj-text color='#a8a8a8' padding-top='0px'>
-            Melde Dich wie gewohnt unter
-            <a style='color: inherit; text-decoration: none;' href='{{LINK}}'>BR Mediathek</a>
-            an. Damit wird der Löschvorgang aufgehoben.
+            Then just log in as usually at the
+            <a style='color: inherit; text-decoration: none;' href='{{LINK}}'>Eurovision Special News Content Discovery Platform</a>
+            . Your deletion request will automatically be cancelled
           </mj-text>
           <mj-text padding-bottom='0px'>
-            Du brauchst Hilfe?
+            You need help?
           </mj-text>
           <mj-text color='#a8a8a8' padding-top='0px'>
-            Wende Dich bitte an den Support unter
-            <a style='color: inherit; text-decoration: none;' href='mailto:mediathek@br.de?subject=Löschauftrag'>mediathek@br.de</a>
-            und teile uns Dein Problem mit.
+            Please contact our support at
+            <a style='color: inherit; text-decoration: none;' href='mailto:Wef2018remote@eurovision.net?subject=Deletion'>Wef2018remote@eurovision.net</a>
+            and tell us about your issue.
           </mj-text>
         </mj-column>
       </mj-section>

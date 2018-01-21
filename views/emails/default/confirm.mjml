@@ -3,49 +3,46 @@
     <mj-container background-color='#edece8'>
       <mj-section background-color='#ffffff'>
         <mj-column>
-          <mj-image width="270" src="https://login.br.de/img/BR_Mediathek_Logo.png" alt="BR Mediathek" align="left"/>
+          <mj-image width="270" src="https://login-news.ebu.io/img/evsn.png" alt="Eurovision Special News Content Discovery Platform" align="left"/>
           <mj-text>
-            Servus,
+            Hello,
           </mj-text>
           <mj-text>
-            vielen Dank für Deine Registrierung in der BR Mediathek.
+            Thank you for creating an account in the Eurovision Special News Content Discovery Platform.
           </mj-text>
           <mj-text>
-            Bevor Du loslegen kannst, bestätige bitte Deine Registrierung mit einem Klick oder Tap auf diesen Link:
+            Please confirm your registration by clicking or tapping the following link:
           </mj-text>
-          <mj-button href='{{CONFIRMLINK}}' background-color='#0082c5' border-bottom='solid rgba(0,0,0,0.3) 2px' border-left='solid rgba(0,0,0,0.3) 1px' border-right='solid rgba(0,0,0,0.3) 1px' align='left'>
-            Registrierung bestätigen
+          <mj-button href='{{CONFIRMLINK}}' background-color='#264A86' border-bottom='solid rgba(0,0,0,0.3) 2px' border-left='solid rgba(0,0,0,0.3) 1px' border-right='solid rgba(0,0,0,0.3) 1px' align='left'>
+            Confirm registration
           </mj-button>
           <mj-text color='#a8a8a8'>
             <a style='color: inherit; text-decoration: none;' href='{{CONFIRMLINK}}'>{{CONFIRMLINK}}</a>
           </mj-text>
           <mj-text>
-            Durch Deine Registrierung kannst Du jetzt folgende Vorteile nutzen:
-            Wenn Du Dich auf unterschiedlichen Geräten wie Smartphone, Tablet und
-            Computer mit derselben E-Mail-Adresse anmeldest, siehst Du
-            überall dieselben Empfehlungen und Abonnenments, sowie Deine Merkliste
-            und Deinen bisherigen Sendungsverlauf.
+            By creating an account, you can now see the same watch history, bookmarks,
+            recommendations and purchased downloads on all devices on which you login with this email address.
           </mj-text>
           <mj-text padding-bottom='0px'>
-            Viel Spaß beim Stöbern und Schauen!
+            We hope that you enjoy using our platform.
           </mj-text>
-          <mj-text color='#0082c5' padding-top='0px'>
-            Dein BR Mediatheks-Team
+          <mj-text color='#264A86' padding-top='0px'>
+            Your Eurovision Special News Team
           </mj-text>
           <mj-divider border-color='#dddddd' border-width='1px' padding-bottom='0px'></mj-divider>
           <mj-text padding-bottom='0px'>
-            Du hast Dich nicht registriert?
+            You didn't create an account?
           </mj-text>
           <mj-text color='#a8a8a8' padding-top='0px'>
-            Bitte ignoriere diese E-Mail.
+            Please ignore this email.
           </mj-text>
           <mj-text padding-bottom='0px'>
-            Du brauchst Hilfe?
+            You need help?
           </mj-text>
           <mj-text color='#a8a8a8' padding-top='0px'>
-            Wende Dich bitte an den Support unter
-            <a style='color: inherit; text-decoration: none;' href='mailto:mediathek@br.de?subject=Registrierung'>mediathek@br.de</a>
-            und teile uns Dein Problem mit.
+            Please contact our support at
+            <a style='color: inherit; text-decoration: none;' href='mailto:Wef2018remote@eurovision.net?subject=Registration'>Wef2018remote@eurovision.net</a>
+            and tell us about your issue.
           </mj-text>
         </mj-column>
       </mj-section>
