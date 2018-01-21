@@ -49,4 +49,4 @@ RUN bin/init-db
 # By default, the application listens for HTTP on port 3000
 EXPOSE 3000
 
-CMD sequelize db:migrate --config db_config.js && bin/server
+CMD bin/server
