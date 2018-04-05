@@ -17,3 +17,5 @@ sessions.db
 data/cpa-auth-provider.sqlite
 
 *.swp
+db.db
+sessions
