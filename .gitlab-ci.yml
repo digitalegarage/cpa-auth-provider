@@ -94,7 +94,7 @@ docker_push:
     - docker push $CONTAINER_RELEASE_IMAGE
   only:
     - develop
-    - master-rts
+    - master
   tags:
     - dind
 
