@@ -7,13 +7,26 @@ var authHelper = require('../../lib/auth-helper');
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 
+var TEST_USER_LOGIN = "testuser";
+var TEST_USER_PASSWORD = "testpassword";
+var FIRSTNAME = "John";
+var LASTNAME = "Doe";
+var GENDER = 'Male';
+var DAB = 123456789;
+var LANG = "EN";
+
 var initDatabase = function (done) {
     db.User.create({
-        provider_uid: 'testuser'
+        provider_uid: 'testuser',
+        firstname: FIRSTNAME,
+        lastname: LASTNAME,
+        gender: GENDER,
+        date_of_birth: DAB,
+        language: LANG
     })
         .then(function (user) {
-            return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
-                return localLogin.setPassword('testpassword');
+            return db.LocalLogin.create({user_id: user.id, login: TEST_USER_LOGIN}).then(function (localLogin) {
+                return localLogin.setPassword(TEST_USER_PASSWORD);
             });
         })
         .then(function () {
@@ -27,6 +40,56 @@ var initDatabase = function (done) {
 var resetDatabase = function (done) {
     return dbHelper.resetDatabase(initDatabase, done);
 };
+
+describe('POST /authenticate/cookie', function () {
+    before(resetDatabase);
+    context('When logging in for a session cookie', function () {
+        context('with valid credentials', function () {
+            before(function (done) {
+                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                    method: 'post',
+                    type: 'json',
+                    data: {"email": TEST_USER_LOGIN, "password": TEST_USER_PASSWORD}
+                }, done);
+            });
+            context('when calling auth endpoint', function () {
+                it('should answer 204 and a session cookie', function () {
+                    expect(this.res.statusCode).to.equal(204);
+                });
+            });
+            context('when accessing the profile with the cookie', function () {
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/session/profile', {
+                        method: 'get',
+                        cookie: this.cookie
+                    }, done);
+                });
+                it('should response with 200', function () {
+                    expect(this.res.statusCode).to.equal(200);
+                    expect(this.res.body.user_profile.email).equal(TEST_USER_LOGIN);
+                    expect(this.res.body.user_profile.display_name).equal(TEST_USER_LOGIN);
+                    expect(this.res.body.user_profile.firstname).equal(FIRSTNAME);
+                    expect(this.res.body.user_profile.lastname).equal(LASTNAME);
+                    expect(this.res.body.user_profile.gender).equal(GENDER);
+                    expect(this.res.body.user_profile.date_of_birth).equal(DAB);
+                    expect(this.res.body.user_profile.language).equal(LANG);
+                });
+            });
+        });
+        context('with invalid credentials', function () {
+            before(function (done) {
+                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                    method: 'post',
+                    type: 'json',
+                    data: {"email": "foo", "password": "bar"}
+                }, done);
+            });
+            it('should response 401', function () {
+                expect(this.res.statusCode).to.equal(401);
+            });
+        });
+    });
+});
 
 describe('GET /auth', function () {
     before(function () {
