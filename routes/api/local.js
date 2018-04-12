@@ -149,8 +149,8 @@ module.exports = function (app, options) {
                                 {
                                     forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
                                     host: config.mail.host,
-                                    mail: localLogin.login,
-                                    code: code
+                                    mail: encodeURIComponent(localLogin.login),
+                                    code: encodeURIComponent(code)
                                 },
                                 localLogin.User.language ? localLogin.User.language : i18n.getLocale()
                             ).then(

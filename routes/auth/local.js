@@ -293,8 +293,8 @@ module.exports = function (app, options) {
                                 {
                                     forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
                                     host: config.mail.host,
-                                    mail: localLogin.login,
-                                    code: code
+                                    mail: encodeURIComponent(localLogin.login),
+                                    code: encodeURIComponent(code)
                                 },
                                 localLogin.User.language ? localLogin.User.language : i18n.getLocale()
                             ).then(
@@ -326,6 +326,7 @@ module.exports = function (app, options) {
                 res.status(400).json({errors: result.array()});
                 return;
             }
+
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
                 res.status(400).json({
                     errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}],
@@ -335,9 +336,8 @@ module.exports = function (app, options) {
             } else {
                 db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
                     .then(function (localLogin) {
-                        var user = localLogin.User;
-                        if (user) {
-                            return codeHelper.recoverPassword(user, req.body.code, req.body.password).then(function (success) {
+                        if (localLogin && localLogin.User) {
+                            return codeHelper.recoverPassword(localLogin.User, req.body.code, req.body.password).then(function (success) {
                                 if (success) {
                                     return res.status(200).send();
                                 } else {
