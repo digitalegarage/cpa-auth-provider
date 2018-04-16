@@ -33,7 +33,7 @@ module.exports = function (app, options) {
     // Origin 'http://localhost.rts.ch:8090' is therefore not allowed access.
     app.options('/api/session/profile', cors);
 
-    app.get('/api/session/profile', cors, authHelper.authenticateFirst, function (req, res) {
+    app.get('/api/session/profile', cors, authHelper.ensureAuthenticated, function (req, res) {
         var user = authHelper.getAuthenticatedUser(req);
 
         if (!user) {
