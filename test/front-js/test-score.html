@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test password strength (Score)</title>
+</head>
+<body>
+<script src="../../public/js/password-score.js"></script>
+<script>
+    function showScore() {
+        document.getElementById('res').innerText = (getScore(document.getElementById('password').value));
+    }
+    window.onload = showScore;
+</script>
+
+<p>
+    <input type="text" id="password" value="P@ssw0rd!"/>
+    <button onclick="showScore();">Score</button>
+</p>
+
+<p>Your score is: <span id="res"></span></p>
+
+</body>
+</html>
