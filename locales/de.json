@@ -296,6 +296,7 @@
 	"BACK_SIGNUP_MISSING_FIELDS": "Die Angaben sind unvollständig",
 	"BACK_SIGNUP_PASS_SIMPLE_TOO_SIMPLE": "Das Passwort ist zu einfach: Verwende auch Zahlen oder Groß/Kleinschreibung.",
 	"BACK_SIGNUP_PASS_SIMPLE_TOO_SHORT": "Das Passwort ist zu kurz: Es muss mindestens {length} Zeichen lang sein.",
+	"BACK_SIGNUP_PASS_SIMPLE_TOO_SHORT_FRONT": "Das Passwort ist zu kurz: Es muss mindestens {{length}} Zeichen lang sein.",
 	"BACK_SIGNUP_PASS_SIMPLE_GENERIC_FAIL": "Passwort ungültig.",
 	"BACK_PWD_UPDATE_USER_NOT_FOUND": "Benutzer nicht gefunden.",
 	"BACK_PWD_WRONG_RECOVERY_CODE": "Falscher Wiederherstellungscode.",

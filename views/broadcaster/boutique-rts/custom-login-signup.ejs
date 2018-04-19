@@ -333,9 +333,11 @@
 
         })();
     </script>
-
-    <% include ../../util/password-support %>
-
+    <% if (config.password.quality_check == 'owasp'){ %>
+    <% include ../../util/password-owasp-support %>
+    <% } else if (config.password.quality_check == 'simple'){ %>
+    <% include ../../util/password-simple-support %>
+    <% } %>
     </div>
 
 </main>

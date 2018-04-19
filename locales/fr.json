@@ -296,6 +296,7 @@
 	"BACK_SIGNUP_MISSING_FIELDS": "Saisie incomplète ou erronée",
 	"BACK_SIGNUP_PASS_SIMPLE_TOO_SIMPLE": "Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux.",
 	"BACK_SIGNUP_PASS_SIMPLE_TOO_SHORT": "Mots de passe trop court. Il doit être long d'au minimum {length} caractères.",
+	"BACK_SIGNUP_PASS_SIMPLE_TOO_SHORT_FRONT": "Mots de passe trop court. Il doit être long d'au minimum {{length}} caractères.",
 	"BACK_SIGNUP_PASS_SIMPLE_GENERIC_FAIL": "Password invalid",
 	"BACK_PWD_UPDATE_USER_NOT_FOUND": "Utilisateur inconnu.",
 	"BACK_PWD_WRONG_RECOVERY_CODE": "Code de récupération de mot de passe erroné.",
