@@ -94,7 +94,8 @@ module.exports = function (app, options) {
                             success: false,
                             msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
                             password_strength_errors: passwordHelper.getWeaknesses(username, req.body.password, req),
-                            errors: [{msg: passwordHelper.getWeaknessesMsg(username, req.body.password, req)}]
+                            errors: [{msg: passwordHelper.getWeaknessesMsg(username, req.body.password, req)}],
+                            score: passwordHelper.getQuality(username, req.body.password)
                         });
                     } else if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
                         logger.debug('[POST /api/local/signup][email', username, '][ERR', err, ']');

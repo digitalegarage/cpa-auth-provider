@@ -34,7 +34,13 @@
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src="<%= config.urlPrefix %>/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="<%= config.urlPrefix %>/cookie/src/js.cookie.js"></script>
+
+<% if (config.password.quality_check == 'owasp'){ %>
 <script src='<%= config.urlPrefix %>/owasp/owasp-password-strength-test.js'></script>
+<% } else if (config.password.quality_check == 'simple'){ %>
+<script src="<%= config.urlPrefix %>/assets/js/password-score.js"></script>
+<% } %>
+
 <script src='<%= config.urlPrefix %>/moment/moment.js'></script>
 
 <script type="text/javascript"
