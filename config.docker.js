@@ -92,6 +92,11 @@ module.exports = {
     password: {
         // one of [simple,owasp,no] - defaults to owasp
         quality_check: process.env.PASSWORD_QUALITY_CHECK || 'owasp',
+        // Minimum score for password "simple" check:
+        minimalExpectedScore:process.env.PASSWORD_QUALITY_MINIMUM_SCORE,
+        // Good score for password "simple" check:
+        goodScore:process.env.PASSWORD_QUALITY_GOOD_SCORE,
+        minimalPasswordLength:process.env.PASSWORD_MINIMUM_LENGTH,
         // in sec
         recovery_code_validity_duration: 1800,
         // a new recovery code will be generated only if the current one has less that TTL

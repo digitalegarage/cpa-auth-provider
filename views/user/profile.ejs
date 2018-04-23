@@ -375,7 +375,13 @@
     <!-- Add client Modal -->
     <% include ./modales/email-change.ejs %>
     <% include ./modales/user-delete.ejs %>
-    <% include ../util/password-support %>
+
+    <% if (config.password.quality_check == 'owasp'){ %>
+    <% include ../util/password-owasp-support %>
+    <% } else if (config.password.quality_check == 'simple'){ %>
+    <% include ../util/password-simple-support %>
+    <% } %>
+
 
     <script type="text/javascript">
         (function () {
