@@ -273,7 +273,10 @@ describe('GET /email/move/:token', function () {
         });
 
         it('should change the email', function (done) {
-            db.LocalLogin.findOne({where: {login: NEW_EMAIL}}).then(
+
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: NEW_EMAIL})
+            }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
@@ -317,7 +320,9 @@ describe('GET /email/move/:token', function () {
         });
 
         it('should have changed the email', function (done) {
-            db.LocalLogin.findOne({where: {login: NEW_EMAIL}}).then(
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: NEW_EMAIL})
+            }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
@@ -402,7 +407,9 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should change the email', function (done) {
-            db.LocalLogin.findOne({where: {login: NEW_EMAIL}}).then(
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: NEW_EMAIL})
+            }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
@@ -447,7 +454,9 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should have changed the email', function (done) {
-            db.LocalLogin.findOne({where: {login: NEW_EMAIL}}).then(
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: NEW_EMAIL})
+            }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);

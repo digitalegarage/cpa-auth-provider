@@ -53,9 +53,7 @@ function routes(router) {
             logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
 
             return db.LocalLogin.findOne({
-                where: {
-                    login: newUsername
-                }
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
             }).then(function (localLogin) {
                     if (localLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
@@ -145,14 +143,18 @@ function routes(router) {
                 function (ll) {
                     localLogin = ll;
                     oldEmail = localLogin.login;
-                    return db.LocalLogin.findOne({where: {login: newUsername}});
+                    return db.LocalLogin.findOne({
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                    });
                 }
             ).then(
                 function (takenLocalLogin) {
                     if (takenLocalLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return db.LocalLogin.findOne({where: {login: newUsername}}).then(function (takenLogin) {
+                    return db.LocalLogin.findOne({
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                    }).then(function (takenLogin) {
                         if (takenLogin) {
                             throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                         }
@@ -241,8 +243,9 @@ function routes(router) {
                         throw err;
                     }
 
-
-                    return db.LocalLogin.findOne({where: {login: newUsername}});
+                    return db.LocalLogin.findOne({
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                    });
                 }
             ).then(
                 function (takenUser) {

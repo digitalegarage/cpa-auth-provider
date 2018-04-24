@@ -320,7 +320,9 @@ describe('GET /email/confirm/:key', function() {
             expect(this.res.body.success).equal(true);
         });
         it('should have set the user to verified', function(done) {
-            db.LocalLogin.findOne({where: {login: UNVERIFIED_USER.email}}).then(
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: UNVERIFIED_USER.email})
+            }).then(
                 ll => {
                     expect(ll).a('object');
                     expect(ll.user_id).equal(UNVERIFIED_USER.id);
@@ -369,7 +371,10 @@ describe('GET /email/verify/:key', function() {
             expect(this.res.statusCode).equal(200);
         });
         it('should have set the user to verified', function(done) {
-            db.LocalLogin.findOne({where: {login: UNVERIFIED_USER.email}}).then(
+
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: UNVERIFIED_USER.email})
+            }).then(
                 ll => {
                     expect(ll).a('object');
                     expect(ll.user_id).equal(UNVERIFIED_USER.id);
