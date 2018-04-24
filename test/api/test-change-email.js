@@ -168,6 +168,45 @@ describe('POST /email/change', function () {
         });
     });
 
+    context('trying to set an already chosen email (case sensitive)', function () {
+        before(resetDatabase);
+        before(oauthHelper.getAccessToken(USER1.email, USER1, CLIENT));
+        before(function (done) {
+            this.accessToken = this.res.body.access_token;
+            requestHelper.sendRequest(
+                this,
+                URL,
+                {
+                    method: 'post',
+                    cookie: this.cookie,
+                    accessToken: this.accessToken,
+                    tokenType: 'Bearer',
+                    data: {
+                        new_email: USER2.email.toUpperCase(),
+                        password: USER1.password,
+                    },
+                    type: 'form'
+                },
+                done
+            );
+        });
+
+        it('should report a failure email token', function () {
+            expect(this.res.statusCode).equal(400);
+            expect(this.res.body.success).equal(false);
+            expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
+        });
+
+        it('should not have generated a token', function (done) {
+            db.UserEmailToken.findOne({where: {user_id: USER1.id, oauth2_client_id: CLIENT.id}}).then(
+                function (token) {
+                    expect(token).equal(null);
+                    done();
+                }
+            ).catch(done);
+        });
+    });
+
     context('trying five times', function () {
         before(resetDatabase);
         before(oauthHelper.getAccessToken(USER1.email, USER1, CLIENT));
