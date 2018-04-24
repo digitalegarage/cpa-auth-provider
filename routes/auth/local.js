@@ -20,7 +20,10 @@ var i18n = require('i18n');
 
 var localStrategyCallback = function (req, username, password, done) {
     var loginError = req.__('BACK_SIGNUP_INVALID_EMAIL_OR_PASSWORD');
-    db.LocalLogin.findOne({where: {login: username}, include: {model: db.User}})
+
+    var where = db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: username});
+
+    db.LocalLogin.findOne({where: where, include: {model: db.User}})
         .then(function (localLogin) {
                 if (!localLogin) {
                     doneWithError();
@@ -361,7 +364,7 @@ module.exports = function (app, options) {
         var redirectUri = req.session.auth_origin;
         delete req.session.auth_origin;
 
-        if (req.session.callback_url){
+        if (req.session.callback_url) {
             redirectUri = req.session.callback_url;
             delete req.session.callback_url;
         }
