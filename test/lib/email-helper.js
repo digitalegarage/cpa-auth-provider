@@ -14,7 +14,12 @@ describe("emailHelper test templating", function () {
                 'from@from.ch',
                 "validation-email",
                 {log: false},
-                {host: "htt://localhost:3000", mail: encodeURIComponent('a@aaa.aa'), code: encodeURIComponent('12345')},
+                {
+                    host: "http://localhost:3000",
+                    mail: 'a@aaa.aa',
+                    code: '12345',
+                    confirmLink: "http://localhost:3000" + encodeURIComponent('a@aaa.aa') + encodeURIComponent('12345')
+                },
                 config.i18n.default_locale
             ).then(function () {
                 self.ok = true;
@@ -69,8 +74,9 @@ describe("emailHelper test templating", function () {
                 {},
                 {
                     host: "http://localhost:3000",
-                    mail: encodeURIComponent('a@aaa.aa'),
-                    code: encodeURIComponent('12345')
+                    mail: 'a@aaa.aa',
+                    code: '12345',
+                    confirmLink: "http://localhost:3000" + encodeURIComponent('a@aaa.aa') + encodeURIComponent('12345')
                 },
                 undefined
             ).then(function () {
