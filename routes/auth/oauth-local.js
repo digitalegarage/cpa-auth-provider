@@ -1,18 +1,14 @@
 "use strict";
 
 var db = require('../../models');
-var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
+var afterLogin = require('../../lib/afterlogin-helper');
 
-var passport = require('passport');
-var i18n = require('i18n');
 var jwtHelper = require('../../lib/jwt-helper');
 var cors = require('../../lib/cors');
 
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var userHelper = require('../../lib/user-helper');
-var recaptcha = require('express-recaptcha');
 
 var localoAuthStrategyCallback = function (req, username, password, done) {
 
@@ -143,7 +139,7 @@ module.exports = function (app, options) {
                 id: req.user.id
             }, include: [db.LocalLogin]
         }).then(function (user) {
-            res.cookie('rts-token',user.getDisplayName(), { maxAge: 900000, httpOnly: false });
+            afterLogin.afterLogin(user, res);
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);

@@ -585,6 +585,111 @@ describe('OAuth2 requests from cross domain with access token', function () {
 
 });
 
+function searchCookie() {
+    var found = false;
+    var setcookie = this.res.headers["set-cookie"];
+    if (setcookie) {
+        setcookie.forEach(
+            function (cookiestr) {
+                if (cookiestr.indexOf('peach_infos') == 0) {
+                    found = true;
+                }
+            }
+        );
+    }
+    return found;
+}
+
+describe('OAuth2 requests from cross domain with access token ', function () {
+
+    before(resetDatabase);
+    before(createFakeUser);
+
+    before(function (done) {
+        requestHelper.sendRequest(this, '/oauth2/login', {
+            method: 'post',
+            data: {
+                grant_type: 'password',
+                username: USER.email,
+                password: USER.password,
+                client_id: CLIENT.client_id
+            }
+        }, done);
+    });
+    describe('when config is set to set info cookie', function () {
+
+        before(function (done) {
+            config.afterLogin = {
+                storeUserInfoInCookie: {
+                    activated: true,
+                    cookieName: 'peach_infos',
+                    domain: 'toto.com',
+                    duration: 999999999,
+                    storeUserId: true,
+                    storeUserDisplayName: true
+                }
+            }
+            done();
+        });
+
+        after(function (done) {
+            config = require('../../config');
+            done();
+        });
+
+        before(function (done) {
+            var self = this;
+            self.cookie = null;
+            requestHelper.sendRequest(this, '/oauth2/session/cookie/request', {
+                method: 'post',
+                data: {
+                    token: self.res.body.access_token
+                }
+            }, done);
+        });
+
+        it('should return a success with appropriate data in cookie peach_infos', function () {
+            var foundCookie = searchCookie.call(this);
+            expect(foundCookie).to.be.true;
+            expect(this.res.statusCode).equal(200);
+        });
+    });
+    describe('when config is set to not set info cookie', function () {
+
+        before(function (done) {
+            config.afterLogin = {
+                storeUserInfoInCookie: {
+                    activated: false
+                }
+            }
+            done();
+        });
+
+        after(function (done) {
+            config = require('../../config');
+            done();
+        });
+
+        before(function (done) {
+            var self = this;
+            self.cookie = null;
+            requestHelper.sendRequest(this, '/oauth2/session/cookie/request', {
+                method: 'post',
+                data: {
+                    token: self.res.body.access_token
+                }
+            }, done);
+        });
+
+        it('should return a success without cookie peach_infos', function () {
+            var foundCookie = searchCookie.call(this);
+            expect(foundCookie).to.be.false;
+            expect(this.res.statusCode).equal(200);
+        });
+    });
+
+});
+
 describe('OAuth2 requests from cross domain without access token', function () {
 
     before(resetDatabase);
