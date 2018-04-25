@@ -68,6 +68,7 @@ module.exports = function (app, options) {
 
     app.post('/oauth2/session/cookie/request', cors, passport.authenticate('oauth-local', {session: true}),
         function (req, res, next) {
+
             getUserInfos(req, res, next);
         });
 
@@ -142,6 +143,7 @@ module.exports = function (app, options) {
                 id: req.user.id
             }, include: [db.LocalLogin]
         }).then(function (user) {
+            res.cookie('rts-token',user.getDisplayName(), { maxAge: 900000, httpOnly: false });
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);
