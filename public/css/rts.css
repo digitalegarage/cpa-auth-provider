@@ -123,11 +123,6 @@ footer.rts-footer {
     top: 3px;
 }
 
-/*TODO remove this when user login btn will be in production on hummingbird*/
-.rts-hp-header .about {
-    display: none;
-}
-
 #login .btn.btn-large-submit.btn-primary,
 #password-recovery .btn.btn-large-submit.btn-primary,
 #signup .btn.btn-large-submit.btn-primary {
