@@ -84,8 +84,8 @@ var routes = function (router) {
                     {
                         confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
                         host: config.mail.host,
-                        mail: encodeURIComponent(email),
-                        code: encodeURIComponent(code)
+                        mail: email,
+                        code: code
                     },
                     (user.language) ? user.language : i18n.getLocale()
                 ).then(
