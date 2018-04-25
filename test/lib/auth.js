@@ -41,9 +41,9 @@ var resetDatabase = function (done) {
     return dbHelper.resetDatabase(initDatabase, done);
 };
 
-function searchCookie() {
+function searchCookie(res) {
     var found = false;
-    var setcookie = this.res.headers["set-cookie"];
+    var setcookie = res.headers["set-cookie"];
     if (setcookie) {
         setcookie.forEach(
             function (cookiestr) {
@@ -70,7 +70,7 @@ describe('POST /authenticate/cookie', function () {
                         storeUserId: true,
                         storeUserDisplayName: true
                     }
-                }
+                };
                 done();
             });
             after(function (done) {
@@ -109,8 +109,8 @@ describe('POST /authenticate/cookie', function () {
             });
             describe('when config is set to set info cookie', function () {
                 it('should return a success with appropriate data in cookie peach_infos', function () {
-                    var foundCookie = searchCookie.call(this);
-                    expect(foundCookie).to.be.true;
+                    var foundCookie = searchCookie.call(this, this.res);
+                    expect(foundCookie).equal(true);
                 });
             });
 

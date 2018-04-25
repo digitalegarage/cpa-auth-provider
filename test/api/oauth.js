@@ -585,9 +585,9 @@ describe('OAuth2 requests from cross domain with access token', function () {
 
 });
 
-function searchCookie() {
+function searchCookie(res) {
     var found = false;
-    var setcookie = this.res.headers["set-cookie"];
+    var setcookie = res.headers["set-cookie"];
     if (setcookie) {
         setcookie.forEach(
             function (cookiestr) {
@@ -649,7 +649,7 @@ describe('OAuth2 requests from cross domain with access token ', function () {
         });
 
         it('should return a success with appropriate data in cookie peach_infos', function () {
-            var foundCookie = searchCookie.call(this);
+            var foundCookie = searchCookie.call(this, this.res);
             expect(foundCookie).to.be.true;
             expect(this.res.statusCode).equal(200);
         });
@@ -682,7 +682,7 @@ describe('OAuth2 requests from cross domain with access token ', function () {
         });
 
         it('should return a success without cookie peach_infos', function () {
-            var foundCookie = searchCookie.call(this);
+            var foundCookie = searchCookie.call(this, this.res);
             expect(foundCookie).to.be.false;
             expect(this.res.statusCode).equal(200);
         });
