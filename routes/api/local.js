@@ -144,8 +144,8 @@ module.exports = function (app, options) {
                                 {
                                     forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
                                     host: config.mail.host,
-                                    mail: encodeURIComponent(localLogin.login),
-                                    code: encodeURIComponent(code)
+                                    mail: localLogin.login,
+                                    code: code
                                 },
                                 localLogin.User.language ? localLogin.User.language : i18n.getLocale()
                             ).then(
@@ -250,8 +250,8 @@ module.exports = function (app, options) {
                     {
                         confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : '') + '&code=' + encodeURIComponent(code),
                         host: config.mail.host,
-                        mail: encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : ''),
-                        code: encodeURIComponent(user.verificationCode)
+                        mail: user.LocalLogin ? user.LocalLogin.login : '',
+                        code: user.verificationCode
                     },
                     user.language ? user.language : config.mail.local
                 ).then(
