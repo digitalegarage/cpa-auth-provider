@@ -139,7 +139,7 @@ module.exports = function (app, options) {
                 id: req.user.id
             }, include: [db.LocalLogin]
         }).then(function (user) {
-            afterLogin.afterLogin(user, res);
+            afterLogin.afterLogin(user, user.LocalLogin.login, res);
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);
