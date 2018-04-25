@@ -2,30 +2,24 @@
 
 var db = require('../../models');
 var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
-var jwtHelpers = require('../../lib/jwt-helper');
 var logger = require('../../lib/logger');
 
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-var recaptcha = require('express-recaptcha');
 
 var jwt = require('jwt-simple');
 var JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 var cors = require('../../lib/cors');
-var generate = require('../../lib/generate');
-var emailUtil = require('../../lib/email-util');
 
 var emailHelper = require('../../lib/email-helper');
 var authHelper = require('../../lib/auth-helper');
-var permissionName = require('../../lib/permission-name');
 var passwordHelper = require('../../lib/password-helper');
 var userHelper = require('../../lib/user-helper');
 
 var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 
+var afterLogin = require('../../lib/afterlogin-helper');
 
 var i18n = require('i18n');
 
@@ -174,7 +168,10 @@ module.exports = function (app, options) {
     app.post('/api/local/authenticate/cookie', cors,
       passport.authenticate('local', { session: true }),
       function(req,res) {
-        // returned value is not relevant
+
+        afterLogin.afterLogin(req.user, req.body.email || req.query.email, res);
+
+          // returned value is not relevant
         res.sendStatus(204);
       }
     );
