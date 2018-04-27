@@ -539,7 +539,7 @@ g-recaptcha {
     position: relative;
 }
 
-#password-bar #password-progress {
+#password-bar #id-password-progress {
     position: absolute;
     left: 0;
     top: 0;
