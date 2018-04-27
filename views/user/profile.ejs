@@ -210,7 +210,7 @@
                                placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
                         <p id="password-error-label" class="password-error error-message text-danger"></p>
                         <div id="password-bar">
-                            <div id="password-progress"></div>
+                            <div id="id-password-progress"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -232,7 +232,7 @@
                                placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
                         <p id="password-error-label" class="password-error error-message text-danger"></p>
                         <div id="password-bar">
-                            <div id="password-progress"></div>
+                            <div id="id-password-progress"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -420,7 +420,7 @@
             var $elementsAccountVerified = $(".accountVerified");
             var $elementsAccountNotVerified = $(".accountNotVerified");
 
-            var $passwordStrengthProgress = $("#password-progress");
+            var $passwordStrengthProgress = $("#id-password-progress");
             var hasPassword = '<%= profile.hasPassword %>';
             var date = "";
             var verified = '<%= profile.verified %>';
