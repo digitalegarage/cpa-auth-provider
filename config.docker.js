@@ -88,7 +88,7 @@ module.exports = {
     afterLogin: {
         storeUserInfoInCookie: {
             activated: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_ACTIVATED,
-            cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE__NAME,
+            cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_NAME,
             domain: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DOMAIN,
             duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION,
             storeUserId: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_USER_ID,
