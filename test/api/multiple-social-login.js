@@ -1016,7 +1016,9 @@ function localSignup(done) {
 
 
 function markEmailAsVerified(done) {
-    db.LocalLogin.findOne({where: {login: GOOGLE_EMAIL}}).then(
+    db.LocalLogin.findOne({
+        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: GOOGLE_EMAIL})
+    }).then(
         function (localLogin) {
             localLogin.updateAttributes({verified: true}).then(
                 function () {
