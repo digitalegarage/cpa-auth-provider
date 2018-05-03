@@ -10,9 +10,9 @@ var LocalStrategy = require('passport-local').Strategy;
 var emailHelper = require('../../lib/email-helper');
 var codeHelper = require('../../lib/code-helper');
 var passwordHelper = require('../../lib/password-helper');
-var socialLoginHelper = require('../../lib/social-login-helper');
 var userHelper = require('../../lib/user-helper');
 var limiterHelper = require('../../lib/limiter-helper');
+var afterLogin = require('../../lib/afterlogin-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
@@ -376,6 +376,8 @@ module.exports = function (app, options) {
             redirectUri = req.session.callback_url;
             delete req.session.callback_url;
         }
+
+        afterLogin.afterLogin(req.user, req.body.email || req.query.email, res);
 
         req.session.save(
             function () {

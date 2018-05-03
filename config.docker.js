@@ -85,6 +85,17 @@ module.exports = {
         defaultTemplateClass: process.env.MAIL_DEFAULT_TEMPLATE_CLASS
     },
 
+    afterLogin: {
+        storeUserInfoInCookie: {
+            activated: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_ACTIVATED,
+            cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_NAME,
+            domain: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DOMAIN,
+            duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION,
+            storeUserId: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_USER_ID,
+            storeUserDisplayName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_DISPLAY_NAME
+        }
+    },
+
     sentry: {
         dsn: process.env.SENTRY_DSN
     },

@@ -41,10 +41,42 @@ var resetDatabase = function (done) {
     return dbHelper.resetDatabase(initDatabase, done);
 };
 
+function searchCookie(res) {
+    var found = false;
+    var setcookie = res.headers["set-cookie"];
+    if (setcookie) {
+        setcookie.forEach(
+            function (cookiestr) {
+                if (cookiestr.indexOf('peach_infos') == 0) {
+                    found = true;
+                }
+            }
+        );
+    }
+    return found;
+}
+
 describe('POST /authenticate/cookie', function () {
     before(resetDatabase);
     context('When logging in for a session cookie', function () {
         context('with valid credentials', function () {
+            before(function (done) {
+                config.afterLogin = {
+                    storeUserInfoInCookie: {
+                        activated: true,
+                        cookieName: 'peach_infos',
+                        domain: 'toto.com',
+                        duration: 999999999,
+                        storeUserId: true,
+                        storeUserDisplayName: true
+                    }
+                };
+                done();
+            });
+            after(function (done) {
+                config = require('../../config');
+                done();
+            });
             before(function (done) {
                 requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
                     method: 'post',
@@ -75,6 +107,13 @@ describe('POST /authenticate/cookie', function () {
                     expect(this.res.body.user_profile.language).equal(LANG);
                 });
             });
+            describe('when config is set to set info cookie', function () {
+                it('should return a success with appropriate data in cookie peach_infos', function () {
+                    var foundCookie = searchCookie.call(this, this.res);
+                    expect(foundCookie).equal(true);
+                });
+            });
+
         });
         context('with invalid credentials', function () {
             before(function (done) {
