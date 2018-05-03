@@ -132,36 +132,38 @@ module.exports = function (app, options) {
                 return;
             }
 
-            db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
-                .then(function (localLogin) {
-                    if (localLogin) {
-                        codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
-                            emailHelper.send(
-                                config.mail.from,
-                                localLogin.login,
-                                "password-recovery-email",
-                                {log: false},
-                                {
-                                    forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                    host: config.mail.host,
-                                    mail: localLogin.login,
-                                    code: code
-                                },
-                                localLogin.User.language ? localLogin.User.language : i18n.getLocale()
-                            ).then(
-                                function () {
-                                },
-                                function (err) {
-                                }
-                            );
-                            return res.status(200).send();
-                        });
-                    } else {
-                        return res.status(400).json({msg: req.__('API_PASSWORD_RECOVER_USER_NOT_FOUND')});
-                    }
-                }, function (error) {
-                    res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-                });
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+                include: [db.User]
+            }).then(function (localLogin) {
+                if (localLogin) {
+                    codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
+                        emailHelper.send(
+                            config.mail.from,
+                            localLogin.login,
+                            "password-recovery-email",
+                            {log: false},
+                            {
+                                forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                host: config.mail.host,
+                                mail: encodeURIComponent(localLogin.login),
+                                code: encodeURIComponent(code)
+                            },
+                            localLogin.User.language ? localLogin.User.language : i18n.getLocale()
+                        ).then(
+                            function () {
+                            },
+                            function (err) {
+                            }
+                        );
+                        return res.status(200).send();
+                    });
+                } else {
+                    return res.status(400).json({msg: req.__('API_PASSWORD_RECOVER_USER_NOT_FOUND')});
+                }
+            }, function (error) {
+                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
+            });
         });
     });
 
@@ -177,34 +179,36 @@ module.exports = function (app, options) {
     );
 
     app.post('/api/local/authenticate/jwt', cors, function (req, res) {
-        db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
-            .then(function (localLogin) {
-                    if (!localLogin || !req.body.password) {
-                        res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                        return;
-                    }
+        db.LocalLogin.findOne({
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+            include: [db.User]
+        }).then(function (localLogin) {
+                if (!localLogin || !req.body.password) {
+                    res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
+                    return;
+                }
 
-                    localLogin.verifyPassword(req.body.password).then(function (isMatch) {
-                            if (isMatch) {
-                                localLogin.logLogin(localLogin.User).then(function () {
-                                }, function () {
-                                });
-                                // if user is found and password is right create a token
-                                var token = jwt.encode(localLogin.User, config.jwtSecret);
-                                // return the information including token as JSON
-                                res.json({success: true, token: 'JWT ' + token});
-                            } else {
-                                res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                                return;
-                            }
-                        },
-                        function (err) {
-                            res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
-                        });
-                },
-                function (error) {
-                    res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-                });
+                localLogin.verifyPassword(req.body.password).then(function (isMatch) {
+                        if (isMatch) {
+                            localLogin.logLogin(localLogin.User).then(function () {
+                            }, function () {
+                            });
+                            // if user is found and password is right create a token
+                            var token = jwt.encode(localLogin.User, config.jwtSecret);
+                            // return the information including token as JSON
+                            res.json({success: true, token: 'JWT ' + token});
+                        } else {
+                            res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
+                            return;
+                        }
+                    },
+                    function (err) {
+                        res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
+                    });
+            },
+            function (error) {
+                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
+            });
     });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.

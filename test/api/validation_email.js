@@ -38,10 +38,6 @@ describe('GET /api/local/request_verification_email', function () {
             }, done);
         });
 
-        it('should return a success false', function () {
-            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
-        });
-
         before(function (done) {
             requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
                 method: 'post',
