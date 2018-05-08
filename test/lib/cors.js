@@ -2,7 +2,6 @@
 "use strict";
 
 const config = require('../../config.dist'),
-      expect = require('chai').expect,
       cors = require('../../lib/cors');
 
 
