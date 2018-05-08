@@ -1,66 +1,43 @@
 /* jshint node:true, expr:true, esversion:6 */
 "use strict";
 
-const cors = require('../../lib/cors'),
-      config = require('../../config.local');
+const config = require('../../config.dist'),
+      expect = require('chai').expect,
+      cors = require('../../lib/cors');
 
-const wildcardDomain = '.br.de';
-const originDomain = 'foobar.br.de';
+
+const originDomain = 'https://foobar.br.de';
+const invalidOrigin = 'http://noir.org';
+const staticOrigin = 'http://localhost.rts.ch:8080';
+// be warned: validity of allowed_domains depends on the environment you are running. double check it, NODE_ENV=test !
 
 describe("cors.wildcard_request", (done) => {
   it("should accept a matching request", () => {
-    config.cors.use_wildcard_domain = true;
-    config.cors.wildcard_domain = wildcardDomain;
     let req,res,next;
     req = fakeRequest({origin: originDomain});
     res = fakeResponse();
-    next = () => { return; };
-    cors(req, res, next, (err,response) => {
-      expect(response).to.equal(originDomain);
-    });
+    next = () => {
+      expect(res.getHeader('Access-Control-Allow-Origin')).to.equal(originDomain);
+    };
+    cors(req, res, next);
   });
-  it("should return false on missing wildcard_domain", () => {
-    config.cors.use_wildcard_domain = true;
-    config.cors.wildcard_domain = undefined;
+  it("should deny on non-matching domain", () => {
     let req,res,next;
-    req = fakeRequest({origin: originDomain});
+    req = fakeRequest({origin: invalidOrigin});
     res = fakeResponse();
-    next = () => { return; };
-    cors(req, res, next, (err,response) => {
-      expect(response).to.equal(false);
-    });
+    next = () => {
+      expect(res.getHeader('Access-Control-Allow-Origin')).to.equal(undefined);
+    };
+    cors(req, res, next);
   });
-  it("should return false on non-matching wildcard_domain", () => {
-    config.cors.use_wildcard_domain = true;
-    config.cors.wildcard_domain = '.kornherr.net';
+  it("should accept a matching allowed_domain", () => {
     let req,res,next;
-    req = fakeRequest({origin: originDomain});
+    req = fakeRequest({origin: staticOrigin});
     res = fakeResponse();
-    next = () => { return; };
-    cors(req, res, next, (err,response) => {
-      expect(response).to.equal(false);
-    });
-  });
-  it("should return false on non-matching origin", () => {
-    config.cors.use_wildcard_domain = true;
-    config.cors.wildcard_domain = '.br.de';
-    let req,res,next;
-    req = fakeRequest({origin: 'www.kornherr.net'});
-    res = fakeResponse();
-    next = () => { return; };
-    cors(req, res, next, (err,response) => {
-      expect(response).to.equal(false);
-    });
-  });
-  it("should match example/default domains without wildcards", () => {
-    config.cors.use_wildcard_domain = false;
-    let req,res,next;
-    req = fakeRequest({origin: config.cors.allowed_domains[0]});
-    res = fakeResponse();
-    next = () => { return; };
-    cors(req, res, next, (err,response) => {
-      expect(response).to.equal(config.cors.allowed_domains[0]);
-    });
+    next = () => {
+      expect(res.getHeader('Access-Control-Allow-Origin')).to.equal(staticOrigin);
+    };
+    cors(req, res, next);
   });
 });
 
