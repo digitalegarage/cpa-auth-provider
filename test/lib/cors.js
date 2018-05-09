@@ -5,7 +5,7 @@ const config = require('../../config.dist'),
       cors = require('../../lib/cors');
 
 // for use outside `npm test`
-const expect = require('chai').expect;
+//const expect = require('chai').expect;
 
 const originDomain = 'https://foobar.br.de';
 const invalidOrigin = 'http://noir.org';
