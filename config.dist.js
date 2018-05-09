@@ -158,6 +158,8 @@ module.exports = {
         allowed_domains: [
             "http://cpa-client.ebu.io"
         ]
+        // possible other options, will extend allowed_domains:
+        // wildcard_domains: ['.ebu.io','.kornherr.net'] // (no stars or so, just a string for .endsWith())
     },
 
     // URL path prefix, e.g., '/myapp'
