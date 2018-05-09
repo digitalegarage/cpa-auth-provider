@@ -4,10 +4,14 @@
 const config = require('../../config.dist'),
       cors = require('../../lib/cors');
 
+// for use outside `npm test`
+//const expect = require('chai').expect;
 
 const originDomain = 'https://foobar.br.de';
 const invalidOrigin = 'http://noir.org';
 const staticOrigin = 'http://localhost.rts.ch:8080';
+const cAseInsenSitiveOrigin = 'hTTps://FooBaR.Br.dE';
+const cAseInsenSitiveALLowedOriGIN = 'hTTp://lOcalHOst.rTS.Ch:8080';
 // be warned: validity of allowed_domains depends on the environment you are running. double check it, NODE_ENV=test !
 
 describe("cors.wildcard_request", (done) => {
@@ -35,6 +39,24 @@ describe("cors.wildcard_request", (done) => {
     res = fakeResponse();
     next = () => {
       expect(res.getHeader('Access-Control-Allow-Origin')).to.equal(staticOrigin);
+    };
+    cors(req, res, next);
+  });
+  it("should accept wildcard origin requests case insensitive", () => {
+    let req,res,next;
+    req = fakeRequest({origin: cAseInsenSitiveOrigin});
+    res = fakeResponse();
+    next = () => {
+      expect(res.getHeader('Access-Control-Allow-Origin')).to.equal(cAseInsenSitiveOrigin);
+    };
+    cors(req, res, next);
+  });
+  it("should accept non-wildcard origin requests case insensitive", () => {
+    let req,res,next;
+    req = fakeRequest({origin: cAseInsenSitiveALLowedOriGIN});
+    res = fakeResponse();
+    next = () => {
+      expect(res.getHeader('Access-Control-Allow-Origin')).to.equal(cAseInsenSitiveALLowedOriGIN);
     };
     cors(req, res, next);
   });
