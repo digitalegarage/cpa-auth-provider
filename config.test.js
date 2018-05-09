@@ -118,7 +118,7 @@ module.exports = {
             'http://localhost.rts.ch:8080'
         ],
         wildcard_domains: [
-          '.br.de'
+          '.rts.ch', '.br.de'
         ]
     },
 

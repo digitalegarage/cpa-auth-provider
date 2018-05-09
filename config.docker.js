@@ -198,6 +198,8 @@ module.exports = {
                 ? process.env.IDP_CLIENT_URL.toLowerCase().split(',')
                 : [],
         wildcard_domains: process.env.CORS_WILDCARD_DOMAINS
+            ? process.env.CORS_WILDCARD_DOMAINS.toLowerCase().split(',')
+            : []
     },
 
     // URL path prefix, e.g., '/myapp'
