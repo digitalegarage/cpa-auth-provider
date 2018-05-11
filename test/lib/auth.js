@@ -136,7 +136,7 @@ describe('POST /authenticate/cookie', function () {
                 }, done);
             });
             it('should response 204', function () {
-                expect(this.res.statusCode).to.equal(200);
+                expect(this.res.statusCode).to.equal(204);
             });
         });
     });
