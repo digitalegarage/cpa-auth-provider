@@ -127,6 +127,18 @@ describe('POST /authenticate/cookie', function () {
                 expect(this.res.statusCode).to.equal(401);
             });
         });
+        context('with uppercase login', function () {
+            before(function (done) {
+                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                    method: 'post',
+                    type: 'json',
+                    data: {"email": TEST_USER_LOGIN.toUpperCase(), "password": TEST_USER_PASSWORD}
+                }, done);
+            });
+            it('should response 204', function () {
+                expect(this.res.statusCode).to.equal(204);
+            });
+        });
     });
 });
 

@@ -53,7 +53,7 @@ function routes(router) {
             logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
 
             return db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
             }).then(function (localLogin) {
                     if (localLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
@@ -144,7 +144,7 @@ function routes(router) {
                     localLogin = ll;
                     oldEmail = localLogin.login;
                     return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
                     });
                 }
             ).then(
@@ -153,7 +153,7 @@ function routes(router) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
                     return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
                     }).then(function (takenLogin) {
                         if (takenLogin) {
                             throw new Error(STATES.EMAIL_ALREADY_TAKEN);
@@ -244,7 +244,7 @@ function routes(router) {
                     }
 
                     return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername})
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
                     });
                 }
             ).then(
