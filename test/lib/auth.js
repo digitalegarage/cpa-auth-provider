@@ -135,7 +135,7 @@ describe('POST /authenticate/cookie', function () {
                     data: {"email": TEST_USER_LOGIN.toUpperCase(), "password": TEST_USER_PASSWORD}
                 }, done);
             });
-            it('should response 200', function () {
+            it('should response 204', function () {
                 expect(this.res.statusCode).to.equal(200);
             });
         });
