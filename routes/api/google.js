@@ -30,7 +30,7 @@ function googleSignup(req, res) {
                 // If the googleProfile already exists and his account is not validated
                 // i.e.: there is a user in the database with the same id and this user email is not validated
                 remoteProfile = socialLoginHelper.buildRemoteProfile(googleHelper.buildGoogleId(googleProfile.provider_uid), googleProfile.display_name, googleProfile.email, googleProfile.givenName, googleProfile.familyName, googleProfile.gender, null);
-                return db.LocalLogin.findOne({where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: googleProfile.email})});
+                return db.LocalLogin.findOne({where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: googleProfile.email.toLowerCase()})});
             }
         ).then(
             function (localLoginInDb) {

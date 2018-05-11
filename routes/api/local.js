@@ -133,7 +133,7 @@ module.exports = function (app, options) {
             }
 
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email.toLowerCase()}),
                 include: [db.User]
             }).then(function (localLogin) {
                 if (localLogin) {
@@ -180,7 +180,7 @@ module.exports = function (app, options) {
 
     app.post('/api/local/authenticate/jwt', cors, function (req, res) {
         db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email.toLowerCase()}),
             include: [db.User]
         }).then(function (localLogin) {
                 if (!localLogin || !req.body.password) {

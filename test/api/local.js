@@ -283,6 +283,45 @@ describe('POST /api/local/signup', function () {
 
     });
 
+    context('When 2 users register with same mail case sensitive', function () {
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr'.toUpperCase(),
+                    password: STRONG_PASSWORD + "2",
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success false', function () {
+            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
+            expect(this.res.statusCode).to.equal(400);
+            expect(this.res.body.success).to.equal(false);
+            expect(this.res.body.msg).to.equal("email already exists");
+        });
+
+    });
+
     context('and some required fields', function () {
         var preFields;
         before(function () {
