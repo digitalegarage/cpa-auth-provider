@@ -22,7 +22,7 @@ var localStrategyCallback = function (req, username, password, done) {
     var loginError = req.__('BACK_SIGNUP_INVALID_EMAIL_OR_PASSWORD');
 
     db.LocalLogin.findOne({
-        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: username}),
+        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: username.toLowerCase()}),
         include: [db.User]
     }).then(function (localLogin) {
             if (!localLogin) {
@@ -214,7 +214,7 @@ module.exports = function (app, options) {
     app.get('/email_verify', function (req, res, next) {
 
         db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.query.email}),
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.query.email.toLowerCase()}),
             include: [db.User]
         }).then(function (localLogin) {
             if (localLogin) {
@@ -289,7 +289,7 @@ module.exports = function (app, options) {
 
 
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email.toLowerCase()}),
                 include: [db.User]
             }).then(function (localLogin) {
                 if (localLogin) {
@@ -345,7 +345,7 @@ module.exports = function (app, options) {
                 return;
             } else {
                 db.LocalLogin.findOne({
-                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email.toLowerCase()}),
                     include: [db.User]
                 }).then(function (localLogin) {
                     if (localLogin && localLogin.User) {
