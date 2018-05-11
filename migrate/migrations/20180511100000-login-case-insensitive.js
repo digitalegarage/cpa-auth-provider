@@ -3,7 +3,9 @@
 module.exports = {
     up: function (queryInterface, Sequelize) {
         if (process.env.DB_TYPE !== 'postgres') {
-            return resolve();
+            return new Promise((resolve, reject) => {
+                return resolve();
+            });
         }
         return queryInterface.removeConstraint('LocalLogins', 'LocalLogins_login_key')
             .then(function () {
@@ -12,7 +14,13 @@ module.exports = {
     },
 
     down: function (queryInterface, Sequelize) {
-        return resolve();
+        return new Promise((resolve, reject) => {
+            return resolve();
+        });
     }
 
 };
+
+
+
+
