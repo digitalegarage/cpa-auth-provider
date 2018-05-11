@@ -85,6 +85,17 @@ module.exports = {
         defaultTemplateClass: process.env.MAIL_DEFAULT_TEMPLATE_CLASS
     },
 
+    afterLogin: {
+        storeUserInfoInCookie: {
+            activated: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_ACTIVATED,
+            cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_NAME,
+            domain: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DOMAIN,
+            duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION,
+            storeUserId: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_USER_ID,
+            storeUserDisplayName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_DISPLAY_NAME
+        }
+    },
+
     sentry: {
         dsn: process.env.SENTRY_DSN
     },
@@ -186,6 +197,9 @@ module.exports = {
             process.env.IDP_CLIENT_URL
                 ? process.env.IDP_CLIENT_URL.toLowerCase().split(',')
                 : [],
+        wildcard_domains: process.env.CORS_WILDCARD_DOMAINS
+            ? process.env.CORS_WILDCARD_DOMAINS.toLowerCase().split(',')
+            : []
     },
 
     // URL path prefix, e.g., '/myapp'

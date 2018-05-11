@@ -2,30 +2,24 @@
 
 var db = require('../../models');
 var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
-var jwtHelpers = require('../../lib/jwt-helper');
 var logger = require('../../lib/logger');
 
 var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
-var recaptcha = require('express-recaptcha');
 
 var jwt = require('jwt-simple');
 var JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 var cors = require('../../lib/cors');
-var generate = require('../../lib/generate');
-var emailUtil = require('../../lib/email-util');
 
 var emailHelper = require('../../lib/email-helper');
 var authHelper = require('../../lib/auth-helper');
-var permissionName = require('../../lib/permission-name');
 var passwordHelper = require('../../lib/password-helper');
 var userHelper = require('../../lib/user-helper');
 
 var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 
+var afterLogin = require('../../lib/afterlogin-helper');
 
 var i18n = require('i18n');
 
@@ -138,76 +132,83 @@ module.exports = function (app, options) {
                 return;
             }
 
-            db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
-                .then(function (localLogin) {
-                    if (localLogin) {
-                        codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
-                            emailHelper.send(
-                                config.mail.from,
-                                localLogin.login,
-                                "password-recovery-email",
-                                {log: false},
-                                {
-                                    forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                    host: config.mail.host,
-                                    mail: encodeURIComponent(localLogin.login),
-                                    code: encodeURIComponent(code)
-                                },
-                                localLogin.User.language ? localLogin.User.language : i18n.getLocale()
-                            ).then(
-                                function () {
-                                },
-                                function (err) {
-                                }
-                            );
-                            return res.status(200).send();
-                        });
-                    } else {
-                        return res.status(400).json({msg: req.__('API_PASSWORD_RECOVER_USER_NOT_FOUND')});
-                    }
-                }, function (error) {
-                    res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-                });
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+                include: [db.User]
+            }).then(function (localLogin) {
+                if (localLogin) {
+                    codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
+                        emailHelper.send(
+                            config.mail.from,
+                            localLogin.login,
+                            "password-recovery-email",
+                            {log: false},
+                            {
+                                forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                host: config.mail.host,
+                                mail: encodeURIComponent(localLogin.login),
+                                code: encodeURIComponent(code)
+                            },
+                            localLogin.User.language ? localLogin.User.language : i18n.getLocale()
+                        ).then(
+                            function () {
+                            },
+                            function (err) {
+                            }
+                        );
+                        return res.status(200).send();
+                    });
+                } else {
+                    return res.status(400).json({msg: req.__('API_PASSWORD_RECOVER_USER_NOT_FOUND')});
+                }
+            }, function (error) {
+                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
+            });
         });
     });
 
     app.post('/api/local/authenticate/cookie', cors,
       passport.authenticate('local', { session: true }),
       function(req,res) {
-        // returned value is not relevant
+
+        afterLogin.afterLogin(req.user, req.body.email || req.query.email, res);
+
+          // returned value is not relevant
         res.sendStatus(204);
       }
     );
 
     app.post('/api/local/authenticate/jwt', cors, function (req, res) {
-        db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
-            .then(function (localLogin) {
-                    if (!localLogin || !req.body.password) {
-                        res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                        return;
-                    }
+        db.LocalLogin.findOne({
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email}),
+            include: [db.User]
+        }).then(function (localLogin) {
+                if (!localLogin || !req.body.password) {
+                    res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
+                    return;
+                }
 
-                    localLogin.verifyPassword(req.body.password).then(function (isMatch) {
-                            if (isMatch) {
-                                localLogin.logLogin(localLogin.User).then(function () {
-                                }, function () {
-                                });
-                                // if user is found and password is right create a token
-                                var token = jwt.encode(localLogin.User, config.jwtSecret);
-                                // return the information including token as JSON
-                                res.json({success: true, token: 'JWT ' + token});
-                            } else {
-                                res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                                return;
-                            }
-                        },
-                        function (err) {
-                            res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
-                        });
-                },
-                function (error) {
-                    res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-                });
+                localLogin.verifyPassword(req.body.password).then(function (isMatch) {
+                        if (isMatch) {
+                            localLogin.logLogin(localLogin.User).then(function () {
+                            }, function () {
+                            });
+                            // if user is found and password is right create a token
+                            var token = jwt.encode(localLogin.User, config.jwtSecret);
+                            // return the information including token as JSON
+                            res.json({success: true, token: 'JWT ' + token});
+                        } else {
+                            res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
+                            return;
+                        }
+                    },
+                    function (err) {
+                        res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
+                    });
+            },
+            function (error) {
+                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
+            });
     });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
@@ -253,8 +254,8 @@ module.exports = function (app, options) {
                     {
                         confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : '') + '&code=' + encodeURIComponent(code),
                         host: config.mail.host,
-                        mail: encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : ''),
-                        code: encodeURIComponent(user.verificationCode)
+                        mail: user.LocalLogin ? user.LocalLogin.login : '',
+                        code: user.verificationCode
                     },
                     user.language ? user.language : config.mail.local
                 ).then(
