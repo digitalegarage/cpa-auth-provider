@@ -71,6 +71,26 @@ describe('POST /check/username', function () {
             });
         });
 
+        context('and it has been taken with different case', function () {
+            before(resetDatabase);
+
+            before(function (done) {
+                requestHelper.sendRequest(this, '/check/username', {
+                    method: 'post',
+                    data: {username: TAKEN_USERNAME.toUpperCase()}
+                }, done);
+            });
+
+            it('should return a status 200', function () {
+                expect(this.res.statusCode).equal(200);
+            });
+
+            it('should claim it exists', function () {
+                expect(this.res.body.exists).equal(true);
+                expect(this.res.body.available).equal(false);
+            });
+        });
+
         context('and it has not been taken', function () {
             before(function (done) {
                 requestHelper.sendRequest(this, '/check/username',
