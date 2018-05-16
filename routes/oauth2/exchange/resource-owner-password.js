@@ -22,8 +22,12 @@ exports.token = function (client, username, password, scope, reqBody, done) {
 
 function confirmUser(client, username, password, scope, extraArgs, done) {
     var user;
-    db.User.findOne(
-        {include: [{model: db.LocalLogin, where: {login: username}}]}
+    db.User.findOne({
+            include: [{
+                model: db.LocalLogin,
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: username.toLowerCase()})
+            }]
+        }
     ).then(
         function (user_res) {
             if (!user_res) {

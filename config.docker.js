@@ -176,7 +176,7 @@ module.exports = {
     // Session cookie is signed with this secret to prevent tampering
     session_secret: process.env.SESSION_SECRET,
     quality_check: {
-        enabled: true
+        enabled: 'true' === process.env.ENABLE_QUALITY_CHECK_ENDPOINT
     },
 
     auth_session_cookie: {

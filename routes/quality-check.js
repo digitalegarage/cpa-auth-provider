@@ -46,22 +46,26 @@ function corsDelegate(req, callback) {
 }
 
 function checkUsername(req, res, next) {
-    db.User.find({include: {model: db.LocalLogin, where: {login: req.body.username}}})
-        .then(
-            function (user) {
-                if (user) {
-                    res.status(200).json({exists: true, available: false});
-                } else {
-                    res.status(200).json({exists: false, available: true});
-                }
-            },
-            function () {
-                res.status(500);
+    db.User.find({
+        include: {
+            model: db.LocalLogin,
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.username.toLowerCase()})
+
+        }
+    }).then(
+        function (user) {
+            if (user) {
+                res.status(200).json({exists: true, available: false});
+            } else {
+                res.status(200).json({exists: false, available: true});
             }
-        )
-        .catch(
-            function () {
-                res.status(500);
-            }
-        );
+        },
+        function () {
+            res.status(500);
+        }
+    ).catch(
+        function () {
+            res.status(500);
+        }
+    );
 }
