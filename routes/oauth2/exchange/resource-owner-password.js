@@ -38,6 +38,7 @@ function confirmUser(client, username, password, scope, extraArgs, done) {
         }
     ).then(
         function (isMatch) {
+            user.LocalLogin.logLogin(user);
             if (isMatch) {
                 provideAccessToken(client, user, scope, extraArgs, done);
             } else {
