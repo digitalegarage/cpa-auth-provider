@@ -1,6 +1,6 @@
 # Exports
 
-Export sub project provide a container that periodically exports data from IDP database into a CSV file and push it into a specified HDFS.
+Export sub project provides a container that periodically exports data from IDP database into a CSV file and push it into a specified HDFS.
 
 # Tests
 
