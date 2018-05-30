@@ -4,8 +4,23 @@ services:
     build: .
     environment:
     - SLEEP_DURATION=10
-    - DB_HOST=192.168.1.181
+    - DB_HOST=postgres
     - DB_USER=dockeridp
     - PGPASSWORD=SchiefesHausBautFalsch
     - DB_NAME=idp
     - DB_PORT=5432
+    depends_on:
+    - postgres
+    links:
+    - postgres:postgres
+
+  postgres:
+    build: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=BlinkenderWaldRegnetFrohlich
+      - DOCKER_USER=dockeridp
+      - DOCKER_PASSWORD=SchiefesHausBautFalsch
+      - PGDATA=/var/lib/postgresql/data/db-files/
