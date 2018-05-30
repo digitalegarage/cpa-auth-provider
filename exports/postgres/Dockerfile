@@ -6,3 +6,7 @@ ENV DOCKER_USER dockeridp
 ENV DOCKER_PASSWORD password
 
 ADD init /docker-entrypoint-initdb.d
+
+ADD sql/dump.sql
+
+psql idp < dump.sql
