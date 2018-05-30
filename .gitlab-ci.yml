@@ -46,7 +46,7 @@ build_exporter:
     - cd exports
     - docker build -t idp-exporter .
     - docker login -u dind-runner -p $REGISTRY_PASSWORD $CONTAINER_REGISTRY
-    - docker tag identity-provider $IMAGE
+    - docker tag idp-exporter $IMAGE
     - docker push $IMAGE
   tags:
     - dind
