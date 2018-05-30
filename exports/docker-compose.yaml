@@ -1,0 +1,11 @@
+version: '2'
+services:
+  exporter:
+    build: .
+    environment:
+    - SLEEP_DURATION=10
+    - DB_HOST=192.168.1.181
+    - DB_USER=dockeridp
+    - PGPASSWORD=SchiefesHausBautFalsch
+    - DB_NAME=idp
+    - DB_PORT=5432
