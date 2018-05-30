@@ -9,4 +9,4 @@ ADD init /docker-entrypoint-initdb.d
 
 ADD sql/dump.sql dump.sql
 
-CMD psql idp < dump.sql
+#CMD psql idp < dump.sql

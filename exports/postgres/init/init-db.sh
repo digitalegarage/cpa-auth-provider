@@ -7,3 +7,5 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     GRANT ALL PRIVILEGES ON DATABASE idp TO `echo $DOCKER_USER`;
 
 EOSQL
+
+psql -U dockeridp idp < dump.sql
