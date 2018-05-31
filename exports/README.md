@@ -31,8 +31,6 @@ user_id,year_of_birth,haslocalaccount,isfacebookaccountlinked,isgoogleaccountlin
 1,2018,t,f,f,f,male,fr,2018-05-30 12:53:55+00,2018-05-30 12:53:55.57+00,2018-05-30 12:54:11.554+00,t,t
 ```
 
-
-
 | column | description |
 | ------- | ------------- |
 | user_id | The user id |
