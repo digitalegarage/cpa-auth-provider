@@ -9,6 +9,7 @@ var userDeletion = require('../../../lib/user-deletion');
 var INCORRECT_LOGIN_OR_PASS = 'INCORRECT_LOGIN_OR_PASS';
 var INVALID_REQUEST = 'invalid_request';
 
+const Op = db.sequelize.Op;
 
 // Grant authorization by resource owner (user) and password credentials.
 // The user is authenticated and checked for validity - this strategy should
@@ -25,7 +26,7 @@ function confirmUser(client, username, password, scope, extraArgs, done) {
     db.User.findOne({
             include: [{
                 model: db.LocalLogin,
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: username.toLowerCase()})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: username.toLowerCase()})
             }]
         }
     ).then(

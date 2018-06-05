@@ -1,12 +1,11 @@
 "use strict";
 
-var generate = require('../../lib/generate');
 var db = require('../../models');
 
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 
-var config = require('../../config');
+const Op = db.sequelize.Op;
 
 var CLIENT = {
     id: 1,
@@ -321,7 +320,7 @@ describe('GET /email/confirm/:key', function() {
         });
         it('should have set the user to verified', function(done) {
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: UNVERIFIED_USER.email})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email})
             }).then(
                 ll => {
                     expect(ll).a('object');
@@ -373,7 +372,7 @@ describe('GET /email/verify/:key', function() {
         it('should have set the user to verified', function(done) {
 
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: UNVERIFIED_USER.email})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email})
             }).then(
                 ll => {
                     expect(ll).a('object');
