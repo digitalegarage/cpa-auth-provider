@@ -389,7 +389,7 @@ describe('Facebook', function () {
 
 
             before(function (done) {
-                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     self.user = socialLogin.User;
                 }).then(function () {
                     done();
@@ -875,7 +875,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     socialLoginHelper.getSocialLogins(socialLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -910,7 +910,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     socialLoginHelper.getSocialLogins(socialLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -964,7 +964,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
                     socialLoginHelper.getSocialLogins(localLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -1006,7 +1006,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
                     socialLoginHelper.getSocialLogins(localLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();

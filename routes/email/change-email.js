@@ -7,7 +7,6 @@ var passport = require('passport');
 var emailHelper = require('../../lib/email-helper');
 var config = require('../../config');
 var uuid = require('uuid');
-var socialLoginHelper = require('../../lib/social-login-helper');
 var finder = require ('../../lib/finder');
 const Op = db.sequelize.Op;
 
@@ -245,7 +244,7 @@ function routes(router) {
                     if (takenUser) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return socialLoginHelper.findBySocialAccountEmail(newUsername);
+                    return finder.findUserBySocialAccountEmail(newUsername);
                 }
             ).then(
                 function (socialLogin_) {
