@@ -134,7 +134,10 @@ module.exports = function (app, options) {
                 return;
             }
 
-            userHelper.findByLocalAccountEmail(req.body.email).then(function (localLogin) {
+            db.LocalLogin.findOne({
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
+                include: [db.User]
+            }).then(function (localLogin) {
                 if (localLogin) {
                     codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
                         emailHelper.send(
@@ -178,7 +181,10 @@ module.exports = function (app, options) {
     );
 
     app.post('/api/local/authenticate/jwt', cors, function (req, res) {
-        userHelper.findByLocalAccountEmail(req.body.email).then(function (localLogin) {
+        db.LocalLogin.findOne({
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
+            include: [db.User]
+        }).then(function (localLogin) {
                 if (!localLogin || !req.body.password) {
                     res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
                     return;

@@ -4,7 +4,7 @@ var db = require('../../models');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var cors = require('../../lib/cors');
 var googleHelper = require('../../lib/google-helper');
-var userHelper = require ('../../lib/user-helper');
+var finder = require ('../../lib/finder');
 
 module.exports = function (app, options) {
 
@@ -31,7 +31,7 @@ function googleSignup(req, res) {
                 // If the googleProfile already exists and his account is not validated
                 // i.e.: there is a user in the database with the same id and this user email is not validated
                 remoteProfile = socialLoginHelper.buildRemoteProfile(googleHelper.buildGoogleId(googleProfile.provider_uid), googleProfile.display_name, googleProfile.email, googleProfile.givenName, googleProfile.familyName, googleProfile.gender, null);
-                return userHelper.findByLocalAccountEmail(googleProfile.email);
+                return finder.findUserByLocalAccountEmail(googleProfile.email);
             }
         ).then(
             function (localLoginInDb) {

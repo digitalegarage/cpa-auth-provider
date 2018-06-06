@@ -5,7 +5,7 @@ var db = require('../models');
 var config = require('../config');
 var cors = require('cors');
 const pwHelper = require('../lib/password-helper');
-var userHelper = require ('../lib/user-helper');
+var finder = require ('../lib/finder');
 
 module.exports = function (router) {
     if (!config.quality_check || !config.quality_check.enabled) {
@@ -47,7 +47,7 @@ function corsDelegate(req, callback) {
 }
 
 function checkUsername(req, res, next) {
-    userHelper.findByLocalAccountEmail(req.body.username).then(
+    finder.findUserByLocalAccountEmail(req.body.username).then(
         function (user) {
             if (user) {
                 res.status(200).json({exists: true, available: false});

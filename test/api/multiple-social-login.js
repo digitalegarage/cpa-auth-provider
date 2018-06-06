@@ -9,9 +9,7 @@ var dbHelper = require('../db-helper');
 var requestHelper = require('../request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var googleHelper = require('../../lib/google-helper');
-var userHelper = require ('../../lib/user-helper');
-
-const Op = db.sequelize.Op;
+var finder = require ('../../lib/finder');
 
 var GOOGLE_EMAIL = 'someone@gmail.com';
 var GOOGLE_PROVIDER_UID = 'google:1234';
@@ -1055,7 +1053,7 @@ function localUpperCaseSignup(done) {
 
 
 function markEmailAsVerified(done) {
-    userHelper.findByLocalAccountEmail(GOOGLE_EMAIL).then(
+    finder.findUserByLocalAccountEmail(GOOGLE_EMAIL).then(
         function (localLogin) {
             localLogin.updateAttributes({verified: true}).then(
                 function () {

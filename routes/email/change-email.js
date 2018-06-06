@@ -8,7 +8,7 @@ var emailHelper = require('../../lib/email-helper');
 var config = require('../../config');
 var uuid = require('uuid');
 var socialLoginHelper = require('../../lib/social-login-helper');
-var userHelper = require ('../../lib/user-helper');
+var finder = require ('../../lib/finder');
 const Op = db.sequelize.Op;
 
 var STATES = {
@@ -53,7 +53,7 @@ function routes(router) {
 
             logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
 
-            return userHelper.findByLocalAccountEmail(newUsername).then(function (localLogin) {
+            return finder.findUserByLocalAccountEmail(newUsername).then(function (localLogin) {
                     if (localLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
@@ -142,14 +142,14 @@ function routes(router) {
                 function (ll) {
                     localLogin = ll;
                     oldEmail = localLogin.login;
-                    return userHelper.findByLocalAccountEmail(newUsername);
+                    return finder.findUserByLocalAccountEmail(newUsername);
                 }
             ).then(
                 function (takenLocalLogin) {
                     if (takenLocalLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return userHelper.findByLocalAccountEmail(newUsername).then(function (takenLogin) {
+                    return finder.findUserByLocalAccountEmail(newUsername).then(function (takenLogin) {
                         if (takenLogin) {
                             throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                         }
@@ -238,7 +238,7 @@ function routes(router) {
                         throw err;
                     }
 
-                    return userHelper.findByLocalAccountEmail(newUsername);
+                    return finder.findUserByLocalAccountEmail(newUsername);
                 }
             ).then(
                 function (takenUser) {
