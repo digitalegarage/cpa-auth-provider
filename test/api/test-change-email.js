@@ -4,7 +4,7 @@ const db = require('../../models');
 const requestHelper = require('../request-helper');
 const dbHelper = require('../db-helper');
 const oauthHelper = require('../oauth-helper');
-const Op = db.sequelize.Op;
+var userHelper = require ('../../lib/user-helper');
 
 const CLIENT = {
     id: 1,
@@ -314,9 +314,7 @@ describe('GET /email/move/:token', function () {
 
         it('should change the email', function (done) {
 
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
-            }).then(
+            userHelper.findByLocalAccountEmail(NEW_EMAIL).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
@@ -360,9 +358,7 @@ describe('GET /email/move/:token', function () {
         });
 
         it('should have changed the email', function (done) {
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
-            }).then(
+            userHelper.findByLocalAccountEmail(NEW_EMAIL).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
@@ -447,9 +443,7 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should change the email', function (done) {
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
-            }).then(
+            userHelper.findByLocalAccountEmail(NEW_EMAIL).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
@@ -494,9 +488,7 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should have changed the email', function (done) {
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
-            }).then(
+            userHelper.findByLocalAccountEmail(NEW_EMAIL).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
                     expect(localLogin.user_id).equal(USER1.id);
