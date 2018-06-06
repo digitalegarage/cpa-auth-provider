@@ -9,6 +9,7 @@ var dbHelper = require('../db-helper');
 var requestHelper = require('../request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var googleHelper = require('../../lib/google-helper');
+var userHelper = require ('../../lib/user-helper');
 
 const Op = db.sequelize.Op;
 
@@ -390,9 +391,8 @@ describe('Facebook', function () {
 
 
             before(function (done) {
-                db.SocialLogin.findOne({where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('email')), {[Op.like]: GOOGLE_EMAIL.toLowerCase()}),
-                    include: [db.User]}).then(function (localLogin) {
-                    self.user = localLogin.User;
+                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
+                    self.user = socialLogin.User;
                 }).then(function () {
                     done();
                 });
@@ -877,10 +877,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({
-                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('email')), {[Op.like]: GOOGLE_EMAIL.toLowerCase()}),
-                    include: [db.User]
-                }).then(function (socialLogin) {
+                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     socialLoginHelper.getSocialLogins(socialLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -915,10 +912,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({
-                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('email')), {[Op.like]: GOOGLE_EMAIL.toLowerCase()}),
-                    include: [db.User]
-                }).then(function (socialLogin) {
+                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     socialLoginHelper.getSocialLogins(socialLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -972,10 +966,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({
-                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('email')), {[Op.like]: GOOGLE_EMAIL.toLowerCase()}),
-                    include: [db.User]
-                }).then(function (localLogin) {
+                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
                     socialLoginHelper.getSocialLogins(localLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -1017,10 +1008,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({
-                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('email')), {[Op.like]: GOOGLE_EMAIL.toLowerCase()}),
-                    include: [db.User]
-                }).then(function (localLogin) {
+                socialLoginHelper.findBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
                     socialLoginHelper.getSocialLogins(localLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -1067,9 +1055,7 @@ function localUpperCaseSignup(done) {
 
 
 function markEmailAsVerified(done) {
-    db.LocalLogin.findOne({
-        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: GOOGLE_EMAIL.toLowerCase()})
-    }).then(
+    userHelper.findByLocalAccountEmail(GOOGLE_EMAIL).then(
         function (localLogin) {
             localLogin.updateAttributes({verified: true}).then(
                 function () {
