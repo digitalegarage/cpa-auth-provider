@@ -18,15 +18,11 @@ var afterLogin = require('../../lib/afterlogin-helper');
 var recaptcha = require('express-recaptcha');
 var i18n = require('i18n');
 
-const Op = db.sequelize.Op;
 
 var localStrategyCallback = function (req, username, password, done) {
     var loginError = req.__('BACK_SIGNUP_INVALID_EMAIL_OR_PASSWORD');
 
-    db.LocalLogin.findOne({
-        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: username.toLowerCase()}),
-        include: [db.User]
-    }).then(function (localLogin) {
+    userHelper.findByLocalAccountEmail(username).then(function (localLogin) {
             if (!localLogin) {
                 doneWithError();
             } else {
@@ -215,10 +211,7 @@ module.exports = function (app, options) {
 
     app.get('/email_verify', function (req, res, next) {
 
-        db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.query.email.toLowerCase()}),
-            include: [db.User]
-        }).then(function (localLogin) {
+        userHelper.findByLocalAccountEmail(req.query.email).then(function (localLogin) {
             if (localLogin) {
                 codeHelper.verifyEmail(localLogin, req.query.code).then(function (success) {
                         if (success) {
@@ -290,10 +283,7 @@ module.exports = function (app, options) {
             }
 
 
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
-                include: [db.User]
-            }).then(function (localLogin) {
+            userHelper.findByLocalAccountEmail(req.body.email).then(function (localLogin) {
                 if (localLogin) {
                     codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
                         emailHelper.send(
@@ -346,10 +336,7 @@ module.exports = function (app, options) {
                 });
                 return;
             } else {
-                db.LocalLogin.findOne({
-                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
-                    include: [db.User]
-                }).then(function (localLogin) {
+                userHelper.findByLocalAccountEmail(req.body.email).then(function (localLogin) {
                     if (localLogin && localLogin.User) {
                         return codeHelper.recoverPassword(localLogin.User, req.body.code, req.body.password).then(function (success) {
                             if (success) {
