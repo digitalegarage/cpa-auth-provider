@@ -315,7 +315,7 @@ describe('GET /email/move/:token', function () {
         it('should change the email', function (done) {
 
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
             }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
@@ -361,7 +361,7 @@ describe('GET /email/move/:token', function () {
 
         it('should have changed the email', function (done) {
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
             }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
@@ -448,7 +448,7 @@ describe('GET /email/moved/:token', function () {
 
         it('should change the email', function (done) {
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
             }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');
@@ -495,7 +495,7 @@ describe('GET /email/moved/:token', function () {
 
         it('should have changed the email', function (done) {
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: NEW_EMAIL.toLowerCase()})
             }).then(
                 function (localLogin) {
                     expect(localLogin).a('object');

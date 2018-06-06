@@ -253,7 +253,7 @@ function routes(router) {
                     if (takenUser) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return db.SocialLogin.findOne({where: {email: newUsername}});
+                    return db.SocialLogin.findOne({where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('email')), {[Op.like]: newUsername.toLowerCase()})});
                 }
             ).then(
                 function (socialLogin_) {

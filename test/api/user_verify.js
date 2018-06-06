@@ -320,7 +320,7 @@ describe('GET /email/confirm/:key', function() {
         });
         it('should have set the user to verified', function(done) {
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email.toLowerCase()})
             }).then(
                 ll => {
                     expect(ll).a('object');
@@ -372,7 +372,7 @@ describe('GET /email/verify/:key', function() {
         it('should have set the user to verified', function(done) {
 
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email.toLowerCase()})
             }).then(
                 ll => {
                     expect(ll).a('object');
