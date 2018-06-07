@@ -20,7 +20,7 @@
     "access-log": "^0.4.1",
     "async": "~2.5.0",
     "aws-sdk": "^2.103.0",
-    "bcrypt": "1.0.3",
+    "bcrypt": "2.0.1",
     "body-parser": "~1.17.2",
     "bootstrap": "^3.3.7",
     "bootstrap-datepicker": "^1.7.1",

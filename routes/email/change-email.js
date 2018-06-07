@@ -3,12 +3,12 @@
 var db = require('../../models/index');
 var logger = require('../../lib/logger');
 var cors = require('cors');
-var authHelper = require('../../lib/auth-helper');
 var passport = require('passport');
 var emailHelper = require('../../lib/email-helper');
 var config = require('../../config');
 var uuid = require('uuid');
-var socialLoginHelper = require('../../lib/social-login-helper');
+var finder = require ('../../lib/finder');
+const Op = db.sequelize.Op;
 
 var STATES = {
     INVALID_TOKEN: 'INVALID_TOKEN',
@@ -52,9 +52,7 @@ function routes(router) {
 
             logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
 
-            return db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
-            }).then(function (localLogin) {
+            return finder.findUserByLocalAccountEmail(newUsername).then(function (localLogin) {
                     if (localLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
@@ -70,7 +68,7 @@ function routes(router) {
                         throw new Error(STATES.WRONG_PASSWORD);
                     }
                     const validityDate = new Date(new Date().getTime() - VALIDITY_DURATION * 1000);
-                    return db.UserEmailToken.count({where: {user_id: oldUser.id, created_at: {$gte: validityDate}}});
+                    return db.UserEmailToken.count({where: {user_id: oldUser.id, created_at: {[Op.gte]: validityDate}}});
                 }
             ).then(
                 function (tokenCount) {
@@ -143,18 +141,14 @@ function routes(router) {
                 function (ll) {
                     localLogin = ll;
                     oldEmail = localLogin.login;
-                    return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
-                    });
+                    return finder.findUserByLocalAccountEmail(newUsername);
                 }
             ).then(
                 function (takenLocalLogin) {
                     if (takenLocalLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
-                    }).then(function (takenLogin) {
+                    return finder.findUserByLocalAccountEmail(newUsername).then(function (takenLogin) {
                         if (takenLogin) {
                             throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                         }
@@ -243,16 +237,14 @@ function routes(router) {
                         throw err;
                     }
 
-                    return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: newUsername.toLowerCase()})
-                    });
+                    return finder.findUserByLocalAccountEmail(newUsername);
                 }
             ).then(
                 function (takenUser) {
                     if (takenUser) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return db.SocialLogin.findOne({where: {email: newUsername}});
+                    return finder.findUserBySocialAccountEmail(newUsername);
                 }
             ).then(
                 function (socialLogin_) {
@@ -366,7 +358,7 @@ function cycle() {
             {
                 where: {
                     created_at: {
-                        $lt: deletionDate
+                        [Op.lt]: deletionDate
                     }
                 }
             }
