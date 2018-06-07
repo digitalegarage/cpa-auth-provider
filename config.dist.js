@@ -165,9 +165,9 @@ module.exports = {
     // iframe options
     iframes: {
       option: 'SAMEORIGIN', // DENY|SAMEORIGIN|ALLOW-FROM
-      allow_from_domain: '*.br.de' // only in use when option is allow-from
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
     },
-    
+
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 
