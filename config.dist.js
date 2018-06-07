@@ -162,6 +162,12 @@ module.exports = {
         // wildcard_domains: ['.ebu.io','.kornherr.net'] // (no stars or so, just a string for .endsWith())
     },
 
+    // iframe options
+    iframes: {
+      option: 'SAMEORIGIN', // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
+    },
+
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 
