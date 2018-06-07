@@ -204,7 +204,7 @@ module.exports = {
 
     // iframe options
     iframes: {
-      option: process.env.IFRAME_OPTION || undefined, // DENY|SAMEORIGIN|ALLOW-FROM
+      option: process.env.IFRAME_OPTION || undefined, // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
       allow_from_domain: process.env.IFRAME_OPTION_DOMAIN
     },
 

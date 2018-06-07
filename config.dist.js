@@ -164,7 +164,7 @@ module.exports = {
 
     // iframe options
     iframes: {
-      option: 'SAMEORIGIN', // DENY|SAMEORIGIN|ALLOW-FROM
+      option: 'SAMEORIGIN', // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
       allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
     },
 
