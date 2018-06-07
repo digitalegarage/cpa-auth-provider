@@ -3,6 +3,7 @@
 var db = require('../../models');
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
+const Op = db.sequelize.Op;
 
 var resetDatabase = function (done) {
     dbHelper.clearDatabase(function (err) {
@@ -77,7 +78,7 @@ describe('user profile timestamps', function () {
             this.clock = sinon.useFakeTimers(new Date("Wed Feb 08 2017 15:37:00 GMT+0000").getTime());
             this.change_at = Date.now();
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: TEST_EMAIL_0})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: TEST_EMAIL_0})
             }).then(
                 function (localLogin) {
                     localLogin.setPassword(NEW_PASSWORD).then(
@@ -117,7 +118,7 @@ describe('user profile timestamps', function () {
         it('should be set to proper time', function (done) {
             var self = this;
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: TEST_EMAIL_0})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: TEST_EMAIL_0})
             }).then(
                 function (localLogin) {
                     try {
@@ -134,7 +135,7 @@ describe('user profile timestamps', function () {
         it('should have proper password set time', function (done) {
             var self = this;
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: TEST_EMAIL_0})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: TEST_EMAIL_0})
             }).then(
                 function (localLogin) {
                     try {
@@ -151,7 +152,7 @@ describe('user profile timestamps', function () {
         it('should have proper last login time', function (done) {
             var self = this;
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: TEST_EMAIL_0})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: TEST_EMAIL_0})
             }).then(
                 function (localLogin) {
                     try {

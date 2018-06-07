@@ -5,6 +5,7 @@ var db = require('../models');
 var config = require('../config');
 var cors = require('cors');
 const pwHelper = require('../lib/password-helper');
+const Op = db.sequelize.Op;
 
 module.exports = function (router) {
     if (!config.quality_check || !config.quality_check.enabled) {
@@ -49,7 +50,7 @@ function checkUsername(req, res, next) {
     db.User.find({
         include: {
             model: db.LocalLogin,
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.username.toLowerCase()})
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.username.toLowerCase()})
 
         }
     }).then(

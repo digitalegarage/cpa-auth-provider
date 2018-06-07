@@ -10,6 +10,8 @@ var requestHelper = require('../request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var googleHelper = require('../../lib/google-helper');
 
+const Op = db.sequelize.Op;
+
 var GOOGLE_EMAIL = 'someone@gmail.com';
 var GOOGLE_PROVIDER_UID = 'google:1234';
 var GOOGLE_DISPLAY_NAME = 'Hans Wurst';
@@ -1017,7 +1019,7 @@ function localSignup(done) {
 
 function markEmailAsVerified(done) {
     db.LocalLogin.findOne({
-        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: GOOGLE_EMAIL})
+        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: GOOGLE_EMAIL})
     }).then(
         function (localLogin) {
             localLogin.updateAttributes({verified: true}).then(
