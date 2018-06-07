@@ -13,7 +13,7 @@ var user_info = [
         var localLogin;
         db.LocalLogin.findOne({where: {user_id: req.user.id}}).then(function (ll) {
             localLogin = ll;
-            db.SocialLogin.findOne({where: {[Op.and]: [{user_id: req.user.id}, {email: {[Op.ne]: null}}, {email: {[Op.ne]: ''}}]}}).then(function (socialLogin) {
+            db.SocialLogin.findOne({where: {user_id: req.user.id}}).then(function (socialLogin) {
 
                 var mail = "";
                 if (localLogin) {

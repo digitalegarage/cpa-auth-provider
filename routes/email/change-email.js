@@ -3,12 +3,11 @@
 var db = require('../../models/index');
 var logger = require('../../lib/logger');
 var cors = require('cors');
-var authHelper = require('../../lib/auth-helper');
 var passport = require('passport');
 var emailHelper = require('../../lib/email-helper');
 var config = require('../../config');
 var uuid = require('uuid');
-var socialLoginHelper = require('../../lib/social-login-helper');
+var finder = require ('../../lib/finder');
 const Op = db.sequelize.Op;
 
 var STATES = {
@@ -53,9 +52,7 @@ function routes(router) {
 
             logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
 
-            return db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: newUsername.toLowerCase()})
-            }).then(function (localLogin) {
+            return finder.findUserByLocalAccountEmail(newUsername).then(function (localLogin) {
                     if (localLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
@@ -144,18 +141,14 @@ function routes(router) {
                 function (ll) {
                     localLogin = ll;
                     oldEmail = localLogin.login;
-                    return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: newUsername.toLowerCase()})
-                    });
+                    return finder.findUserByLocalAccountEmail(newUsername);
                 }
             ).then(
                 function (takenLocalLogin) {
                     if (takenLocalLogin) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: newUsername.toLowerCase()})
-                    }).then(function (takenLogin) {
+                    return finder.findUserByLocalAccountEmail(newUsername).then(function (takenLogin) {
                         if (takenLogin) {
                             throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                         }
@@ -244,16 +237,14 @@ function routes(router) {
                         throw err;
                     }
 
-                    return db.LocalLogin.findOne({
-                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: newUsername.toLowerCase()})
-                    });
+                    return finder.findUserByLocalAccountEmail(newUsername);
                 }
             ).then(
                 function (takenUser) {
                     if (takenUser) {
                         throw new Error(STATES.EMAIL_ALREADY_TAKEN);
                     }
-                    return db.SocialLogin.findOne({where: {email: newUsername}});
+                    return finder.findUserBySocialAccountEmail(newUsername);
                 }
             ).then(
                 function (socialLogin_) {

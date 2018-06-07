@@ -4,8 +4,7 @@ var db = require('../../models');
 
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
-
-const Op = db.sequelize.Op;
+var finder = require ('../../lib/finder');
 
 var CLIENT = {
     id: 1,
@@ -319,9 +318,7 @@ describe('GET /email/confirm/:key', function() {
             expect(this.res.body.success).equal(true);
         });
         it('should have set the user to verified', function(done) {
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email})
-            }).then(
+            finder.findUserByLocalAccountEmail(UNVERIFIED_USER.email).then(
                 ll => {
                     expect(ll).a('object');
                     expect(ll.user_id).equal(UNVERIFIED_USER.id);
@@ -371,9 +368,7 @@ describe('GET /email/verify/:key', function() {
         });
         it('should have set the user to verified', function(done) {
 
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: UNVERIFIED_USER.email})
-            }).then(
+            finder.findUserByLocalAccountEmail(UNVERIFIED_USER.email).then(
                 ll => {
                     expect(ll).a('object');
                     expect(ll.user_id).equal(UNVERIFIED_USER.id);
