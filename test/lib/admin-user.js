@@ -742,7 +742,8 @@ describe('DELETE /api/admin/clients/id', function () {
                 id: 2,
                 client_id: "222",
                 client_secret: "22222222222",
-                name: "OAuth 2.0 Client 2"
+                name: "OAuth 2.0 Client 2",
+                redirect_uri: 'http://localhost'
             }).then(function () {
                 db.OAuth2Client.create({
                     id: 1,
