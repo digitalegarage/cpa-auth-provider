@@ -548,7 +548,8 @@ describe('GET /api/admin/clients', function () {
                 id: 1,
                 client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
                 client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-                name: "OAuth 2.0 Client"
+                name: "OAuth 2.0 Client",
+                redirect_uri: 'http://localhost'
             }).then(function () {
                 done();
             });
@@ -617,13 +618,15 @@ describe('GET /api/admin/clients/id', function () {
                 id: 1,
                 client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
                 client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-                name: "OAuth 2.0 Client"
+                name: "OAuth 2.0 Client",
+                redirect_uri: 'http://localhost'
             }).then(function () {
                 db.OAuth2Client.create({
                     id: 2,
                     client_id: "222",
                     client_secret: "22222222222",
-                    name: "OAuth 2.0 Client 2"
+                    name: "OAuth 2.0 Client 2",
+                    redirect_uri: 'http://localhost'
                 }).then(function () {
                     done();
                 });
@@ -666,7 +669,8 @@ describe('GET /api/admin/clients/:clientId/secret', function () {
             id: 1,
             client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
             client_secret: "secret",
-            name: "OAuth 2.0 Client"
+            name: "OAuth 2.0 Client",
+            redirect_uri: 'http://localhost'
         }).then(function () {
             done();
         });
@@ -744,7 +748,8 @@ describe('DELETE /api/admin/clients/id', function () {
                     id: 1,
                     client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
                     client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-                    name: "OAuth 2.0 Client"
+                    name: "OAuth 2.0 Client",
+                    redirect_uri: 'http://localhost'
                 }).then(function () {
                     done();
                 });
