@@ -31,7 +31,7 @@ module.exports = function (sequelize, DataTypes) {
         },
         redirect_uri: { // TODO: Use its own table (RedirectURIWhiteList)
             type: DataTypes.STRING,
-            allowNull: true
+            allowNull: false
         },
         use_template: {
             type: DataTypes.STRING,
