@@ -23,6 +23,8 @@ var afterLogin = require('../../lib/afterlogin-helper');
 
 var i18n = require('i18n');
 
+const Op = db.sequelize.Op;
+
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromExtractors(
     [
@@ -133,7 +135,7 @@ module.exports = function (app, options) {
             }
 
             db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email.toLowerCase()}),
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
                 include: [db.User]
             }).then(function (localLogin) {
                 if (localLogin) {
@@ -180,7 +182,7 @@ module.exports = function (app, options) {
 
     app.post('/api/local/authenticate/jwt', cors, function (req, res) {
         db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {$like: req.body.email.toLowerCase()}),
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
             include: [db.User]
         }).then(function (localLogin) {
                 if (!localLogin || !req.body.password) {

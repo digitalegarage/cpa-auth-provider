@@ -202,6 +202,12 @@ module.exports = {
             : []
     },
 
+    // iframe options
+    iframes: {
+      option: process.env.IFRAME_OPTION || undefined, // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
+      allow_from_domain: process.env.IFRAME_OPTION_DOMAIN
+    },
+
     // URL path prefix, e.g., '/myapp'
     urlPrefix: process.env.URL_PREFIX || '',
     oauth2: {

@@ -122,6 +122,12 @@ module.exports = {
         ]
     },
 
+    // iframe options
+    iframes: {
+      option: 'allow-from', // DENY|SAMEORIGIN|ALLOW-FROM
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
+    },
+
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '/ap',
 
