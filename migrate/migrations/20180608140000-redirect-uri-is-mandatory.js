@@ -7,15 +7,19 @@ module.exports = {
             'OAuth2Clients',
             'redirect_uri',
             {
-                allowNull: false,
-            }
+                type: Sequelize.STRING,
+                allowNull: false}
         );
     },
 
     down: function (queryInterface, Sequelize) {
-        return new Promise((resolve, reject) => {
-            return resolve();
-        });
+        return queryInterface.changeColumn(
+            'OAuth2Clients',
+            'redirect_uri',
+            {
+                type: Sequelize.STRING,
+                allowNull: true}
+        );;
     }
 
 };

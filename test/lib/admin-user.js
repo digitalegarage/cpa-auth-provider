@@ -810,7 +810,6 @@ describe('POST /api/admin/clients', function () {
         });
 
         it('should return status 400 an array with one element containing a client_secret (length 60)', function () {
-            console.log(self.res);
             expect(self.res.statusCode).to.equal(400);
             expect(JSON.parse(self.res.text).errors[0].msg).to.be.equal('Missing redirect url');
         });
