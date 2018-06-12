@@ -548,7 +548,8 @@ describe('GET /api/admin/clients', function () {
                 id: 1,
                 client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
                 client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-                name: "OAuth 2.0 Client"
+                name: "OAuth 2.0 Client",
+                redirect_uri: 'http://localhost'
             }).then(function () {
                 done();
             });
@@ -617,13 +618,15 @@ describe('GET /api/admin/clients/id', function () {
                 id: 1,
                 client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
                 client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-                name: "OAuth 2.0 Client"
+                name: "OAuth 2.0 Client",
+                redirect_uri: 'http://localhost'
             }).then(function () {
                 db.OAuth2Client.create({
                     id: 2,
                     client_id: "222",
                     client_secret: "22222222222",
-                    name: "OAuth 2.0 Client 2"
+                    name: "OAuth 2.0 Client 2",
+                    redirect_uri: 'http://localhost'
                 }).then(function () {
                     done();
                 });
@@ -666,7 +669,8 @@ describe('GET /api/admin/clients/:clientId/secret', function () {
             id: 1,
             client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
             client_secret: "secret",
-            name: "OAuth 2.0 Client"
+            name: "OAuth 2.0 Client",
+            redirect_uri: 'http://localhost'
         }).then(function () {
             done();
         });
@@ -738,13 +742,15 @@ describe('DELETE /api/admin/clients/id', function () {
                 id: 2,
                 client_id: "222",
                 client_secret: "22222222222",
-                name: "OAuth 2.0 Client 2"
+                name: "OAuth 2.0 Client 2",
+                redirect_uri: 'http://localhost'
             }).then(function () {
                 db.OAuth2Client.create({
                     id: 1,
                     client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
                     client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-                    name: "OAuth 2.0 Client"
+                    name: "OAuth 2.0 Client",
+                    redirect_uri: 'http://localhost'
                 }).then(function () {
                     done();
                 });
@@ -788,8 +794,7 @@ describe('DELETE /api/admin/clients/id', function () {
 
 describe('POST /api/admin/clients', function () {
 
-    context('when creating a new client', function () {
-
+    context('when creating a new client without redirect url', function () {
 
         var self = this;
 
@@ -805,7 +810,35 @@ describe('POST /api/admin/clients', function () {
                 cookie: self.cookie,
                 method: 'post',
                 data: {
-                    name: "OAuth 2.0 Client"
+                    name: "OAuth 2.0 Client",
+                }
+            }, done);
+        });
+
+        it('should return status 400 an array with one element containing a client_secret (length 60)', function () {
+            expect(self.res.statusCode).to.equal(400);
+            expect(JSON.parse(self.res.text).errors[0].msg).to.be.equal('Missing redirect url');
+        });
+    });
+
+    context('when creating a new client', function () {
+
+        var self = this;
+
+        before(resetDatabase);
+
+        before(function (done) {
+            // Login with an admin login
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, self, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(self, '/api/admin/clients', {
+                cookie: self.cookie,
+                method: 'post',
+                data: {
+                    name: "OAuth 2.0 Client",
+                    redirect_uri: "http://coucou.com"
                 }
             }, done);
         });
@@ -837,6 +870,47 @@ describe('POST /api/admin/clients', function () {
         });
     });
 
+    context('when updating a client without redirect url', function () {
+
+        var self = this;
+
+        before(resetDatabase);
+
+        before(function (done) {
+            // Login with an admin login
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, self, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(self, '/api/admin/clients', {
+                cookie: self.cookie,
+                method: 'post',
+                data: {
+                    client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
+                    name: "OAuth 2.0 Client",
+                    redirect_uri: "http://coucou.com"
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            var id = JSON.parse(self.res.text).id;
+            requestHelper.sendRequest(self, '/api/admin/clients', {
+                cookie: self.cookie,
+                method: 'post',
+                data: {
+                    id: id,
+                    name: "bbb",
+                }
+            }, done);
+        });
+
+        it('should return status 400', function () {
+            expect(self.res.statusCode).to.equal(400);
+            expect(JSON.parse(self.res.text).errors[0].msg).to.be.equal('Missing redirect url');
+        });
+    });
+
     context('when updating a client', function () {
 
 
@@ -855,7 +929,8 @@ describe('POST /api/admin/clients', function () {
                 method: 'post',
                 data: {
                     client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
-                    name: "OAuth 2.0 Client"
+                    name: "OAuth 2.0 Client",
+                    redirect_uri: "http://coucou.com"
                 }
             }, done);
         });
@@ -867,7 +942,8 @@ describe('POST /api/admin/clients', function () {
                 method: 'post',
                 data: {
                     id: id,
-                    name: "bbb"
+                    name: "bbb",
+                    redirect_uri: "http://coucou.com"
                 }
             }, done);
         });
@@ -901,6 +977,7 @@ describe('POST /api/admin/clients', function () {
 
 
     });
+
 
 });
 
