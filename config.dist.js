@@ -168,6 +168,9 @@ module.exports = {
       allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
     },
 
+    // use more secure header settings
+    use_secure_headers: true,
+    
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 
