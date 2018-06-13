@@ -21,5 +21,5 @@ describe('Check response for headers', function () {
       expect(this.res.header['x-content-type-options']).to.equal("nosniff");
       expect(this.res.header['strict-transport-security']).to.equal("max-age=31536000");
       expect(this.res.header['content-security-policy']).to.equal("default-src https: \'self\'; script-src https: \'self\'; style-src https: \'self\'; img-src *; frame-src \'self\'; connect-src https:; report-uri /csp_report;");
-    })
+    });
 });
