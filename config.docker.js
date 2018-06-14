@@ -208,6 +208,9 @@ module.exports = {
       allow_from_domain: process.env.IFRAME_OPTION_DOMAIN
     },
 
+    // use more secure header settings
+    use_secure_headers: process.env.USE_SECURE_HEADERS,
+
     // URL path prefix, e.g., '/myapp'
     urlPrefix: process.env.URL_PREFIX || '',
     oauth2: {
