@@ -19,7 +19,7 @@ var userHelper = require('../../lib/user-helper');
 var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 
-var afterLogin = require('../../lib/afterlogin-helper');
+var afterLoginHelper = require('../../lib/afterlogin-helper');
 
 var i18n = require('i18n');
 
@@ -173,7 +173,7 @@ module.exports = function (app, options) {
       passport.authenticate('local', { session: true }),
       function(req,res) {
 
-        afterLogin.afterLogin(req.user, req.body.email || req.query.email, res);
+        afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
           // returned value is not relevant
         res.sendStatus(204);
