@@ -1,7 +1,8 @@
 "use strict";
 
 var db = require('../../models');
-var afterLogin = require('../../lib/afterlogin-helper');
+var afterLoginHelper = require('../../lib/afterlogin-helper');
+var afterLogoutHelper = require('../../lib/afterlogout-helper');
 
 var jwtHelper = require('../../lib/jwt-helper');
 var cors = require('../../lib/cors');
@@ -64,7 +65,6 @@ module.exports = function (app, options) {
 
     app.post('/oauth2/session/cookie/request', cors, passport.authenticate('oauth-local', {session: true}),
         function (req, res, next) {
-
             getUserInfos(req, res, next);
         });
 
@@ -92,6 +92,7 @@ module.exports = function (app, options) {
     app.options('/api/logout', cors);
 
     app.get('/api/logout', cors, function (req, res, next) {
+        afterLogoutHelper.afterLogout(res);
         req.logout();
         res.json({connected: false});
     });
@@ -139,7 +140,7 @@ module.exports = function (app, options) {
                 id: req.user.id
             }, include: [db.LocalLogin]
         }).then(function (user) {
-            afterLogin.afterLogin(user, user.LocalLogin.login, res);
+            afterLoginHelper.afterLogin(user, user.LocalLogin.login, res);
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);
