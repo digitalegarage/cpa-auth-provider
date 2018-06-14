@@ -65,7 +65,6 @@ module.exports = function (app, options) {
 
     app.post('/oauth2/session/cookie/request', cors, passport.authenticate('oauth-local', {session: true}),
         function (req, res, next) {
-            afterLoginHelper.afterLogin(user, user.LocalLogin.login, res);
             getUserInfos(req, res, next);
         });
 
@@ -141,6 +140,7 @@ module.exports = function (app, options) {
                 id: req.user.id
             }, include: [db.LocalLogin]
         }).then(function (user) {
+            afterLoginHelper.afterLogin(user, user.LocalLogin.login, res);
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);
