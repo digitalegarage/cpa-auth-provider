@@ -209,7 +209,7 @@ module.exports = {
     },
 
     // use more secure header settings
-    use_secure_headers: process.env.USE_SECURE_HEADERS || true,
+    use_secure_headers: process.env.USE_SECURE_HEADERS,
 
     // URL path prefix, e.g., '/myapp'
     urlPrefix: process.env.URL_PREFIX || '',
