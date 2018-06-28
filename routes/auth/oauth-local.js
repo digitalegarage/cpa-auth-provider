@@ -137,9 +137,16 @@ module.exports = function (app, options) {
         db.User.findOne({
             where: {
                 id: req.user.id
-            }, include: [db.LocalLogin]
+            }, include: [db.LocalLogin, db.SocialLogin]
         }).then(function (user) {
-            afterLogin.afterLogin(user, user.LocalLogin.login, res);
+            var mail = "";
+            if (user.LocalLogin && user.LocalLogin.login){
+                mail = user.LocalLogin.login;
+            }
+            if (! mail && user.SocialLogin && user.SocialLogin.email){
+                mail = user.SocialLogin.email;
+            }
+            afterLogin.afterLogin(user, mail, res);
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);
