@@ -26,6 +26,21 @@ module.exports = function (app, options) {
         }
     });
 
+    // A route for getting profile data when authed by a cpa token.
+    app.get('/api/cpa/profile', function(req,res) {
+      authHelper.getCpaAuthedUser(req)
+      .then(function(user) {
+        if (!user)
+          res.sendStatus(401);
+        else
+          res.send(user);
+      })
+      .catch(function(err) {
+        console.log(err);
+        res.sendStatus(401);
+      });
+    });
+
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
     // That following line avoid cross domain error like
     // XMLHttpRequest cannot load http://localhost.rts.ch:3000/api/local/info.
