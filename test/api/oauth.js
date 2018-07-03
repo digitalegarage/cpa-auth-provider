@@ -600,6 +600,21 @@ function searchCookie(res) {
     return found;
 }
 
+function searchCookieString(res) {
+    var found;
+    var setcookie = res.headers["set-cookie"];
+    if (setcookie) {
+        setcookie.forEach(
+            function (cookiestr) {
+                if (cookiestr.indexOf('peach_infos') == 0) {
+                    found =  cookiestr;
+                }
+            }
+        );
+    }
+    return found;
+}
+
 describe('OAuth2 requests from cross domain with access token ', function () {
 
     before(resetDatabase);
@@ -616,6 +631,8 @@ describe('OAuth2 requests from cross domain with access token ', function () {
             }
         }, done);
     });
+
+
     describe('when config is set to set info cookie', function () {
 
         before(function (done) {
@@ -647,11 +664,28 @@ describe('OAuth2 requests from cross domain with access token ', function () {
                 }
             }, done);
         });
+        describe('when user login', function () {
 
-        it('should return a success with appropriate data in cookie peach_infos', function () {
-            var foundCookie = searchCookie.call(this, this.res);
-            expect(foundCookie).to.be.true;
-            expect(this.res.statusCode).equal(200);
+            it('should return a success with appropriate data in cookie peach_infos', function () {
+                var foundCookie = searchCookie.call(this, this.res);
+                expect(foundCookie).to.be.true;
+                expect(this.res.statusCode).equal(200);
+            });
+        });
+
+        describe('when when user logout', function () {
+
+            before(function (done) {
+                requestHelper.sendRequest(this, '/logout', {
+                    method: 'get',
+                }, done);
+            });
+
+
+            it('logout should invalidate cookie ', function () {
+                var peachInfoCookieString = searchCookieString.call(this, this.res);
+                expect(peachInfoCookieString).to.be.equal('peach_infos=; Max-Age=0; Domain=toto.com; Path=/; Expires=Invalid Date');
+            });
         });
     });
     describe('when config is set to not set info cookie', function () {

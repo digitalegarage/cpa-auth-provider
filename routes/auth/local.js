@@ -13,7 +13,7 @@ var passwordHelper = require('../../lib/password-helper');
 var finder = require('../../lib/finder');
 var userHelper = require('../../lib/user-helper');
 var limiterHelper = require('../../lib/limiter-helper');
-var afterLogin = require('../../lib/afterlogin-helper');
+var afterLoginHelper = require('../../lib/afterlogin-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
@@ -367,7 +367,7 @@ module.exports = function (app, options) {
             delete req.session.callback_url;
         }
 
-        afterLogin.afterLogin(req.user, req.body.email || req.query.email, res);
+        afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
         req.session.save(
             function () {

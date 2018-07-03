@@ -87,7 +87,7 @@ describe('POST /api/local/signup', function () {
         });
 
         it('should return a success false', function () {
-            expect(this.res.body.msg.indexOf("API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH")).to.equal(0);
+            expect(this.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
             expect(this.res.statusCode).to.equal(400);
             expect(this.res.body.success).to.equal(false);
         });
@@ -113,7 +113,7 @@ describe('POST /api/local/signup', function () {
         });
 
         it('should return a success false', function () {
-            expect(this.res.body.msg.indexOf("API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH")).to.equal(0);
+            expect(this.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
             expect(this.res.statusCode).to.equal(400);
             expect(this.res.body.success).to.equal(false);
         });
