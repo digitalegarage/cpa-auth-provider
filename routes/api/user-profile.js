@@ -6,6 +6,7 @@ var passport = require('passport');
 var cors = require('../../lib/cors');
 var authHelper = require('../../lib/auth-helper');
 var userHelper = require('../../lib/user-helper');
+var logger = require('../../lib/logger');
 
 module.exports = function (app, options) {
 
@@ -28,7 +29,7 @@ module.exports = function (app, options) {
 
     // A route for getting profile data when authed by a cpa token.
     app.get('/api/cpa/profile', function(req,res) {
-      authHelper.getCpaAuthedUser(req)
+      getCpaAuthedUser(req)
       .then(function(user) {
         if (!user)
           res.sendStatus(401);
@@ -36,7 +37,6 @@ module.exports = function (app, options) {
           res.send(user);
       })
       .catch(function(err) {
-        console.log(err);
         res.sendStatus(401);
       });
     });
@@ -160,4 +160,36 @@ function returnProfileAsJson(user, res, req) {
             }
         });
     });
+}
+
+
+// Get the user for a given CPA token. Due to the fact that it is more "get user"
+// than "authenticate" it has been moved here from auth-helper.
+function getCpaAuthedUser(req) {
+  return new Promise(function(resolve,reject) {
+    var cpaToken = req.header('Authorization').replace('Bearer: ','');
+    if (!cpaToken) {
+      logger.warn("Access to CPA profile without cpa token");
+      reject({"Error": "No token given"});
+    } else {
+      db.AccessToken.findOne({where: {token: cpaToken}, include: [db.User]})
+      .then(function (accessToken) {
+        if (!accessToken) {
+          logger.warn("Access to CPA profile without resolvable token",cpaToken);
+          reject({"Error": "No valid token given"});
+        } else {
+          var responseData = {
+            client_id: accessToken.client_id
+          };
+          if (accessToken.User) {
+            responseData.user = accessToken.User;
+          }
+          resolve(responseData);
+        }
+      }, function (err) {
+        logger.error("Something spooky went wrong resolving CPA to user profile",err);
+        reject();
+      });
+    }
+  });
 }
