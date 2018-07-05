@@ -37,7 +37,8 @@ module.exports = function (app, options) {
           res.send(user);
       })
       .catch(function(err) {
-        res.sendStatus(401);
+        res.statusMessage = JSON.stringify(err);
+        res.status(401).end();
       });
     });
 
@@ -167,10 +168,10 @@ function returnProfileAsJson(user, res, req) {
 // than "authenticate" it has been moved here from auth-helper.
 function getCpaAuthedUser(req) {
   return new Promise(function(resolve,reject) {
-    var cpaToken = req.header('Authorization').replace('Bearer: ','');
+    var cpaToken = req.header('Authorization').replace('Bearer ','');
     if (!cpaToken) {
       logger.warn("Access to CPA profile without cpa token");
-      reject({"Error": "No token given"});
+      reject({"Error": "No token given: "+cpaToken});
     } else {
       db.AccessToken.findOne({where: {token: cpaToken}, include: [db.User]})
       .then(function (accessToken) {

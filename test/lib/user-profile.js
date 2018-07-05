@@ -10,52 +10,63 @@ var generate = require('../../lib/generate');
 var cpaToken = generate.cryptoCode(20);
 
 var initDatabase = function (done) {
-    db.User.create({
-        provider_uid: 'testuser'
+  db.User.create({
+    provider_uid: 'testuser'
+  })
+  .then(function (user) {
+    //console.log("Linking" + user.id + " to token " + cpaToken);
+    db.AccessToken.create({
+      token: cpaToken,
+      user_id: user.id
     })
-        .then(function (user) {
-          console.log("Linking" + user.id + " to token " + cpaToken);
-          db.AccessToken.create({
-            token: cpaToken,
-            user_id: user.id
-          })
-          .then(function() {
-            return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
-                return localLogin.setPassword('testpassword');
-            });
-          });
-        })
-        .then(function () {
-                done();
-            },
-            function (err) {
-                done(new Error(err));
-            });
-
+    .then(function() {
+      return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
+        return localLogin.setPassword('testpassword');
+      });
+    });
+  })
+  .then(function () {
+    done();
+  },
+  function (err) {
+    done(new Error(err));
+  });
 };
 
 var resetDatabase = function (done) {
     return dbHelper.resetDatabase(initDatabase, done);
 };
 
-describe('Test user profile with CPA token', function() {
+describe('Test user profile with CPA token', function () {
 
-  before(resetDatabase);
+    before(resetDatabase);
 
-  before(function (done) {
-      console.log("Token used:",cpaToken);
-      requestHelper.sendRequest(this, '/api/cpa/profile', {accessToken: cpaToken, parseDOM: true}, done);
-  });
-  it('should return a status 200', function () {
-      expect(this.res.statusCode).to.equal(200);
-  });
-  before(function (done) {
-      requestHelper.sendRequest(this, '/api/cpa/profile', {accessToken: '', parseDOM: true}, done);
-  });
-  it('should throw a 401 without token', function() {
-    expect(this.res.statusCode).to.equal(401);
-  })
-})
+    describe('when token is correct', function () {
+        before(function (done) {
+            //console.log("Token used:", cpaToken);
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
+                accessToken: cpaToken,
+                parseDOM: true
+            }, done);
+        });
+        it('should return a status 200', function () {
+            expect(this.res.statusCode).to.equal(200);
+        });
+    });
+
+    describe('when token is incorrect', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
+                accessToken: '',
+                parseDOM: true
+            }, done);
+        });
+        it('should throw a 401 without token', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+});
+
 describe('Test user profile', function () {
 
     context('When requesting display_name', function () {
