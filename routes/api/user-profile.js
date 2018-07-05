@@ -135,6 +135,7 @@ function returnProfileAsJson(user, res, req) {
         res.json({
             success: true,
             user_profile: {
+                id: user.id,
                 firstname: user.firstname,
                 lastname: user.lastname,
                 gender: user.gender,
