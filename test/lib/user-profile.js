@@ -14,7 +14,7 @@ var initDatabase = function (done) {
         provider_uid: 'testuser'
     }).then(function (user) {
         //console.log("Linking" + user.id + " to token " + cpaToken);
-        db.AccessToken.create({
+        return db.AccessToken.create({
             token: cpaToken,
             user_id: user.id
         }).then(function () {
