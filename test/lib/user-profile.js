@@ -10,27 +10,27 @@ var generate = require('../../lib/generate');
 var cpaToken = generate.cryptoCode(20);
 
 var initDatabase = function (done) {
-  db.User.create({
-    provider_uid: 'testuser'
-  })
-  .then(function (user) {
-    //console.log("Linking" + user.id + " to token " + cpaToken);
-    db.AccessToken.create({
-      token: cpaToken,
-      user_id: user.id
-    })
-    .then(function() {
-      return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
-        return localLogin.setPassword('testpassword');
-      });
-    });
-  })
-  .then(function () {
-    done();
-  },
-  function (err) {
-    done(new Error(err));
-  });
+    db.User.create({
+        provider_uid: 'testuser'
+    }).then(function (user) {
+        //console.log("Linking" + user.id + " to token " + cpaToken);
+        db.AccessToken.create({
+            token: cpaToken,
+            user_id: user.id
+        }).then(function () {
+            return db.LocalLogin.create({
+                user_id: user.id,
+                login: 'testuser'
+            }).then(function (localLogin) {
+                return localLogin.setPassword('testpassword');
+            });
+        });
+    }).then(function () {
+            done();
+        },
+        function (err) {
+            done(new Error(err));
+        });
 };
 
 var resetDatabase = function (done) {
@@ -173,7 +173,10 @@ describe('User profile page:', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/user/profile', {cookie: this.cookie, parseDOM: true}, done);
+            requestHelper.sendRequest(this, '/user/profile', {
+                cookie: this.cookie,
+                parseDOM: true
+            }, done);
         });
 
         it('should return a status 200', function () {
@@ -200,7 +203,10 @@ describe('User id API:', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/user/id', {cookie: this.cookie, parseDOM: true}, done);
+            requestHelper.sendRequest(this, '/user/id', {
+                cookie: this.cookie,
+                parseDOM: true
+            }, done);
         });
 
         it('should return a status 200', function () {
@@ -213,7 +219,10 @@ describe('User id API:', function () {
     context('with wrong session cookie', function () {
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/user/id', {cookie: 'really wrong session cookie', parseDOM: true}, done);
+            requestHelper.sendRequest(this, '/user/id', {
+                cookie: 'really wrong session cookie',
+                parseDOM: true
+            }, done);
         });
 
         it('should return a status 401', function () {
