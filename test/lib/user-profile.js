@@ -55,7 +55,30 @@ describe('Test user profile with CPA token', function () {
     describe('when token is incorrect', function () {
         before(function (done) {
             requestHelper.sendRequest(this, '/api/cpa/profile', {
+                accessToken: 'this is a bad cpa token',
+                parseDOM: true
+            }, done);
+        });
+        it('should throw a 401 without token', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+
+    describe('when token is blank', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
                 accessToken: '',
+                parseDOM: true
+            }, done);
+        });
+        it('should throw a 401 without token', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+
+    describe('when token is missing', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
                 parseDOM: true
             }, done);
         });
