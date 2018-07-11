@@ -13,7 +13,6 @@ var initDatabase = function (done) {
     db.User.create({
         provider_uid: 'testuser'
     }).then(function (user) {
-        //console.log("Linking" + user.id + " to token " + cpaToken);
         return db.AccessToken.create({
             token: cpaToken,
             user_id: user.id
@@ -43,7 +42,6 @@ describe('Test user profile with CPA token', function () {
 
     describe('when token is correct', function () {
         before(function (done) {
-            //console.log("Token used:", cpaToken);
             requestHelper.sendRequest(this, '/api/cpa/profile', {
                 accessToken: cpaToken,
                 parseDOM: true
