@@ -59,7 +59,7 @@ describe('Test user profile with CPA token', function () {
                 parseDOM: true
             }, done);
         });
-        it('should throw a 401 without token', function () {
+        it('should throw a 401', function () {
             expect(this.res.statusCode).to.equal(401);
         });
     });
@@ -71,7 +71,7 @@ describe('Test user profile with CPA token', function () {
                 parseDOM: true
             }, done);
         });
-        it('should throw a 401 without token', function () {
+        it('should throw a 401', function () {
             expect(this.res.statusCode).to.equal(401);
         });
     });
@@ -82,7 +82,7 @@ describe('Test user profile with CPA token', function () {
                 parseDOM: true
             }, done);
         });
-        it('should throw a 401 without token', function () {
+        it('should throw a 401', function () {
             expect(this.res.statusCode).to.equal(401);
         });
     });
