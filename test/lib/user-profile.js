@@ -5,27 +5,88 @@ var db = require('../../models');
 var dbHelper = require('../db-helper');
 var requestHelper = require('../request-helper');
 var config = require('../../config');
+var generate = require('../../lib/generate');
+
+var cpaToken = generate.cryptoCode(20);
 
 var initDatabase = function (done) {
     db.User.create({
         provider_uid: 'testuser'
-    })
-        .then(function (user) {
-            return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
+    }).then(function (user) {
+        return db.AccessToken.create({
+            token: cpaToken,
+            user_id: user.id
+        }).then(function () {
+            return db.LocalLogin.create({
+                user_id: user.id,
+                login: 'testuser'
+            }).then(function (localLogin) {
                 return localLogin.setPassword('testpassword');
             });
-        })
-        .then(function () {
-                done();
-            },
-            function (err) {
-                done(new Error(err));
-            });
+        });
+    }).then(function () {
+            done();
+        },
+        function (err) {
+            done(new Error(err));
+        });
 };
 
 var resetDatabase = function (done) {
     return dbHelper.resetDatabase(initDatabase, done);
 };
+
+describe('Test user profile with CPA token', function () {
+
+    before(resetDatabase);
+
+    describe('when token is correct', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
+                accessToken: cpaToken,
+                parseDOM: true
+            }, done);
+        });
+        it('should return a status 200', function () {
+            expect(this.res.statusCode).to.equal(200);
+        });
+    });
+
+    describe('when token is incorrect', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
+                accessToken: 'this is a bad cpa token',
+                parseDOM: true
+            }, done);
+        });
+        it('should throw a 401', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+
+    describe('when token is blank', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
+                accessToken: '',
+                parseDOM: true
+            }, done);
+        });
+        it('should throw a 401', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+
+    describe('when token is missing', function () {
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/cpa/profile', {
+                parseDOM: true
+            }, done);
+        });
+        it('should throw a 401', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+});
 
 describe('Test user profile', function () {
 
@@ -133,7 +194,10 @@ describe('User profile page:', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/user/profile', {cookie: this.cookie, parseDOM: true}, done);
+            requestHelper.sendRequest(this, '/user/profile', {
+                cookie: this.cookie,
+                parseDOM: true
+            }, done);
         });
 
         it('should return a status 200', function () {
@@ -160,7 +224,10 @@ describe('User id API:', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/user/id', {cookie: this.cookie, parseDOM: true}, done);
+            requestHelper.sendRequest(this, '/user/id', {
+                cookie: this.cookie,
+                parseDOM: true
+            }, done);
         });
 
         it('should return a status 200', function () {
@@ -173,7 +240,10 @@ describe('User id API:', function () {
     context('with wrong session cookie', function () {
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/user/id', {cookie: 'really wrong session cookie', parseDOM: true}, done);
+            requestHelper.sendRequest(this, '/user/id', {
+                cookie: 'really wrong session cookie',
+                parseDOM: true
+            }, done);
         });
 
         it('should return a status 401', function () {
