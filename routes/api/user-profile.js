@@ -6,6 +6,7 @@ var passport = require('passport');
 var cors = require('../../lib/cors');
 var authHelper = require('../../lib/auth-helper');
 var userHelper = require('../../lib/user-helper');
+var logger = require('../../lib/logger');
 
 module.exports = function (app, options) {
 
@@ -24,6 +25,20 @@ module.exports = function (app, options) {
         } else {
             returnProfileAsJson(user, res, req);
         }
+    });
+
+    // A route for getting profile data when authed by a cpa token.
+    app.get('/api/cpa/profile', function (req, res) {
+        getCpaAuthedUser(req).then(function (user) {
+            if (!user) {
+                res.sendStatus(401);
+            } else {
+                returnProfileAsJson(user, res, req);
+            }
+        }).catch(function (err) {
+            res.statusMessage = JSON.stringify(err);
+            res.status(401).end();
+        });
     });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
@@ -145,5 +160,34 @@ function returnProfileAsJson(user, res, req) {
                 display_name: user.getDisplayName(req.query.policy, email)
             }
         });
+    });
+}
+
+
+// Get the user for a given CPA token. Due to the fact that it is more "get user"
+// than "authenticate" it has been moved here from auth-helper.
+function getCpaAuthedUser(req) {
+    return new Promise(function (resolve, reject) {
+        var cpaToken = req.header('Authorization').replace('Bearer ', '');
+        if (!cpaToken) {
+            logger.warn("Access to CPA profile without cpa token");
+            reject({"Error": "No token given: " + cpaToken});
+        } else {
+            db.AccessToken.findOne({where: {token: cpaToken}, include: [db.User]})
+                .then(function (accessToken) {
+                    if (!accessToken) {
+                        logger.warn("Access to CPA profile without resolvable token", cpaToken);
+                        reject({"Error": "No valid token given"});
+                    } else {
+                        if (accessToken.User) {
+                            resolve(accessToken.User);
+                        }
+                        resolve();
+                    }
+                }, function (err) {
+                    logger.error("Something spooky went wrong resolving CPA to user profile", err);
+                    reject();
+                });
+        }
     });
 }
