@@ -25,6 +25,12 @@
         var $allowButton = $('#allow-auth');
         var $denyButton = $('#deny-auth');
 
+        var rerender = function(data,status,xhr) {
+          var newDoc = document.open("text/html", "replace");
+          newDoc.write(data);
+          newDoc.close();
+        }
+
         $allowButton.on('click', function (event) {
             event.preventDefault();
 
@@ -34,7 +40,8 @@
                     user_code: '<%= user_code %>',
                     redirect_uri: '<%= redirect_uri %>'
                 },
-                type: 'POST'
+                type: 'POST',
+                success: rerender
             });
         });
 
@@ -47,7 +54,8 @@
                     user_code: '<%= user_code %>',
                     redirect_uri: '<%= redirect_uri %>'
                 },
-                type: 'POST'
+                type: 'POST',
+                success: rerender
             });
         });
     })();
