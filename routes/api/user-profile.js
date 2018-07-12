@@ -33,7 +33,7 @@ module.exports = function (app, options) {
             if (!user) {
                 res.sendStatus(401);
             } else {
-                returnProfileAsJson(user,res,req);
+                returnProfileAsJson(user, res, req);
             }
         }).catch(function (err) {
             res.statusMessage = JSON.stringify(err);
