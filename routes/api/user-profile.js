@@ -33,7 +33,7 @@ module.exports = function (app, options) {
             if (!user) {
                 res.sendStatus(401);
             } else {
-                res.send(user);
+                returnProfileAsJson(user,res,req);
             }
         }).catch(function (err) {
             res.statusMessage = JSON.stringify(err);
@@ -178,13 +178,10 @@ function getCpaAuthedUser(req) {
                         logger.warn("Access to CPA profile without resolvable token", cpaToken);
                         reject({"Error": "No valid token given"});
                     } else {
-                        var responseData = {
-                            client_id: accessToken.client_id
-                        };
                         if (accessToken.User) {
-                            responseData.user = accessToken.User;
+                            resolve(accessToken.User);
                         }
-                        resolve(responseData);
+                        resolve();
                     }
                 }, function (err) {
                     logger.error("Something spooky went wrong resolving CPA to user profile", err);
