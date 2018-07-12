@@ -1,23 +1,18 @@
 <% include layout/header %>
 
-<div></div>
-
-<div class="panel panel-info">
-    <div class="panel-heading"><%= __('VERIFY_PREFILLED_CODE_TITLE') %></div>
-
-    <div class="panel-body">
-        <form id="authorization-form">
-            <div class="form-group has-success">
-                <%= client_name %> <%= __('VERIFY_MAIN_LABEL_PREFIX') %> <%= domain %><%= __('VERIFY_MAIN_LABEL_SUFFIX') %>
-            </div>
-
-            <input id="allow-auth" type="button" class="btn btn-success"
-                   value="<%= __('VERIFY_MAIN_ALLOW_BUTTON') %>">
-
-            <input id="deny-auth" type="button" class="btn btn-danger"
-                   value="<%= __('VERIFY_MAIN_DENY_BUTTON') %>">
-        </form>
-    </div>
+<div class="container">
+  <div class="col-sm-8 col-sm-offset-2 col-lg-6 col-lg-offset-3">
+    <h1 class="text-center"><%= __('VERIFY_PREFILLED_CODE_TITLE') %></h1>
+    <form id="authorization-form">
+      <div>
+        <p><%= client_name %> <%= __('VERIFY_MAIN_LABEL_PREFIX') %> <%= domain %><%= __('VERIFY_MAIN_LABEL_SUFFIX') %></p>
+      </div>
+      <input id="allow-auth" type="button" class="btn btn-success"
+        value="<%= __('VERIFY_MAIN_ALLOW_BUTTON') %>">
+      <input id="deny-auth" type="button" class="btn btn-danger"
+        value="<%= __('VERIFY_MAIN_DENY_BUTTON') %>">
+    </form>
+  </div>
 </div>
 
 <script type="text/javascript">
