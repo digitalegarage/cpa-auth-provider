@@ -6,6 +6,7 @@ var passport = require('passport');
 var cors = require('../../lib/cors');
 var authHelper = require('../../lib/auth-helper');
 var userHelper = require('../../lib/user-helper');
+var logger = require('../../lib/logger');
 
 module.exports = function (app, options) {
 
@@ -26,6 +27,20 @@ module.exports = function (app, options) {
         }
     });
 
+    // A route for getting profile data when authed by a cpa token.
+    app.get('/api/cpa/profile', function (req, res) {
+        getCpaAuthedUser(req).then(function (user) {
+            if (!user) {
+                res.sendStatus(401);
+            } else {
+                returnProfileAsJson(user, res, req);
+            }
+        }).catch(function (err) {
+            res.statusMessage = JSON.stringify(err);
+            res.status(401).end();
+        });
+    });
+
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
     // That following line avoid cross domain error like
     // XMLHttpRequest cannot load http://localhost.rts.ch:3000/api/local/info.
@@ -33,7 +48,7 @@ module.exports = function (app, options) {
     // Origin 'http://localhost.rts.ch:8090' is therefore not allowed access.
     app.options('/api/session/profile', cors);
 
-    app.get('/api/session/profile', cors, authHelper.authenticateFirst, function (req, res) {
+    app.get('/api/session/profile', cors, authHelper.ensureAuthenticated, function (req, res) {
         var user = authHelper.getAuthenticatedUser(req);
 
         if (!user) {
@@ -135,6 +150,7 @@ function returnProfileAsJson(user, res, req) {
         res.json({
             success: true,
             user_profile: {
+                id: user.id,
                 firstname: user.firstname,
                 lastname: user.lastname,
                 gender: user.gender,
@@ -144,5 +160,34 @@ function returnProfileAsJson(user, res, req) {
                 display_name: user.getDisplayName(req.query.policy, email)
             }
         });
+    });
+}
+
+
+// Get the user for a given CPA token. Due to the fact that it is more "get user"
+// than "authenticate" it has been moved here from auth-helper.
+function getCpaAuthedUser(req) {
+    return new Promise(function (resolve, reject) {
+        var cpaToken = req.header('Authorization').replace('Bearer ', '');
+        if (!cpaToken) {
+            logger.warn("Access to CPA profile without cpa token");
+            reject({"Error": "No token given: " + cpaToken});
+        } else {
+            db.AccessToken.findOne({where: {token: cpaToken}, include: [db.User]})
+                .then(function (accessToken) {
+                    if (!accessToken) {
+                        logger.warn("Access to CPA profile without resolvable token", cpaToken);
+                        reject({"Error": "No valid token given"});
+                    } else {
+                        if (accessToken.User) {
+                            resolve(accessToken.User);
+                        }
+                        resolve();
+                    }
+                }, function (err) {
+                    logger.error("Something spooky went wrong resolving CPA to user profile", err);
+                    reject();
+                });
+        }
     });
 }

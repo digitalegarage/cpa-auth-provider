@@ -13,7 +13,7 @@ var permissionName = require('../../lib/permission-name');
 var config = require('../../config');
 var bcrypt = require('bcrypt');
 var moment = require('moment');
-
+const Op = db.sequelize.Op;
 
 module.exports = function (router) {
     router.get('/admin', [authHelper.authenticateFirst, permissionHelper.can(permissionName.ADMIN_PERMISSION)], function (req, res) {
@@ -65,6 +65,7 @@ module.exports = function (router) {
         var client = req.body;
 
         req.checkBody('name', req.__('API_ADMIN_CLIENT_NAME_IS_MISSING')).notEmpty();
+        req.checkBody('redirect_uri', req.__('API_ADMIN_REDIRECT_URI_IS_MISSING')).notEmpty();
         if (client.redirect_uri) {
             req.checkBody('redirect_uri', req.__('API_ADMIN_CLIENT_REDIRECT_URL_IS_INVALID')).isURL();
         }
@@ -80,7 +81,7 @@ module.exports = function (router) {
                 return db.OAuth2Client.findOne({
                     where: {
                         client_id: xssFilters.inHTMLData(client.client_id),
-                        $not: {id: client.id}
+                        [Op.not]: {id: client.id}
                     }
                 }).then(function (clientInDb) {
                     if (clientInDb) {

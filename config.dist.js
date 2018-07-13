@@ -158,8 +158,19 @@ module.exports = {
         allowed_domains: [
             "http://cpa-client.ebu.io"
         ]
+        // possible other options, will extend allowed_domains:
+        // wildcard_domains: ['.ebu.io','.kornherr.net'] // (no stars or so, just a string for .endsWith())
     },
 
+    // iframe options
+    iframes: {
+      option: 'SAMEORIGIN', // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
+    },
+
+    // use more secure header settings
+    use_secure_headers: true,
+    
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 

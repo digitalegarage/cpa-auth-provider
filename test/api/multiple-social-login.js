@@ -9,6 +9,7 @@ var dbHelper = require('../db-helper');
 var requestHelper = require('../request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var googleHelper = require('../../lib/google-helper');
+var finder = require ('../../lib/finder');
 
 var GOOGLE_EMAIL = 'someone@gmail.com';
 var GOOGLE_PROVIDER_UID = 'google:1234';
@@ -140,6 +141,29 @@ describe('Facebook', function () {
 
                 before(function (done) {
                     localSignup.call(this, done);
+                });
+
+                before(function (done) {
+                    facebookUISignup.call(this, done);
+                });
+
+                it('should redirect to login with error LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB', function () {
+                        expect(this.res.statusCode).equal(302);
+                        expect(this.res.text).equal('Found. Redirecting to /ap/auth?error=LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB');
+                    }
+                );
+            });
+            describe('When user is in the system and hasn\'t validated his uppercase mail', function () {
+
+                before(function (done) {
+                    recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+                    done();
+                });
+
+                before(resetDatabase);
+
+                before(function (done) {
+                    localUpperCaseSignup.call(this, done);
                 });
 
                 before(function (done) {
@@ -365,8 +389,8 @@ describe('Facebook', function () {
 
 
             before(function (done) {
-                db.SocialLogin.findOne({where: {email: GOOGLE_EMAIL}, include: [db.User]}).then(function (localLogin) {
-                    self.user = localLogin.User;
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
+                    self.user = socialLogin.User;
                 }).then(function () {
                     done();
                 });
@@ -851,7 +875,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({where: {email: GOOGLE_EMAIL}, include: [db.User]}).then(function (socialLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     socialLoginHelper.getSocialLogins(socialLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -886,7 +910,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({where: {email: GOOGLE_EMAIL}, include: [db.User]}).then(function (socialLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (socialLogin) {
                     socialLoginHelper.getSocialLogins(socialLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -940,7 +964,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({where: {email: GOOGLE_EMAIL}, include: [db.User]}).then(function (localLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
                     socialLoginHelper.getSocialLogins(localLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -982,7 +1006,7 @@ describe('Facebook and Google', function () {
             });
 
             before(function (done) {
-                db.SocialLogin.findOne({where: {email: GOOGLE_EMAIL}, include: [db.User]}).then(function (localLogin) {
+                finder.findUserBySocialAccountEmail(GOOGLE_EMAIL).then(function (localLogin) {
                     socialLoginHelper.getSocialLogins(localLogin.User).then(function (providers) {
                         providersInDb = providers;
                         done();
@@ -1014,9 +1038,22 @@ function localSignup(done) {
     }, done);
 }
 
+function localUpperCaseSignup(done) {
+    requestHelper.sendRequest(this, '/api/local/signup', {
+        method: 'post',
+        cookie: this.cookie,
+        type: 'form',
+        data: {
+            email: GOOGLE_EMAIL.toUpperCase(),
+            password: STRONG_PASSWORD,
+            'g-recaptcha-response': recaptchaResponse
+        }
+    }, done);
+}
+
 
 function markEmailAsVerified(done) {
-    db.LocalLogin.findOne({where: {login: GOOGLE_EMAIL}}).then(
+    finder.findUserByLocalAccountEmail(GOOGLE_EMAIL).then(
         function (localLogin) {
             localLogin.updateAttributes({verified: true}).then(
                 function () {

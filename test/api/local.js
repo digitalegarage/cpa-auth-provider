@@ -87,7 +87,7 @@ describe('POST /api/local/signup', function () {
         });
 
         it('should return a success false', function () {
-            expect(this.res.body.msg.indexOf("API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH")).to.equal(0);
+            expect(this.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
             expect(this.res.statusCode).to.equal(400);
             expect(this.res.body.success).to.equal(false);
         });
@@ -113,7 +113,7 @@ describe('POST /api/local/signup', function () {
         });
 
         it('should return a success false', function () {
-            expect(this.res.body.msg.indexOf("API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH")).to.equal(0);
+            expect(this.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
             expect(this.res.statusCode).to.equal(400);
             expect(this.res.body.success).to.equal(false);
         });
@@ -230,6 +230,44 @@ describe('POST /api/local/signup', function () {
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD + "2",
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success false', function () {
+            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
+            expect(this.res.statusCode).to.equal(400);
+            expect(this.res.body.success).to.equal(false);
+            expect(this.res.body.msg).to.equal("email already exists");
+        });
+
+    });
+    context('When 2 users register with same mail case sensitive', function () {
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr'.toUpperCase(),
                     password: STRONG_PASSWORD + "2",
                     'g-recaptcha-response': recaptchaResponse
                 }
@@ -421,10 +459,44 @@ describe('POST /api/local/password/recover', function () {
             }, done);
         });
 
-        it('should return a success false', function () {
-            // if Test fail  here google should have change the recaptcha algorithm
-            // => update recaptchaResponse by getting the value post as parameter g-recaptcha-response in signup query using a browser
-            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/password/recover', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success ', function () {
+            expect(this.res.statusCode).to.equal(200);
+        });
+    });
+
+    context('When user try to recover password with valid email (case insensitive) and good recaptcha', function () {
+
+        before(resetDatabase);
+
+        // Google reCAPTCHA
+        before(function (done) {
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
         });
 
         before(function (done) {
@@ -433,7 +505,7 @@ describe('POST /api/local/password/recover', function () {
                 cookie: this.cookie,
                 type: 'form',
                 data: {
-                    email: 'qsdf@qsdf.fr',
+                    email: 'qsdf@qsdf.fr'.toUpperCase(),
                     'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
@@ -587,6 +659,94 @@ describe('POST /api/local/authenticate/jwt', function () {
             expect(this.res.body.success).to.equal(true);
             expect(this.res.body.user.email).to.equal('qsdf@qsdf.fr');
             expect(this.res.body.user.display_name).to.equal('qsdf@qsdf.fr');
+
+        });
+    });
+    context('When unauthenticated user signup with correct credential (case insensitive)', function () {
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr'.toUpperCase(),
+                    password: STRONG_PASSWORD
+                }
+            }, done);
+        });
+
+        // Test get user info
+        before(function (done) {
+            this.accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+            requestHelper.sendRequest(this, '/api/local/info', {
+                    method: 'get',
+                    accessToken: this.accessToken,
+                    tokenType: 'JWT'
+                }, done
+            );
+        });
+
+        it('/api/local/info should return a success ', function () {
+            expect(this.accessToken.length).to.be.greaterThan(0);
+            expect(this.res.statusCode).to.equal(200);
+            expect(this.res.body.success).to.equal(true);
+            expect(this.res.body.user.email).to.equal('qsdf@qsdf.fr');
+            expect(this.res.body.user.display_name).to.equal('qsdf@qsdf.fr');
+
+        });
+    });
+    // Check that the like SQL function has no side effect
+    context('When unauthenticated user tries to login with email that is a sub part of another login', function () {
+
+        var aLogin = 'qsdf@qsdf.fr';
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: aLogin,
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'a' + aLogin + 'a',
+                    password: STRONG_PASSWORD
+                }
+            }, done);
+        });
+
+        it('/api/local/info should return a 401 ', function () {
+            expect(this.accessToken).to.be.undefined;
+            expect(this.res.statusCode).to.equal(401);
+            expect(this.res.body.success).to.equal(false);
 
         });
     });

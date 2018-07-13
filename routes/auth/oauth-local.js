@@ -1,18 +1,15 @@
 "use strict";
 
 var db = require('../../models');
-var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
+var afterLoginHelper = require('../../lib/afterlogin-helper');
+var afterLogoutHelper = require('../../lib/afterlogout-helper');
 
-var passport = require('passport');
-var i18n = require('i18n');
 var jwtHelper = require('../../lib/jwt-helper');
 var cors = require('../../lib/cors');
 
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var userHelper = require('../../lib/user-helper');
-var recaptcha = require('express-recaptcha');
 
 var localoAuthStrategyCallback = function (req, username, password, done) {
 
@@ -95,6 +92,7 @@ module.exports = function (app, options) {
     app.options('/api/logout', cors);
 
     app.get('/api/logout', cors, function (req, res, next) {
+        afterLogoutHelper.afterLogout(res);
         req.logout();
         res.json({connected: false});
     });
@@ -140,8 +138,16 @@ module.exports = function (app, options) {
         db.User.findOne({
             where: {
                 id: req.user.id
-            }, include: [db.LocalLogin]
+            }, include: [db.LocalLogin, db.SocialLogin]
         }).then(function (user) {
+            var mail = "";
+            if (user.LocalLogin && user.LocalLogin.login){
+                mail = user.LocalLogin.login;
+            }
+            if (! mail && user.SocialLogin && user.SocialLogin.email){
+                mail = user.SocialLogin.email;
+            }
+            afterLoginHelper.afterLogin(user, mail, res);
             returnMenuInfos(user, req, res);
         }, function (err) {
             next(err);

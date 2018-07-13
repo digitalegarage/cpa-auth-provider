@@ -1,0 +1,34 @@
+version: '3'
+services:
+  # image from pipe/pipe/pipe-hadoop
+  hdfs-nn:
+    image: local/pipe-hadoop
+
+  exporter:
+    image: local/pipe-idp-exporter
+    build: .
+    environment:
+    - SLEEP_DURATION=10
+    - DB_HOST=postgres
+    - DB_USER=dockeridp
+    - PGPASSWORD=SchiefesHausBautFalsch
+    - DB_NAME=idp
+    - DB_PORT=5432
+
+    - HDFS_NAMENODE=hdfs-nn
+    - HDFS_DESTINATION=/idp_data.csv
+    depends_on:
+    - postgres
+    links:
+    - postgres:postgres
+
+  postgres:
+    build: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=BlinkenderWaldRegnetFrohlich
+      - DOCKER_USER=dockeridp
+      - DOCKER_PASSWORD=SchiefesHausBautFalsch
+      - PGDATA=/var/lib/postgresql/data/db-files/

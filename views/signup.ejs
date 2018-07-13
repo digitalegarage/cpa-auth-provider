@@ -100,7 +100,7 @@
                                        placeholder="<%= __('SIGNUP_PASSWORD_LABEL') %>" required>
                                 <p id="password-error-label" class="password-error error-message text-danger"></p>
                                 <div id="password-bar">
-                                    <div id="password-progress"></div>
+                                    <div id="id-password-progress"></div>
                                 </div>
                             </div>
 
@@ -167,5 +167,9 @@
         }
     })();
 </script>
-<% include util/password-support %>
+<% if (config.password.quality_check == 'owasp'){ %>
+<% include util/password-owasp-support %>
+<% } else if (config.password.quality_check == 'simple'){ %>
+<% include util/password-simple-support %>
+<% } %>
 <% include layout/foot %>

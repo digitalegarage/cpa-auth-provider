@@ -1,18 +1,17 @@
 "use strict";
 
-var db = require('../../models');
 var config = require('../../config');
 var authHelper = require('../../lib/auth-helper');
 var requestHelper = require('../../lib/request-helper');
 var trackingCookie = require('../../lib/tracking-cookie');
-var userHelper = require('../../lib/user-helper');
-const {URL} = require('url');
+let afterLogoutHelper = require('../../lib/afterlogout-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
 
 module.exports = function (router) {
     router.get('/logout', function (req, res) {
+        afterLogoutHelper.afterLogout(res);
         req.logout();
         requestHelper.redirect(res, '/');
     });

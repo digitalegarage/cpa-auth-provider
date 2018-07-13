@@ -210,7 +210,7 @@
                                placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
                         <p id="password-error-label" class="password-error error-message text-danger"></p>
                         <div id="password-bar">
-                            <div id="password-progress"></div>
+                            <div id="id-password-progress"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -232,7 +232,7 @@
                                placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
                         <p id="password-error-label" class="password-error error-message text-danger"></p>
                         <div id="password-bar">
-                            <div id="password-progress"></div>
+                            <div id="id-password-progress"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -375,7 +375,13 @@
     <!-- Add client Modal -->
     <% include ./modales/email-change.ejs %>
     <% include ./modales/user-delete.ejs %>
-    <% include ../util/password-support %>
+
+    <% if (config.password.quality_check == 'owasp'){ %>
+    <% include ../util/password-owasp-support %>
+    <% } else if (config.password.quality_check == 'simple'){ %>
+    <% include ../util/password-simple-support %>
+    <% } %>
+
 
     <script type="text/javascript">
         (function () {
@@ -414,7 +420,7 @@
             var $elementsAccountVerified = $(".accountVerified");
             var $elementsAccountNotVerified = $(".accountNotVerified");
 
-            var $passwordStrengthProgress = $("#password-progress");
+            var $passwordStrengthProgress = $("#id-password-progress");
             var hasPassword = '<%= profile.hasPassword %>';
             var date = "";
             var verified = '<%= profile.verified %>';
@@ -784,7 +790,7 @@
                     password: $password.val();
                     data["password"] = $password.val();
                     data["previous_password"] = $previousPassword.val();
-                    data["confirm_password"] = $newConfirmPassword.val();
+                    data["confirm_password"] = $confirmPassword.val();
                 }
 
                 $.ajax({

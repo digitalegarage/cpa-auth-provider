@@ -80,7 +80,8 @@ var routes = function (router) {
                 if (!passwordHelper.isStrong(email, req.body.password)) {
                     res.status(400).json({
                         errors: [{msg: passwordHelper.getWeaknessesMsg(email, req.body.password, req)}],
-                        password_strength_errors: passwordHelper.getWeaknesses(email, req.body.password, req)
+                        password_strength_errors: passwordHelper.getWeaknesses(email, req.body.password, req),
+                        score: passwordHelper.getQuality(email, req.body.password)
                     });
                 } else {
                     db.User.findOne({
@@ -129,7 +130,8 @@ var routes = function (router) {
                 if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
                     res.status(400).json({
                         errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}],
-                        password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req)
+                        password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                        score: passwordHelper.getQuality(req.body.email, req.body.password)
                     });
                 } else {
                     userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(

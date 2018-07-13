@@ -116,9 +116,21 @@ module.exports = {
         enabled: true,
         allowed_domains: [
             'http://localhost.rts.ch:8080'
+        ],
+        wildcard_domains: [
+          '.rts.ch', '.br.de'
         ]
     },
 
+    // iframe options
+    iframes: {
+      option: 'allow-from', // DENY|SAMEORIGIN|ALLOW-FROM
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
+    },
+
+    // use more secure header settings
+    use_secure_headers: true,
+    
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '/ap',
 

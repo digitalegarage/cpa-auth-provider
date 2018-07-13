@@ -10,37 +10,39 @@ var LocalStrategy = require('passport-local').Strategy;
 var emailHelper = require('../../lib/email-helper');
 var codeHelper = require('../../lib/code-helper');
 var passwordHelper = require('../../lib/password-helper');
-var socialLoginHelper = require('../../lib/social-login-helper');
+var finder = require('../../lib/finder');
 var userHelper = require('../../lib/user-helper');
 var limiterHelper = require('../../lib/limiter-helper');
+var afterLoginHelper = require('../../lib/afterlogin-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
 var i18n = require('i18n');
 
+
 var localStrategyCallback = function (req, username, password, done) {
     var loginError = req.__('BACK_SIGNUP_INVALID_EMAIL_OR_PASSWORD');
-    db.LocalLogin.findOne({where: {login: username}, include: {model: db.User}})
-        .then(function (localLogin) {
-                if (!localLogin) {
-                    doneWithError();
-                } else {
-                    return localLogin.verifyPassword(password).then(function (isMatch) {
-                            if (isMatch) {
-                                localLogin.logLogin(localLogin.User);
-                                done(null, localLogin.User);
-                            } else {
-                                doneWithError();
-                            }
-                        },
-                        function (err) {
-                            done(err);
-                        });
-                }
-            },
-            function (error) {
-                done(error);
-            });
+
+    finder.findUserByLocalAccountEmail(username).then(function (localLogin) {
+            if (!localLogin) {
+                doneWithError();
+            } else {
+                return localLogin.verifyPassword(password).then(function (isMatch) {
+                        if (isMatch) {
+                            localLogin.logLogin(localLogin.User);
+                            done(null, localLogin.User);
+                        } else {
+                            doneWithError();
+                        }
+                    },
+                    function (err) {
+                        done(err);
+                    });
+            }
+        },
+        function (error) {
+            done(error);
+        });
 
     function doneWithError(e) {
         e = e || loginError;
@@ -209,26 +211,26 @@ module.exports = function (app, options) {
     });
 
     app.get('/email_verify', function (req, res, next) {
-        db.LocalLogin.findOne({where: {login: req.query.email}})
-            .then(function (localLogin) {
-                if (localLogin) {
-                    codeHelper.verifyEmail(localLogin, req.query.code).then(function (success) {
-                            if (success) {
-                                res.render('./verify-mail.ejs', {
-                                    verified: localLogin.verified,
-                                    userId: localLogin.user_id
-                                });
-                            } else {
-                                res.render('./verify-mail.ejs', {verified: false});
-                            }
+
+        finder.findUserByLocalAccountEmail(req.query.email).then(function (localLogin) {
+            if (localLogin) {
+                codeHelper.verifyEmail(localLogin, req.query.code).then(function (success) {
+                        if (success) {
+                            res.render('./verify-mail.ejs', {
+                                verified: localLogin.verified,
+                                userId: localLogin.user_id
+                            });
+                        } else {
+                            res.render('./verify-mail.ejs', {verified: false});
                         }
-                    );
-                } else {
-                    return res.status(400).json({msg: req.__('BACK_SIGNUP_EMAIL_VERIFY_USER_NOT_FOUND')});
-                }
-            }, function (error) {
-                next(error);
-            });
+                    }
+                );
+            } else {
+                return res.status(400).json({msg: req.__('BACK_SIGNUP_EMAIL_VERIFY_USER_NOT_FOUND')});
+            }
+        }, function (error) {
+            next(error);
+        });
     });
 
     app.post('/login', passport.authenticate('local', {
@@ -281,36 +283,36 @@ module.exports = function (app, options) {
                 return;
             }
 
-            db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
-                .then(function (localLogin) {
-                    if (localLogin) {
-                        codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
-                            emailHelper.send(
-                                config.mail.from,
-                                localLogin.login,
-                                "password-recovery-email",
-                                {log: false},
-                                {
-                                    forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                    host: config.mail.host,
-                                    mail: localLogin.login,
-                                    code: code
-                                },
-                                localLogin.User.language ? localLogin.User.language : i18n.getLocale()
-                            ).then(
-                                function () {
-                                },
-                                function (err) {
-                                }
-                            );
-                            return res.status(200).send();
-                        });
-                    } else {
-                        return res.status(400).json({msg: req.__('BACK_SIGNUP_USER_NOT_FOUND')});
-                    }
-                }, function (error) {
-                    next(error);
-                });
+
+            finder.findUserByLocalAccountEmail(req.body.email).then(function (localLogin) {
+                if (localLogin) {
+                    codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
+                        emailHelper.send(
+                            config.mail.from,
+                            localLogin.login,
+                            "password-recovery-email",
+                            {log: false},
+                            {
+                                forceLink: config.mail.host + config.urlPrefix + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                host: config.mail.host,
+                                mail: encodeURIComponent(localLogin.login),
+                                code: encodeURIComponent(code)
+                            },
+                            localLogin.User.language ? localLogin.User.language : i18n.getLocale()
+                        ).then(
+                            function () {
+                            },
+                            function (err) {
+                            }
+                        );
+                        return res.status(200).send();
+                    });
+                } else {
+                    return res.status(400).json({msg: req.__('BACK_SIGNUP_USER_NOT_FOUND')});
+                }
+            }, function (error) {
+                next(error);
+            });
         });
 
     });
@@ -326,31 +328,31 @@ module.exports = function (app, options) {
                 res.status(400).json({errors: result.array()});
                 return;
             }
+
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
                 res.status(400).json({
                     errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}],
-                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req)
+                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                    score: passwordHelper.getQuality(req.body.email, req.body.password)
                 });
                 return;
             } else {
-                db.LocalLogin.findOne({where: {login: req.body.email}, include: [db.User]})
-                    .then(function (localLogin) {
-                        var user = localLogin.User;
-                        if (user) {
-                            return codeHelper.recoverPassword(user, req.body.code, req.body.password).then(function (success) {
-                                if (success) {
-                                    return res.status(200).send();
-                                } else {
-                                    return res.status(400).json({msg: req.__('BACK_PWD_WRONG_RECOVERY_CODE')});
-                                }
-                            });
-                        }
-                        else {
-                            return res.status(400).json({msg: req.__('BACK_PWD_UPDATE_USER_NOT_FOUND')});
-                        }
-                    }, function (error) {
-                        next(error);
-                    });
+                finder.findUserByLocalAccountEmail(req.body.email).then(function (localLogin) {
+                    if (localLogin && localLogin.User) {
+                        return codeHelper.recoverPassword(localLogin.User, req.body.code, req.body.password).then(function (success) {
+                            if (success) {
+                                return res.status(200).send();
+                            } else {
+                                return res.status(400).json({msg: req.__('BACK_PWD_WRONG_RECOVERY_CODE')});
+                            }
+                        });
+                    }
+                    else {
+                        return res.status(400).json({msg: req.__('BACK_PWD_UPDATE_USER_NOT_FOUND')});
+                    }
+                }, function (error) {
+                    next(error);
+                });
             }
         });
 
@@ -360,10 +362,12 @@ module.exports = function (app, options) {
         var redirectUri = req.session.auth_origin;
         delete req.session.auth_origin;
 
-        if (req.session.callback_url){
+        if (req.session.callback_url) {
             redirectUri = req.session.callback_url;
             delete req.session.callback_url;
         }
+
+        afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
         req.session.save(
             function () {

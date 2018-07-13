@@ -38,10 +38,6 @@ describe('GET /api/local/profile', function () {
             }, done);
         });
 
-        it('should return a success false', function () {
-            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
-        });
-
         before(function (done) {
             requestHelper.sendRequest(this, '/api/local/signup', {
                 method: 'post',
@@ -54,13 +50,6 @@ describe('GET /api/local/profile', function () {
                 }
             }, done);
         });
-
-        it('should return a success false', function () {
-            // if Test fail  here google should have change the recaptcha algorithm
-            // => update recaptchaResponse by getting the value post as parameter g-recaptcha-response in signup query using a browser
-            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
-        });
-
 
         before(function (done) {
             requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
@@ -91,6 +80,7 @@ describe('GET /api/local/profile', function () {
         it('should return a success ', function () {
             expect(this.res.statusCode).to.equal(200);
             expect(this.res.body.success).to.equal(true);
+            expect(this.res.body.user_profile.id >= 0).to.equal(true);
             expect(this.res.body.user_profile.firstname).null;
             expect(this.res.body.user_profile.lastname).null;
             expect(this.res.body.user_profile.gender).null;

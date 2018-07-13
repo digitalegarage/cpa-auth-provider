@@ -4,7 +4,7 @@ var passport = require('passport');
 var cors = require('cors');
 var logger = require('../../lib/logger');
 var db = require('../../models');
-
+const Op = db.sequelize.Op;
 
 var user_info = [
     passport.authenticate('bearer', {session: false}),
@@ -13,7 +13,7 @@ var user_info = [
         var localLogin;
         db.LocalLogin.findOne({where: {user_id: req.user.id}}).then(function (ll) {
             localLogin = ll;
-            db.SocialLogin.findOne({where: {$and: [{user_id: req.user.id}, {email: {$ne: null}}, {email: {$ne: ''}}]}}).then(function (socialLogin) {
+            db.SocialLogin.findOne({where: {user_id: req.user.id}}).then(function (socialLogin) {
 
                 var mail = "";
                 if (localLogin) {

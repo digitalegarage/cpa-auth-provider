@@ -9,6 +9,7 @@ var userDeletion = require('../../../lib/user-deletion');
 var INCORRECT_LOGIN_OR_PASS = 'INCORRECT_LOGIN_OR_PASS';
 var INVALID_REQUEST = 'invalid_request';
 
+const Op = db.sequelize.Op;
 
 // Grant authorization by resource owner (user) and password credentials.
 // The user is authenticated and checked for validity - this strategy should
@@ -22,8 +23,12 @@ exports.token = function (client, username, password, scope, reqBody, done) {
 
 function confirmUser(client, username, password, scope, extraArgs, done) {
     var user;
-    db.User.findOne(
-        {include: [{model: db.LocalLogin, where: {login: username}}]}
+    db.User.findOne({
+            include: [{
+                model: db.LocalLogin,
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: username.toLowerCase()})
+            }]
+        }
     ).then(
         function (user_res) {
             if (!user_res) {
@@ -34,6 +39,7 @@ function confirmUser(client, username, password, scope, extraArgs, done) {
         }
     ).then(
         function (isMatch) {
+            user.LocalLogin.logLogin(user);
             if (isMatch) {
                 provideAccessToken(client, user, scope, extraArgs, done);
             } else {

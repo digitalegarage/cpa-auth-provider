@@ -85,6 +85,17 @@ module.exports = {
         defaultTemplateClass: process.env.MAIL_DEFAULT_TEMPLATE_CLASS
     },
 
+    afterLogin: {
+        storeUserInfoInCookie: {
+            activated: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_ACTIVATED,
+            cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_NAME,
+            domain: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DOMAIN,
+            duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION,
+            storeUserId: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_USER_ID,
+            storeUserDisplayName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_DISPLAY_NAME
+        }
+    },
+
     sentry: {
         dsn: process.env.SENTRY_DSN
     },
@@ -92,6 +103,11 @@ module.exports = {
     password: {
         // one of [simple,owasp,no] - defaults to owasp
         quality_check: process.env.PASSWORD_QUALITY_CHECK || 'owasp',
+        // Minimum score for password "simple" check:
+        minimalExpectedScore:process.env.PASSWORD_QUALITY_MINIMUM_SCORE,
+        // Good score for password "simple" check:
+        goodScore:process.env.PASSWORD_QUALITY_GOOD_SCORE,
+        minimalPasswordLength:process.env.PASSWORD_MINIMUM_LENGTH,
         // in sec
         recovery_code_validity_duration: 1800,
         // a new recovery code will be generated only if the current one has less that TTL
@@ -160,7 +176,7 @@ module.exports = {
     // Session cookie is signed with this secret to prevent tampering
     session_secret: process.env.SESSION_SECRET,
     quality_check: {
-        enabled: true
+        enabled: 'true' === process.env.ENABLE_QUALITY_CHECK_ENDPOINT
     },
 
     auth_session_cookie: {
@@ -181,7 +197,19 @@ module.exports = {
             process.env.IDP_CLIENT_URL
                 ? process.env.IDP_CLIENT_URL.toLowerCase().split(',')
                 : [],
+        wildcard_domains: process.env.CORS_WILDCARD_DOMAINS
+            ? process.env.CORS_WILDCARD_DOMAINS.toLowerCase().split(',')
+            : []
     },
+
+    // iframe options
+    iframes: {
+      option: process.env.IFRAME_OPTION || undefined, // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
+      allow_from_domain: process.env.IFRAME_OPTION_DOMAIN
+    },
+
+    // use more secure header settings
+    use_secure_headers: process.env.USE_SECURE_HEADERS,
 
     // URL path prefix, e.g., '/myapp'
     urlPrefix: process.env.URL_PREFIX || '',
