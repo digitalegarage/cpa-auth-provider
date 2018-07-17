@@ -22,10 +22,10 @@ lint-src:
 	@$(JSHINT) bin/* lib/*.js routes/*
 
 lint-test:
-	@$(JSHINT) --config .jshintrc-test test/*.js test/lib/*.js
+	@$(JSHINT) --exit  --config .jshintrc-test test/*.js test/lib/*.js
 
 coverage:
-	@$(COVERAGE) cover $(MOCHA) -- --reporter $(REPORTER) --require test/test-helper test/lib test/api
+	@$(COVERAGE) cover $(MOCHA) -- --reporter $(REPORTER) --exit --require test/test-helper test/lib test/api
 
 doc:
 	@$(JSDOC) --private --destination ./docs/ lib models routes routes/auth routes/token routes/user
