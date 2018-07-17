@@ -14,7 +14,7 @@ export NODE_ENV = test
 all: lint coverage
 
 test:
-	@$(MOCHA) --bail --timeout 10000 --reporter $(REPORTER) --require test/test-helper test/lib test/api
+	@$(MOCHA) --bail --timeout 10000 --exit --reporter $(REPORTER) --require test/test-helper test/lib test/api
 
 lint: lint-src lint-test
 
