@@ -119,5 +119,5 @@ module.exports = function (router) {
     router.get('/oauth2/user_info', cors_headers, user_info);
     router.get('/oauth2/user_id', cors_headers, user_id);
     router.get('/oauth2/user_profile', cors_headers, user_profile);
-    router.post('/oauth2/user_profile', cors_headers, user_profile_update);
+    router.put('/oauth2/user_profile', cors_headers, user_profile_update);
 };

@@ -159,6 +159,63 @@ describe('GET profile', function () {
     });
 
 
+    context('PUT : /oauth2/user_profile', function () {
+        var token;
+
+        before(resetDatabase);
+        before(createFakeUser);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/oauth2/token', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    grant_type: 'password',
+                    username: USER.email,
+                    password: USER.password,
+                    client_id: CLIENT.client_id,
+                    client_secret: CLIENT.client_secret
+                }
+            }, done);
+        });
+        before(function (done) {
+            token = this.res.body.access_token;
+            requestHelper.sendRequest(this, "/oauth2/user_profile", {
+                    method: 'put',
+                    accessToken: token,
+                    data: {
+                        firstname: 'new firstname',
+                        lastname: 'new lastname',
+                        gender: 'female',
+                        date_of_birth: 123,
+                    }
+                },
+                done
+            );
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(
+                this,
+                "/oauth2/user_profile",
+                {
+                    accessToken: token
+                },
+                done
+            );
+        });
+
+        it('should return a success', function () {
+            expect(this.res.statusCode).equal(200);
+            expect(this.res.body.user.firstname).equal('new firstname');
+            expect(this.res.body.user.lastname).equal('new lastname');
+            expect(this.res.body.user.gender).equal('female');
+            expect(this.res.body.user.date_of_birth).equal(123);
+        });
+    });
+
+
     context('GET : /oauth2/user_id', function () {
         before(resetDatabase);
         before(createFakeUser);
