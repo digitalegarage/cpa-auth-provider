@@ -16,7 +16,7 @@ var limiterHelper = require('../../lib/limiter-helper');
 var routes = function (router) {
     router.put('/user/profile/', authHelper.ensureAuthenticated, function (req, res) {
 
-        userHelper.validateProfileUpdateData().then(function (result) {
+        userHelper.validateProfileUpdateData(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
                 res.status(400).json({errors: result.array({onlyFirstError: true})});
