@@ -59,6 +59,7 @@ var user_profile = [
                     lastname: req.user.lastname,
                     gender: req.user.gender,
                     date_of_birth: req.user.date_of_birth,
+                    birth_date: req.user.birth_date,
                 },
                 scope: req.authInfo.scope
             });
@@ -75,6 +76,7 @@ var user_profile = [
                         lastname: socialLogin.lastname,
                         gender: socialLogin.gender,
                         date_of_birth: socialLogin.date_of_birth,
+                        birth_date: socialLogin.birth_date
                     },
                     scope: req.authInfo.scope
                 });

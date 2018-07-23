@@ -155,6 +155,7 @@ function returnProfileAsJson(user, res, req) {
                 lastname: user.lastname,
                 gender: user.gender,
                 date_of_birth: user.date_of_birth ? parseInt(user.date_of_birth) : user.date_of_birth,
+                birth_date: user.birth_date,
                 language: user.language,
                 email: email,
                 display_name: user.getDisplayName(req.query.policy, email)

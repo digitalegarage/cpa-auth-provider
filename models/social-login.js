@@ -10,7 +10,11 @@ module.exports = function (sequelize, DataTypes) {
         firstname: DataTypes.STRING,
         lastname: DataTypes.STRING,
         gender: DataTypes.STRING,
+        /*
+        @deprecated use birth_date
+         */
         date_of_birth: DataTypes.BIGINT,
+        birth_date: DataTypes.DATEONLY,
         language: DataTypes.STRING,
         last_login_at: DataTypes.BIGINT
     }, {

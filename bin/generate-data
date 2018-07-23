@@ -28,11 +28,13 @@ var batch = [];
 
 
 for (var i = 0; i < nbOfUserToGenerate; i++) {
+    let date = faker.date.past(80);
     batch.push(db.User.create({
         firstname: faker.name.firstName(),
         lastname: faker.name.lastName(),
         gender: faker.random.number(1) ? 'male' : 'female',
-        date_of_birth: faker.date.past(80).getTime(),
+        date_of_birth: date.getTime(),
+        birth_date: date,
         language: 'fr',
         last_seen: faker.date.past(10).getTime()
     }).then(generatePasswordAndLocalLogin));
