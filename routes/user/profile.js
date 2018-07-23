@@ -15,36 +15,8 @@ var limiterHelper = require('../../lib/limiter-helper');
 
 var routes = function (router) {
     router.put('/user/profile/', authHelper.ensureAuthenticated, function (req, res) {
-        var userId = authHelper.getAuthenticatedUser(req).id;
 
-        var requiredFields = userHelper.getRequiredFields();
-        if (requiredFields.firstname) {
-            req.checkBody('firstname', req.__('BACK_PROFILE_UPDATE_FIRSTNAME_EMPTY_OR_INVALID')).notEmpty().matches(userHelper.NAME_REGEX);
-        } else if (req.body.firstname) {
-            req.checkBody('firstname', req.__('BACK_PROFILE_UPDATE_FIRSTNAME_EMPTY_OR_INVALID')).matches(userHelper.NAME_REGEX);
-        }
-        if (requiredFields.lastname) {
-            req.checkBody('lastname', req.__('BACK_PROFILE_UPDATE_LASTNAME_EMPTY_OR_INVALID')).notEmpty().matches(userHelper.NAME_REGEX);
-        } else if (req.body.lastname) {
-            req.checkBody('lastname', req.__('BACK_PROFILE_UPDATE_LASTNAME_EMPTY_OR_INVALID')).matches(userHelper.NAME_REGEX);
-        }
-        if (requiredFields.date_of_birth) {
-            req.checkBody('date_of_birth', req.__('BACK_PROFILE_UPDATE_DATE_OF_BIRTH_EMPTY_OR_INVALID')).notEmpty().isInt();
-        } else if (req.body.date_of_birth) {
-            req.checkBody('date_of_birth', req.__('BACK_PROFILE_UPDATE_DATE_OF_BIRTH_EMPTY_OR_INVALID')).isInt();
-        }
-        if (requiredFields.gender) {
-            req.checkBody('gender', req.__('BACK_PROFILE_UPDATE_GENDER_EMPTY_OR_INVALID')).notEmpty().isIn(['male', 'female', 'other']);
-        } else if (req.body.gender) {
-            req.checkBody('gender', req.__('BACK_PROFILE_UPDATE_GENDER_EMPTY_OR_INVALID')).isIn(['male', 'female', 'other']);
-        }
-        if (requiredFields.language) {
-            req.checkBody('language', req.__('BACK_LANGUAGE_UPDATE_LANGUAGE_EMPTY_OR_INVALID')).notEmpty().isAlpha();
-        } else if (req.body.language) {
-            req.checkBody('language', req.__('BACK_LANGUAGE_UPDATE_LANGUAGE_EMPTY_OR_INVALID')).isAlpha();
-        }
-
-        req.getValidationResult().then(function (result) {
+        userHelper.validateProfileUpdateData(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
                 res.status(400).json({errors: result.array({onlyFirstError: true})});
@@ -72,7 +44,10 @@ var routes = function (router) {
 
         var user = authHelper.getAuthenticatedUser(req);
         if (!user) {
-            return res.status(403).send({success: false, msg: req.__('BACK_PROFILE_REQ_VERIF_MAIL')});
+            return res.status(403).send({
+                success: false,
+                msg: req.__('BACK_PROFILE_REQ_VERIF_MAIL')
+            });
         } else {
             var email = req.user.LocalLogin ? req.user.LocalLogin.login : "";
             codeHelper.getOrGenereateEmailVerificationCode(user).then(function (code) {

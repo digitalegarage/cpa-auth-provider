@@ -4,7 +4,7 @@ var passport = require('passport');
 var cors = require('cors');
 var logger = require('../../lib/logger');
 var db = require('../../models');
-const Op = db.sequelize.Op;
+var userHelper = require('../../lib/user-helper');
 
 var user_info = [
     passport.authenticate('bearer', {session: false}),
@@ -83,6 +83,30 @@ var user_profile = [
     }];
 
 
+
+var user_profile_update = [
+    passport.authenticate('bearer', {session: false}),
+    function (req, res) {
+        logger.debug('[OAuth2][Profile udpate][user_id', req.user.id, ']');
+        userHelper.validateProfileUpdateData(req).then(function (result) {
+            if (!result.isEmpty()) {
+                result.useFirstErrorOnly();
+                res.status(400).json({errors: result.array({onlyFirstError: true})});
+                return;
+            }
+            userHelper.updateProfile(req.user, req.body).then(
+                function () {
+                    res.json({msg: req.__('BACK_PROFILE_UPDATE_SUCCESS')});
+                },
+                function (err) {
+                    logger.error('[PUT /user/profile][ERROR', err, ']');
+                    res.status(500).json({msg: req.__('BACK_PROFILE_UPDATE_FAIL') + err});
+                }
+            );
+        });
+    }];
+
+
 module.exports = function (router) {
 
     // TODO move this to a standalone server as Profile Manager
@@ -95,4 +119,5 @@ module.exports = function (router) {
     router.get('/oauth2/user_info', cors_headers, user_info);
     router.get('/oauth2/user_id', cors_headers, user_id);
     router.get('/oauth2/user_profile', cors_headers, user_profile);
+    router.put('/oauth2/user_profile', cors_headers, user_profile_update);
 };
