@@ -11,6 +11,8 @@ var config = require('../../config');
 var promise = require('bluebird');
 var bcrypt = promise.promisifyAll(require('bcrypt'));
 
+var DAB = new Date();
+
 var CLIENT = {
     id: 1,
     client_id: "ClientA",
@@ -28,7 +30,8 @@ var PROFILE = {
     firstname: 'John',
     lastname: 'Doe',
     gender: 'M',
-    date_of_birth: 273369600000,
+    date_of_birth: DAB.getTime(),
+    birth_date: DAB,
     language: 'FR'
 };
 
@@ -50,7 +53,10 @@ function createOAuth2Client(done) {
 
 function createUser(userTemplate) {
     return db.User.create(userTemplate).then(function (user) {
-        return db.LocalLogin.create({user_id: user.id, login: userTemplate.email}).then(function (localLogin) {
+        return db.LocalLogin.create({
+            user_id: user.id,
+            login: userTemplate.email
+        }).then(function (localLogin) {
             return localLogin.setPassword(userTemplate.password).then(function () {
                 return user.updateAttributes(PROFILE);
             });
@@ -155,7 +161,19 @@ describe('GET profile', function () {
             expect(this.res.body.user.lastname).equal(PROFILE.lastname);
             expect(this.res.body.user.gender).equal(PROFILE.gender);
             expect(this.res.body.user.date_of_birth).equal(PROFILE.date_of_birth);
-            expect(this.res.body.user.birth_date).equal(PROFILE.date_of_birth);
+            var day = PROFILE.birth_date.getDate();
+            if (day < 10) {
+                day = "0" + day
+            } else {
+                day = day + "";
+            }
+            var month = PROFILE.birth_date.getMonth() + 1;
+            if (month < 10) {
+                month = "0" + month
+            } else {
+                month = month + "";
+            }
+            expect(this.res.body.user.birth_date).equal(PROFILE.birth_date.getFullYear() + '-' + month + '-' + day);
         });
     });
 

@@ -166,7 +166,7 @@ describe('GET /api/local/profile', function () {
             expect(this.res.body.user_profile.lastname).to.equal('zola');
             expect(this.res.body.user_profile.gender).to.equal('male');
             expect(this.res.body.user_profile.date_of_birth).to.equals(birth);
-            expect(this.res.body.user_profile.birth_date).to.equals(birth);
+            expect(this.res.body.user_profile.birth_date).to.equals('2012-12-31');
             expect(this.res.body.user_profile.email).to.equals('qsdf@qsdf.fr');
             expect(this.res.body.user_profile.display_name).to.equals('emile zola');
         });

@@ -12,7 +12,7 @@ var TEST_USER_PASSWORD = "testpassword";
 var FIRSTNAME = "John";
 var LASTNAME = "Doe";
 var GENDER = 'Male';
-var DAB = 123456789;
+var DAB = new Date();
 var LANG = "EN";
 
 var initDatabase = function (done) {
@@ -21,7 +21,8 @@ var initDatabase = function (done) {
         firstname: FIRSTNAME,
         lastname: LASTNAME,
         gender: GENDER,
-        date_of_birth: DAB,
+        date_of_birth: DAB.getTime(),
+        birth_date: DAB,
         language: LANG
     })
         .then(function (user) {
@@ -103,8 +104,20 @@ describe('POST /authenticate/cookie', function () {
                     expect(this.res.body.user_profile.firstname).equal(FIRSTNAME);
                     expect(this.res.body.user_profile.lastname).equal(LASTNAME);
                     expect(this.res.body.user_profile.gender).equal(GENDER);
-                    expect(this.res.body.user_profile.date_of_birth).equal(DAB);
-                    expect(this.res.body.user_profile.birth_date).equal(DAB);
+                    expect(this.res.body.user_profile.date_of_birth).equal(DAB.getTime());
+                    var day = DAB.getDate();
+                    if (day < 10) {
+                        day = "0" + day
+                    } else {
+                        day = day + "";
+                    }
+                    var month = DAB.getMonth() + 1;
+                    if (month < 10) {
+                        month = "0" + month
+                    } else {
+                        month = month + "";
+                    }
+                    expect(this.res.body.user_profile.birth_date).equal(DAB.getFullYear() + '-' + month + '-' + day);
                     expect(this.res.body.user_profile.language).equal(LANG);
                 });
             });
