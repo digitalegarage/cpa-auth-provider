@@ -163,13 +163,13 @@ describe('GET profile', function () {
             expect(this.res.body.user.date_of_birth).equal(PROFILE.date_of_birth);
             var day = PROFILE.birth_date.getDate();
             if (day < 10) {
-                day = "0" + day
+                day = "0" + day;
             } else {
                 day = day + "";
             }
             var month = PROFILE.birth_date.getMonth() + 1;
             if (month < 10) {
-                month = "0" + month
+                month = "0" + month;
             } else {
                 month = month + "";
             }

@@ -107,13 +107,13 @@ describe('POST /authenticate/cookie', function () {
                     expect(this.res.body.user_profile.date_of_birth).equal(DAB.getTime());
                     var day = DAB.getDate();
                     if (day < 10) {
-                        day = "0" + day
+                        day = "0" + day;
                     } else {
                         day = day + "";
                     }
                     var month = DAB.getMonth() + 1;
                     if (month < 10) {
-                        month = "0" + month
+                        month = "0" + month;
                     } else {
                         month = month + "";
                     }
