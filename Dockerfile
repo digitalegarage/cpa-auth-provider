@@ -1,4 +1,4 @@
-FROM node:9.1.0-alpine
+FROM node:10.6.0-alpine
 
 # Install dependencies
 RUN apk add --no-cache sqlite-libs
