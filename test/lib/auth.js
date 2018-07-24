@@ -12,7 +12,7 @@ var TEST_USER_PASSWORD = "testpassword";
 var FIRSTNAME = "John";
 var LASTNAME = "Doe";
 var GENDER = 'Male';
-var DAB = new Date();
+var DAB_STR = "2018-07-14";
 var LANG = "EN";
 
 var initDatabase = function (done) {
@@ -21,8 +21,8 @@ var initDatabase = function (done) {
         firstname: FIRSTNAME,
         lastname: LASTNAME,
         gender: GENDER,
-        date_of_birth: DAB.getTime(),
-        birth_date: DAB,
+        date_of_birth: new Date(DAB_STR).getTime(),
+        date_of_birth_ymd: DAB_STR,
         language: LANG
     })
         .then(function (user) {
@@ -104,20 +104,8 @@ describe('POST /authenticate/cookie', function () {
                     expect(this.res.body.user_profile.firstname).equal(FIRSTNAME);
                     expect(this.res.body.user_profile.lastname).equal(LASTNAME);
                     expect(this.res.body.user_profile.gender).equal(GENDER);
-                    expect(this.res.body.user_profile.date_of_birth).equal(DAB.getTime());
-                    var day = DAB.getDate();
-                    if (day < 10) {
-                        day = "0" + day;
-                    } else {
-                        day = day + "";
-                    }
-                    var month = DAB.getMonth() + 1;
-                    if (month < 10) {
-                        month = "0" + month;
-                    } else {
-                        month = month + "";
-                    }
-                    expect(this.res.body.user_profile.birth_date).equal(DAB.getFullYear() + '-' + month + '-' + day);
+                    expect(this.res.body.user_profile.date_of_birth).equal(new Date(DAB_STR).getTime());
+                    expect(this.res.body.user_profile.date_of_birth_ymd).equal(DAB_STR);
                     expect(this.res.body.user_profile.language).equal(LANG);
                 });
             });

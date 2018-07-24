@@ -34,7 +34,7 @@ for (var i = 0; i < nbOfUserToGenerate; i++) {
         lastname: faker.name.lastName(),
         gender: faker.random.number(1) ? 'male' : 'female',
         date_of_birth: date.getTime(),
-        birth_date: date,
+        date_of_birth_ymd: date,
         language: 'fr',
         last_seen: faker.date.past(10).getTime()
     }).then(generatePasswordAndLocalLogin));

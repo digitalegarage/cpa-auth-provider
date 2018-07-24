@@ -11,10 +11,10 @@ module.exports = function (sequelize, DataTypes) {
         lastname: DataTypes.STRING,
         gender: DataTypes.STRING,
         /*
-        @deprecated use birth_date
+        @deprecated use date_of_birth_ymd
          */
         date_of_birth: DataTypes.BIGINT,
-        birth_date: DataTypes.DATEONLY,
+        date_of_birth_ymd: DataTypes.DATEONLY,
         language: DataTypes.STRING,
         last_login_at: DataTypes.BIGINT
     }, {

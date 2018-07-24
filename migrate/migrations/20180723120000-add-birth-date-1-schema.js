@@ -5,7 +5,7 @@ module.exports = {
         return new Promise(function (resolve, reject) {
             queryInterface.addColumn(
                 "Users",
-                "birth_date",
+                "date_of_birth_ymd",
                 {
                     type: Sequelize.DATEONLY,
                     allowNull: true
@@ -13,7 +13,7 @@ module.exports = {
             ).then(function () {
                 queryInterface.addColumn(
                     "SocialLogins",
-                    "birth_date",
+                    "date_of_birth_ymd",
                     {
                         type: Sequelize.DATEONLY,
                         allowNull: true
@@ -22,8 +22,8 @@ module.exports = {
             }).then(function () {
                 if (process.env.DB_TYPE === "postgres") {
                     var offSet = new Date().getTimezoneOffset();
-                    return queryInterface.sequelize.query("UPDATE public.\"Users\" SET birth_date = TO_TIMESTAMP(date_of_birth / 1000 -1*(" + offSet + "*60))::date").then(function () {
-                        return queryInterface.sequelize.query("UPDATE public.\"SocialLogins\" SET birth_date = TO_TIMESTAMP(date_of_birth::bigint / 1000 -1*(" + offSet + "*60))::date");
+                    return queryInterface.sequelize.query("UPDATE public.\"Users\" SET date_of_birth_ymd = TO_TIMESTAMP(date_of_birth / 1000 -1*(" + offSet + "*60))::date").then(function () {
+                        return queryInterface.sequelize.query("UPDATE public.\"SocialLogins\" SET date_of_birth_ymd = TO_TIMESTAMP(date_of_birth::bigint / 1000 -1*(" + offSet + "*60))::date");
                     });
                 } else {
                     // Only RTS using postgres use profile with birth date
@@ -36,8 +36,8 @@ module.exports = {
 
     down: function (queryInterface, Sequelize) {
         return new Promise(function (resolve, reject) {
-            return queryInterface.removeColumn('Users', 'birth_date').then(function () {
-                return queryInterface.removeColumn('SocialLogins', 'birth_date')
+            return queryInterface.removeColumn('Users', 'date_of_birth_ymd').then(function () {
+                return queryInterface.removeColumn('SocialLogins', 'date_of_birth_ymd')
             }).then(resolve).catch(reject);
         });
     }
