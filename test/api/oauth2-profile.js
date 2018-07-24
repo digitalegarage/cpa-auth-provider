@@ -155,6 +155,7 @@ describe('GET profile', function () {
             expect(this.res.body.user.lastname).equal(PROFILE.lastname);
             expect(this.res.body.user.gender).equal(PROFILE.gender);
             expect(this.res.body.user.date_of_birth).equal(PROFILE.date_of_birth);
+            expect(this.res.body.user.birth_date).equal(PROFILE.date_of_birth);
         });
     });
 

@@ -104,6 +104,7 @@ describe('POST /authenticate/cookie', function () {
                     expect(this.res.body.user_profile.lastname).equal(LASTNAME);
                     expect(this.res.body.user_profile.gender).equal(GENDER);
                     expect(this.res.body.user_profile.date_of_birth).equal(DAB);
+                    expect(this.res.body.user_profile.birth_date).equal(DAB);
                     expect(this.res.body.user_profile.language).equal(LANG);
                 });
             });
