@@ -31,27 +31,21 @@ describe('API-V2 profile', function () {
             });
         });
 
-        // context('using cookie', function () {
-        //     var httpContext = this;
-        //
-        //     before(function (done) {
-        //         requestHelper.loginCustom(initData.USER_1.email, initData.USER_1.password, httpContext, function () {
-        //             context.cookie = httpContext.cookie;
-        //             done();
-        //         });
-        //     });
-        //
-        //     before(function (done) {
-        //         requestHelper.sendRequest(context, '/api/v2/session/profile', {
-        //             method: 'get',
-        //             cookie: context.cookie
-        //         }, done);
-        //     });
-        //
-        //     it('should return a success', function () {
-        //         expectGetInitialProfile(httpContext);
-        //     });
-        // });
+        context('using cookie', function () {
+            var httpContext = this;
+
+            before(function (done) {
+                cookieLogin(httpContext, done);
+            });
+
+            before(function (done) {
+                cookieGetProfile(httpContext, done);
+            });
+
+            it('should return a success', function () {
+                expectGetInitialProfile(httpContext);
+            });
+        });
     });
 
 
@@ -77,6 +71,28 @@ describe('API-V2 profile', function () {
                 expectedGetUpdatedProfile(httpContext, newFirstname, newLastname, newGender, newDab);
             });
         });
+
+
+        context('using cookie', function () {
+            var httpContext = this;
+
+            before(function (done) {
+                cookieLogin(httpContext, done);
+            });
+
+            before(function (done) {
+                cookieUpdateProfile(httpContext, newFirstname, newLastname, newGender, newDab, done);
+            });
+
+            before(function (done) {
+                cookieGetProfile(httpContext, done);
+            });
+
+            it('should return a success', function () {
+                expectedGetUpdatedProfile(httpContext, newFirstname, newLastname, newGender, newDab);
+            });
+        });
+
 
     });
 
@@ -117,6 +133,40 @@ function oAuthUpdateProfile(context, newFirstname, newLastname, newGender, newDa
     requestHelper.sendRequest(context, "/api/v2/oauth2/profile", {
             method: 'put',
             accessToken: context.token,
+            data: {
+                firstname: newFirstname,
+                lastname: newLastname,
+                gender: newGender,
+                date_of_birth: newDab,
+            }
+        },
+        done
+    );
+}
+
+//---------------
+// cookie calls
+
+
+function cookieLogin(httpContext, done) {
+    requestHelper.loginCustom(initData.USER_1.email, initData.USER_1.password, httpContext, function () {
+        context.cookie = httpContext.cookie;
+        done();
+    });
+}
+
+function cookieGetProfile(httpContext, done) {
+    requestHelper.sendRequest(httpContext, '/api/v2/session/profile', {
+        method: 'get',
+        cookie: httpContext.cookie
+    }, done);
+}
+
+
+function cookieUpdateProfile(context, newFirstname, newLastname, newGender, newDab, done) {
+    requestHelper.sendRequest(context, "/api/v2/session/profile", {
+            method: 'put',
+            cookie: context.cookie,
             data: {
                 firstname: newFirstname,
                 lastname: newLastname,
