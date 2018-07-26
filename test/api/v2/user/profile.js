@@ -13,6 +13,7 @@ const newGender = 'female';
 describe('API-V2 profile', function () {
 
     context('GET : /api/v2/oauth2/profile ', function () {
+
         before(initData.resetDatabase);
 
         context('using oauth token', function () {
@@ -40,6 +41,22 @@ describe('API-V2 profile', function () {
 
             before(function (done) {
                 cookieGetProfile(ctx, done);
+            });
+
+            it('should return a success', function () {
+                expectGetInitialProfile(ctx);
+            });
+        });
+
+        context('using JWT', function () {
+            var ctx = this;
+
+            before(function (done) {
+                jwtLogin(ctx, done);
+            });
+
+            before(function (done) {
+                jwtGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
@@ -72,7 +89,6 @@ describe('API-V2 profile', function () {
             });
         });
 
-
         context('using session cookie', function () {
             var ctx = this;
 
@@ -86,6 +102,26 @@ describe('API-V2 profile', function () {
 
             before(function (done) {
                 cookieGetProfile(ctx, done);
+            });
+
+            it('should return a success', function () {
+                expectedGetUpdatedProfile(ctx, newFirstname, newLastname, newGender, newDab);
+            });
+        });
+
+        context('using jwt', function () {
+            var ctx = this;
+
+            before(function (done) {
+                jwtLogin(ctx, done);
+            });
+
+            before(function (done) {
+                jwtUpdateProfile(ctx, newFirstname, newLastname, newGender, newDab, done);
+            });
+
+            before(function (done) {
+                jwtGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
@@ -142,7 +178,6 @@ function oAuthUpdateProfile(context, newFirstname, newLastname, newGender, newDa
 //---------------
 // cookie calls
 
-
 function cookieLogin(httpContext, done) {
     requestHelper.loginCustom(initData.USER_1.email, initData.USER_1.password, httpContext, function () {
         context.cookie = httpContext.cookie;
@@ -157,11 +192,51 @@ function cookieGetProfile(httpContext, done) {
     }, done);
 }
 
-
 function cookieUpdateProfile(context, newFirstname, newLastname, newGender, newDab, done) {
     requestHelper.sendRequest(context, "/api/v2/session/profile", {
             method: 'put',
             cookie: context.cookie,
+            data: {
+                firstname: newFirstname,
+                lastname: newLastname,
+                gender: newGender,
+                date_of_birth: newDab,
+            }
+        },
+        done
+    );
+}
+
+//---------------
+// jwt calls
+
+function jwtLogin(context, done) {
+    requestHelper.sendRequest(context, '/api/local/authenticate/jwt', {
+        method: 'post',
+        type: 'form',
+        data: {
+            email: initData.USER_1.email,
+            password: initData.USER_1.password
+        }
+    }, function () {
+        context.token = context.res.body.token.substring(4, context.res.body.token.size);
+        done();
+    });
+}
+
+function jwtGetProfile(context, done) {
+    requestHelper.sendRequest(context, '/api/v2/jwt/profile', {
+        method: 'get',
+        accessToken: context.token,
+        tokenType: 'JWT'
+    }, done);
+}
+
+
+function jwtUpdateProfile(context, newFirstname, newLastname, newGender, newDab, done) {
+    requestHelper.sendRequest(context, "/api/v2/jwt/profile", {
+            method: 'put',
+            accessToken: context.token,
             data: {
                 firstname: newFirstname,
                 lastname: newLastname,

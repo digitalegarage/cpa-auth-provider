@@ -6,10 +6,11 @@ var logger = require('../../../../lib/logger');
 var db = require('../../../../models');
 var userHelper = require('../../../../lib/user-helper');
 var authHelper = require('../../../../lib/auth-helper');
+var passport = require('passport');
 
 
 var user_profile = function (req, res) {
-    logger.debug('[OAuth2][Profile][user_id', req.user.id, ']');
+    logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
     if (req.user.LocalLogin) {
         res.json({
             user: {
@@ -24,7 +25,7 @@ var user_profile = function (req, res) {
                 date_of_birth: req.user.date_of_birth,
                 date_of_birth_ymd: req.user.date_of_birth_ymd,
             },
-            // FIXME (oauth need that?) scope: req.authInfo.scope
+           scope: req.authInfo && req.authInfo.scope ? req.authInfo.scope : null
         });
     } else {
         db.SocialLogin.findOne({where: {user_id: req.user.id}}).then(function (socialLogin) {
@@ -41,7 +42,7 @@ var user_profile = function (req, res) {
                     date_of_birth: socialLogin.date_of_birth,
                     date_of_birth_ymd: socialLogin.date_of_birth_ymd
                 },
-                // FIXME (oauth need that?) scope: req.authInfo.scope
+                scope: req.authInfo && req.authInfo.scope ? req.authInfo.scope : null
             });
         });
     }
@@ -75,6 +76,7 @@ module.exports = function (router) {
     // TODO :
     // - swagger
     // - JWT / CPA
+    // - remove time stamp from API
 
     // TODO configure the restriction of origins on the CORS preflight call
     var cors_headers = cors({origin: true, methods: ['GET']});
@@ -85,4 +87,7 @@ module.exports = function (router) {
 
     router.get('/api/v2/session/profile', cors_headers, authHelper.ensureAuthenticated, user_profile);
     router.put('/api/v2/session/profile', cors_headers, authHelper.ensureAuthenticated, user_profile_update);
+
+    router.get('/api/v2/jwt/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile);
+    router.put('/api/v2/jwt/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile_update);
 };
