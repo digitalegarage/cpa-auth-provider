@@ -75,7 +75,7 @@ module.exports = function (router) {
 
     // TODO :
     // - swagger
-    // - JWT / CPA
+    // - CPA
     // - remove time stamp from API
 
     // TODO configure the restriction of origins on the CORS preflight call
@@ -90,4 +90,7 @@ module.exports = function (router) {
 
     router.get('/api/v2/jwt/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile);
     router.put('/api/v2/jwt/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile_update);
+
+    // router.get('/api/v2/cpa/profile', cors_headers, xxx, user_profile);
+    // router.put('/api/v2/cpa/profile', cors_headers, xxx, user_profile_update);
 };
