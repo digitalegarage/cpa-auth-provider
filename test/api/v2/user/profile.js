@@ -16,34 +16,34 @@ describe('API-V2 profile', function () {
         before(initData.resetDatabase);
 
         context('using oauth token', function () {
-            var httpContext = this;
+            var ctx = this;
 
             before(function (done) {
-                oAuthLogin(httpContext, done);
+                oAuthLogin(ctx, done);
             });
 
             before(function (done) {
-                oAuthGetProfile(httpContext, done);
+                oAuthGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
-                expectGetInitialProfile(httpContext);
+                expectGetInitialProfile(ctx);
             });
         });
 
-        context('using cookie', function () {
-            var httpContext = this;
+        context('using session cookie', function () {
+            var ctx = this;
 
             before(function (done) {
-                cookieLogin(httpContext, done);
+                cookieLogin(ctx, done);
             });
 
             before(function (done) {
-                cookieGetProfile(httpContext, done);
+                cookieGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
-                expectGetInitialProfile(httpContext);
+                expectGetInitialProfile(ctx);
             });
         });
     });
@@ -54,49 +54,45 @@ describe('API-V2 profile', function () {
         before(initData.resetDatabase);
 
         context('using oauth token', function () {
-            var httpContext = this;
+            var ctx = this;
 
             before(function (done) {
-                oAuthLogin(httpContext, done);
+                oAuthLogin(ctx, done);
             });
             before(function (done) {
-                oAuthUpdateProfile(httpContext, newFirstname, newLastname, newGender, newDab, done);
+                oAuthUpdateProfile(ctx, newFirstname, newLastname, newGender, newDab, done);
             });
 
             before(function (done) {
-                oAuthGetProfile(httpContext, done);
+                oAuthGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
-                expectedGetUpdatedProfile(httpContext, newFirstname, newLastname, newGender, newDab);
+                expectedGetUpdatedProfile(ctx, newFirstname, newLastname, newGender, newDab);
             });
         });
 
 
-        context('using cookie', function () {
-            var httpContext = this;
+        context('using session cookie', function () {
+            var ctx = this;
 
             before(function (done) {
-                cookieLogin(httpContext, done);
+                cookieLogin(ctx, done);
             });
 
             before(function (done) {
-                cookieUpdateProfile(httpContext, newFirstname, newLastname, newGender, newDab, done);
+                cookieUpdateProfile(ctx, newFirstname, newLastname, newGender, newDab, done);
             });
 
             before(function (done) {
-                cookieGetProfile(httpContext, done);
+                cookieGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
-                expectedGetUpdatedProfile(httpContext, newFirstname, newLastname, newGender, newDab);
+                expectedGetUpdatedProfile(ctx, newFirstname, newLastname, newGender, newDab);
             });
         });
-
-
     });
-
-
 });
 
 //---------------
@@ -104,7 +100,6 @@ describe('API-V2 profile', function () {
 function oAuthLogin(context, done) {
     requestHelper.sendRequest(context, '/oauth2/token', {
         method: 'post',
-        type: 'form',
         data: {
             grant_type: 'password',
             username: initData.USER_1.email,
