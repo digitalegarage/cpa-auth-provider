@@ -111,7 +111,7 @@ module.exports = function (router) {
 
     // TODO move this to a standalone server as Profile Manager
     // TODO configure the restriction of origins on the CORS preflight call
-    var cors_headers = cors({origin: true, methods: ['GET']});
+    var cors_headers = cors({origin: true, methods: ['GET', 'PUT']});
     router.options('/oauth2/user_info', cors_headers);
     router.options('/oauth2/user_id', cors_headers);
     router.options('/oauth2/user_profile', cors_headers);

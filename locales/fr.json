@@ -234,6 +234,8 @@
 	"SIGNUP_RECAPTCHA_NOT_A_ROBOT": "Je ne suis pas un robot.",
 	"SIGNUP_RECAPTCHA_PRIVACY": "Vie privée",
 	"SIGNUP_RECAPTCHA_TERMS": "Conditions générales",
+	"VERIFY_AUTH_GRANTED": "Autorisation accordée!",
+	"VERIFY_AUTH_DENIED": "Autorisation refusée!",
 	"VERIFY_TITLE": "Association d'appareils",
 	"VERIFY_USER_CODE_LABEL": "Code utilisateur",
 	"VERIFY_VERIFY_BUTTON": "Vérifier",
