@@ -234,6 +234,8 @@
 	"SIGNUP_RECAPTCHA_NOT_A_ROBOT": "Ich bin kein Roboter.",
 	"SIGNUP_RECAPTCHA_PRIVACY": "Privatsphäre",
 	"SIGNUP_RECAPTCHA_TERMS": "Bedingungen",
+	"VERIFY_AUTH_GRANTED": "Autorisierung gegeben!",
+	"VERIFY_AUTH_DENIED": "Autorisierung verweigert!",
 	"VERIFY_TITLE": "Gerätevereinigung",
 	"VERIFY_USER_CODE_LABEL": "Benutzercode",
 	"VERIFY_VERIFY_BUTTON": "Überprüfen",

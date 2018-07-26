@@ -26,7 +26,13 @@ var routes = function (router) {
                 order: [['id']]
             })
             .then(function (clients) {
-                return res.render('./user/devices.ejs', {devices: clients});
+                var flash = {};
+                if (req.session.flashMessage) {
+                  flash.message = req.session.flashMessage;
+                  flash.type = 'info';
+                  delete req.session.flashMessage;
+                }
+                return res.render('./user/devices.ejs', {devices: clients, flash: flash});
             }, function (err) {
                 next(err);
             });
@@ -59,7 +65,12 @@ var routes = function (router) {
                         },
                         captcha: req.recaptcha
                     };
-
+                    data.flash = {};
+                    if (req.session.flashMessage) {
+                      data.flash.message = req.session.flashMessage;
+                      data.flash.type = "success";
+                      delete req.session.flashMessage;
+                    }
                     res.render('./user/profile.ejs', data);
                 });
             });
