@@ -4,10 +4,10 @@ var requestHelper = require('../../../request-helper');
 var initData = require('../setup/init-data');
 
 
-const newDab = 1234567890;
-const newFirstname = 'new firstname';
-const newLastname = 'new lastname';
-const newGender = 'female';
+const NEW_DAB = "1989-11-09";
+const NEW_FIRSTNAME = 'new firstname';
+const NEW_LASTNAME = 'new lastname';
+const NEW_GENDER = 'female';
 
 
 describe('API-V2 profile', function () {
@@ -77,7 +77,7 @@ describe('API-V2 profile', function () {
                 oAuthLogin(ctx, done);
             });
             before(function (done) {
-                oAuthUpdateProfile(ctx, newFirstname, newLastname, newGender, newDab, done);
+                oAuthUpdateProfile(ctx, done);
             });
 
             before(function (done) {
@@ -85,7 +85,7 @@ describe('API-V2 profile', function () {
             });
 
             it('should return a success', function () {
-                expectedGetUpdatedProfile(ctx, newFirstname, newLastname, newGender, newDab);
+                expectedGetUpdatedProfile(ctx);
             });
         });
 
@@ -97,7 +97,7 @@ describe('API-V2 profile', function () {
             });
 
             before(function (done) {
-                cookieUpdateProfile(ctx, newFirstname, newLastname, newGender, newDab, done);
+                cookieUpdateProfile(ctx, done);
             });
 
             before(function (done) {
@@ -105,7 +105,7 @@ describe('API-V2 profile', function () {
             });
 
             it('should return a success', function () {
-                expectedGetUpdatedProfile(ctx, newFirstname, newLastname, newGender, newDab);
+                expectedGetUpdatedProfile(ctx);
             });
         });
 
@@ -117,7 +117,7 @@ describe('API-V2 profile', function () {
             });
 
             before(function (done) {
-                jwtUpdateProfile(ctx, newFirstname, newLastname, newGender, newDab, done);
+                jwtUpdateProfile(ctx, done);
             });
 
             before(function (done) {
@@ -125,7 +125,7 @@ describe('API-V2 profile', function () {
             });
 
             it('should return a success', function () {
-                expectedGetUpdatedProfile(ctx, newFirstname, newLastname, newGender, newDab);
+                expectedGetUpdatedProfile(ctx);
             });
         });
     });
@@ -160,15 +160,15 @@ function oAuthGetProfile(context, done) {
     );
 }
 
-function oAuthUpdateProfile(context, newFirstname, newLastname, newGender, newDab, done) {
+function oAuthUpdateProfile(context, done) {
     requestHelper.sendRequest(context, "/api/v2/oauth2/profile", {
             method: 'put',
             accessToken: context.token,
             data: {
-                firstname: newFirstname,
-                lastname: newLastname,
-                gender: newGender,
-                date_of_birth: newDab,
+                firstname: NEW_FIRSTNAME,
+                lastname: NEW_LASTNAME,
+                gender: NEW_GENDER,
+                date_of_birth_ymd: NEW_DAB,
             }
         },
         done
@@ -192,15 +192,15 @@ function cookieGetProfile(httpContext, done) {
     }, done);
 }
 
-function cookieUpdateProfile(context, newFirstname, newLastname, newGender, newDab, done) {
+function cookieUpdateProfile(context, done) {
     requestHelper.sendRequest(context, "/api/v2/session/profile", {
             method: 'put',
             cookie: context.cookie,
             data: {
-                firstname: newFirstname,
-                lastname: newLastname,
-                gender: newGender,
-                date_of_birth: newDab,
+                firstname: NEW_FIRSTNAME,
+                lastname: NEW_LASTNAME,
+                gender: NEW_GENDER,
+                date_of_birth_ymd: NEW_DAB,
             }
         },
         done
@@ -233,15 +233,15 @@ function jwtGetProfile(context, done) {
 }
 
 
-function jwtUpdateProfile(context, newFirstname, newLastname, newGender, newDab, done) {
+function jwtUpdateProfile(context, done) {
     requestHelper.sendRequest(context, "/api/v2/jwt/profile", {
             method: 'put',
             accessToken: context.token,
             data: {
-                firstname: newFirstname,
-                lastname: newLastname,
-                gender: newGender,
-                date_of_birth: newDab,
+                firstname: NEW_FIRSTNAME,
+                lastname: NEW_LASTNAME,
+                gender: NEW_GENDER,
+                date_of_birth_ymd: NEW_DAB,
             }
         },
         done
@@ -260,12 +260,12 @@ function expectGetInitialProfile(context) {
     expect(context.res.body.user.date_of_birth_ymd).equal(initData.USER_1_DAB_STR);
 }
 
-function expectedGetUpdatedProfile(context, newFirstname, newLastname, newGender, newDab) {
+function expectedGetUpdatedProfile(context) {
     expect(context.res.statusCode).equal(200);
-    expect(context.res.body.user.firstname).equal(newFirstname);
-    expect(context.res.body.user.lastname).equal(newLastname);
-    expect(context.res.body.user.gender).equal(newGender);
-    expect(context.res.body.user.date_of_birth).equal(newDab);
+    expect(context.res.body.user.firstname).equal(NEW_FIRSTNAME);
+    expect(context.res.body.user.lastname).equal(NEW_LASTNAME);
+    expect(context.res.body.user.gender).equal(NEW_GENDER);
+    expect(context.res.body.user.date_of_birth_ymd).equal(NEW_DAB);
 }
 
 
