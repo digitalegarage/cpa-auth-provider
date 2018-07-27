@@ -90,13 +90,13 @@ var user_profile_update = [
     passport.authenticate('bearer', {session: false}),
     function (req, res) {
         logger.debug('[OAuth2][Profile udpate][user_id', req.user.id, ']');
-        userHelper.validateProfileUpdateData(req).then(function (result) {
+        userHelper.validateProfileUpdateDataLegacy(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
                 res.status(400).json({errors: result.array({onlyFirstError: true})});
                 return;
             }
-            userHelper.updateProfile(req.user, req.body).then(
+            userHelper.updateProfileLegacy(req.user, req.body).then(
                 function () {
                     res.json({msg: req.__('BACK_PROFILE_UPDATE_SUCCESS')});
                 },

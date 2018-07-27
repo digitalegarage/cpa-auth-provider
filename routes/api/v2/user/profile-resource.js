@@ -52,13 +52,13 @@ var user_profile = function (req, res) {
 var user_profile_update =
     function (req, res) {
         logger.debug('[API-V2][Profile udpate][user_id', req.user.id, ']');
-        userHelper.validateProfileUpdateDataV2(req).then(function (result) {
+        userHelper.validateProfileUpdateData(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
                 res.status(400).json({errors: result.array({onlyFirstError: true})});
                 return;
             }
-            userHelper.updateProfileV2(req.user, req.body).then(
+            userHelper.updateProfile(req.user, req.body).then(
                 function () {
                     res.json({msg: req.__('BACK_PROFILE_UPDATE_SUCCESS')});
                 },
