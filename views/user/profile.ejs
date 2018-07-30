@@ -721,7 +721,7 @@
                 var dab_str = dab ? createDate(dab) : '';
 
                 $.ajax({
-                    url: "<%= link('/api/v2/session/profile') %>",
+                    url: "<%= link('/api/v2/session/user/profile') %>",
                     data: {
                         firstname: $firstname.val(),
                         lastname: $lastname.val(),

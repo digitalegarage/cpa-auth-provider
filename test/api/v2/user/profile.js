@@ -12,7 +12,7 @@ const NEW_GENDER = 'female';
 
 describe('API-V2 profile', function () {
 
-    context('GET : /api/v2/oauth2/profile ', function () {
+    context('GET : /api/v2/oauth2/user/profile ', function () {
 
         before(initData.resetDatabase);
 
@@ -66,7 +66,7 @@ describe('API-V2 profile', function () {
     });
 
 
-    context('PUT : /api/v2/oauth2/profile', function () {
+    context('PUT : /api/v2/oauth2/user/profile', function () {
 
         before(initData.resetDatabase);
 
@@ -152,7 +152,7 @@ function oAuthLogin(context, done) {
 function oAuthGetProfile(context, done) {
     requestHelper.sendRequest(
         context,
-        "/api/v2/oauth2/profile",
+        "/api/v2/oauth2/user/profile",
         {
             accessToken: context.token
         },
@@ -161,7 +161,7 @@ function oAuthGetProfile(context, done) {
 }
 
 function oAuthUpdateProfile(context, done) {
-    requestHelper.sendRequest(context, "/api/v2/oauth2/profile", {
+    requestHelper.sendRequest(context, "/api/v2/oauth2/user/profile", {
             method: 'put',
             accessToken: context.token,
             data: {
@@ -186,14 +186,14 @@ function cookieLogin(httpContext, done) {
 }
 
 function cookieGetProfile(httpContext, done) {
-    requestHelper.sendRequest(httpContext, '/api/v2/session/profile', {
+    requestHelper.sendRequest(httpContext, '/api/v2/session/user/profile', {
         method: 'get',
         cookie: httpContext.cookie
     }, done);
 }
 
 function cookieUpdateProfile(context, done) {
-    requestHelper.sendRequest(context, "/api/v2/session/profile", {
+    requestHelper.sendRequest(context, "/api/v2/session/user/profile", {
             method: 'put',
             cookie: context.cookie,
             data: {
@@ -225,7 +225,7 @@ function jwtLogin(context, done) {
 }
 
 function jwtGetProfile(context, done) {
-    requestHelper.sendRequest(context, '/api/v2/jwt/profile', {
+    requestHelper.sendRequest(context, '/api/v2/jwt/user/profile', {
         method: 'get',
         accessToken: context.token,
         tokenType: 'JWT'
@@ -234,7 +234,7 @@ function jwtGetProfile(context, done) {
 
 
 function jwtUpdateProfile(context, done) {
-    requestHelper.sendRequest(context, "/api/v2/jwt/profile", {
+    requestHelper.sendRequest(context, "/api/v2/jwt/user/profile", {
             method: 'put',
             accessToken: context.token,
             data: {
