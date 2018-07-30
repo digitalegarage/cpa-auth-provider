@@ -60,7 +60,7 @@ var routes = function (router) {
                         },
                         captcha: req.recaptcha
                     };
-
+console.log('date_of_birth_ymd', user.date_of_birth_ymd);
                     res.render('./user/profile.ejs', data);
                 });
             });

@@ -61,7 +61,7 @@
                         <input id="lastname" name="lastname" class="form-control personnal-data-input"
                                placeholder="<%= __('PROFILE_PLACE_LASTNAME_HOLDER') %>"/>
                     </div>
-                    <div class="panel <% if (!profile.date_of_birth) { %> hidden <% } %>">
+                    <div class="panel <% if (!profile.date_of_birth_ymd) { %> hidden <% } %>">
                         <h4>
                             <%= __('PROFILE_DATE_OF_BIRTH_LABEL') %>
                             <% if (config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.indexOf('date_of_birth') !== -1) { %>
@@ -478,8 +478,8 @@
             };
 
             var createDate = function (sDate) {
-                var date = sDate.substr(6, 4) + "/" + sDate.substr(3, 2) + "/" + sDate.substr(0, 2);
-                return new Date(date);
+                var date = sDate.substr(6, 4) + "-" + sDate.substr(3, 2) + "-" + sDate.substr(0, 2);
+                return date;
             };
 
             var resetMessages = function (formClass, errorsClass) {
@@ -488,8 +488,8 @@
             };
 
             //Init date field and datepicker
-            if ("<%= profile.date_of_birth %>" && "<%= profile.date_of_birth %>" != "null" && "<%= profile.date_of_birth %>" !== null && "<%= profile.date_of_birth %>" != "undefined") {
-                date = new Date(parseInt("<%= profile.date_of_birth %>"));
+            if ("<%= profile.date_of_birth_ymd %>" && "<%= profile.date_of_birth_ymd %>" != "null" && "<%= profile.date_of_birth_ymd %>" !== null && "<%= profile.date_of_birth_ymd %>" != "undefined") {
+                date = new Date("<%= profile.date_of_birth_ymd %>");
                 $datepicker.prev(".data-value").text(formatDate(date));
             }
 
@@ -717,17 +717,17 @@
                 resetMessages("form-personnal-data-errors", "personnal-data-errors");
 
                 var userId = "<%= user.id %>";
-                var date_of_birth = $birthday.val();
-                var date = date_of_birth ? createDate(date_of_birth).getTime() : '';
+                var dab = $birthday.val();
+                var dab_str = dab ? createDate(dab) : '';
 
                 $.ajax({
-                    url: "<%= link('/user/profile/') %>",
+                    url: "<%= link('/api/v2/session/profile') %>",
                     data: {
                         firstname: $firstname.val(),
                         lastname: $lastname.val(),
                         gender: $gender.val(),
                         language: $language.val(),
-                        date_of_birth: date
+                        date_of_birth_ymd: dab_str
                     },
                     type: 'PUT',
                     success: function (result) {
