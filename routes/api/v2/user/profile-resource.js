@@ -6,44 +6,18 @@ var logger = require('../../../../lib/logger');
 var db = require('../../../../models');
 var userHelper = require('../../../../lib/user-helper');
 var authHelper = require('../../../../lib/auth-helper');
-var passport = require('passport');
-var dateFormat = require('dateformat');
 
 var user_profile = function (req, res) {
     logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
     if (req.user.LocalLogin) {
-        let data = {
-            user: {
-                id: req.user.id,
-                email: req.user.LocalLogin ? req.user.LocalLogin.login : null,
-                email_verified: req.user.LocalLogin && req.user.LocalLogin.verified ? true : false,
-                display_name: req.user.display_name,
-                firstname: req.user.firstname,
-                lastname: req.user.lastname,
-                gender: req.user.gender,
-                date_of_birth: req.user.date_of_birth,
-                date_of_birth_ymd: req.user.date_of_birth_ymd ? dateFormat(req.user.date_of_birth_ymd, "yyyy-mm-dd") : null,
-            }
-        };
+        let data = req.user.getProfile();
         if (req.authInfo && req.authInfo.scope) {
             data.score = req.authInfo.scope;
         }
         res.json(data);
     } else {
         db.SocialLogin.findOne({where: {user_id: req.user.id}}).then(function (socialLogin) {
-            let data = {
-                user: {
-                    id: req.user.id,
-                    email: socialLogin.email,
-                    email_verified: true,
-                    display_name: socialLogin.display_name ? socialLogin.display_name : socialLogin.email,
-                    firstname: socialLogin.firstname,
-                    lastname: socialLogin.lastname,
-                    gender: socialLogin.gender,
-                    date_of_birth: socialLogin.date_of_birth,
-                    date_of_birth_ymd: socialLogin.date_of_birth_ymd ? dateFormat(socialLogin.date_of_birth_ymd, "yyyy-mm-dd") : null,
-                }
-            };
+            let data = socialLogin.getProfile();
             if (req.authInfo && req.authInfo.scope) {
                 data.score = req.authInfo.scope;
             }
