@@ -3,6 +3,9 @@ var bcrypt = promise.promisifyAll(require('bcrypt'));
 
 var db = require('../../../../models');
 var dbHelper = require('../../../db-helper');
+var generate = require('../../../../lib/generate');
+
+var USER_1_CPA_TOKEN = generate.cryptoCode(20);
 
 
 var OAUTH_CLIENT_1 = {
@@ -38,6 +41,7 @@ module.exports = {
     USER_1: USER_1,
     USER_1_PROFILE: USER_1_PROFILE,
     USER_1_DAB_STR: USER_1_DAB_STR,
+    USER_1_CPA_TOKEN: USER_1_CPA_TOKEN,
     resetDatabase: resetDatabase
 }
 
@@ -66,6 +70,11 @@ function createUser(userTemplate) {
             return localLogin.setPassword(userTemplate.password).then(function () {
                 return user.updateAttributes(USER_1_PROFILE);
             });
+        }).then(function(){
+            return db.AccessToken.create({
+                token: USER_1_CPA_TOKEN,
+                user_id: user.id
+            });
         });
     });
 }
@@ -80,13 +89,13 @@ function createUsers(done) {
 
 
 function resetDatabase(done) {
-    dbHelper.clearDatabase(function (err) {
+    return dbHelper.clearDatabase(function (err) {
         if (err) {
             return done(err);
         } else {
-            createOAuth2Client(
+            return createOAuth2Client(
                 function () {
-                    createUsers(function () {
+                    return createUsers(function () {
                         done();
                     });
                 }

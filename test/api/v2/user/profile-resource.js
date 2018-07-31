@@ -63,6 +63,19 @@ describe('API-V2 profile', function () {
                 expectGetInitialProfile(ctx);
             });
         });
+
+        context('using CPA', function () {
+            var ctx = this;
+            ctx.token = initData.USER_1_CPA_TOKEN;
+
+            before(function (done) {
+                cpaGetProfile(ctx, done);
+            });
+
+            it('should return a success', function () {
+                expectGetInitialProfile(ctx);
+            });
+        });
     });
 
 
@@ -122,6 +135,22 @@ describe('API-V2 profile', function () {
 
             before(function (done) {
                 jwtGetProfile(ctx, done);
+            });
+
+            it('should return a success', function () {
+                expectedGetUpdatedProfile(ctx);
+            });
+        });
+        context('using CPA', function () {
+            var ctx = this;
+            ctx.token = initData.USER_1_CPA_TOKEN;
+
+            before(function (done) {
+                cpaUpdateProfile(ctx, done);
+            });
+
+            before(function (done) {
+                cpaGetProfile(ctx, done);
             });
 
             it('should return a success', function () {
@@ -234,6 +263,32 @@ function jwtGetProfile(context, done) {
 
 
 function jwtUpdateProfile(context, done) {
+    requestHelper.sendRequest(context, "/api/v2/jwt/user/profile", {
+            method: 'put',
+            accessToken: context.token,
+            data: {
+                firstname: NEW_FIRSTNAME,
+                lastname: NEW_LASTNAME,
+                gender: NEW_GENDER,
+                date_of_birth_ymd: NEW_DAB,
+            }
+        },
+        done
+    );
+}
+
+//---------------
+// cpa calls
+
+function cpaGetProfile(context, done) {
+    requestHelper.sendRequest(context, '/api/v2/cpa/user/profile', {
+        method: 'get',
+        accessToken: context.token,
+    }, done);
+}
+
+
+function cpaUpdateProfile(context, done) {
     requestHelper.sendRequest(context, "/api/v2/jwt/user/profile", {
             method: 'put',
             accessToken: context.token,

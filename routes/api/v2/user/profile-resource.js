@@ -2,7 +2,6 @@
 
 var passport = require('passport');
 var cors = require('cors');
-var config = require ('../../../../config');
 var logger = require('../../../../lib/logger');
 var db = require('../../../../models');
 var userHelper = require('../../../../lib/user-helper');
@@ -10,7 +9,7 @@ var authHelper = require('../../../../lib/auth-helper');
 
 var user_profile = function (req, res) {
     logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
-    if (req.user.LocalLogin) {
+    if (req.user) {
         let data = req.user.getProfile();
         if (req.authInfo && req.authInfo.scope) {
             data.score = req.authInfo.scope;
@@ -51,9 +50,6 @@ var user_profile_update =
 
 
 module.exports = function (router) {
-
-    // TODO :
-    // - CPA
 
     /**
      * @swagger
@@ -270,10 +266,49 @@ module.exports = function (router) {
     router.put('/api/v2/jwt/user/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile_update);
     router.options('/api/v2/jwt/user/profile', cors_headers);
 
+    /**
+     * @swagger
+     * /api/v2/cpa/user/profile:
+     *   get:
+     *     description: get logged (using CPA token security) user profile
+     *     produces:
+     *       - application/json
+     *     responses:
+     *       200:
+     *         description: Return logged user profile
+     *         schema:
+     *           $ref: '#/definitions/Profile'
+     */
+    router.get('/api/v2/cpa/user/profile', cors_headers, authHelper.ensureCpaAuthenticated, user_profile);
 
-    var protectedResourceHandler = require('../../../../lib/protected-resource-handler')(config, db, logger);
-
-    router.get('/api/v2/cpa/profile', cors_headers, protectedResourceHandler, user_profile);
-    router.put('/api/v2/cpa/profile', cors_headers, protectedResourceHandler, user_profile_update);
+    /**
+     * @swagger
+     * /api/v2/cpa/user/profile:
+     *   put:
+     *     description: update user profile (using CPA token security)
+     *     operationId: "updateProfile"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "profile"
+     *            description: "new profile data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ProfileUpdate"
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: JWT blablabla
+     *            description: JWT token
+     *            required: true
+     *     responses:
+     *          "204":
+     *            description: "profile udpated"
+     */
+    router.put('/api/v2/cpa/user/profile', cors_headers, authHelper.ensureCpaAuthenticated, user_profile_update);
     router.options('/api/v2/cpa/user/profile', cors_headers);
+
+
 };
