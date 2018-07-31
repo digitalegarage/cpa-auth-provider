@@ -18,7 +18,6 @@ var user_profile = function (req, res) {
                 email: req.user.LocalLogin ? req.user.LocalLogin.login : null,
                 email_verified: req.user.LocalLogin && req.user.LocalLogin.verified ? true : false,
                 display_name: req.user.display_name,
-                name: req.user.display_name || (req.user.LocalLogin ? req.user.LocalLogin.login : ''),
                 firstname: req.user.firstname,
                 lastname: req.user.lastname,
                 gender: req.user.gender,
@@ -38,7 +37,6 @@ var user_profile = function (req, res) {
                     email: socialLogin.email,
                     email_verified: true,
                     display_name: socialLogin.display_name ? socialLogin.display_name : socialLogin.email,
-                    name: socialLogin.display_name ? socialLogin.display_name : socialLogin.email,
                     firstname: socialLogin.firstname,
                     lastname: socialLogin.lastname,
                     gender: socialLogin.gender,
@@ -66,7 +64,7 @@ var user_profile_update =
             }
             userHelper.updateProfile(req.user, req.body).then(
                 function () {
-                    res.json({msg: req.__('BACK_PROFILE_UPDATE_SUCCESS')});
+                    res.status(204).send();
                 },
                 function (err) {
                     logger.error('[PUT /user/profile][ERROR', err, ']');
@@ -131,9 +129,35 @@ module.exports = function (router) {
      *          scope:
      *              type: string
      *              description: oAuth2 stuff
+     *
+     *  ProfileUpdate:
+     *      type: "object"
+     *      properties:
+     *           firstname:
+     *               type: "string"
+     *               example: "John"
+     *               description: "user firstname"
+     *           lastname:
+     *               type: "string"
+     *               example: "Doe"
+     *               description: "user lastname"
+     *           date_of_birth_ymd:
+     *               type: "string"
+     *               example: "2018-08-31"
+     *               description: "user date of birth using yyyy-mm-dd format"
+     *           gender:
+     *               type: "string"
+     *               example: "male"
+     *               enum: [other, male, female]
+     *               description: "user gender (might be 'male', 'female', 'other)"
+     *           language:
+     *               type: "string"
+     *               example: "en"
+     *               description: "user language (ISO 639-1)"
+     *
      */
 
-        // TODO configure the restriction of origins on the CORS preflight call
+    // TODO configure the restriction of origins on the CORS preflight call
     var cors_headers = cors({origin: true, methods: ['GET, PUT']});
 
 
@@ -141,7 +165,15 @@ module.exports = function (router) {
      * @swagger
      * /api/v2/oauth2/user/profile:
      *   get:
-     *     description: get logged (oAuth token) user profile
+     *     description: get logged (using oAuth token security) user profile
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: Bearer blablabla
+     *            description: oAuth access token
+     *            required: true
      *     produces:
      *       - application/json
      *     responses:
@@ -151,6 +183,33 @@ module.exports = function (router) {
      *           $ref: '#/definitions/Profile'
      */
     router.get('/api/v2/oauth2/user/profile', cors_headers, passport.authenticate('bearer', {session: false}), user_profile);
+
+    /**
+     * @swagger
+     * /api/v2/oauth2/user/profile:
+     *   put:
+     *     description: update user profile (using oAuth token security)
+     *     operationId: "updateProfile"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "profile"
+     *            description: "new profile data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ProfileUpdate"
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: Bearer blablabla
+     *            description: oAuth access token
+     *            required: true
+     *     responses:
+     *          "204":
+     *            description: "profile udpated"
+     */
     router.put('/api/v2/oauth2/user/profile', cors_headers, passport.authenticate('bearer', {session: false}), user_profile_update);
     router.options('/api/v2/oauth2/user/profile', cors_headers);
 
@@ -159,7 +218,7 @@ module.exports = function (router) {
      * @swagger
      * /api/v2/session/user/profile:
      *   get:
-     *     description: get logged (session cookie) user profile
+     *     description: get logged (using session cookie security) user profile
      *     produces:
      *       - application/json
      *     responses:
@@ -169,15 +228,35 @@ module.exports = function (router) {
      *           $ref: '#/definitions/Profile'
      */
     router.get('/api/v2/session/user/profile', cors_headers, authHelper.ensureAuthenticated, user_profile);
+
+    /**
+     * @swagger
+     * /api/v2/session/user/profile:
+     *   put:
+     *     description: update user profile (using session cookie security)
+     *     operationId: "updateProfile"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          -
+     *            name: "profile"
+     *            in: "body"
+     *            description: "new profile data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ProfileUpdate"
+     *     responses:
+     *          "204":
+     *            description: "profile udpated"
+     */
     router.put('/api/v2/session/user/profile', cors_headers, authHelper.ensureAuthenticated, user_profile_update);
     router.options('/api/v2/session/user/profile', cors_headers);
-
 
     /**
      * @swagger
      * /api/v2/jwt/user/profile:
      *   get:
-     *     description: get logged (jwt) user profile
+     *     description: get logged (using JWT token security) user profile
      *     produces:
      *       - application/json
      *     responses:
@@ -187,6 +266,33 @@ module.exports = function (router) {
      *           $ref: '#/definitions/Profile'
      */
     router.get('/api/v2/jwt/user/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile);
+
+    /**
+     * @swagger
+     * /api/v2/jwt/user/profile:
+     *   put:
+     *     description: update user profile (using JWT token security)
+     *     operationId: "updateProfile"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "profile"
+     *            description: "new profile data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ProfileUpdate"
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: JWT blablabla
+     *            description: JWT token
+     *            required: true
+     *     responses:
+     *          "204":
+     *            description: "profile udpated"
+     */
     router.put('/api/v2/jwt/user/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile_update);
     router.options('/api/v2/jwt/user/profile', cors_headers);
 
