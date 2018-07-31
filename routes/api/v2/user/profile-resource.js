@@ -89,9 +89,6 @@ module.exports = function (router) {
      *                      enum: [other, male, female]
      *                      example: male
      *                      description: user gender
-     *                  date_of_birth:
-     *                      type: integer
-     *                      example: 12345678
      *                  date_of_birth_ymd:
      *                      type: string
      *                      example: 2018-08-31

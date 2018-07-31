@@ -5,7 +5,6 @@ var db = require('../../models');
 var authHelper = require('../../lib/auth-helper');
 var passwordHelper = require('../../lib/password-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
-var i18n = require('i18n');
 var userHelper = require('../../lib/user-helper');
 var logger = require('../../lib/logger');
 
@@ -53,8 +52,7 @@ var routes = function (router) {
                             lastname: user.lastname,
                             gender: user.gender,
                             language: user.language,
-                            date_of_birth: user.date_of_birth ? parseInt(user.date_of_birth) : user.date_of_birth,
-                            date_of_birth_ymd: user.date_of_birth_ymd,
+                            date_of_birth_ymd: user.date_of_birth_ymd ? user.date_of_birth_ymd : null,
                             email: email,
                             socialEmail: socialEmail,
                             display_name: user.getDisplayName(email, req.query.policy),
