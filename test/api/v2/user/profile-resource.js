@@ -12,7 +12,7 @@ const NEW_GENDER = 'female';
 
 describe('API-V2 profile', function () {
 
-    context('GET : /api/v2/oauth2/user/profile ', function () {
+    context('GET : /api/v2/<security>/user/profile ', function () {
 
         before(initData.resetDatabase);
 
@@ -66,7 +66,7 @@ describe('API-V2 profile', function () {
     });
 
 
-    context('PUT : /api/v2/oauth2/user/profile', function () {
+    context('PUT : /api/v2/<security>/user/profile', function () {
 
         before(initData.resetDatabase);
 

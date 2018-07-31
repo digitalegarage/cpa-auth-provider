@@ -2,6 +2,7 @@
 
 var passport = require('passport');
 var cors = require('cors');
+var config = require ('../../../../config');
 var logger = require('../../../../lib/logger');
 var db = require('../../../../models');
 var userHelper = require('../../../../lib/user-helper');
@@ -130,7 +131,7 @@ module.exports = function (router) {
      *
      */
 
-    // TODO configure the restriction of origins on the CORS preflight call
+        // TODO configure the restriction of origins on the CORS preflight call
     var cors_headers = cors({origin: true, methods: ['GET, PUT']});
 
 
@@ -269,7 +270,10 @@ module.exports = function (router) {
     router.put('/api/v2/jwt/user/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile_update);
     router.options('/api/v2/jwt/user/profile', cors_headers);
 
-    // router.get('/api/v2/cpa/profile', cors_headers, xxx, user_profile);
-    // router.put('/api/v2/cpa/profile', cors_headers, xxx, user_profile_update);
-    // router.options('/api/v2/cpa/user/profile', cors_headers);
+
+    var protectedResourceHandler = require('../../../../lib/protected-resource-handler')(config, db, logger);
+
+    router.get('/api/v2/cpa/profile', cors_headers, protectedResourceHandler, user_profile);
+    router.put('/api/v2/cpa/profile', cors_headers, protectedResourceHandler, user_profile_update);
+    router.options('/api/v2/cpa/user/profile', cors_headers);
 };
