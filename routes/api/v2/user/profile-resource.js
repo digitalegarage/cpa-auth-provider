@@ -52,7 +52,6 @@ var user_profile_update =
 module.exports = function (router) {
 
     // TODO :
-    // - swagger
     // - CPA
 
     /**
