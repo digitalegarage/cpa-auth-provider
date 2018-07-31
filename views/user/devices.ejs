@@ -1,5 +1,17 @@
 <% include ../layout/header %>
 
+<% if (flash.message) { %>
+  <div id="flash">
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="alert alert-<%= flash.type %>">
+          <strong><%= flash.message %></strong>
+        </div>
+      </div>
+    </div>
+  </div>
+<% } %>
+
 <div id="devices">
     <div class="row">
         <div class="col-sm-12">

@@ -9,7 +9,12 @@
             </h1>
         </div>
     </div>
-
+    <% if (flash.message && ['danger','warning','info','success'].indexOf(flash.type) !== -1) { %>
+      <div class="alert alert-<%= flash.type %>">
+        <strong><%= flash.message %></strong>
+      </div>
+    <% } %>
+    
     <hr/>
 
     <div class="row">

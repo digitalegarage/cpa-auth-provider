@@ -326,6 +326,7 @@ var routes = function (router) {
 
         associateUserCodeWithUser(req, userCode, req.user.id, function (err, errorMessage, result) {
             var redirectUri = urlHelper.addQueryParameters(req.body.redirect_uri, {result: result});
+            req.session.flashMessage = req.__('VERIFY_AUTH_GRANTED');
             res.redirect(redirectUri);
         });
     });
@@ -353,6 +354,7 @@ var routes = function (router) {
 
         denyUserCode(req, userCode, req.user.id, function (err, errorMessage, result) {
             var redirectUri = urlHelper.addQueryParameters(req.body.redirect_uri, {result: result});
+            req.session.flashMessage = req.__('VERIFY_AUTH_DENIED');
             res.redirect(redirectUri);
         });
     });

@@ -256,6 +256,9 @@
     "SIGNUP_RECAPTCHA_PRIVACY" : "Privacy",
     "SIGNUP_RECAPTCHA_TERMS" : "Terms",
 
+    "VERIFY_AUTH_GRANTED": "Authorisation given!",
+  	"VERIFY_AUTH_DENIED": "Authorisation denied!",
+
     "VERIFY_TITLE": "Device Association",
     "VERIFY_USER_CODE_LABEL": "User Code",
     "VERIFY_VERIFY_BUTTON": "Verify",
