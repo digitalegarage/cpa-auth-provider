@@ -311,7 +311,6 @@ function expectGetInitialProfile(context) {
     expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
     expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
-    expect(context.res.body.user.date_of_birth).equal(initData.USER_1_PROFILE.date_of_birth);
     expect(context.res.body.user.date_of_birth_ymd).equal(initData.USER_1_DAB_STR);
 }
 
