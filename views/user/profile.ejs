@@ -687,9 +687,10 @@
                 }
 
                 $.ajax({
-                    url: "<%= link('/user') %>",
-                    type: 'POST',
+                    url: "http://localhost:3005/api/user",
+                    type: 'DELETE',
                     data: {
+                        username: '<%= profile.login %>', // TODO social login without password.
                         password: $password.val()
                     },
                     success: function (result) {
