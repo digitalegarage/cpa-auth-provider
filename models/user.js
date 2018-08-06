@@ -66,7 +66,6 @@ module.exports = function (sequelize, DataTypes) {
     };
 
     User.prototype.getProfile = function(){
-        console.log("=================this.date_of_birth_ymd", this.date_of_birth_ymd);
         return {
             user: {
                 id: this.id,
