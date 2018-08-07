@@ -6,14 +6,12 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <link rel="stylesheet" type="text/css"
-          href="https://hummingbird.rts.ch/hummingbird-static/res/css/navigation-rts.css"/>
+    <link rel="stylesheet" type="text/css" href="https://hummingbird.rts.ch/hummingbird-static/css/rts-widgets.css">
     <link rel="stylesheet" type="text/css" href="/bootstrap/dist/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="/assets/css/profile.css"/>
     <link rel="stylesheet" type="text/css" href="/assets/css/profile-rts.css"/>
 
-
-    <script id="navigation-rts" src="https://hummingbird.rts.ch/hummingbird-static/res/js/navigation-rts.js"></script>
+    <script id="rts-widget-loader" src="https://hummingbird.rts.ch/hummingbird-static/js/rts-widgets-loader.min.js"></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -35,12 +33,12 @@
     <title></title>
 </head>
 <body>
-<div data-rts-widget="rts-header"></div>
+<div data-rts-widget="rts-header" data-rts-widget-src="peach"></div>
 <div class="container">
     <div class="profile-container">
         <% include ../profile-content %>
     </div>
 </div>
-<div data-rts-widget="rts-footer"></div>
+<div data-rts-widget="rts-footer" data-rts-widget-src="peach"></div>
 </body>
 </html>
