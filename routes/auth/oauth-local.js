@@ -94,6 +94,7 @@ module.exports = function (app, options) {
     app.get('/api/logout', cors, function (req, res, next) {
         afterLogoutHelper.afterLogout(res);
         req.logout();
+        req.session.destroy();
         res.json({connected: false});
     });
 
