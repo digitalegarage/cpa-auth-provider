@@ -224,6 +224,14 @@ module.exports = function (router) {
      * /api/v2/jwt/user/profile:
      *   get:
      *     description: get logged (using JWT token security) user profile
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: JWT blablabla
+     *            description: JWT token
+     *            required: true
      *     produces:
      *       - application/json
      *     responses:
@@ -268,6 +276,14 @@ module.exports = function (router) {
      * /api/v2/cpa/user/profile:
      *   get:
      *     description: get logged (using CPA token security) user profile
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: blablabla
+     *            description: CPA token
+     *            required: true
      *     produces:
      *       - application/json
      *     responses:
@@ -297,8 +313,8 @@ module.exports = function (router) {
      *            name: Authorization
      *            schema:
      *              type: string
-     *            example: JWT blablabla
-     *            description: JWT token
+     *            example: Bearer blablabla
+     *            description: CPA token
      *            required: true
      *     responses:
      *          "204":
