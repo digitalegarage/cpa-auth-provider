@@ -12,6 +12,7 @@ var recaptcha = require('express-recaptcha');
 module.exports = function (router) {
     router.get('/logout', function (req, res) {
         afterLogoutHelper.afterLogout(res);
+        req.session.destroy();
         req.logout();
         requestHelper.redirect(res, '/');
     });

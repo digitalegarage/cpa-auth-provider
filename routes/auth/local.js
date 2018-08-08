@@ -207,6 +207,7 @@ module.exports = function (app, options) {
 
     app.get('/logout', function (req, res) {
         req.logout();
+        req.session.destroy();
         requestHelper.redirect(res, '/');
     });
 

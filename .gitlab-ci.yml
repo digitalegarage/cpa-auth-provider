@@ -1,6 +1,6 @@
 variables:
   GIT_SUBMODULE_STRATEGY: normal
-  DOCKER_DRIVER: overlay
+  DOCKER_DRIVER: overlay2
   CONTAINER_RELEASE_IMAGE: registry.ebu.io/pipe/identity-provider:$CI_COMMIT_REF_NAME
   CONTAINER_SHA_IMAGE: registry.ebu.io/pipe/identity-provider:$CI_COMMIT_SHA
   CONTAINER_REGISTRY: registry.ebu.io
@@ -25,6 +25,8 @@ npm_test:
 build:
   stage: build
   image: docker:stable
+  variables:
+    DOCKER_HOST: tcp://docker:2375
   services:
     - docker:dind
   script:
@@ -40,6 +42,7 @@ build_exporter:
   image: docker:stable
   variables:
     IMAGE: registry.ebu.io/pipe/idp-hdfs-exporter:$CI_COMMIT_REF_NAME
+    DOCKER_HOST: tcp://docker:2375
   services:
     - docker:dind
   script:
