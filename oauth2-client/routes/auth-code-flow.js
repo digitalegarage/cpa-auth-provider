@@ -127,6 +127,7 @@ function setup(router) {
         '/auth_code/logout',
         function (req, res) {
             req.logout();
+            req.session.destroy();
             clearSession(req.session);
             res.redirect('/auth_code');
         }
