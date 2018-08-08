@@ -61,7 +61,7 @@ module.exports = function (sequelize, DataTypes) {
                     firstname: this.firstname,
                     lastname: this.lastname,
                     gender: this.gender,
-                    date_of_birth_ymd: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
+                    date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
             }
         };
     };

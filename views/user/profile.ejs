@@ -66,7 +66,7 @@
                         <input id="lastname" name="lastname" class="form-control personnal-data-input"
                                placeholder="<%= __('PROFILE_PLACE_LASTNAME_HOLDER') %>"/>
                     </div>
-                    <div class="panel <% if (!profile.date_of_birth_ymd) { %> hidden <% } %>">
+                    <div class="panel <% if (!profile.date_of_birth) { %> hidden <% } %>">
                         <h4>
                             <%= __('PROFILE_DATE_OF_BIRTH_LABEL') %>
                             <% if (config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.indexOf('date_of_birth') !== -1) { %>
@@ -493,8 +493,8 @@
             };
 
             //Init date field and datepicker
-            if ("<%= profile.date_of_birth_ymd %>" && "<%= profile.date_of_birth_ymd %>" != "null" && "<%= profile.date_of_birth_ymd %>" !== null && "<%= profile.date_of_birth_ymd %>" != "undefined") {
-                date = new Date("<%= profile.date_of_birth_ymd %>");
+            if ("<%= profile.date_of_birth %>" && "<%= profile.date_of_birth %>" != "null" && "<%= profile.date_of_birth %>" !== null && "<%= profile.date_of_birth %>" != "undefined") {
+                date = new Date("<%= profile.date_of_birth %>");
                 $datepicker.prev(".data-value").text(formatDate(date));
             }
 
@@ -732,7 +732,7 @@
                         lastname: $lastname.val(),
                         gender: $gender.val(),
                         language: $language.val(),
-                        date_of_birth_ymd: dab_str
+                        date_of_birth: dab_str
                     },
                     type: 'PUT',
                     success: function (result) {

@@ -197,7 +197,7 @@ function oAuthUpdateProfile(context, done) {
                 firstname: NEW_FIRSTNAME,
                 lastname: NEW_LASTNAME,
                 gender: NEW_GENDER,
-                date_of_birth_ymd: NEW_DAB,
+                date_of_birth: NEW_DAB,
             }
         },
         done
@@ -229,7 +229,7 @@ function cookieUpdateProfile(context, done) {
                 firstname: NEW_FIRSTNAME,
                 lastname: NEW_LASTNAME,
                 gender: NEW_GENDER,
-                date_of_birth_ymd: NEW_DAB,
+                date_of_birth: NEW_DAB,
             }
         },
         done
@@ -270,7 +270,7 @@ function jwtUpdateProfile(context, done) {
                 firstname: NEW_FIRSTNAME,
                 lastname: NEW_LASTNAME,
                 gender: NEW_GENDER,
-                date_of_birth_ymd: NEW_DAB,
+                date_of_birth: NEW_DAB,
             }
         },
         done
@@ -296,7 +296,7 @@ function cpaUpdateProfile(context, done) {
                 firstname: NEW_FIRSTNAME,
                 lastname: NEW_LASTNAME,
                 gender: NEW_GENDER,
-                date_of_birth_ymd: NEW_DAB,
+                date_of_birth: NEW_DAB,
             }
         },
         done
@@ -311,7 +311,7 @@ function expectGetInitialProfile(context) {
     expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
     expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
-    expect(context.res.body.user.date_of_birth_ymd).equal(initData.USER_1_DAB_STR);
+    expect(context.res.body.user.date_of_birth).equal(initData.USER_1_DAB_STR);
 }
 
 function expectedGetUpdatedProfile(context) {
@@ -319,7 +319,7 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.body.user.firstname).equal(NEW_FIRSTNAME);
     expect(context.res.body.user.lastname).equal(NEW_LASTNAME);
     expect(context.res.body.user.gender).equal(NEW_GENDER);
-    expect(context.res.body.user.date_of_birth_ymd).equal(NEW_DAB);
+    expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
 }
 
 

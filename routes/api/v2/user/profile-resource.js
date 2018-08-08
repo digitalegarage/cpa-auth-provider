@@ -89,7 +89,7 @@ module.exports = function (router) {
      *                      enum: [other, male, female]
      *                      example: male
      *                      description: user gender
-     *                  date_of_birth_ymd:
+     *                  date_of_birth:
      *                      type: string
      *                      example: 2018-08-31
      *                      description: user data of birth using yyyy-mm-dd format
@@ -108,7 +108,7 @@ module.exports = function (router) {
      *               type: "string"
      *               example: "Doe"
      *               description: "user lastname"
-     *           date_of_birth_ymd:
+     *           date_of_birth:
      *               type: "string"
      *               example: "2018-08-31"
      *               description: "user date of birth using yyyy-mm-dd format"

@@ -52,7 +52,7 @@ var routes = function (router) {
                             lastname: user.lastname,
                             gender: user.gender,
                             language: user.language,
-                            date_of_birth_ymd: user.date_of_birth_ymd ? user.date_of_birth_ymd : null,
+                            date_of_birth: user.date_of_birth_ymd ? user.date_of_birth_ymd : null,
                             email: email,
                             socialEmail: socialEmail,
                             display_name: user.getDisplayName(email, req.query.policy),
