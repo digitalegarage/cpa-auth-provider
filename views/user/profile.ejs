@@ -687,12 +687,20 @@
                 }
 
                 $.ajax({
-                    url: "http://localhost:3005/api/user",
-                    type: 'DELETE',
-                    data: {
-                        username: '<%= profile.login %>', // TODO social login without password.
-                        password: $password.val()
-                    },
+                    <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL){ %>
+                        url: config.gdprManager.useGDPRManagerWithURL,
+                        type: 'DELETE',
+                        data: {
+                            username: '<%= profile.login %>', // TODO social login without password.
+                            password: $password.val()
+                        },
+                    <%} else { %>
+                        url: "<%= link('/user') %>",
+                        type: 'POST',
+                        data: {
+                            password: $password.val()
+                        },
+                    <%}%>
                     success: function (result) {
                         //set success message in storage to get it back on login page and LOGOUT
                         if (typeof localStorage !== 'undefined') {

@@ -52,6 +52,10 @@ module.exports = {
         }
     },
 
+    gdprManager: {
+        useGDPRManagerWithURL: process.env.USE_GDPR_MANAGER_WITH_URL,
+    },
+
     userProfiles: {
         requiredFields: process.env.PROFILE_FIELDS_REQUIRED
             ? process.env.PROFILE_FIELDS_REQUIRED.toLowerCase().split(',')
