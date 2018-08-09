@@ -1,4 +1,5 @@
 "use strict";
+var dateFormat = require('dateformat');
 
 
 module.exports = function (sequelize, DataTypes) {
@@ -10,7 +11,11 @@ module.exports = function (sequelize, DataTypes) {
         firstname: DataTypes.STRING,
         lastname: DataTypes.STRING,
         gender: DataTypes.STRING,
+        /*
+        @deprecated use date_of_birth_ymd
+         */
         date_of_birth: DataTypes.BIGINT,
+        date_of_birth_ymd: DataTypes.DATEONLY,
         language: DataTypes.STRING,
         last_login_at: DataTypes.BIGINT
     }, {
@@ -44,6 +49,21 @@ module.exports = function (sequelize, DataTypes) {
         return self.updateAttributes({last_login_at: Date.now()}, {transaction: transaction}).then(function () {
             return user.logLastSeen();
         });
+    };
+
+    SocialLogin.prototype.getProfile = function(){
+        return {
+            user: {
+                id: this.user_id,
+                    email: this.email,
+                    email_verified: true,
+                    display_name: this.display_name ? this.display_name : this.email,
+                    firstname: this.firstname,
+                    lastname: this.lastname,
+                    gender: this.gender,
+                    date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
+            }
+        };
     };
 
     return SocialLogin;

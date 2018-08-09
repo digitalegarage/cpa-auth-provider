@@ -86,7 +86,7 @@ module.exports = function (app, options) {
                         msg: req.__('API_PROFILE_VALIDATION_ERRORS') + result.array({onlyFirstError: true})
                     });
                 } else {
-                    userHelper.updateProfile(authHelper.getAuthenticatedUser(req), req.body).then(
+                    userHelper.updateProfileLegacy(authHelper.getAuthenticatedUser(req), req.body).then(
                         function (userProfile) {
                             res.cookie(config.i18n.cookie_name, userProfile.language, {
                                 maxAge: config.i18n.cookie_duration,
@@ -155,6 +155,7 @@ function returnProfileAsJson(user, res, req) {
                 lastname: user.lastname,
                 gender: user.gender,
                 date_of_birth: user.date_of_birth ? parseInt(user.date_of_birth) : user.date_of_birth,
+                date_of_birth_ymd: user.date_of_birth_ymd,
                 language: user.language,
                 email: email,
                 display_name: user.getDisplayName(req.query.policy, email)
