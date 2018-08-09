@@ -16,13 +16,13 @@ var limiterHelper = require('../../lib/limiter-helper');
 var routes = function (router) {
     router.put('/user/profile/', authHelper.ensureAuthenticated, function (req, res) {
 
-        userHelper.validateProfileUpdateData(req).then(function (result) {
+        userHelper.validateProfileUpdateDataLegacy(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
                 res.status(400).json({errors: result.array({onlyFirstError: true})});
                 return;
             }
-            userHelper.updateProfile(authHelper.getAuthenticatedUser(req), req.body).then(
+            userHelper.updateProfileLegacy(authHelper.getAuthenticatedUser(req), req.body).then(
                 function (user) {
                     res.cookie(config.i18n.cookie_name, user.language, {
                         maxAge: config.i18n.cookie_duration,

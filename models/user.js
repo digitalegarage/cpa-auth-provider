@@ -1,4 +1,5 @@
 "use strict";
+var dateFormat = require('dateformat');
 
 
 module.exports = function (sequelize, DataTypes) {
@@ -11,7 +12,11 @@ module.exports = function (sequelize, DataTypes) {
         firstname: DataTypes.STRING,
         lastname: DataTypes.STRING,
         gender: DataTypes.STRING,
+        /*
+        @deprecated use date_of_birth_ymd
+         */
         date_of_birth: DataTypes.BIGINT,
+        date_of_birth_ymd: DataTypes.DATEONLY,
         language: DataTypes.STRING,
         last_seen: DataTypes.BIGINT,
         scheduled_for_deletion_at: DataTypes.DATE,
@@ -58,6 +63,21 @@ module.exports = function (sequelize, DataTypes) {
 
     User.prototype.isScheduledForDeletion = function () {
         return !!this.scheduled_for_deletion_at;
+    };
+
+    User.prototype.getProfile = function(){
+        return {
+            user: {
+                id: this.id,
+                    email: this.LocalLogin ? this.LocalLogin.login : null,
+                    email_verified: this.LocalLogin && this.LocalLogin.verified ? true : false,
+                    display_name: this.display_name,
+                    firstname: this.firstname,
+                    lastname: this.lastname,
+                    gender: this.gender,
+                    date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
+            }
+        }
     };
 
     return User;
