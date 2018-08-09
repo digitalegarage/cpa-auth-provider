@@ -483,8 +483,8 @@
             };
 
             var createDate = function (sDate) {
-                var date = sDate.substr(6, 4) + "/" + sDate.substr(3, 2) + "/" + sDate.substr(0, 2);
-                return new Date(date);
+                var date = sDate.substr(6, 4) + "-" + sDate.substr(3, 2) + "-" + sDate.substr(0, 2);
+                return date;
             };
 
             var resetMessages = function (formClass, errorsClass) {
@@ -494,7 +494,7 @@
 
             //Init date field and datepicker
             if ("<%= profile.date_of_birth %>" && "<%= profile.date_of_birth %>" != "null" && "<%= profile.date_of_birth %>" !== null && "<%= profile.date_of_birth %>" != "undefined") {
-                date = new Date(parseInt("<%= profile.date_of_birth %>"));
+                date = new Date("<%= profile.date_of_birth %>");
                 $datepicker.prev(".data-value").text(formatDate(date));
             }
 
@@ -731,17 +731,17 @@
                 resetMessages("form-personnal-data-errors", "personnal-data-errors");
 
                 var userId = "<%= user.id %>";
-                var date_of_birth = $birthday.val();
-                var date = date_of_birth ? createDate(date_of_birth).getTime() : '';
+                var dab = $birthday.val();
+                var dab_str = dab ? createDate(dab) : '';
 
                 $.ajax({
-                    url: "<%= link('/user/profile/') %>",
+                    url: "<%= link('/api/v2/session/user/profile') %>",
                     data: {
                         firstname: $firstname.val(),
                         lastname: $lastname.val(),
                         gender: $gender.val(),
                         language: $language.val(),
-                        date_of_birth: date
+                        date_of_birth: dab_str
                     },
                     type: 'PUT',
                     success: function (result) {
