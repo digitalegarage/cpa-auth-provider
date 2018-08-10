@@ -30,6 +30,7 @@ var USER_1_DAB_STR = '2018-07-14';
 var USER_1_PROFILE = {
     firstname: 'John',
     lastname: 'Doe',
+    display_name: 'John Doe',
     gender: 'M',
     date_of_birth: new Date(USER_1_DAB_STR).getTime(),
     date_of_birth_ymd: USER_1_DAB_STR,
@@ -70,7 +71,7 @@ function createUser(userTemplate) {
             return localLogin.setPassword(userTemplate.password).then(function () {
                 return user.updateAttributes(USER_1_PROFILE);
             });
-        }).then(function(){
+        }).then(function () {
             return db.AccessToken.create({
                 token: USER_1_CPA_TOKEN,
                 user_id: user.id
