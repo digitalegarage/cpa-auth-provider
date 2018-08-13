@@ -210,7 +210,12 @@ module.exports = {
 
     // use more secure header settings
     use_secure_headers: process.env.USE_SECURE_HEADERS,
-
+    content_security_policy:{
+        additional_scripts_src: process.env.ADDITIONAL_SCRIPTS_SRC,
+        additional_fonts_src: process.env.ADDITIONAL_FONTS_SRC,
+        additional_frames_src: process.env.ADDITIONAL_FRAMES_SRC,
+        additional_styles_src: process.env.ADDITIONAL_STYLES_SRC
+    },
     // URL path prefix, e.g., '/myapp'
     urlPrefix: process.env.URL_PREFIX || '',
     oauth2: {

@@ -130,7 +130,12 @@ module.exports = {
 
     // use more secure header settings
     use_secure_headers: true,
-    
+    content_security_policy:{
+        additional_scripts_src: 'https://broadcarster.org',
+        additional_fonts_src: 'https://broadcarster.org',
+        additional_frames_src: 'https://broadcarster.org',
+        additional_styles_src:'https://broadcarster.org'
+    },
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '/ap',
 
