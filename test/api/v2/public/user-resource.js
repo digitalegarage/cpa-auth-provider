@@ -36,7 +36,7 @@ describe('API-V2 user DELETE', function () {
 
         before(function (done) {
             requestHelper.sendRequest(ctx, "/api/v2/public/user", {
-                    method: 'delete',
+                    method: 'del',
                     basicAuth: {
                         login: initData.USER_1.email,
                         password: initData.USER_1.password
