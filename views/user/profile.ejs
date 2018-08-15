@@ -688,11 +688,10 @@
 
                 $.ajax({
                     <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL){ %>
-                        url: config.gdprManager.useGDPRManagerWithURL,
+                        url: '<%=config.gdprManager.useGDPRManagerWithURL%>',
                         type: 'DELETE',
-                        data: {
-                            username: '<%= profile.login %>', // TODO social login without password.
-                            password: $password.val()
+                        headers: {
+                            "Authorization": "Basic " + btoa("<%=profile.login%> :" + $password) // TODO social login without password.
                         },
                     <%} else { %>
                         url: "<%= link('/user') %>",
