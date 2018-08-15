@@ -691,7 +691,7 @@
                         url: '<%=config.gdprManager.useGDPRManagerWithURL%>',
                         type: 'DELETE',
                         headers: {
-                            "Authorization": "Basic " + btoa("<%=profile.login%> :" + $password) // TODO social login without password.
+                            "Authorization": "Basic " + btoa("<%=profile.login%>:" + $password.val()) // TODO social login without password.
                         },
                     <%} else { %>
                         url: "<%= link('/user') %>",
