@@ -8,7 +8,7 @@ var auth = require('basic-auth')
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
 
-    var user = auth(req)
+    var user = auth(req);
     logger.info('user', user);
 
     if (!user) {
