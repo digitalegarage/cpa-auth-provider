@@ -3,7 +3,7 @@
 var cors = require('cors');
 var logger = require('../../../../lib/logger');
 var db = require('../../../../models/index');
-var auth = require('basic-auth')
+var auth = require('basic-auth');
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
