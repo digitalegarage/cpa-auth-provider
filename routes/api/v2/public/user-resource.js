@@ -4,42 +4,52 @@ var passport = require('passport');
 var cors = require('cors');
 var logger = require('../../../../lib/logger');
 var db = require('../../../../models/index');
+var auth = require('basic-auth')
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
-    var login = req.body.login;
-    var password = req.body.password;
 
-    db.LocalLogin.findOne({where: {user_id: login}}).then(function (localLogin) {
-        if (!localLogin) {
-            return res.status(401).send();
-        }
-        return localLogin.verifyPassword(password);
-    }).then(function (isMatch) {
-        if (isMatch) {
-            // Transactional part
-            return db.sequelize.transaction(function (transaction) {
-                return localLogin.destroy({
-                    where: {user_id: localLogin.user_id},
-                    transaction: transaction
-                }).then(function () {
-                    return db.SocialLogin.destroy({
+    var user = auth(req)
+
+    if (!user) {
+        return res.json({error: 'missing credentials'}).status(400).send();
+    } else {
+        var login = user.name;
+        var password = user.pass;
+
+        db.LocalLogin.findOne({where: {user_id: login}}).then(function (localLogin) {
+            if (!localLogin) {
+                return res.status(401).send();
+            }
+            return localLogin.verifyPassword(password);
+        }).then(function (isMatch) {
+            if (isMatch) {
+                // Transactional part
+                return db.sequelize.transaction(function (transaction) {
+                    return localLogin.destroy({
                         where: {user_id: localLogin.user_id},
                         transaction: transaction
+                    }).then(function () {
+                        return db.SocialLogin.destroy({
+                            where: {user_id: localLogin.user_id},
+                            transaction: transaction
+                        });
+                    }).then(function () {
+                        return user.destroy({
+                            where: {id: localLogin.user_id},
+                            transaction: transaction
+                        });
+                    }).then(function () {
+                        return res.status(204).send();
                     });
-                }).then(function () {
-                    return user.destroy({
-                        where: {id: localLogin.user_id},
-                        transaction: transaction
-                    });
-                }).then(function () {
-                    return res.status(204).send();
                 });
-            });
-        } else {
-            return res.status(401).send();
-        }
-    });
+            } else {
+                return res.status(401).send();
+            }
+        });
+
+    }
+
 
 };
 
@@ -52,7 +62,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * definition:
+     * definitions:
      *  Credentials:
      *    properties:
      *      login:
@@ -87,7 +97,7 @@ module.exports = function (router) {
      *          "204":
      *            description: "user had been deleted"
      */
-    router.delete('/api/v2/public/user', cors_headers, delete_user());
+    router.delete('/api/v2/public/user', cors_headers, delete_user);
     router.options('/api/v2/public/use', cors_headers);
 
 

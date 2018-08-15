@@ -20,6 +20,7 @@
     "access-log": "^0.4.1",
     "async": "~2.5.0",
     "aws-sdk": "^2.275.1",
+    "basic-auth": "^2.0.0",
     "bcrypt": "^3.0.0",
     "body-parser": "^1.18.3",
     "bootstrap": "^3.3.7",
