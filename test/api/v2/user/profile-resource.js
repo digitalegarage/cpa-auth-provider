@@ -310,6 +310,7 @@ function expectGetInitialProfile(context) {
     expect(context.res.statusCode).equal(200);
     expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
     expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
     expect(context.res.body.user.date_of_birth).equal(initData.USER_1_DAB_STR);
 }
@@ -318,6 +319,7 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.statusCode).equal(200);
     expect(context.res.body.user.firstname).equal(NEW_FIRSTNAME);
     expect(context.res.body.user.lastname).equal(NEW_LASTNAME);
+    expect(context.res.body.user.display_name).equal(NEW_FIRSTNAME + " " + NEW_LASTNAME);
     expect(context.res.body.user.gender).equal(NEW_GENDER);
     expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
 }

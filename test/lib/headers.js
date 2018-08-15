@@ -20,6 +20,6 @@ describe('Check response for headers', function () {
       expect(this.res.header['x-xss-protection']).to.equal("1; mode=block");
       expect(this.res.header['x-content-type-options']).to.equal("nosniff");
       expect(this.res.header['strict-transport-security']).to.equal("max-age=31536000");
-      expect(this.res.header['content-security-policy']).to.equal("default-src data: https: 'self'; script-src https: 'self' 'unsafe-inline' http://connect.facebook.com/; style-src https: 'self' 'unsafe-inline'; img-src *; frame-src 'self' http://staticxx.facebook.com https://www.google.com https://accounts.google.com/; connect-src https:; font-src 'self'");
+      expect(this.res.header['content-security-policy']).to.equal("default-src data: https: 'self'; script-src https: 'self' 'unsafe-inline' http://connect.facebook.com/ https://broadcarster.org; style-src https: 'self' 'unsafe-inline' https://broadcarster.org; img-src *; frame-src 'self' http://staticxx.facebook.com https://www.google.com https://accounts.google.com/ https://broadcarster.org; connect-src https:; font-src 'self' https://broadcarster.org");
     });
 });

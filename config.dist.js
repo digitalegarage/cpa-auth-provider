@@ -175,7 +175,19 @@ module.exports = {
 
     // use more secure header settings
     use_secure_headers: true,
-    
+    content_security_policy:{
+        // allow script loading from
+        additional_scripts_src: 'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // allow font loading from
+        additional_fonts_src: 'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // allow iframe loading from
+        additional_frames_src: 'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // allow css loading from
+        additional_styles_src:'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // Unless you have to load font using AJAX and set it directly as B64 in a font HTML tag, it's not recommended to enable allow_fonts_data
+        //allow_fonts_data: true,
+    },
+
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 
