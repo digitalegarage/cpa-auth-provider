@@ -67,24 +67,6 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * definitions:
-     *  Credentials:
-     *    properties:
-     *      login:
-     *          type: string
-     *          example: john@doe.com
-     *          description: user login
-     *          required: true
-     *      password:
-     *          type: string
-     *          example: myCrazyUnbreakableP@ssword
-     *          description: user password
-     *          required: true
-     *
-     */
-
-    /**
-     * @swagger
      * /api/v2/public/user:
      *   delete:
      *     description: delete the user providing user credentials
@@ -92,12 +74,13 @@ module.exports = function (router) {
      *     content:
      *        - application/json
      *     parameters:
-     *          - in: body
-     *            name: "Credentials"
-     *            description: "user credentials"
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "user credentials basic authentication format AKA base64 applied to login+':'+password prefixed by 'Basic '"
      *            required: true
      *            schema:
-     *              $ref: "#/definitions/Credentials"
+     *              type: string
+     *              example: Basic bG9naW46cGFzc3dvcmQ=
      *     responses:
      *          "204":
      *            description: "user had been deleted"
