@@ -687,11 +687,19 @@
                 }
 
                 $.ajax({
-                    url: "<%= link('/user') %>",
-                    type: 'POST',
-                    data: {
-                        password: $password.val()
-                    },
+                    <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL){ %>
+                        url: '<%=config.gdprManager.useGDPRManagerWithURL%>',
+                        type: 'DELETE',
+                        headers: {
+                            "Authorization": "Basic " + btoa("<%=profile.login%>:" + $password.val()) // TODO social login without password.
+                        },
+                    <%} else { %>
+                        url: "<%= link('/user') %>",
+                        type: 'POST',
+                        data: {
+                            password: $password.val()
+                        },
+                    <%}%>
                     success: function (result) {
                         //set success message in storage to get it back on login page and LOGOUT
                         if (typeof localStorage !== 'undefined') {

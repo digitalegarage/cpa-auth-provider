@@ -49,6 +49,11 @@ module.exports = {
         }
     },
 
+
+    gdprManager: {
+        // useGDPRManagerWithURL: 'https://gdprmanager.org',
+    },
+
     // configuration for password using local identity provider
     password: {
         // one of [no,simple,owasp] - defaults to owasp

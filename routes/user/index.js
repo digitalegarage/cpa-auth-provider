@@ -48,6 +48,7 @@ var routes = function (router) {
                     var email = user.LocalLogin ? user.LocalLogin.login : undefined;
                     var data = {
                         profile: {
+                            login: email,
                             firstname: user.firstname,
                             lastname: user.lastname,
                             gender: user.gender,

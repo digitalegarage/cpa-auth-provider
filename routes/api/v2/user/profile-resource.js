@@ -53,7 +53,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * definition:
+     * definitions:
      *  Profile:
      *      properties:
      *          user:
