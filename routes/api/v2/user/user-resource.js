@@ -67,7 +67,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * /api/v2/public/user:
+     * /api/v2/basicauth/user:
      *   delete:
      *     description: delete the user providing user credentials
      *     operationId: "deleteUser"
@@ -85,8 +85,8 @@ module.exports = function (router) {
      *          "204":
      *            description: "user had been deleted"
      */
-    router.delete('/api/v2/public/user', cors_headers, delete_user);
-    router.options('/api/v2/public/use', cors_headers);
+    router.delete('/api/v2/basicauth/user', cors_headers, delete_user);
+    router.options('/api/v2/basicauth/user', cors_headers);
 
 
 };
