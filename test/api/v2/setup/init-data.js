@@ -1,3 +1,5 @@
+"use strict";
+
 var promise = require('bluebird');
 var bcrypt = promise.promisifyAll(require('bcrypt'));
 
