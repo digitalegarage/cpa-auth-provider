@@ -65,7 +65,7 @@ var get_user_id = function (req, res) {
         if (auth.indexOf("Bearer ") == 0) {
             var token = auth.substring("Bearer ".length);
             try {
-                let userId = jwtHelper.getUserId(token);
+                let userId = jwtHelper.decode(token).id;
                 return res.status(200).send({id: userId});
             } catch (err) {
                 return res.status(401).send({error: 'Cannot parse JWT token'});
