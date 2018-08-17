@@ -58,7 +58,7 @@ var delete_user = function (req, res) {
 };
 
 var get_user_id = function (req, res) {
-    var auth = req.headers['authorization'];
+    var auth = req.headers.authorization;
     if (!auth) {
         return res.status(401).send({error: 'missing header Authorization'});
     } else {
