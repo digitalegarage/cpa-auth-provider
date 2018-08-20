@@ -2,6 +2,7 @@
 
 var requestHelper = require('../../../request-helper');
 var initData = require('../setup/init-data');
+var login = require('../setup/login');
 
 
 const NEW_DAB = "1989-11-09";
@@ -20,7 +21,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                oAuthLogin(ctx, done);
+                login.oAuthLogin(ctx, done);
             });
 
             before(function (done) {
@@ -36,7 +37,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                cookieLogin(ctx, done);
+                login.cookieLogin(ctx, done);
             });
 
             before(function (done) {
@@ -52,7 +53,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                jwtLogin(ctx, done);
+                login.jwtLogin(ctx, done);
             });
 
             before(function (done) {
@@ -87,7 +88,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                oAuthLogin(ctx, done);
+                login.oAuthLogin(ctx, done);
             });
             before(function (done) {
                 oAuthUpdateProfile(ctx, done);
@@ -106,7 +107,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                cookieLogin(ctx, done);
+                login.cookieLogin(ctx, done);
             });
 
             before(function (done) {
@@ -126,7 +127,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                jwtLogin(ctx, done);
+                login.jwtLogin(ctx, done);
             });
 
             before(function (done) {
@@ -162,21 +163,6 @@ describe('API-V2 profile', function () {
 
 //---------------
 // oAuth calls
-function oAuthLogin(context, done) {
-    requestHelper.sendRequest(context, '/oauth2/token', {
-        method: 'post',
-        data: {
-            grant_type: 'password',
-            username: initData.USER_1.email,
-            password: initData.USER_1.password,
-            client_id: initData.OAUTH_CLIENT_1.client_id,
-            client_secret: initData.OAUTH_CLIENT_1.client_secret
-        }
-    }, function () {
-        context.token = context.res.body.access_token;
-        done();
-    });
-}
 
 function oAuthGetProfile(context, done) {
     requestHelper.sendRequest(
@@ -207,13 +193,6 @@ function oAuthUpdateProfile(context, done) {
 //---------------
 // cookie calls
 
-function cookieLogin(httpContext, done) {
-    requestHelper.loginCustom(initData.USER_1.email, initData.USER_1.password, httpContext, function () {
-        context.cookie = httpContext.cookie;
-        done();
-    });
-}
-
 function cookieGetProfile(httpContext, done) {
     requestHelper.sendRequest(httpContext, '/api/v2/session/user/profile', {
         method: 'get',
@@ -239,25 +218,10 @@ function cookieUpdateProfile(context, done) {
 //---------------
 // jwt calls
 
-function jwtLogin(context, done) {
-    requestHelper.sendRequest(context, '/api/local/authenticate/jwt', {
-        method: 'post',
-        type: 'form',
-        data: {
-            email: initData.USER_1.email,
-            password: initData.USER_1.password
-        }
-    }, function () {
-        context.token = context.res.body.token.substring(4, context.res.body.token.size);
-        done();
-    });
-}
-
 function jwtGetProfile(context, done) {
     requestHelper.sendRequest(context, '/api/v2/jwt/user/profile', {
         method: 'get',
         accessToken: context.token,
-        tokenType: 'JWT'
     }, done);
 }
 

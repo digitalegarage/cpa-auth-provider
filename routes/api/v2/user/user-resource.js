@@ -4,6 +4,7 @@ var cors = require('cors');
 var logger = require('../../../../lib/logger');
 var db = require('../../../../models/index');
 var auth = require('basic-auth');
+var jwtHelper = require('../../../../lib/jwt-helper');
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
@@ -54,7 +55,25 @@ var delete_user = function (req, res) {
             }
         });
     }
+};
 
+var get_user_id = function (req, res) {
+    var auth = req.headers.authorization;
+    if (!auth) {
+        return res.status(401).send({error: 'missing header Authorization'});
+    } else {
+        if (auth.indexOf("Bearer ") == 0) {
+            var token = auth.substring("Bearer ".length);
+            try {
+                let userId = jwtHelper.decode(token).id;
+                return res.status(200).send({id: userId});
+            } catch (err) {
+                return res.status(401).send({error: 'Cannot parse JWT token'});
+            }
+        } else {
+            return res.status(401).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
+        }
+    }
 
 };
 
@@ -87,6 +106,32 @@ module.exports = function (router) {
      */
     router.delete('/api/v2/basicauth/user', cors_headers, delete_user);
     router.options('/api/v2/basicauth/user', cors_headers);
+
+    /**
+     * @swagger
+     * /api/v2/jwt/user/id:
+     *   get:
+     *     description: retreive user id from jwt token (id is retrieved in jwt token not from the database)
+     *     operationId: "getUserId"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "jwt token"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c=
+     *     responses:
+     *          "200":
+     *            description: "user had been deleted"
+     *            schema:
+     *              type: string
+     *              example: 42b
+     */
+    router.get('/api/v2/jwt/user/id', cors_headers, get_user_id);
+    router.options('/api/v2/jwt/user/id', cors_headers);
 
 
 };
