@@ -23,7 +23,6 @@ var delete_user = function (req, res) {
                 logger.info('locallogin not found');
                 return res.status(401).send();
             } else {
-                logger.info('locallogin', localLogin);
                 return localLogin.verifyPassword(password)
                     .then(function (isMatch) {
                         logger.info('isMatch', isMatch);
