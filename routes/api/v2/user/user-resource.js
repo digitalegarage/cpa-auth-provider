@@ -10,7 +10,6 @@ var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
 
     var user = auth(req);
-    logger.info('user', user);
 
     if (!user) {
         return res.json({error: 'missing credentials'}).status(400).send();
