@@ -157,6 +157,9 @@ module.exports = {
         //domain: .rts.ch
     },
 
+    // Can be use to use an authorization header instead of a cookie in mobile app for instance.
+    session_authorization_header_qualifier : 'sessiontoken',
+
     // Cross-origin resource sharing
     cors: {
         enabled: true,
