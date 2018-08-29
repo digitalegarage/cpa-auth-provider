@@ -24,11 +24,11 @@
                         <!-- LOGIN FORM -->
                         <form class="connect-forms" action="<%= target %>" method="post">
                             <div class="form-group">
-                                <input type="email" class="form-control" name="email" value="dominique.chion@gmail.com"
+                                <input type="email" class="form-control" name="email" value="<%= email %>"
                                        placeholder="<%= __('LOGIN_EMAIL_LABEL') %>">
                             </div>
                             <div class="form-group">
-                                <input type="password" class="form-control" name="password" value="azertyuiopazertyuiop"
+                                <input type="password" class="form-control" name="password"
                                        placeholder="<%= __('LOGIN_PASSWORD_LABEL') %>">
                                 <a id="password-recovery"
                                    class="btn-link"
