@@ -88,13 +88,17 @@ module.exports = function (app, options) {
                 if (! Array.isArray(headers)){
                     var tmp = headers;
                     headers = [];
-                    headers.push(tmp);
+                    if (tmp) {
+                        headers.push(tmp);
+                    }
                 }
+
+                logger.debug("headers", headers);
 
                 var token;
                 for (var header in headers) {
 
-                    if (headers[header].indexOf(config.auth_session_cookie.name) == 0) {
+                    if (headers[header] && headers[header].indexOf(config.auth_session_cookie.name) == 0) {
                         var attributes = headers[header].split(';');
                         for (var attribute in attributes) {
                             if (attributes[attribute].indexOf(config.auth_session_cookie.name) == 0) {
@@ -144,7 +148,7 @@ module.exports = function (app, options) {
      */
     app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
         if (req.query.redirect) {
-            const redirectUrl = req.query.redirect + '?token=' + encodeURI(req.cookies[config.auth_session_cookie.name]);
+            const redirectUrl = req.query.redirect + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]);
             logger.debug("about to redirect client to  ", redirectUrl);
             res.setHeader('Location', redirectUrl);
             res.writeHead(302);

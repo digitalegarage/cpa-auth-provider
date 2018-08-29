@@ -86,7 +86,7 @@ var routes = function (router) {
             email: req.query.email ? req.query.email : '',
             target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/login' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/login')
         };
-        let broadcaster = config.broadcaster && config.broadcaster.name ? config.broadcaster.name + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
         res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
     });
 
