@@ -81,9 +81,9 @@ module.exports = function (router) {
      *                      example: john@doe.com
      *                      description: user email
      *                  email_verified:
-     *                      type: string
+     *                      type: boolean
      *                      example: false
-     *                      description: true if email had benn verified
+     *                      description: true if email has been verified
      *                  gender:
      *                      type: string
      *                      enum: [other, male, female]

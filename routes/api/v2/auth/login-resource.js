@@ -54,11 +54,13 @@ module.exports = function (app, options) {
      *              $ref: "#/definitions/Credentials"
      *          - in: query
      *            name: "redirect"
+     *            example: "http://somedomain.org"
      *            schema:
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
      *            name: "code"
+     *            example: "true"
      *            schema:
      *              type: string
      *              description: if present a first redirect'd be request to /api/v2/session/cookie
@@ -83,9 +85,15 @@ module.exports = function (app, options) {
 
                 // Hack to retrieve authentication cookie in headers
                 let headers = res.getHeader("set-cookie");
+                if (! Array.isArray(headers)){
+                    var tmp = headers;
+                    headers = [];
+                    headers.push(tmp);
+                }
+
                 var token;
                 for (var header in headers) {
-                    logger.debug("parsing ", headers[header]);
+
                     if (headers[header].indexOf(config.auth_session_cookie.name) == 0) {
                         var attributes = headers[header].split(';');
                         for (var attribute in attributes) {
