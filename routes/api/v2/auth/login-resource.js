@@ -144,7 +144,7 @@ module.exports = function (app, options) {
      */
     app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
         if (req.query.redirect) {
-            const redirectUrl = req.query.redirect + '?token=' + req.cookies[config.auth_session_cookie.name];
+            const redirectUrl = req.query.redirect + '?token=' + encodeURI(req.cookies[config.auth_session_cookie.name]);
             logger.debug("about to redirect client to  ", redirectUrl);
             res.setHeader('Location', redirectUrl);
             res.writeHead(302);
