@@ -158,7 +158,7 @@ module.exports = {
     },
 
     // Can be use to use an authorization header instead of a cookie in mobile app for instance.
-    session_authorization_header_qualifier : 'sessiontoken',
+    session_authorization_header_qualifier : 'sessionToken',
 
     // Cross-origin resource sharing
     cors: {
