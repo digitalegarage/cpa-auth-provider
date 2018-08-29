@@ -24,6 +24,7 @@ services:
       - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
       - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
       - BROADCASTER_LAYOUT=rts
+      - SESSION_AUTHORIZATION_HEADER_QUALIFIER=sessionToken
     networks:
       - default
       - traefik-net
