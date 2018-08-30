@@ -8,8 +8,6 @@ var passport = require('passport');
 
 var REQUESTED_PERMISSIONS = ['email', 'user_birthday'];
 
-
-
 passport.use(facebookHelper.getFacebookStrategy('/auth/facebook/callback'));
 
 module.exports = function (app, options) {
