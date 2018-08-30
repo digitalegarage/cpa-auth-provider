@@ -77,6 +77,30 @@ module.exports = function (app, options) {
      *               type: "string"
      *               example: "myVeryStrongPassword"
      *               description: "user password"
+     *   SignupData:
+     *      type: "object"
+     *      properties:
+     *           email:
+     *               type: "string"
+     *               example: "someone@domain.org"
+     *               description: "user email"
+     *           password:
+     *               type: "string"
+     *               example: "myVeryStrongPassword"
+     *               description: "user password"
+     *           confirm_password:
+     *               type: "string"
+     *               example: "myVeryStrongPassword"
+     *               description: "user password confirm value"
+     *           gender:
+     *               type: "string"
+     *               enum: [other, male, female]
+     *               example: male
+     *               description: user gender
+     *           date_of_birth:
+     *               type: "string"
+     *               example: 31.08.1978
+     *               description: "user date of birth"
      *   Token:
      *      type: "object"
      *      properties:
@@ -117,7 +141,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: if present a first redirect'd be request to /api/v2/session/cookie
      *     responses:
-     *          "200":
+     *          "204":
      *            description: "login succeed"
      *          "302":
      *            description: "a redirect with token in body response"
@@ -150,16 +174,56 @@ module.exports = function (app, options) {
         }
     );
 
+
+    /**
+     * @swagger
+     * /api/v2/session/signup:
+     *   post:
+     *     description: login
+     *     operationId: "sessionLogin"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "signup data"
+     *            description: "signup data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/SignupData"
+     *          - in: query
+     *            name: "redirect"
+     *            example: "http://somedomain.org"
+     *            schema:
+     *              type: string
+     *              description: The redirect url to send the code
+     *          - in: query
+     *            name: "code"
+     *            example: "true"
+     *            schema:
+     *              type: string
+     *              description: if present a first redirect'd be request to /api/v2/session/cookie
+     *     responses:
+     *          "204":
+     *            description: "signup succeed"
+     *          "302":
+     *            description: "a redirect with token in body response"
+     *            schema:
+     *              $ref: '#/definitions/Token'
+     */
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
 
         passport.authenticate(LOCAL_REDIRECT_SIGNUP_STRATEGY, function (err, user, info) {
+
+            if (res.headersSent){
+                return res.end();
+            }
 
             if (err) {
                 return next(err);
             }
             // Redirect if it fails
             if (!user) {
-                res.sendStatus(500);
+                return res.json({error: info}); //TODO when email is already taken response code is 200
             }
             req.logIn(user, function (err) {
                 if (req.query.redirect) {
