@@ -28,6 +28,7 @@ services:
       - GOOGLE_LOGIN_ENABLED=true
       - GOOGLE_LOGIN_ID=428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com
       - GOOGLE_LOGIN_SECRET=9nG_oREywyfzDWwASVVFVQOr
+      - BASE_URL=http://{$DEPLOY_URL}
 
     networks:
       - default
