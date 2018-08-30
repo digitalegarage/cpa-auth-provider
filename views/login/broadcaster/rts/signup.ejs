@@ -21,7 +21,8 @@
         <div class="rts-panel main rts-overlay-hide-action">
             <div class="rts-module bg-default">
                 <div class="marts-form-container"><h1>Créer mon compte</h1>
-                    <form id="marts-new-accound-form" class="marts-form" method="post"><p>Renseignez
+                    <form id="marts-new-accound-form" class="marts-form" method="post"
+                          action="<%= target %>"><p>Renseignez
                             les champs présents ci-dessous afin de créer un compte.</p>
                         <div class="marts-form-error-message"></div>
                         <input type="text" id="create_account_birthdate"
@@ -38,14 +39,21 @@
                                                                  name="signup_gender" value="other"
                                                                  checked="checked" required> Non
                                 renseigné</label></div>
-                        <input type="email" id="create_account_email" name="create_account_email"
+                        <input type="email" id="create_account_email" name="email"
                                class="text text-error" placeholder="Adresse email (identifiant)"
-                               required> <input type="password" id="create_account_password"
-                                                name="create_account_password"
-                                                class="text text-error password-complexity"
-                                                placeholder="Mot de passe" required>
+                               required>
+                        <input type="password" id="create_account_password"
+                               name="password"
+                               class="text text-error password-complexity"
+                               placeholder="Mot de passe" required>
+                        <input type="password" id="create_account_password_confirm"
+                               name="confirm_password"
+                               class="text text-error password-complexity"
+                               placeholder="Confirmer votre de passe" required>
                         <div class="password-handler">
-                            <div class="password-bar"><span class="password-progress"></span></div>
+                            <div class="password-bar">
+                                <span class="password-progress"></span>
+                            </div>
                             <div class="password-complexity-explanation"> Pour rendre votre mot de
                                 passe plus sécurisé, vous pouvez ajouter :
                                 <ul>

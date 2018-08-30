@@ -95,7 +95,7 @@ var routes = function (router) {
             message: '',
             email: req.query.email ? req.query.email : '',
             login: requestHelper.getPath(req.query.redirect ? ('/responsive/login' + '?redirect=' + req.query.redirect+'&code=true') : '/responsive/login'),
-            target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/login' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/login')
+            target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/signup' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/signup')
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
         res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);

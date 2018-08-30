@@ -6,8 +6,60 @@ var cors = require('../../../../lib/cors');
 var config = require('../../../../config');
 var logger = require('../../../../lib/logger');
 var requestHelper = require('../../../../lib/request-helper');
+var LocalStrategy = require('passport-local').Strategy;
+var authLocalHelper = require('../../../../lib/auth-local-helper');
+var limiterHelper = require('../../../../lib/limiter-helper');
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
+
+function getToken(res, token, req) {
+// Hack to retrieve authentication cookie in headers
+    let headers = res.getHeader("set-cookie");
+    if (!Array.isArray(headers)) {
+        var tmp = headers;
+        headers = [];
+        if (tmp) {
+            headers.push(tmp);
+        }
+    }
+
+    for (var header in headers) {
+
+        if (headers[header] && headers[header].indexOf(config.auth_session_cookie.name) == 0) {
+            var attributes = headers[header].split(';');
+            for (var attribute in attributes) {
+                if (attributes[attribute].indexOf(config.auth_session_cookie.name) == 0) {
+                    token = attributes[attribute].substring(config.auth_session_cookie.name.length + 1); // +1 for equal char
+                    break;
+                }
+            }
+            break;
+        }
+    }
+
+    // server doesn't set cookie (cookie is in the request). => respond with request one
+    if (!token) {
+        token = req.cookies[config.auth_session_cookie.name];
+    }
+    return token;
+}
+
+
+var localStrategyConf = {
+    // by default, local strategy uses username and password, we will override with email
+    usernameField: 'email',
+    passwordField: 'password',
+    passReqToCallback: true // allows us to pass back the entire request to the callback
+};
+
+const LOCAL_REDIRECT_STRATEGY = 'local-redirect';
+const LOCAL_REDIRECT_SIGNUP_STRATEGY = 'local-signup-redirect';
+
+
+passport.use(LOCAL_REDIRECT_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
+
+passport.use(LOCAL_REDIRECT_SIGNUP_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localSignupStrategyCallback));
+
 
 module.exports = function (app, options) {
 
@@ -73,7 +125,7 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/Token'
      */
     app.post('/api/v2/session/login', cors,
-        passport.authenticate('local', {session: true}),
+        passport.authenticate(LOCAL_REDIRECT_STRATEGY, {session: true}),
         function (req, res) {
 
             afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
@@ -87,37 +139,7 @@ module.exports = function (app, options) {
                 }
                 res.writeHead(302);
 
-                // Hack to retrieve authentication cookie in headers
-                let headers = res.getHeader("set-cookie");
-                if (! Array.isArray(headers)){
-                    var tmp = headers;
-                    headers = [];
-                    if (tmp) {
-                        headers.push(tmp);
-                    }
-                }
-
-                logger.debug("headers", headers);
-
-                var token;
-                for (var header in headers) {
-
-                    if (headers[header] && headers[header].indexOf(config.auth_session_cookie.name) == 0) {
-                        var attributes = headers[header].split(';');
-                        for (var attribute in attributes) {
-                            if (attributes[attribute].indexOf(config.auth_session_cookie.name) == 0) {
-                                token = attributes[attribute].substring(config.auth_session_cookie.name.length + 1); // +1 for equal char
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-
-                // server doesn't set cookie (cookie is in the request). => respond with request one
-                if (!token) {
-                    token = req.cookies[config.auth_session_cookie.name];
-                }
+                var token = getToken(res, token, req);
 
                 res.write('{"token": "' + token + '"}');
                 res.end();
@@ -127,6 +149,38 @@ module.exports = function (app, options) {
             }
         }
     );
+
+    app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
+
+        passport.authenticate(LOCAL_REDIRECT_SIGNUP_STRATEGY, function (err, user, info) {
+
+            if (err) {
+                return next(err);
+            }
+            // Redirect if it fails
+            if (!user) {
+                res.sendStatus(500);
+            }
+            req.logIn(user, function (err) {
+                if (req.query.redirect) {
+                    if (req.query.code) {
+                        res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
+                    } else {
+                        res.setHeader('Location', req.query.redirect);
+                    }
+                    res.writeHead(302);
+
+                    var token = getToken(res, token, req);
+
+                    res.write('{"token": "' + token + '"}');
+                    res.end();
+
+                } else {
+                    res.sendStatus(204);
+                }
+            });
+        })(req, res, next);
+    });
 
     /**
      * @swagger
