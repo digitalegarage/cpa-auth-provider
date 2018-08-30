@@ -5,7 +5,7 @@ services:
     image: ${CONTAINER_SHA_IMAGE}
     environment:
       - MAIL_FROM=no-reply@nobody.nowhere
-      - IDP_HOST=http://{$DEPLOY_URL}
+      - IDP_HOST=http://identity-provider-review-week-plus-9ozrwk.pipe-swarm.ebu.io
       - IDP_RECAPCHA_SITEKEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
       - IDP_RECAPCHA_SECRETKEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
       - DEFAULT_LOCALE=fr
