@@ -5,7 +5,7 @@ services:
     image: ${CONTAINER_SHA_IMAGE}
     environment:
       - MAIL_FROM=no-reply@nobody.nowhere
-      - IDP_HOST=http://identity-provider-review-week-plus-9ozrwk.pipe-swarm.ebu.io
+      - IDP_HOST=http://{$DEPLOY_URL}
       - IDP_RECAPCHA_SITEKEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
       - IDP_RECAPCHA_SECRETKEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
       - DEFAULT_LOCALE=fr
@@ -28,7 +28,10 @@ services:
       - GOOGLE_LOGIN_ENABLED=true
       - GOOGLE_LOGIN_ID=428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com
       - GOOGLE_LOGIN_SECRET=9nG_oREywyfzDWwASVVFVQOr
-      - BASE_URL=http://{$DEPLOY_URL}
+      - FACEBOOK_LOGIN_ENABLED=true
+      - FACEBOOK_LOGIN_ID=315223112568780
+      - FACEBOOK_LOGIN_SECRET=ccd7c4568fb402585e4acb3eb1eb9068
+      - BASE_URL=http://identity-provider-review-week-plus-9ozrwk.pipe-swarm.ebu.io
 
     networks:
       - default
