@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><title>Connexion - MaRTS - rts.ch</title>
-    <meta name="viewport" content="width=device-width, viewport-fit=cover, initial-scale=1, shrink-to-fit=no">
+<head>
+    <title>Connexion - MaRTS - rts.ch</title>
+    <meta name="viewport"
+          content="width=device-width, viewport-fit=cover, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" type="text/css"
           href="https://cloud.typography.com/7638132/678348/css/fonts.css">
     <link rel="stylesheet" type="text/css"
@@ -12,8 +14,6 @@
           href="https://www.rts.ch/hummingbird-static/css/rts-3b10de8b4b3f278f58790eb3d6c7f5f9.css"/>
     <link rel="stylesheet" type="text/css"
           href="https://www.rts.ch/hummingbird-static/css/marts-f7be90533b56a4b212abcb1e58bcd416.css"/>
-    <script src="/js/password-score.js" async defer></script>
-
 </head>
 <body class="marts-overlay universe-rts">
 <main class="rts-layout layout-page large rts-overlay-hide-action">
@@ -21,7 +21,8 @@
         <div class="rts-panel main rts-overlay-hide-action">
             <div class="rts-module bg-default">
                 <div class="marts-form-container"><h1>Me connecter</h1>
-                    <p>Pas encore membre ? <a href="/profile/new?popup=true">Créer un compte</a></p>
+                    <p>Pas encore membre ? <a href="<%= signup %>">Créer un
+                            compte</a></p>
                     <form id="marts-login-form" class="marts-form" method="post"
                           action="<%= target %>">
                         <div class="marts-form-error-message"></div>
