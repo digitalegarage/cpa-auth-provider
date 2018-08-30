@@ -44,7 +44,7 @@
                         <div class="row social">
                             <% if(config.identity_providers.google.enabled) { %>
                             <div class="text-center">
-                                <a href="<%= link('/auth/google') %>"
+                                <a href="<%= link('/api/v2/auth/google') %>"
                                    class="identity_provider googleplus">
                                     <img class="login-images" src="<%= link('/assets/img/logoroundg+.svg') %>"/>
                                     <p class="login-social-labels">
@@ -55,7 +55,7 @@
                             <% } %>
                             <% if(config.identity_providers.facebook.enabled) { %>
                             <div class="text-center">
-                                <a href="<%= link('/auth/facebook') %>"
+                                <a href="<%= link('/api/v2/auth/facebook') %>"
                                    class="identity_provider facebook">
                                     <img class="login-images" src="<%= link('/assets/img/logoroundfacebook.svg') %>"/>
                                     <p class="login-social-labels">
