@@ -67,6 +67,10 @@ module.exports = function (app, options) {
      *     responses:
      *          "200":
      *            description: "login succeed"
+     *          "302":
+     *            description: "a redirect with token in body response"
+     *            schema:
+     *              $ref: '#/definitions/Token'
      */
     app.post('/api/v2/session/login', cors,
         passport.authenticate('local', {session: true}),
@@ -143,8 +147,6 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/Token'
      *          "302":
      *            description: "a redirect with token as a get query parameter"
-     *            schema:
-     *              $ref: '#/definitions/Token'
      */
     app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
         if (req.query.redirect) {
