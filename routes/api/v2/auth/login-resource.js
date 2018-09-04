@@ -194,7 +194,7 @@ module.exports = function (app, options) {
             if (err) {
                 return next(err);
             }
-            return res.send({authenticated: req.isAuthenticated()});
+            return res.sendStatus(204);
         });
     });
 
