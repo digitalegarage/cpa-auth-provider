@@ -33,6 +33,13 @@ function cookieLogin(httpContext, done) {
     });
 }
 
+function cookieLogout(httpContext, done) {
+    requestHelper.sendRequest(httpContext, '/api/v2/session/logout', {
+        method: 'delete',
+        cookie: httpContext.cookie
+    }, done);
+}
+
 
 //---------------
 // jwt calls
@@ -55,5 +62,6 @@ function jwtLogin(context, done) {
 module.exports = {
     oAuthLogin: oAuthLogin,
     cookieLogin: cookieLogin,
+    cookieLogout: cookieLogout,
     jwtLogin: jwtLogin
 };
