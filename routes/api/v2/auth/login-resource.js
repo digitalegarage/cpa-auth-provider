@@ -9,6 +9,8 @@ var requestHelper = require('../../../../lib/request-helper');
 var LocalStrategy = require('passport-local').Strategy;
 var authLocalHelper = require('../../../../lib/auth-local-helper');
 var limiterHelper = require('../../../../lib/limiter-helper');
+var authHelper = require('../../../../lib/auth-helper');
+var afterLogoutHelper = require('../../../../lib/afterlogout-helper');
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
@@ -173,6 +175,28 @@ module.exports = function (app, options) {
             }
         }
     );
+
+    /**
+     * @swagger
+     * /api/v2/session/logout:
+     *   delete:
+     *     description: disconnect
+     *     operationId: "sessionDisconnect"
+     *     responses:
+     *          "204":
+     *            description: "user disconnected"
+     */
+    app.delete('/api/v2/session/logout', cors, authHelper.ensureAuthenticated, function (req, res, next) {
+
+        afterLogoutHelper.afterLogout(res);
+        req.logout();
+        req.session.destroy(function (err) {
+            if (err) {
+                return next(err);
+            }
+            return res.send({authenticated: req.isAuthenticated()});
+        });
+    });
 
 
     /**
