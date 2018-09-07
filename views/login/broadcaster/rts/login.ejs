@@ -38,9 +38,10 @@
                         <p><a href="/profile/forgot-password?popup=true">Mot de passe oublié ?</a>
                         </p></form>
                     <ul class="alternative-logins">
-                        <li class="alternative-login marts-login-facebook"><span
+                        <li class="alternative-login marts-login-facebook">
+                          <a href="<%= link('/api/v2/auth/facebook') %>"><span
                                     class="rts-picto social facebook colored"></span>
-                            <p class="login-name">Connectez-vous avec Facebook</p></li>
+                            <p class="login-name">Connectez-vous avec Facebook</p></a></li>
                         <li class="alternative-login marts-login-google">
                             <a href="<%= link('/api/v2/auth/google') %>"><span
                                         class="rts-picto social google colored"></span>

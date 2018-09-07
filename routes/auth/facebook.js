@@ -6,7 +6,7 @@ var facebookHelper = require('../../lib/facebook-helper');
 
 var passport = require('passport');
 
-var REQUESTED_PERMISSIONS = ['email', 'user_birthday'];
+var REQUESTED_PERMISSIONS = ['email'];
 
 passport.use(facebookHelper.getFacebookStrategy('/auth/facebook/callback'));
 
@@ -32,4 +32,3 @@ module.exports = function (app, options) {
 
         });
 };
-
