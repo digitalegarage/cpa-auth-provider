@@ -46,7 +46,8 @@ module.exports = {
     USER_1_PROFILE: USER_1_PROFILE,
     USER_1_DAB_STR: USER_1_DAB_STR,
     USER_1_CPA_TOKEN: USER_1_CPA_TOKEN,
-    resetDatabase: resetDatabase
+    resetDatabase: resetDatabase,
+    resetEmptyDatabase: resetEmptyDatabase
 }
 
 function createOAuth2Client(done) {
@@ -102,6 +103,21 @@ function resetDatabase(done) {
                     return createUsers(function () {
                         done();
                     });
+                }
+            );
+        }
+    });
+};
+
+
+function resetEmptyDatabase(done) {
+    return dbHelper.clearDatabase(function (err) {
+        if (err) {
+            return done(err);
+        } else {
+            return createOAuth2Client(
+                function () {
+                        done();
                 }
             );
         }

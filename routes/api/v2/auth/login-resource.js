@@ -11,6 +11,9 @@ var authLocalHelper = require('../../../../lib/auth-local-helper');
 var limiterHelper = require('../../../../lib/limiter-helper');
 var authHelper = require('../../../../lib/auth-helper');
 var afterLogoutHelper = require('../../../../lib/afterlogout-helper');
+var userHelper = require('../../../../lib/user-helper');
+var passwordHelper = require('../../../../lib/password-helper');
+
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
@@ -22,13 +25,8 @@ var localStrategyConf = {
 };
 
 const LOCAL_REDIRECT_STRATEGY = 'local-redirect';
-const LOCAL_REDIRECT_SIGNUP_STRATEGY = 'local-signup-redirect';
-
 
 passport.use(LOCAL_REDIRECT_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
-
-passport.use(LOCAL_REDIRECT_SIGNUP_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localSignupStrategyCallback));
-
 
 module.exports = function (app, options) {
 
@@ -200,35 +198,80 @@ module.exports = function (app, options) {
      */
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
 
-        passport.authenticate(LOCAL_REDIRECT_SIGNUP_STRATEGY, function (err, user, info) {
-
-            if (res.headersSent) {
-                return res.end();
+            if (req.recaptcha.error) {
+                res.status(400).json({msg: req.__('API_SIGNUP_SOMETHING_WRONG_RECAPTCHA')});
+                return;
             }
 
-            if (err) {
-                return next(err);
-            }
-            // Redirect if it fails
-            if (!user) {
-                return res.json({error: info}); //TODO when email is already taken response code is 200
-            }
-            req.logIn(user, function (err) {
-                if (req.query.redirect) {
-                    if (req.query.code) {
-                        res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
-                    } else {
-                        res.setHeader('Location', req.query.redirect);
+            if (!req.body.email || !req.body.password) {
+                res.status(400).json({msg: req.__('API_SIGNUP_PLEASE_PASS_EMAIL_AND_PWD')});
+            } else {
+                var username = req.body.email;
+                var password = req.body.password;
+                var requiredAttributes = {};
+                config.userProfiles.requiredFields.forEach(
+                    function (element) {
+                        if (req.body[element]) {
+                            requiredAttributes[element] = req.body[element];
+                        }
                     }
-                    res.writeHead(302);
-
-                    res.end();
-
-                } else {
-                    res.sendStatus(204);
+                );
+                var optionnalAttributes = {};
+                for (var element in userHelper.getRequiredFields()) {
+                    if (req.body[element] && !config.userProfiles.requiredFields.includes(element)) {
+                        optionnalAttributes[element] = req.body[element];
+                    }
                 }
-            });
-        })(req, res, next);
+
+                userHelper.createLocalLogin(username, password, requiredAttributes, optionnalAttributes).then(
+                    function (user) {
+                        req.logIn(user, function () {
+                            if (req.query.redirect) {
+                                if (req.query.code) {
+                                    res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
+                                } else {
+                                    res.setHeader('Location', req.query.redirect);
+                                }
+                                res.writeHead(302);
+
+                                res.end();
+
+                            } else {
+                                res.sendStatus(204);
+                            }
+                        });
+                    },
+                    function (err) {
+                        if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
+                            return res.status(400).json({msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')});
+                        } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
+                            return res.status(400).json({
+                                msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+                                password_strength_errors: passwordHelper.getWeaknesses(username, req.body.password, req),
+                                errors: [{msg: passwordHelper.getWeaknessesMsg(username, req.body.password, req)}],
+                                score: passwordHelper.getQuality(username, req.body.password)
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
+                            logger.debug('[POST /api/v2/session/signup][email', username, '][ERR', err, ']');
+                            return res.status(400).json({
+                                msg: req.__('API_SIGNUP_MISSING_FIELDS'),
+                                missingFields: err.data ? err.data.missingFields : undefined
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.UNKNOWN_GENDER) {
+                            return res.status(400).json({
+                                msg: req.__('API_SIGNUP_MISSING_FIELDS')
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.MALFORMED_DATE_OF_BIRTH) {
+                            return res.status(400).json({
+                                msg: req.__('API_SIGNUP_MISSING_FIELDS')
+                            });
+                        } else {
+                            logger.error('[POST /api/v2/session/signup][email', username, '][ERR', err, ']');
+                            res.status(500).json({msg: req.__('API_ERROR') + err});
+                        }
+                    }
+                );
+            }
     });
 
     /**
