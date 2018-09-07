@@ -203,8 +203,8 @@ module.exports = function (app, options) {
      * @swagger
      * /api/v2/session/signup:
      *   post:
-     *     description: login
-     *     operationId: "sessionLogin"
+     *     description: signup
+     *     operationId: "signup"
      *     content:
      *        - application/json
      *     parameters:

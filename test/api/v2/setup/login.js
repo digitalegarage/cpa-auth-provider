@@ -6,8 +6,8 @@ var initData = require('../setup/init-data');
 
 //---------------
 // oAuth calls
-function oAuthLogin(context, done) {
-    requestHelper.sendRequest(context, '/oauth2/token', {
+function oAuthLogin(httpContext, done) {
+    requestHelper.sendRequest(httpContext, '/oauth2/token', {
         method: 'post',
         data: {
             grant_type: 'password',
@@ -17,7 +17,7 @@ function oAuthLogin(context, done) {
             client_secret: initData.OAUTH_CLIENT_1.client_secret
         }
     }, function () {
-        context.token = context.res.body.access_token;
+        httpContext.token = httpContext.res.body.access_token;
         done();
     });
 }
@@ -26,9 +26,27 @@ function oAuthLogin(context, done) {
 //---------------
 // cookie calls
 
+
 function cookieLogin(httpContext, done) {
-    requestHelper.loginCustom(initData.USER_1.email, initData.USER_1.password, httpContext, function () {
-        context.cookie = httpContext.cookie;
+    cookieLoginWithRedirectOption(httpContext, null, null, done);
+}
+
+function cookieLoginWithRedirectOption(httpContext, redirect, code, done) {
+    var uri = '/api/v2/session/login';
+    if (redirect) {
+        uri += "?redirect=" + redirect;
+        if (code) {
+            uri += "&code=true";
+        }
+    }
+    requestHelper.sendRequest(httpContext, uri, {
+        method: 'post',
+        data: {
+            email: initData.USER_1.email,
+            password: initData.USER_1.password
+        }
+    }, function () {
+        httpContext.cookie = httpContext.cookie;
         done();
     });
 }
@@ -62,6 +80,7 @@ function jwtLogin(context, done) {
 module.exports = {
     oAuthLogin: oAuthLogin,
     cookieLogin: cookieLogin,
+    cookieLoginWithRedirectOption: cookieLoginWithRedirectOption,
     cookieLogout: cookieLogout,
     jwtLogin: jwtLogin
 };
