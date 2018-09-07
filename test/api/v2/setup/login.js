@@ -31,7 +31,15 @@ function cookieLogin(httpContext, done) {
     cookieLoginWithRedirectOption(httpContext, null, null, done);
 }
 
+function cookieLoginWithCustomCrendentials(httpContext, email, password, done) {
+    cookieLoginWithOptions(httpContext, email, password, null, null, done);
+}
+
 function cookieLoginWithRedirectOption(httpContext, redirect, code, done) {
+    cookieLoginWithOptions(httpContext, initData.USER_1.email, initData.USER_1.password, redirect, code, done)
+}
+
+function cookieLoginWithOptions(httpContext, email, password, redirect, code, done) {
     var uri = '/api/v2/session/login';
     if (redirect) {
         uri += "?redirect=" + redirect;
@@ -42,8 +50,8 @@ function cookieLoginWithRedirectOption(httpContext, redirect, code, done) {
     requestHelper.sendRequest(httpContext, uri, {
         method: 'post',
         data: {
-            email: initData.USER_1.email,
-            password: initData.USER_1.password
+            email: email,
+            password: password,
         }
     }, function () {
         httpContext.cookie = httpContext.cookie;
@@ -81,6 +89,7 @@ module.exports = {
     oAuthLogin: oAuthLogin,
     cookieLogin: cookieLogin,
     cookieLoginWithRedirectOption: cookieLoginWithRedirectOption,
+    cookieLoginWithCustomCrendentials: cookieLoginWithCustomCrendentials,
     cookieLogout: cookieLogout,
     jwtLogin: jwtLogin
 };
