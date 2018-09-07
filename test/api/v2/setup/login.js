@@ -42,21 +42,20 @@ function cookieLoginWithRedirectOption(httpContext, redirect, code, done) {
 function cookieLoginWithOptions(httpContext, email, password, redirect, code, done) {
     var uri = '/api/v2/session/login';
     if (redirect) {
-        uri += "?redirect=" + redirect;
+        uri += "?redirect=" + encodeURIComponent(redirect);
         if (code) {
             uri += "&code=true";
         }
     }
     requestHelper.sendRequest(httpContext, uri, {
-        method: 'post',
-        data: {
-            email: email,
-            password: password,
-        }
-    }, function () {
-        httpContext.cookie = httpContext.cookie;
-        done();
-    });
+            method: 'post',
+            data: {
+                email: email,
+                password: password,
+            }
+        },
+        done
+    );
 }
 
 function cookieLogout(httpContext, done) {

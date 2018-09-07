@@ -14,39 +14,6 @@ var afterLogoutHelper = require('../../../../lib/afterlogout-helper');
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
-function getToken(res, token, req) {
-// Hack to retrieve authentication cookie in headers
-    let headers = res.getHeader("set-cookie");
-    if (!Array.isArray(headers)) {
-        var tmp = headers;
-        headers = [];
-        if (tmp) {
-            headers.push(tmp);
-        }
-    }
-
-    for (var header in headers) {
-
-        if (headers[header] && headers[header].indexOf(config.auth_session_cookie.name) == 0) {
-            var attributes = headers[header].split(';');
-            for (var attribute in attributes) {
-                if (attributes[attribute].indexOf(config.auth_session_cookie.name) == 0) {
-                    token = attributes[attribute].substring(config.auth_session_cookie.name.length + 1); // +1 for equal char
-                    break;
-                }
-            }
-            break;
-        }
-    }
-
-    // server doesn't set cookie (cookie is in the request). => respond with request one
-    if (!token) {
-        token = req.cookies[config.auth_session_cookie.name];
-    }
-    return token;
-}
-
-
 var localStrategyConf = {
     // by default, local strategy uses username and password, we will override with email
     usernameField: 'email',
@@ -158,17 +125,14 @@ module.exports = function (app, options) {
 
             res.contentType('application/json');
             if (req.query.redirect) {
-                if (req.query.code) {
-                    res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
-                } else {
-                    res.setHeader('Location', req.query.redirect);
-                }
-                res.writeHead(302);
+                    if (req.query.code) {
+                        res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
+                    } else {
+                        res.setHeader('Location', req.query.redirect);
+                    }
+                     res.writeHead(302);
 
-                var token = getToken(res, token, req);
-
-                res.write('{"token": "' + token + '"}');
-                res.end();
+                     res.end();
 
             } else {
                 res.sendStatus(204);
@@ -238,7 +202,7 @@ module.exports = function (app, options) {
 
         passport.authenticate(LOCAL_REDIRECT_SIGNUP_STRATEGY, function (err, user, info) {
 
-            if (res.headersSent){
+            if (res.headersSent) {
                 return res.end();
             }
 
@@ -258,9 +222,6 @@ module.exports = function (app, options) {
                     }
                     res.writeHead(302);
 
-                    var token = getToken(res, token, req);
-
-                    res.write('{"token": "' + token + '"}');
                     res.end();
 
                 } else {

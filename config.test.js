@@ -7,6 +7,10 @@ module.exports = {
         title: ''
     },
 
+    auth_session_cookie :{
+        name: 'connect.sid'
+    },
+
     limiter: {
         type: 'recaptcha', // 'no' || 'rate' || 'recaptcha-optional' || 'recaptcha'
         parameters: {
