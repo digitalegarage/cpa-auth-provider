@@ -328,7 +328,7 @@ module.exports = function (app, options) {
                     .then(function (isMatch) {
                         if (isMatch) {
                             localLogin.logLogin(localLogin.User);
-                            handleCorrectJWTSignupOrLoginResponse(localLogin.User, req, res)
+                            handleCorrectJWTSignupOrLoginResponse(localLogin.User, req, res);
                         } else {
                             res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
                         }
