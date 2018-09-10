@@ -4,6 +4,7 @@ var config = require('../../config');
 var db = require('../../models');
 var authHelper = require('../../lib/auth-helper');
 var passwordHelper = require('../../lib/password-helper');
+var requestHelper = require('../../lib/request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var userHelper = require('../../lib/user-helper');
 var logger = require('../../lib/logger');
@@ -76,6 +77,30 @@ var routes = function (router) {
             });
         }
     });
+
+
+    router.get('/responsive/login', function (req, res) {
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            signup: requestHelper.getPath(req.query.redirect ? ('/responsive/signup' + '?redirect=' + req.query.redirect+'&code=true') : '/responsive/signup'),
+            target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/login' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/login')
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
+    });
+
+    router.get('/responsive/signup', function (req, res) {
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            login: requestHelper.getPath(req.query.redirect ? ('/responsive/login' + '?redirect=' + req.query.redirect+'&code=true') : '/responsive/login'),
+            target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/signup' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/signup')
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
+    });
+
 
     router.post('/user/:user_id/password', authHelper.ensureAuthenticated, function (req, res) {
         req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();

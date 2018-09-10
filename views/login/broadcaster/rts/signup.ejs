@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Connexion - MaRTS - rts.ch</title>
+    <meta name="viewport"
+          content="width=device-width, viewport-fit=cover, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" type="text/css"
+          href="https://cloud.typography.com/7638132/678348/css/fonts.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://hummingbird.rts.ch/hummingbird/res/fonts/srgssr/srgssr.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://www.rts.ch/hummingbird-static/css/navigation-rts-c254cfeac661b4bf4c2c15c6f6936c9d.css">
+    <link rel="stylesheet" type="text/css"
+          href="https://www.rts.ch/hummingbird-static/css/rts-3b10de8b4b3f278f58790eb3d6c7f5f9.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://www.rts.ch/hummingbird-static/css/marts-f7be90533b56a4b212abcb1e58bcd416.css"/>
+</head>
+<body class="marts-overlay universe-rts">
+<main class="rts-layout layout-page large rts-overlay-hide-action">
+    <div class="layout-container">
+        <div class="rts-panel main rts-overlay-hide-action">
+            <div class="rts-module bg-default">
+                <div class="marts-form-container"><h1>Créer mon compte</h1>
+                    <form id="marts-new-accound-form" class="marts-form" method="post"
+                          action="<%= target %>"><p>Renseignez
+                            les champs présents ci-dessous afin de créer un compte.</p>
+                        <div class="marts-form-error-message"></div>
+                        <input type="text" id="create_account_birthdate"
+                               name="date_of_birth"
+                               class="text text-error custom-datepicker"
+                               placeholder="Date de naissance (JJ.MM.AAAA)" required/>
+                        <div><label class="radio-inline"> <input type="radio" class="signup_gender"
+                                                                 name="gender" value="male"
+                                                                 required> Homme</label> <label
+                                    class="radio-inline"> <input type="radio" class="signup_gender"
+                                                                 name="gender" value="female"
+                                                                 required> Femme</label> <label
+                                    class="radio-inline"> <input type="radio" class="signup_gender"
+                                                                 name="gender" value="other"
+                                                                 checked="checked" required> Non
+                                renseigné</label></div>
+                        <input type="email" id="create_account_email" name="email" value="<%= email %>"
+                               class="text text-error" placeholder="Adresse email (identifiant)"
+                               required>
+                        <input type="password" id="create_account_password"
+                               name="password"
+                               class="text text-error password-complexity"
+                               placeholder="Mot de passe" required>
+                        <input type="password" id="create_account_password_confirm"
+                               name="confirm_password"
+                               class="text text-error password-complexity"
+                               placeholder="Confirmer votre de passe" required>
+                        <div class="password-handler">
+                            <div class="password-bar">
+                                <span class="password-progress"></span>
+                            </div>
+                            <div class="password-complexity-explanation"> Pour rendre votre mot de
+                                passe plus sécurisé, vous pouvez ajouter :
+                                <ul>
+                                    <li>Plus de caractères</li>
+                                    <li>Des lettres majuscules</li>
+                                    <li>Des chiffres</li>
+                                    <li>Des caractères spéciaux (ex: !?+#...)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="align-left">
+                            <p>
+                                <input id="create_conditions" type="checkbox"
+                                       name="create_conditions"
+                                       required>
+                                <label for="create_conditions"> J'accepte les&nbsp;
+                                    <a class="form-link"
+                                       href="//www.rtsentreprise.ch/conditions-generales/"
+                                       target="_blank">conditions d'utilisation</a>
+                                </label></p>
+                            <p>
+                                <input id="create_conditions" type="checkbox"
+                                       name="create_conditions"
+                                       required>
+                                <label for="create_conditions"> J'accepte la&nbsp;
+                                    <a class="form-link"
+                                       href="//www.rts.ch/entreprise/a-propos/8994006-charte-de-confidentialite.html"
+                                       target="_blank">charte de confidentialité</a>
+                                </label></p>
+                        </div>
+                        <input class="marts-button" type="submit" value="Continuer"></form>
+                    <p> Vous avez déjà un compte ? <a href="<%= login %>">Connectez-vous
+                            !</a></p></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

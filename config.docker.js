@@ -194,6 +194,8 @@ module.exports = {
         accessible_over_non_https: process.env.AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS || false,
     },
 
+    session_authorization_header_qualifier:process.env.SESSION_AUTHORIZATION_HEADER_QUALIFIER,
+
     // Cross-origin resource sharing
     cors: {
         enabled: true,
