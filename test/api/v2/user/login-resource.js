@@ -30,7 +30,7 @@ const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong wit
 
 describe('API-V2 LOGIN', function () {
 
-    context('cookieSignup', function () {
+    context('signup', function () {
         beforeEach(initData.resetEmptyDatabase);
 
         context('session', function () {
@@ -42,7 +42,7 @@ describe('API-V2 LOGIN', function () {
                 });
 
                 before(function (done) {
-                    login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
+                    login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
                 });
 
                 it('should return a success false', function () {
@@ -62,7 +62,7 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, WEAK_PASSWORD, null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, WEAK_PASSWORD, null, null, done);
                     });
 
                     it('should return a success false', function () {
@@ -76,7 +76,7 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, LONG_MAIL, LONG_MAIL, null, done);
+                        login.cookieSignup(ctx, LONG_MAIL, LONG_MAIL, null, null, done);
                     });
 
                     it('should return a success false', function () {
@@ -90,7 +90,7 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
                     });
 
                     it('should return a success true', function () {
@@ -103,7 +103,7 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, 'qsdf2@qsdf.fr', null, null, done);
+                        login.cookieSignup(ctx, 'qsdf2@qsdf.fr', null, null, null, done);
                     });
 
 
@@ -118,7 +118,7 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, null, STRONG_PASSWORD, null, done);
+                        login.cookieSignup(ctx, null, STRONG_PASSWORD, null, null, done);
                     });
 
                     it('should return a success false', function () {
@@ -132,11 +132,11 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
                     });
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD + "2", null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD + "2", null, null, done);
                     });
 
                     it('should return a success false', function () {
@@ -149,11 +149,11 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
                     });
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL.toUpperCase(), STRONG_PASSWORD + "2", null, done);
+                        login.cookieSignup(ctx, AN_EMAIL.toUpperCase(), STRONG_PASSWORD + "2", null, null, done);
                     });
 
 
@@ -180,7 +180,7 @@ describe('API-V2 LOGIN', function () {
                         var ctx = this;
 
                         before(function (done) {
-                            login.cookieSignupWithProfile(ctx, AN_EMAIL, STRONG_PASSWORD, {gender: 'male'}, null, done);
+                            login.cookieSignupWithProfile(ctx, AN_EMAIL, STRONG_PASSWORD, {gender: 'male'}, null, null, done);
                         });
 
 
@@ -200,7 +200,7 @@ describe('API-V2 LOGIN', function () {
                             login.cookieSignupWithProfile(ctx, AN_EMAIL, STRONG_PASSWORD, {
                                 gender: 'jedi',
                                 date_of_birth: DATE_OF_BIRTH
-                            }, null, done);
+                            }, null, null, done);
                         });
 
                         it('should return a success false', function () {
@@ -217,7 +217,7 @@ describe('API-V2 LOGIN', function () {
                             login.cookieSignupWithProfile(ctx, 'qsdf@qsdf.fr'.toUpperCase(), STRONG_PASSWORD + "2", {
                                 gender: 'female',
                                 date_of_birth: DATE_OF_BIRTH
-                            }, null, done);
+                            }, null, null, done);
                         });
 
                         it('should return a success false', function () {
@@ -247,7 +247,7 @@ describe('API-V2 LOGIN', function () {
                             date_of_birth: DATE_OF_BIRTH,
                             firstname: 'firstname',
                             lastname: 'lastname'
-                        }, null, done);
+                        }, null, null, done);
                     });
 
                     before(function (done) {
@@ -270,7 +270,7 @@ describe('API-V2 LOGIN', function () {
                     var ctx = this;
 
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
                     });
 
                     before(function (done) {
@@ -287,23 +287,93 @@ describe('API-V2 LOGIN', function () {
                 });
             });
             context('when user request to be redirected', function () {
+                context('with code', function () {
+
+                    var ctx = this;
+
+                    const REDIRECT_URI = 'http://google.ch';
+
+                    before(function (done) {
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, true, done);
+                    });
+
+                    it('should return a 302', function () {
+                        expect(ctx.res.statusCode).to.equal(302);
+                        expect(ctx.res.header.location).to.equal('/ap/api/v2/session/cookie?redirect=' + REDIRECT_URI);
+                    });
+                });
+                context('without code', function () {
+
+                    var ctx = this;
+
+                    const REDIRECT_URI = 'http://google.ch';
+
+                    before(function (done) {
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, null, done);
+                    });
+
+                    it('should return a 302', function () {
+                        expect(ctx.res.statusCode).to.equal(302);
+                        expect(ctx.res.header.location).to.equal(REDIRECT_URI);
+                    });
+                });
+            });
+        });
+
+        context('jwt', function () {
+            context('after signup', function () {
+
+                context('user should have an authenticated cookie session ', function () {
+                    var ctx = this;
+
+                    before(function (done) {
+                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+                    });
+
+                    before(function (done) {
+                        requestHelper.sendRequest(ctx, '/api/v2/jwt/user/profile', {
+                            method: 'get',
+                            accessToken: ctx.token,
+                            tokenType: 'JWT'
+                        }, done);
+                    });
+
+                    it('should return a success true', function () {
+                        expect(ctx.res.statusCode).to.equal(200);
+                    });
+
+                });
+            });
+            context('when user request to be redirected', function () {
                 var ctx = this;
 
                 const REDIRECT_URI = 'http://google.ch';
 
-                before(function (done) {
-                    login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, done);
-                });
+                context('with code', function () {
 
-                it('should return a success true', function () {
-                    expect(ctx.res.statusCode).to.equal(302);
-                    expect(ctx.res.header.location).to.equal(REDIRECT_URI);
+                    before(function (done) {
+                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, true, done);
+                    });
+
+                    it('should return a 302', function () {
+                        expect(ctx.res.statusCode).to.equal(302);
+                        expect(ctx.res.header.location).to.equal(REDIRECT_URI + '?token=' + ctx.token);
+                    });
+                });
+                context('without code', function () {
+
+                    before(function (done) {
+                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, null, done);
+                    });
+
+                    it('should return a 302', function () {
+                        expect(ctx.res.statusCode).to.equal(302);
+                        expect(ctx.res.header.location).to.equal(REDIRECT_URI);
+                    });
                 });
             });
         });
     });
-    // TODO clean cookieSignup endpoint
-    // TODO Login resource with oAuth, JWT
 
     context('login', function () {
         before(initData.resetDatabase);

@@ -25,7 +25,7 @@ function oAuthLogin(httpContext, done) {
 
 //---------------
 // cookie calls
-function cookieSignupWithProfile(httpContext, email, password, profileData, redirect, done) {
+function cookieSignupWithProfile(httpContext, email, password, profileData, redirect, code, done) {
     var data = {
         email: email,
         password: password,
@@ -37,6 +37,9 @@ function cookieSignupWithProfile(httpContext, email, password, profileData, redi
     var uri = '/api/v2/session/signup';
     if (redirect) {
         uri += "?redirect=" + redirect;
+        if (code) {
+            uri += "&code=true";
+        }
     }
     requestHelper.sendRequest(httpContext, uri, {
         method: 'post',
@@ -45,8 +48,8 @@ function cookieSignupWithProfile(httpContext, email, password, profileData, redi
     }, done);
 }
 
-function cookieSignup(httpContext, email, password, redirect, done) {
-    cookieSignupWithProfile(httpContext, email, password, null, redirect, done);
+function cookieSignup(httpContext, email, password, redirect, code, done) {
+    cookieSignupWithProfile(httpContext, email, password, null, redirect, code, done);
 }
 
 function cookieLogin(httpContext, done) {
@@ -92,9 +95,8 @@ function cookieLogout(httpContext, done) {
 // jwt calls
 
 function jwtLogin(context, done) {
-    requestHelper.sendRequest(context, '/api/local/authenticate/jwt', {
+    requestHelper.sendRequest(context, '/api/v2/jwt/login', {
         method: 'post',
-        type: 'form',
         data: {
             email: initData.USER_1.email,
             password: initData.USER_1.password
@@ -105,6 +107,33 @@ function jwtLogin(context, done) {
     });
 }
 
+function jwtSignup(context, email, password, redirect, code, done) {
+
+    var uri = '/api/v2/jwt/signup';
+    if (redirect) {
+        uri += "?redirect=" + redirect;
+        if (code) {
+            uri += '&code=true'
+        }
+    }
+    requestHelper.sendRequest(context, uri, {
+        method: 'post',
+        data: {
+            email: email,
+            password: password,
+            'g-recaptcha-response': 'a dummy recaptcha response'
+        }
+    }, function () {
+        if (redirect) {
+            const TOKEN_QUERY_STRING = '?token=';
+            const LOCATION_HEADER = context.res.header.location;
+            context.token = LOCATION_HEADER.substring(LOCATION_HEADER.indexOf(TOKEN_QUERY_STRING) + TOKEN_QUERY_STRING.length);
+        } else {
+            context.token = context.res.body.token.substring(4); //Remove "JWT " prefix
+        }
+        done();
+    });
+}
 
 module.exports = {
     oAuthLogin: oAuthLogin,
@@ -114,5 +143,6 @@ module.exports = {
     cookieLogout: cookieLogout,
     cookieSignup: cookieSignup,
     cookieSignupWithProfile: cookieSignupWithProfile,
-    jwtLogin: jwtLogin
+    jwtLogin: jwtLogin,
+    jwtSignup: jwtSignup
 };
