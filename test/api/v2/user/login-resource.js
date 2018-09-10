@@ -24,154 +24,142 @@ const AN_EMAIL = 'mail@mail.mail';
 const LONG_MAIL = 'thisis@nemailthatisvery.cool';
 const STRONG_PASSWORD = 'correct horse battery staple';
 const WEAK_PASSWORD = 'weak';
+const DATE_OF_BIRTH = 249782400000;
 
 const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
 
-function signupWithProfile(email, password, profileData, done) {
-    var data = {
-        email: email,
-        password: password,
-        confirm_password: password, //FIXME: remove that!!!
-        'g-recaptcha-response': 'a dummy recaptcha response'
-    };
-    data = Object.assign(data, profileData);
-
-    requestHelper.sendRequest(this, '/api/v2/session/signup', {
-        method: 'post',
-        cookie: this.cookie,
-        type: 'form',
-        data: data
-    }, done);
-}
-
-function signup(email, password, done) {
-    signupWithProfile.call(this, email, password, null, done);
-}
-
 describe('API-V2 LOGIN', function () {
 
-    context('signup', function () {
+    context('cookieSignup', function () {
         beforeEach(initData.resetEmptyDatabase);
 
         context('session', function () {
-            context('When unauthenticated user signup with bad recaptcha', function () {
-
+            context('When unauthenticated user cookieSignup with bad recaptcha', function () {
+                var ctx = this;
                 before(function (done) {
                     recaptcha.init(KO_RECATCHA_KEY, KO_RECATCHA_SECRET);
                     done();
                 });
 
                 before(function (done) {
-                    signup.call(this, AN_EMAIL, STRONG_PASSWORD, done);
+                    login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
                 });
 
                 it('should return a success false', function () {
-                    expect(this.res.statusCode).to.equal(400);
-                    expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+                    expect(ctx.res.statusCode).to.equal(400);
+                    expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
                 });
 
             });
-            context('When unauthenticated user signup with good recaptcha', function () {
+            context('When unauthenticated user cookieSignup with good recaptcha', function () {
 
                 before(function (done) {
                     recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
                     done();
                 });
 
-                context('When unauthenticated user signup with weak password', function () {
+                context('When unauthenticated user cookieSignup with weak password', function () {
+                    var ctx = this;
 
                     before(function (done) {
-                        signup.call(this, AN_EMAIL, WEAK_PASSWORD, done);
+                        login.cookieSignup(ctx, AN_EMAIL, WEAK_PASSWORD, null, done);
                     });
 
                     it('should return a success false', function () {
-                        expect(this.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
-                        expect(this.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
+                        expect(ctx.res.statusCode).to.equal(400);
                     });
 
                 });
 
-                context('When unauthenticated user signup with email as passord', function () {
+                context('When unauthenticated user cookieSignup with email as passord', function () {
+                    var ctx = this;
 
                     before(function (done) {
-                        signup.call(this, LONG_MAIL, LONG_MAIL, done);
+                        login.cookieSignup(ctx, LONG_MAIL, LONG_MAIL, null, done);
                     });
 
                     it('should return a success false', function () {
-                        expect(this.res.statusCode).to.equal(400);
-                        expect(this.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
+                        expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
                     });
 
                 });
 
-                context('When unauthenticated user signup with good recaptcha', function () {
+                context('When unauthenticated user cookieSignup with good recaptcha', function () {
+                    var ctx = this;
 
                     before(function (done) {
-                        signup.call(this, AN_EMAIL, STRONG_PASSWORD, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
                     });
 
                     it('should return a success true', function () {
-                        expect(this.res.statusCode).to.equal(204);
+                        expect(ctx.res.statusCode).to.equal(204);
                     });
 
                 });
 
-                context('When unauthenticated user signup without password', function () {
+                context('When unauthenticated user cookieSignup without password', function () {
+                    var ctx = this;
 
                     before(function (done) {
-                        signup.call(this, 'qsdf2@qsdf.fr', null, done);
+                        login.cookieSignup(ctx, 'qsdf2@qsdf.fr', null, null, done);
                     });
 
 
                     it('should return a success false', function () {
-                        expect(this.res.statusCode).to.equal(400);
-                        expect(this.res.body.msg).to.equal("Please pass email and password");
+                        expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg).to.equal("Please pass email and password");
                     });
 
                 });
 
-                context('When unauthenticated user signup without mail', function () {
+                context('When unauthenticated user cookieSignup without mail', function () {
+                    var ctx = this;
 
                     before(function (done) {
-                        signup.call(this, null, STRONG_PASSWORD, done);
+                        login.cookieSignup(ctx, null, STRONG_PASSWORD, null, done);
                     });
 
                     it('should return a success false', function () {
-                        expect(this.res.statusCode).to.equal(400);
-                        expect(this.res.body.msg).to.equal("Please pass email and password");
+                        expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg).to.equal("Please pass email and password");
                     });
 
                 });
 
                 context('When 2 users register with same mail', function () {
+                    var ctx = this;
 
                     before(function (done) {
-                        signup.call(this, AN_EMAIL, STRONG_PASSWORD, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
                     });
 
                     before(function (done) {
-                        signup.call(this, AN_EMAIL, STRONG_PASSWORD + "2", done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD + "2", null, done);
                     });
 
                     it('should return a success false', function () {
-                        expect(this.res.statusCode).to.equal(400);
-                        expect(this.res.body.msg).to.equal("email already exists");
+                        expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg).to.equal("email already exists");
                     });
 
                 });
                 context('When 2 users register with same mail case sensitive', function () {
+                    var ctx = this;
+
                     before(function (done) {
-                        signup.call(this, AN_EMAIL, STRONG_PASSWORD, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
                     });
 
                     before(function (done) {
-                        signup.call(this, AN_EMAIL.toUpperCase(), STRONG_PASSWORD + "2", done);
+                        login.cookieSignup(ctx, AN_EMAIL.toUpperCase(), STRONG_PASSWORD + "2", null, done);
                     });
 
 
                     it('should return a success false', function () {
-                        expect(this.res.statusCode).to.equal(400);
-                        expect(this.res.body.msg).to.equal("email already exists");
+                        expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg).to.equal("email already exists");
                     });
 
                 });
@@ -188,55 +176,58 @@ describe('API-V2 LOGIN', function () {
                         userHelper.reloadConfig();
                     });
 
-                    context('When unauthenticated user signup without all required fields', function () {
+                    context('When unauthenticated user cookieSignup without all required fields', function () {
+                        var ctx = this;
 
                         before(function (done) {
-                            signupWithProfile.call(this, AN_EMAIL, STRONG_PASSWORD, {gender: 'male'}, done);
+                            login.cookieSignupWithProfile(ctx, AN_EMAIL, STRONG_PASSWORD, {gender: 'male'}, null, done);
                         });
 
 
                         it('should return a success false', function () {
-                            expect(this.res.statusCode).equal(400);
-                            expect(this.res.body.msg).equal("missing required fields");
-                            expect(this.res.body.missingFields).members(['date_of_birth']);
+                            expect(ctx.res.statusCode).equal(400);
+                            expect(ctx.res.body.msg).equal("missing required fields");
+                            expect(ctx.res.body.missingFields).members(['date_of_birth']);
                         });
 
                     });
 
-                    context('When unauthenticated user signup with badly formatted field', function () {
+                    context('When unauthenticated user cookieSignup with badly formatted field', function () {
+                        var ctx = this;
 
 
                         before(function (done) {
-                            signupWithProfile.call(this, AN_EMAIL, STRONG_PASSWORD, {
+                            login.cookieSignupWithProfile(ctx, AN_EMAIL, STRONG_PASSWORD, {
                                 gender: 'jedi',
-                                date_of_birth: 249782400000
-                            }, done);
+                                date_of_birth: DATE_OF_BIRTH
+                            }, null, done);
                         });
 
                         it('should return a success false', function () {
-                            expect(this.res.statusCode).equal(400);
-                            expect(this.res.body.msg).equal("missing required fields");
-                            expect(this.res.body.missingFields).undefined;
+                            expect(ctx.res.statusCode).equal(400);
+                            expect(ctx.res.body.msg).equal("missing required fields");
+                            expect(ctx.res.body.missingFields).undefined;
                         });
                     });
 
-                    context('When unauthenticated user signup with correct fields', function () {
+                    context('When unauthenticated user cookieSignup with correct fields', function () {
+                        var ctx = this;
 
                         before(function (done) {
-                            signupWithProfile.call(this, 'qsdf@qsdf.fr'.toUpperCase(), STRONG_PASSWORD + "2", {
+                            login.cookieSignupWithProfile(ctx, 'qsdf@qsdf.fr'.toUpperCase(), STRONG_PASSWORD + "2", {
                                 gender: 'female',
-                                date_of_birth: 249782400000
-                            }, done);
+                                date_of_birth: DATE_OF_BIRTH
+                            }, null, done);
                         });
 
                         it('should return a success false', function () {
-                            expect(this.res.statusCode).equal(204);
+                            expect(ctx.res.statusCode).equal(204);
                         });
                     });
                 });
 
-                context('When unauthenticated user signup with optionnals fields and no fields are required', function () {
-                    var self = this;
+                context('When unauthenticated user cookieSignup with optionnals fields and no fields are required', function () {
+                    var ctx = this;
 
                     var preFields;
 
@@ -251,35 +242,68 @@ describe('API-V2 LOGIN', function () {
                     });
 
                     before(function (done) {
-                        signupWithProfile.call(this, AN_EMAIL, STRONG_PASSWORD, {
+                        login.cookieSignupWithProfile(ctx, AN_EMAIL, STRONG_PASSWORD, {
                             gender: 'female',
-                            date_of_birth: 249782400000,
+                            date_of_birth: DATE_OF_BIRTH,
                             firstname: 'firstname',
                             lastname: 'lastname'
-                        }, done);
+                        }, null, done);
                     });
 
                     before(function (done) {
                         db.User.findOne().then(function (profile) {
-                            self.user = profile;
+                            ctx.user = profile;
                         }).then(done);
                     });
 
                     it('should save fields', function () {
-                        expect('female').equal(self.user.gender);
-                        expect('firstname').equal(self.user.firstname);
-                        expect('lastname').equal(self.user.lastname);
-                        expect(249782400000).equal(self.user.date_of_birth);
+                        expect('female').equal(ctx.user.gender);
+                        expect('firstname').equal(ctx.user.firstname);
+                        expect('lastname').equal(ctx.user.lastname);
+                        expect(DATE_OF_BIRTH).equal(ctx.user.date_of_birth);
                     });
+                });
+            });
+            context('after signup', function () {
+
+                context('user should have an authenticated cookie session ', function () {
+                    var ctx = this;
+
+                    before(function (done) {
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, done);
+                    });
+
+                    before(function (done) {
+                        requestHelper.sendRequest(ctx, '/api/v2/session/user/profile', {
+                            method: 'get',
+                            cookie: ctx.cookie
+                        }, done);
+                    });
+
+                    it('should return a success true', function () {
+                        expect(ctx.res.statusCode).to.equal(200);
+                    });
+
+                });
+            });
+            context('when user request to be redirected', function () {
+                var ctx = this;
+
+                const REDIRECT_URI = 'http://google.ch';
+
+                before(function (done) {
+                    login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, done);
+                });
+
+                it('should return a success true', function () {
+                    expect(ctx.res.statusCode).to.equal(302);
+                    expect(ctx.res.header.location).to.equal(REDIRECT_URI);
                 });
             });
         });
     });
-    // TODO expect to be logged after signup
-    // TODO Date format
-    // TODO clean signup endpoint
-    // TODO test redirect
-    // TODO remove password confirm from required field
+    // TODO clean cookieSignup endpoint
+    // TODO Login resource with oAuth, JWT
 
     context('login', function () {
         before(initData.resetDatabase);

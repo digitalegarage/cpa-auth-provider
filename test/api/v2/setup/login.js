@@ -25,7 +25,29 @@ function oAuthLogin(httpContext, done) {
 
 //---------------
 // cookie calls
+function cookieSignupWithProfile(httpContext, email, password, profileData, redirect, done) {
+    var data = {
+        email: email,
+        password: password,
+        'g-recaptcha-response': 'a dummy recaptcha response'
+    };
+    data = Object.assign(data, profileData);
 
+
+    var uri = '/api/v2/session/signup';
+    if (redirect) {
+        uri += "?redirect=" + redirect;
+    }
+    requestHelper.sendRequest(httpContext, uri, {
+        method: 'post',
+        type: 'form',
+        data: data
+    }, done);
+}
+
+function cookieSignup(httpContext, email, password, redirect, done) {
+    cookieSignupWithProfile(httpContext, email, password, null, redirect, done);
+}
 
 function cookieLogin(httpContext, done) {
     cookieLoginWithRedirectOption(httpContext, null, null, done);
@@ -90,5 +112,7 @@ module.exports = {
     cookieLoginWithRedirectOption: cookieLoginWithRedirectOption,
     cookieLoginWithCustomCrendentials: cookieLoginWithCustomCrendentials,
     cookieLogout: cookieLogout,
+    cookieSignup: cookieSignup,
+    cookieSignupWithProfile: cookieSignupWithProfile,
     jwtLogin: jwtLogin
 };
