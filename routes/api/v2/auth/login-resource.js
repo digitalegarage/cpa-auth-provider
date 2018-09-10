@@ -4,46 +4,21 @@ var passport = require('passport');
 var afterLoginHelper = require('../../../../lib/afterlogin-helper');
 var cors = require('../../../../lib/cors');
 var config = require('../../../../config');
+var db = require('../../../../models');
 var logger = require('../../../../lib/logger');
 var requestHelper = require('../../../../lib/request-helper');
 var LocalStrategy = require('passport-local').Strategy;
 var authLocalHelper = require('../../../../lib/auth-local-helper');
 var limiterHelper = require('../../../../lib/limiter-helper');
+var authHelper = require('../../../../lib/auth-helper');
+var afterLogoutHelper = require('../../../../lib/afterlogout-helper');
+var userHelper = require('../../../../lib/user-helper');
+var passwordHelper = require('../../../../lib/password-helper');
+var jwt = require('jwt-simple');
+const Op = db.sequelize.Op;
+
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
-
-function getToken(res, token, req) {
-// Hack to retrieve authentication cookie in headers
-    let headers = res.getHeader("set-cookie");
-    if (!Array.isArray(headers)) {
-        var tmp = headers;
-        headers = [];
-        if (tmp) {
-            headers.push(tmp);
-        }
-    }
-
-    for (var header in headers) {
-
-        if (headers[header] && headers[header].indexOf(config.auth_session_cookie.name) == 0) {
-            var attributes = headers[header].split(';');
-            for (var attribute in attributes) {
-                if (attributes[attribute].indexOf(config.auth_session_cookie.name) == 0) {
-                    token = attributes[attribute].substring(config.auth_session_cookie.name.length + 1); // +1 for equal char
-                    break;
-                }
-            }
-            break;
-        }
-    }
-
-    // server doesn't set cookie (cookie is in the request). => respond with request one
-    if (!token) {
-        token = req.cookies[config.auth_session_cookie.name];
-    }
-    return token;
-}
-
 
 var localStrategyConf = {
     // by default, local strategy uses username and password, we will override with email
@@ -53,12 +28,8 @@ var localStrategyConf = {
 };
 
 const LOCAL_REDIRECT_STRATEGY = 'local-redirect';
-const LOCAL_REDIRECT_SIGNUP_STRATEGY = 'local-signup-redirect';
-
 
 passport.use(LOCAL_REDIRECT_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
-
-passport.use(LOCAL_REDIRECT_SIGNUP_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localSignupStrategyCallback));
 
 
 module.exports = function (app, options) {
@@ -101,17 +72,64 @@ module.exports = function (app, options) {
      *               type: "string"
      *               example: 31.08.1978
      *               description: "user date of birth"
-     *   Token:
+     *   SessionToken:
      *      type: "object"
      *      properties:
      *           token:
      *               type: "string"
      *               example: "s%3AhWMtLUjPHIUvc-nSw2Lr-2YLZf_bE4hy.GXWJQgyHtd1ad3DubqvYNMKsJQ2bHceDdIZN1oTfcEY"
      *               description: "user session cookie value"
+     *   JWTToken:
+     *      type: "object"
+     *      properties:
+     *           token:
+     *               type: "string"
+     *               example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiZGlzcGxheV9uYW1lIjoibWFpbEBtYWlsLm1haWwiLCJ1cGRhdGVkX2F0IjoiMjAxOC0wOS0xMFQxMTo1Nzo1OS41MTRaIiwiY3JlYXRlZF9hdCI6IjIwMTgtMDktMTBUMTE6NTc6NTkuNTE0WiJ9.grw08gCjKH36rJKDN3thhgjo9HbXTk42BMX-q1Hlv4c"
+     *               description: "user session cookie value"
      *
      *
      */
 
+
+    /**
+     * @swagger
+     * /api/v2/session/signup:
+     *   post:
+     *     description: signup
+     *     operationId: "signup"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "signup data"
+     *            description: "signup data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/SignupData"
+     *          - in: query
+     *            name: "redirect"
+     *            example: "http://somedomain.org"
+     *            schema:
+     *              type: string
+     *              description: The redirect url to send the code
+     *          - in: query
+     *            name: "code"
+     *            example: "true"
+     *            schema:
+     *              type: string
+     *              description: if present a first redirect'd be request to /api/v2/session/cookie
+     *     responses:
+     *          "204":
+     *            description: "signup succeed"
+     *          "302":
+     *            schema:
+     *              $ref: '#/definitions/SessionToken'
+     */
+    app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
+
+        signup(req, res, handleCorrectCookieSessionSignupResponse);
+
+    });
 
     /**
      * @swagger
@@ -146,7 +164,7 @@ module.exports = function (app, options) {
      *          "302":
      *            description: "a redirect with token in body response"
      *            schema:
-     *              $ref: '#/definitions/Token'
+     *              $ref: '#/definitions/SessionToken'
      */
     app.post('/api/v2/session/login', cors,
         passport.authenticate(LOCAL_REDIRECT_STRATEGY, {session: true}),
@@ -154,7 +172,6 @@ module.exports = function (app, options) {
 
             afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
-            res.contentType('application/json');
             if (req.query.redirect) {
                 if (req.query.code) {
                     res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
@@ -163,9 +180,6 @@ module.exports = function (app, options) {
                 }
                 res.writeHead(302);
 
-                var token = getToken(res, token, req);
-
-                res.write('{"token": "' + token + '"}');
                 res.end();
 
             } else {
@@ -177,74 +191,26 @@ module.exports = function (app, options) {
 
     /**
      * @swagger
-     * /api/v2/session/signup:
-     *   post:
-     *     description: login
-     *     operationId: "sessionLogin"
-     *     content:
-     *        - application/json
-     *     parameters:
-     *          - in: body
-     *            name: "signup data"
-     *            description: "signup data"
-     *            required: true
-     *            schema:
-     *              $ref: "#/definitions/SignupData"
-     *          - in: query
-     *            name: "redirect"
-     *            example: "http://somedomain.org"
-     *            schema:
-     *              type: string
-     *              description: The redirect url to send the code
-     *          - in: query
-     *            name: "code"
-     *            example: "true"
-     *            schema:
-     *              type: string
-     *              description: if present a first redirect'd be request to /api/v2/session/cookie
+     * /api/v2/session/logout:
+     *   delete:
+     *     description: disconnect
+     *     operationId: "sessionDisconnect"
      *     responses:
      *          "204":
-     *            description: "signup succeed"
-     *          "302":
-     *            description: "a redirect with token in body response"
-     *            schema:
-     *              $ref: '#/definitions/Token'
+     *            description: "user disconnected"
      */
-    app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
+    app.delete('/api/v2/session/logout', cors, authHelper.ensureAuthenticated, function (req, res, next) {
 
-        passport.authenticate(LOCAL_REDIRECT_SIGNUP_STRATEGY, function (err, user, info) {
-
-            if (res.headersSent){
-                return res.end();
-            }
-
+        afterLogoutHelper.afterLogout(res);
+        req.logout();
+        req.session.destroy(function (err) {
             if (err) {
                 return next(err);
             }
-            // Redirect if it fails
-            if (!user) {
-                return res.json({error: info}); //TODO when email is already taken response code is 200
-            }
-            req.logIn(user, function (err) {
-                if (req.query.redirect) {
-                    if (req.query.code) {
-                        res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
-                    } else {
-                        res.setHeader('Location', req.query.redirect);
-                    }
-                    res.writeHead(302);
-
-                    var token = getToken(res, token, req);
-
-                    res.write('{"token": "' + token + '"}');
-                    res.end();
-
-                } else {
-                    res.sendStatus(204);
-                }
-            });
-        })(req, res, next);
+            return res.sendStatus(204);
+        });
     });
+
 
     /**
      * @swagger
@@ -278,4 +244,228 @@ module.exports = function (app, options) {
         }
     });
 
+
+    /**
+     * @swagger
+     * /api/v2/jwt/signup:
+     *   post:
+     *     description: signup
+     *     operationId: "signup"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "signup data"
+     *            description: "signup data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/SignupData"
+     *          - in: query
+     *            name: "redirect"
+     *            example: "http://somedomain.org"
+     *            schema:
+     *              type: string
+     *              description: The redirect url to send the JWT token
+     *     responses:
+     *          "200":
+     *            description: "signup succeed"
+     *            schema:
+     *              $ref: '#/definitions/JWTToken'
+     *          "302":
+     *            description: "redirect"
+
+     */
+    app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
+
+        signup(req, res, handleCorrectJWTSignupOrLoginResponse);
+
+    });
+
+
+    /**
+     * @swagger
+     * /api/v2/jwt/login:
+     *   post:
+     *     description: login
+     *     operationId: "sessionLogin"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "credentials"
+     *            description: "user credential"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/Credentials"
+     *          - in: query
+     *            name: "redirect"
+     *            example: "http://somedomain.org"
+     *            schema:
+     *              type: string
+     *              description: The redirect url to send the code
+     *          - in: query
+     *            name: "code"
+     *            example: "true"
+     *            schema:
+     *              type: string
+     *              description: if present a first redirect'd be request to /api/v2/session/cookie
+     *     responses:
+     *          "200":
+     *            description: "signup succeed"
+     *            schema:
+     *              $ref: '#/definitions/JWTToken'
+     *          "302":
+     *            description: "redirect"
+     */
+    app.post('/api/v2/jwt/login', cors, function (req, res) {
+
+        db.LocalLogin.findOne({
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
+            include: [db.User]
+        }).then(function (localLogin) {
+            if (localLogin && req.body.password) {
+                localLogin.verifyPassword(req.body.password)
+                    .then(function (isMatch) {
+                        if (isMatch) {
+                            localLogin.logLogin(localLogin.User);
+                            handleCorrectJWTSignupOrLoginResponse(localLogin.User, req, res);
+                        } else {
+                            res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
+                        }
+                    });
+            } else {
+                res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
+            }
+        });
+    });
+
 };
+
+/////////////////////
+// signup
+function signup(req, res, corretSignupResponseHandler) {
+    if (req.recaptcha.error) {
+        res.status(400).json({msg: req.__('API_SIGNUP_SOMETHING_WRONG_RECAPTCHA')});
+    } else if (!req.body.email || !req.body.password) {
+        res.status(400).json({msg: req.__('API_SIGNUP_PLEASE_PASS_EMAIL_AND_PWD')});
+    } else {
+
+        var username = req.body.email;
+        var password = req.body.password;
+
+        var requiredAttributes = getRequiredAttributes(req);
+        var optionnalAttributes = getOptionnalAttributes(req);
+
+        userHelper.createLocalLogin(username, password, requiredAttributes, optionnalAttributes).then(
+            function (user) {
+                req.logIn(user, function () {
+                    corretSignupResponseHandler(user, req, res);
+                });
+            },
+            function (err) {
+                res.status(400).json(buildJsonForError(err, req, username));
+            }
+        );
+    }
+}
+
+
+/////////////////////
+// handler depending on security
+
+function handleCorrectCookieSessionSignupResponse(user, req, res) {
+    if (req.query.redirect) {
+        if (req.query.code) {
+            //TODO : check redirect white list PEACH-1521
+            res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
+        } else {
+            res.setHeader('Location', req.query.redirect);
+        }
+        res.writeHead(302);
+
+        res.end();
+
+    } else {
+        res.sendStatus(204);
+    }
+}
+
+
+function handleCorrectJWTSignupOrLoginResponse(user, req, res) {
+    const token = jwt.encode(user, config.jwtSecret);
+    if (req.query.redirect) {
+        if (req.query.code) {
+            //TODO : check redirect white list PEACH-1521
+            const redirectUrl = req.query.redirect + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]);
+            logger.debug("about to redirect client to  ", redirectUrl);
+            res.setHeader('Location', redirectUrl);
+            res.writeHead(302);
+            res.end();
+        } else {
+            res.setHeader('Location', req.query.redirect);
+            res.writeHead(302);
+            res.end();
+        }
+    } else {
+        res.json({token: 'JWT ' + token});
+    }
+}
+
+/////////////////////
+// Utilities
+
+function buildJsonForError(err, req, username) {
+    var json;
+    if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
+        json = {msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')};
+    } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
+        json = {
+            msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+            password_strength_errors: passwordHelper.getWeaknesses(username, req.body.password, req),
+            errors: [{msg: passwordHelper.getWeaknessesMsg(username, req.body.password, req)}],
+            score: passwordHelper.getQuality(username, req.body.password)
+        };
+    } else if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
+        logger.debug('[POST /api/v2/session/signup][email', username, '][ERR', err, ']');
+        json = {
+            msg: req.__('API_SIGNUP_MISSING_FIELDS'),
+            missingFields: err.data ? err.data.missingFields : undefined
+        };
+    } else if (err.message === userHelper.EXCEPTIONS.UNKNOWN_GENDER) {
+        json = {
+            msg: req.__('API_SIGNUP_MISSING_FIELDS')
+        };
+    } else if (err.message === userHelper.EXCEPTIONS.MALFORMED_DATE_OF_BIRTH) {
+        json = {
+            msg: req.__('API_SIGNUP_MISSING_FIELDS')
+        };
+    } else {
+        logger.error('[POST /api/v2/session/signup][email', username, '][ERR', err, ']');
+        json = {msg: req.__('API_ERROR') + err};
+    }
+    return json;
+}
+
+
+function getRequiredAttributes(req) {
+    var requiredAttributes = {};
+    config.userProfiles.requiredFields.forEach(
+        function (element) {
+            if (req.body[element]) {
+                requiredAttributes[element] = req.body[element];
+            }
+        }
+    );
+    return requiredAttributes;
+}
+
+function getOptionnalAttributes(req) {
+    var optionnalAttributes = {};
+    for (var element in userHelper.getRequiredFields()) {
+        if (req.body[element] && !config.userProfiles.requiredFields.includes(element)) {
+            optionnalAttributes[element] = req.body[element];
+        }
+    }
+    return optionnalAttributes;
+}
+
