@@ -172,21 +172,23 @@ module.exports = function (app, options) {
 
             afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
-            if (req.query.redirect) {
+            const REDIRECT_URI = req.query.redirect;
+
+            if (REDIRECT_URI) {
                 if (req.query.code) {
-                    res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
+                    var allowed = isAllowedRedirectUri(REDIRECT_URI);
+                    if (allowed) {
+                        res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
+                    } else {
+                        res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+                    }
                 } else {
-                    res.setHeader('Location', req.query.redirect);
+                    res.redirect(REDIRECT_URI);
                 }
-                res.writeHead(302);
-
-                res.end();
-
             } else {
                 res.sendStatus(204);
             }
-        }
-    );
+        });
 
 
     /**
@@ -339,7 +341,8 @@ module.exports = function (app, options) {
         });
     });
 
-};
+}
+;
 
 /////////////////////
 // signup
@@ -373,18 +376,20 @@ function signup(req, res, corretSignupResponseHandler) {
 /////////////////////
 // handler depending on security
 
+
 function handleCorrectCookieSessionSignupResponse(user, req, res) {
-    if (req.query.redirect) {
+    const REDIRECT_URI = req.query.redirect;
+    if (REDIRECT_URI) {
         if (req.query.code) {
-            //TODO : check redirect white list PEACH-1521
-            res.setHeader('Location', requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + req.query.redirect));
+            var allowed = isAllowedRedirectUri(REDIRECT_URI);
+            if (allowed) {
+                res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
+            } else {
+                res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+            }
         } else {
-            res.setHeader('Location', req.query.redirect);
+            res.redirect(REDIRECT_URI);
         }
-        res.writeHead(302);
-
-        res.end();
-
     } else {
         res.sendStatus(204);
     }
@@ -393,18 +398,17 @@ function handleCorrectCookieSessionSignupResponse(user, req, res) {
 
 function handleCorrectJWTSignupOrLoginResponse(user, req, res) {
     const token = jwt.encode(user, config.jwtSecret);
-    if (req.query.redirect) {
+    const REDIRECT_URI = req.query.redirect;
+    if (REDIRECT_URI) {
         if (req.query.code) {
-            //TODO : check redirect white list PEACH-1521
-            const redirectUrl = req.query.redirect + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]);
-            logger.debug("about to redirect client to  ", redirectUrl);
-            res.setHeader('Location', redirectUrl);
-            res.writeHead(302);
-            res.end();
+            var allowed = isAllowedRedirectUri(REDIRECT_URI);
+            if (allowed) {
+                res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+            } else {
+                res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+            }
         } else {
-            res.setHeader('Location', req.query.redirect);
-            res.writeHead(302);
-            res.end();
+            res.redirect(REDIRECT_URI);
         }
     } else {
         res.json({token: 'JWT ' + token});
@@ -467,5 +471,20 @@ function getOptionnalAttributes(req) {
         }
     }
     return optionnalAttributes;
+}
+
+
+function isAllowedRedirectUri(REDIRECT_URI) {
+    var allowed;
+    if (config.afterLogin && config.afterLogin.allowedRedirectUris) {
+        var allowedUris = config.afterLogin.allowedRedirectUris.split(',');
+        for (var u in allowedUris) {
+            allowed = REDIRECT_URI.indexOf(allowedUris[u]) == 0;
+            if (allowed) {
+                break;
+            }
+        }
+    }
+    return allowed;
 }
 
