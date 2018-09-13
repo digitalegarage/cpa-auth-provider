@@ -75,12 +75,46 @@ var get_user_id = function (req, res) {
 
 };
 
+var get_user = function (req,res) {
+    if (!req.headers.authorization) {
+        return res.status(401).send({error: 'missing header Authorization'});
+    } else {
+        var user = auth(req);
+        var login = user.name;
+        var password = user.pass;
+        db.LocalLogin.findOne({where: {login: login}}).then(function (localLogin) {
+            if (!localLogin) {
+                logger.info('locallogin not found');
+                return res.status(401).send();
+            } else {
+                return localLogin.verifyPassword(password)
+                .then(function (isMatch) {
+                    logger.info('isMatch', isMatch);
+                    if (isMatch) {
+                        db.User.findOne({
+                            where: {id: localLogin.user_id},
+                            include: [db.Permission]
+                        })
+                        .then(function (user) {
+                            res.send(user);
+                        })
+                        .catch(function (error) {
+                            res.send(error);
+                        });
+                    } else {
+                        res.sendStatus(404);
+                    }
+                });
+            }
+        });
+    }
+};
 
 module.exports = function (router) {
 
 
     // TODO configure the restriction of origins on the CORS preflight call
-    var cors_headers = cors({origin: true, methods: ['DELETE']});
+    var cors_headers = cors({origin: true, methods: ['DELETE','GET']});
 
     /**
      * @swagger
@@ -131,5 +165,5 @@ module.exports = function (router) {
     router.get('/api/v2/jwt/user/id', cors_headers, get_user_id);
     router.options('/api/v2/jwt/user/id', cors_headers);
 
-
+    router.get('/api/v2/basicauth/user', cors_headers, get_user);
 };
