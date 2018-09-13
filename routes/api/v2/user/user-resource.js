@@ -135,6 +135,22 @@ module.exports = function (router) {
      *     responses:
      *          "204":
      *            description: "user had been deleted"
+     *   get:
+     *     description: get a users profile by credentials
+     *     operationId: "getUser"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "user credentials basic authentication format AKA base64 applied to login+':'+password prefixed by 'Basic '"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: Basic bG9naW46cGFzc3dvcmQ=
+     *     responses:
+     *          "200":
+     *            description: "user profile including permissions in json body"
      */
     router.delete('/api/v2/basicauth/user', cors_headers, delete_user);
     router.options('/api/v2/basicauth/user', cors_headers);
