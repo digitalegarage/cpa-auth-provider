@@ -235,14 +235,11 @@ module.exports = function (app, options) {
      *            description: "a redirect with token as a get query parameter"
      */
     app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
-        if (req.query.redirect) {
-            const redirectUrl = req.query.redirect + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]);
-            logger.debug("about to redirect client to  ", redirectUrl);
-            res.setHeader('Location', redirectUrl);
-            res.writeHead(302);
-            res.end();
+        const REDIRECT_URI = req.query.redirect;
+        if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
+            res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
         } else {
-            res.json({token: req.cookies[config.auth_session_cookie.name]});
+            res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
         }
     });
 
