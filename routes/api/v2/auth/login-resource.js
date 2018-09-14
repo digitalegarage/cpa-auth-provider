@@ -471,12 +471,12 @@ function getOptionnalAttributes(req) {
 }
 
 
-function isAllowedRedirectUri(REDIRECT_URI) {
+function isAllowedRedirectUri(redirectUri) {
     var allowed;
     if (config.afterLogin && config.afterLogin.allowedRedirectUris) {
         var allowedUris = config.afterLogin.allowedRedirectUris.split(',');
         for (var u in allowedUris) {
-            allowed = REDIRECT_URI.indexOf(allowedUris[u]) == 0;
+            allowed = redirectUri.indexOf(allowedUris[u]) == 0;
             if (allowed) {
                 break;
             }

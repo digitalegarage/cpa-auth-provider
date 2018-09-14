@@ -644,7 +644,8 @@ describe('OAuth2 requests from cross domain with access token ', function () {
                     duration: 999999999,
                     storeUserId: true,
                     storeUserDisplayName: true
-                }
+                },
+                allowedRedirectUris: config.afterLogin.allowedRedirectUris
             }
             done();
         });
@@ -694,7 +695,8 @@ describe('OAuth2 requests from cross domain with access token ', function () {
             config.afterLogin = {
                 storeUserInfoInCookie: {
                     activated: false
-                }
+                },
+                allowedRedirectUris: config.afterLogin.allowedRedirectUris
             }
             done();
         });
