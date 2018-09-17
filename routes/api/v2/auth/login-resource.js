@@ -15,6 +15,8 @@ var afterLogoutHelper = require('../../../../lib/afterlogout-helper');
 var userHelper = require('../../../../lib/user-helper');
 var passwordHelper = require('../../../../lib/password-helper');
 var jwt = require('jwt-simple');
+var loginService = require('../../../../services/login-service');
+var errors = require('../../../../services/errors');
 const Op = db.sequelize.Op;
 
 
@@ -126,9 +128,7 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/SessionToken'
      */
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
-
-        signup(req, res, handleCorrectCookieSessionSignupResponse);
-
+        signup(req, res, handleAfterSessionLogin);
     });
 
     /**
@@ -172,22 +172,7 @@ module.exports = function (app, options) {
 
             afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
-            const REDIRECT_URI = req.query.redirect;
-
-            if (REDIRECT_URI) {
-                if (req.query.code) {
-                    var allowed = isAllowedRedirectUri(REDIRECT_URI);
-                    if (allowed) {
-                        res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
-                    } else {
-                        res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
-                    }
-                } else {
-                    res.redirect(REDIRECT_URI);
-                }
-            } else {
-                res.sendStatus(204);
-            }
+            handleAfterSessionLogin(req.user, req, res);
         });
 
 
@@ -275,9 +260,7 @@ module.exports = function (app, options) {
 
      */
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
-
-        signup(req, res, handleCorrectJWTSignupOrLoginResponse);
-
+        signup(req, res, handleAfterJWTLogin);
     });
 
 
@@ -327,7 +310,7 @@ module.exports = function (app, options) {
                     .then(function (isMatch) {
                         if (isMatch) {
                             localLogin.logLogin(localLogin.User);
-                            handleCorrectJWTSignupOrLoginResponse(localLogin.User, req, res);
+                            handleAfterJWTLogin(localLogin.User, req, res);
                         } else {
                             res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
                         }
@@ -343,30 +326,28 @@ module.exports = function (app, options) {
 
 /////////////////////
 // signup
-function signup(req, res, corretSignupResponseHandler) {
-    if (req.recaptcha.error) {
-        res.status(400).json({msg: req.__('API_SIGNUP_SOMETHING_WRONG_RECAPTCHA')});
-    } else if (!req.body.email || !req.body.password) {
-        res.status(400).json({msg: req.__('API_SIGNUP_PLEASE_PASS_EMAIL_AND_PWD')});
-    } else {
-
-        var username = req.body.email;
-        var password = req.body.password;
-
-        var requiredAttributes = getRequiredAttributes(req);
-        var optionnalAttributes = getOptionnalAttributes(req);
-
-        userHelper.createLocalLogin(username, password, requiredAttributes, optionnalAttributes).then(
-            function (user) {
-                req.logIn(user, function () {
-                    corretSignupResponseHandler(user, req, res);
-                });
-            },
-            function (err) {
-                res.status(400).json(buildJsonForError(err, req, username));
+function signup(req, res, handleAfterLogin) {
+    loginService.checkSignupData(req)
+        .then(function (userAttributes) {
+            return loginService.signup(userAttributes, req.body.email, req.body.password);
+        })
+        .then(function (user) {
+            req.logIn(user, function () {
+                handleAfterLogin(user, req, res);
+            });
+        })
+        .catch(function (err) {
+            if (err.name === errors.VALIDATION_ERROR) {
+                var toReturn = {msg: err.message};
+                if (err.data) {
+                    toReturn.data = err.data;
+                }
+                res.status(400).json(toReturn);
+            } else {
+                logger.warn("unexpected error.", err);
+                res.status(500).json({msg: "unexpected error."});
             }
-        );
-    }
+        });
 }
 
 
@@ -374,7 +355,7 @@ function signup(req, res, corretSignupResponseHandler) {
 // handler depending on security
 
 
-function handleCorrectCookieSessionSignupResponse(user, req, res) {
+function handleAfterSessionLogin(user, req, res) {
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
         if (req.query.code) {
@@ -393,7 +374,7 @@ function handleCorrectCookieSessionSignupResponse(user, req, res) {
 }
 
 
-function handleCorrectJWTSignupOrLoginResponse(user, req, res) {
+function handleAfterJWTLogin(user, req, res) {
     const token = jwt.encode(user, config.jwtSecret);
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
@@ -445,29 +426,6 @@ function buildJsonForError(err, req, username) {
         json = {msg: req.__('API_ERROR') + err};
     }
     return json;
-}
-
-
-function getRequiredAttributes(req) {
-    var requiredAttributes = {};
-    config.userProfiles.requiredFields.forEach(
-        function (element) {
-            if (req.body[element]) {
-                requiredAttributes[element] = req.body[element];
-            }
-        }
-    );
-    return requiredAttributes;
-}
-
-function getOptionnalAttributes(req) {
-    var optionnalAttributes = {};
-    for (var element in userHelper.getRequiredFields()) {
-        if (req.body[element] && !config.userProfiles.requiredFields.includes(element)) {
-            optionnalAttributes[element] = req.body[element];
-        }
-    }
-    return optionnalAttributes;
 }
 
 

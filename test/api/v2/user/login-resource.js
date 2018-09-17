@@ -50,7 +50,7 @@ describe('API-V2 LOGIN', function () {
 
                 it('should return a success false', function () {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+                    expect(ctx.res.body.msg).to.equal('RECAPTCHA_ERROR');
                 });
 
             });
@@ -75,7 +75,7 @@ describe('API-V2 LOGIN', function () {
 
                 });
 
-                context('When unauthenticated user cookieSignup with email as passord', function () {
+                context('When unauthenticated user cookieSignup with email as password', function () {
                     var ctx = this;
 
                     before(function (done) {
@@ -112,7 +112,10 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal("Please pass email and password");
+                        expect(ctx.res.body.msg).to.equal("missing required fields");
+                        expect(ctx.res.body.data);
+                        expect(ctx.res.body.missingFields);
+                        expect(ctx.res.body.data.missingFields[0]).to.equal('password');
                     });
 
                 });
@@ -126,7 +129,10 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal("Please pass email and password");
+                        expect(ctx.res.body.msg).to.equal("missing required fields");
+                        expect(ctx.res.body.data);
+                        expect(ctx.res.body.missingFields);
+                        expect(ctx.res.body.data.missingFields[0]).to.equal('email');
                     });
 
                 });
@@ -190,7 +196,7 @@ describe('API-V2 LOGIN', function () {
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
                             expect(ctx.res.body.msg).equal("missing required fields");
-                            expect(ctx.res.body.missingFields).members(['date_of_birth']);
+                            expect(ctx.res.body.data.missingFields).members(['date_of_birth']);
                         });
 
                     });
@@ -208,8 +214,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.body.msg).equal("missing required fields");
-                            expect(ctx.res.body.missingFields).undefined;
+                            expect(ctx.res.body.msg).equal("UNKNOWN_GENDER");
                         });
                     });
 
