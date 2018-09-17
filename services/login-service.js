@@ -27,9 +27,6 @@ const ERRORS = {
 
 };
 
-var NAME_REGEX = /^[a-zA-Z\u00C0-\u017F -]*$/;
-
-
 function checkSignupData(req) {
     return new Promise((resolve, reject) => {
         if (req.recaptcha.error) {
@@ -197,6 +194,7 @@ function validateFields(attributes) {
     validateFiledsValues(attributes);
 }
 
+var NAME_REGEX = /^[a-zA-Z\u00C0-\u017F -]*$/;
 
 function validateFiledsValues(attributes) {
     if (attributes.hasOwnProperty('gender')) {
