@@ -1,22 +1,22 @@
 "use strict";
 
-var passport = require('passport');
-var afterLoginHelper = require('../../../../lib/afterlogin-helper');
-var cors = require('../../../../lib/cors');
-var config = require('../../../../config');
-var db = require('../../../../models');
-var logger = require('../../../../lib/logger');
-var requestHelper = require('../../../../lib/request-helper');
-var LocalStrategy = require('passport-local').Strategy;
-var authLocalHelper = require('../../../../lib/auth-local-helper');
-var limiterHelper = require('../../../../lib/limiter-helper');
-var authHelper = require('../../../../lib/auth-helper');
-var afterLogoutHelper = require('../../../../lib/afterlogout-helper');
-var userHelper = require('../../../../lib/user-helper');
-var passwordHelper = require('../../../../lib/password-helper');
-var jwt = require('jwt-simple');
-var loginService = require('../../../../services/login-service');
-var errors = require('../../../../services/errors');
+const passport = require('passport');
+const afterLoginHelper = require('../../../../lib/afterlogin-helper');
+const cors = require('../../../../lib/cors');
+const config = require('../../../../config');
+const db = require('../../../../models');
+const logger = require('../../../../lib/logger');
+const requestHelper = require('../../../../lib/request-helper');
+const LocalStrategy = require('passport-local').Strategy;
+const authLocalHelper = require('../../../../lib/auth-local-helper');
+const limiterHelper = require('../../../../lib/limiter-helper');
+const authHelper = require('../../../../lib/auth-helper');
+const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
+const userHelper = require('../../../../lib/user-helper');
+const passwordHelper = require('../../../../lib/password-helper');
+const jwt = require('jwt-simple');
+const loginService = require('../../../../services/login-service');
+const errors = require('../../../../services/errors');
 const Op = db.sequelize.Op;
 
 
@@ -31,6 +31,8 @@ var localStrategyConf = {
 
 const LOCAL_REDIRECT_STRATEGY = 'local-redirect';
 
+
+// TODO move that to login service
 passport.use(LOCAL_REDIRECT_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
 
 
@@ -128,8 +130,13 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/SessionToken'
      */
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
-        signup(req, res, handleAfterSessionLogin);
+        signupREST(req, res, handleAfterSessionRestLogin);
     });
+
+    app.post('/responsive/session/signup', limiterHelper.verify, function (req, res, next) {
+        signupHTML(req, res, handleAfterSessionHtlmLogin);
+    });
+
 
     /**
      * @swagger
@@ -172,7 +179,7 @@ module.exports = function (app, options) {
 
             afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
 
-            handleAfterSessionLogin(req.user, req, res);
+            handleAfterSessionRestLogin(req.user, req, res);
         });
 
 
@@ -260,7 +267,7 @@ module.exports = function (app, options) {
 
      */
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
-        signup(req, res, handleAfterJWTLogin);
+        signupREST(req, res, handleAfterJWTRestLogin);
     });
 
 
@@ -301,6 +308,8 @@ module.exports = function (app, options) {
      */
     app.post('/api/v2/jwt/login', cors, function (req, res) {
 
+        // TODO : move that code to login service
+
         db.LocalLogin.findOne({
             where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
             include: [db.User]
@@ -310,7 +319,7 @@ module.exports = function (app, options) {
                     .then(function (isMatch) {
                         if (isMatch) {
                             localLogin.logLogin(localLogin.User);
-                            handleAfterJWTLogin(localLogin.User, req, res);
+                            handleAfterJWTRestLogin(localLogin.User, req, res);
                         } else {
                             res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
                         }
@@ -321,12 +330,48 @@ module.exports = function (app, options) {
         });
     });
 
+
+    app.get('/responsive/login', function (req, res) {
+        var redirect = getRedirectParams(req);
+
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            signup: requestHelper.getPath('/responsive/signup' + redirect),
+            target: requestHelper.getPath('/api/v2/session/login' + redirect), //FIXME
+            fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
+            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
+    });
+
+    app.get('/responsive/signup', function (req, res) {
+        var redirect = getRedirectParams(req);
+
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
+            firstname: req.query.firstname ? req.query.firstname : '',
+            lastname: req.query.lastname ? req.query.lastname : '',
+            login: requestHelper.getPath('/responsive/login' + redirect),
+            target: requestHelper.getPath('/responsive/session/signup' + redirect)
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
+    });
+
+
 }
-;
+
+// TODO Create /view/v2/signup or responsive/signup
+// TODO validate endpoint naming
+
 
 /////////////////////
 // signup
-function signup(req, res, handleAfterLogin) {
+function signupREST(req, res, handleAfterLogin) {
     loginService.checkSignupData(req)
         .then(function (userAttributes) {
             return loginService.signup(userAttributes, req.body.email, req.body.password);
@@ -338,15 +383,38 @@ function signup(req, res, handleAfterLogin) {
         })
         .catch(function (err) {
             if (err.name === errors.VALIDATION_ERROR) {
-                var toReturn = {msg: err.message};
-                if (err.data) {
-                    toReturn.data = err.data;
-                }
-                res.status(400).json(toReturn);
+                res.status(400).json({error: err.errorData});
             } else {
                 logger.warn("unexpected error.", err);
                 res.status(500).json({msg: "unexpected error."});
             }
+        });
+}
+
+function signupHTML(req, res, handleAfterLogin) {
+    loginService.checkSignupData(req)
+        .then(function (userAttributes) {
+            return loginService.signup(userAttributes, req.body.email, req.body.password);
+        })
+        .then(function (user) {
+            req.logIn(user, function () {
+                handleAfterLogin(user, req, res);
+            });
+        })
+        .catch(function (err) {
+            var redirect = getRedirectParams(req);
+
+            var data = {
+                message: req.__(err.errorData.key),
+                email: req.body.email ? req.body.email : '',
+                date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
+                firstname: req.body.firstname ? req.body.firstname : '',
+                lastname: req.body.lastname ? req.body.lastname : '',
+                login: requestHelper.getPath('/responsive/login' + redirect),
+                target: requestHelper.getPath('/responsive/session/signup' + redirect)
+            };
+            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+            res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
         });
 }
 
@@ -355,7 +423,7 @@ function signup(req, res, handleAfterLogin) {
 // handler depending on security
 
 
-function handleAfterSessionLogin(user, req, res) {
+function handleAfterSessionRestLogin(user, req, res) {
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
         if (req.query.code) {
@@ -374,7 +442,17 @@ function handleAfterSessionLogin(user, req, res) {
 }
 
 
-function handleAfterJWTLogin(user, req, res) {
+function handleAfterSessionHtlmLogin(user, req, res) {
+    const REDIRECT_URI = req.query.redirect;
+    if (REDIRECT_URI) {
+        res.redirect(REDIRECT_URI);
+    } else {
+        res.redirect('/');
+    }
+}
+
+
+function handleAfterJWTRestLogin(user, req, res) {
     const token = jwt.encode(user, config.jwtSecret);
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
@@ -443,3 +521,13 @@ function isAllowedRedirectUri(redirectUri) {
     return allowed;
 }
 
+function getRedirectParams(req) {
+    var redirect = '';
+    if (req.query.redirect) {
+        redirect = '?redirect=' + encodeURI(req.query.redirect);
+        if (req.query.withcode) {
+            redirect += '&withcode=true';
+        }
+    }
+    return redirect;
+}

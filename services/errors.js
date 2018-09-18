@@ -8,13 +8,14 @@ module.exports = {
 
 
 class ValidationError extends Error {
-    constructor(message, data) {
-        super(message);
+    constructor(errorData, data) {
+        super();
         this.name = VALIDATION_ERROR;
-        this.data = data;
+        this.errorData = errorData;
+        this.errorData.data = data;
     }
 }
 
-function throwValidationError(msg, data) {
-    throw new ValidationError(msg, data);
+function throwValidationError(errorData, data) {
+    throw new ValidationError(errorData, data);
 }

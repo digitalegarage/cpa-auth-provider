@@ -1,13 +1,15 @@
-var config = require('../config');
-var db = require('../models');
-var passwordHelper = require('../lib/password-helper');
-var permissionName = require('../lib/permission-name');
-var codeHelper = require('../lib/code-helper');
-var emailHelper = require('../lib/email-helper');
-var finder = require('../lib/finder');
-var xssFilters = require('xss-filters');
-var userHelper = require('../lib/user-helper');
-var errors = require('./errors');
+const config = require('../config');
+const db = require('../models');
+const passwordHelper = require('../lib/password-helper');
+const permissionName = require('../lib/permission-name');
+const codeHelper = require('../lib/code-helper');
+const emailHelper = require('../lib/email-helper');
+const finder = require('../lib/finder');
+const xssFilters = require('xss-filters');
+const userHelper = require('../lib/user-helper');
+const errors = require('./errors');
+const isDateFormat = require('is-date-format');
+const dateFormat = config.broadcaster && config.broadcaster.date_format ? config.broadcaster.date_format : "dd.mm.yyyy";
 
 
 module.exports = {
@@ -16,14 +18,14 @@ module.exports = {
 };
 
 const ERRORS = {
-    EMAIL_TAKEN: 'email already exists',
-    PASSWORD_WEAK: 'Password is not strong enough',
-    MISSING_FIELDS: 'missing required fields',
-    UNKNOWN_GENDER: 'UNKNOWN_GENDER',
-    MALFORMED_DATE_OF_BIRTH: 'MALFORMED_DATE_OF_BIRTH',
-    INVALID_LAST_NAME: 'INVALID_LAST_NAME',
-    INVALID_FIRST_NAME: 'INVALID_FIRST_NAME',
-    RECAPTCHA_ERROR: 'RECAPTCHA_ERROR',
+    EMAIL_TAKEN: {key: 'EMAIL_TAKEN', message: 'Email already exists', code: 'S1'},
+    PASSWORD_WEAK: {key: 'PASSWORD_WEAK', message: 'Password is not strong enough', code: 'S2'},
+    MISSING_FIELDS: {key: 'MISSING_FIELDS', message: 'Missing required fields', code: 'S3'},
+    UNKNOWN_GENDER: {key: 'UNKNOWN_GENDER', message: 'Unknown gender', code: 'S4'},
+    MALFORMED_DATE_OF_BIRTH: {key: 'MALFORMED_DATE_OF_BIRTH', message: 'Malformed date of birth', code: 'S5'},
+    INVALID_LAST_NAME: {key: 'INVALID_LAST_NAME', message: 'Invalid lastname', code: 'S6'},
+    INVALID_FIRST_NAME: {key: 'INVALID_FIRST_NAME', message: 'Invalid firstname', code: 'S7'},
+    RECAPTCHA_ERROR: {key: 'API_SIGNUP_SOMETHING_WRONG_RECAPTCHA', message: 'recaptcha error', code: 'S8'}
 
 };
 
@@ -90,7 +92,7 @@ function checkSignupData(req) {
 function signup(userAttributes, email, password) {
 
     //use XSS filters to prevent users storing malicious data/code that could be interpreted then
-    for(var k in userAttributes){
+    for (var k in userAttributes) {
         userAttributes[k] = xssFilters.inHTMLData(userAttributes[k]);
     }
 
@@ -204,9 +206,7 @@ function validateFiledsValues(attributes) {
     }
 
     if (attributes.hasOwnProperty('date_of_birth')) {
-        if (typeof(attributes.date_of_birth) === 'string' && !attributes.date_of_birth.match(/\d*/)) {
-            errors.throwValidationError(ERRORS.MALFORMED_DATE_OF_BIRTH);
-        } else if (typeof(attributes.date_of_birth) !== 'string' && typeof(attributes.date_of_birth) !== 'number') {
+        if (typeof(attributes.date_of_birth) === 'string' && !isDateFormat(attributes.date_of_birth, dateFormat)) {
             errors.throwValidationError(ERRORS.MALFORMED_DATE_OF_BIRTH);
         }
     }

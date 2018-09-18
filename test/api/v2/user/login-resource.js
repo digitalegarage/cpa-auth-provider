@@ -24,12 +24,10 @@ const AN_EMAIL = 'mail@mail.mail';
 const LONG_MAIL = 'thisis@nemailthatisvery.cool';
 const STRONG_PASSWORD = 'correct horse battery staple';
 const WEAK_PASSWORD = 'weak';
-const DATE_OF_BIRTH = 249782400000;
+const DATE_OF_BIRTH = '31.08.1978';
 
 const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
 const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
-
-const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
 
 describe('API-V2 LOGIN', function () {
 
@@ -50,7 +48,10 @@ describe('API-V2 LOGIN', function () {
 
                 it('should return a success false', function () {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.body.msg).to.equal('RECAPTCHA_ERROR');
+                    expect(ctx.res.body.error);
+                    expect(ctx.res.body.error.code).to.equal('S8');
+                    expect(ctx.res.body.error.key).to.equal('API_SIGNUP_SOMETHING_WRONG_RECAPTCHA');
+                    expect(ctx.res.body.error.message).to.equal('recaptcha error');
                 });
 
             });
@@ -69,8 +70,11 @@ describe('API-V2 LOGIN', function () {
                     });
 
                     it('should return a success false', function () {
-                        expect(ctx.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
                         expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.error);
+                        expect(ctx.res.body.error.code).to.equal('S2');
+                        expect(ctx.res.body.error.key).to.equal('PASSWORD_WEAK');
+                        expect(ctx.res.body.error.message).to.equal('Password is not strong enough');
                     });
 
                 });
@@ -84,7 +88,10 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg.indexOf("Password is not strong enough")).to.equal(0);
+                        expect(ctx.res.body.error);
+                        expect(ctx.res.body.error.code).to.equal('S2');
+                        expect(ctx.res.body.error.key).to.equal('PASSWORD_WEAK');
+                        expect(ctx.res.body.error.message).to.equal('Password is not strong enough');
                     });
 
                 });
@@ -112,10 +119,14 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal("missing required fields");
-                        expect(ctx.res.body.data);
-                        expect(ctx.res.body.missingFields);
-                        expect(ctx.res.body.data.missingFields[0]).to.equal('password');
+                        expect(ctx.res.body.error);
+                        expect(ctx.res.body.error.code).to.equal('S3');
+                        expect(ctx.res.body.error.key).to.equal('MISSING_FIELDS');
+                        expect(ctx.res.body.error.message).to.equal('Missing required fields');
+                        expect(ctx.res.body.error.missingFields);
+                        expect(ctx.res.body.error.data.missingFields);
+                        expect(ctx.res.body.error.data.missingFields.length).to.equal(1);
+                        expect(ctx.res.body.error.data.missingFields[0]).to.equal('password');
                     });
 
                 });
@@ -129,10 +140,14 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal("missing required fields");
-                        expect(ctx.res.body.data);
-                        expect(ctx.res.body.missingFields);
-                        expect(ctx.res.body.data.missingFields[0]).to.equal('email');
+                        expect(ctx.res.body.error);
+                        expect(ctx.res.body.error.code).to.equal('S3');
+                        expect(ctx.res.body.error.key).to.equal('MISSING_FIELDS');
+                        expect(ctx.res.body.error.message).to.equal('Missing required fields');
+                        expect(ctx.res.body.error.missingFields);
+                        expect(ctx.res.body.error.data.missingFields);
+                        expect(ctx.res.body.error.data.missingFields.length).to.equal(1);
+                        expect(ctx.res.body.error.data.missingFields[0]).to.equal('email');
                     });
 
                 });
@@ -150,7 +165,10 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal("email already exists");
+                        expect(ctx.res.body.error);
+                        expect(ctx.res.body.error.code).to.equal('S1');
+                        expect(ctx.res.body.error.key).to.equal('EMAIL_TAKEN');
+                        expect(ctx.res.body.error.message).to.equal('Email already exists');
                     });
 
                 });
@@ -168,7 +186,10 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal("email already exists");
+                        expect(ctx.res.body.error);
+                        expect(ctx.res.body.error.code).to.equal('S1');
+                        expect(ctx.res.body.error.key).to.equal('EMAIL_TAKEN');
+                        expect(ctx.res.body.error.message).to.equal('Email already exists');
                     });
 
                 });
@@ -195,8 +216,14 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.body.msg).equal("missing required fields");
-                            expect(ctx.res.body.data.missingFields).members(['date_of_birth']);
+                            expect(ctx.res.body.error);
+                            expect(ctx.res.body.error.code).to.equal('S3');
+                            expect(ctx.res.body.error.key).to.equal('MISSING_FIELDS');
+                            expect(ctx.res.body.error.message).to.equal('Missing required fields');
+                            expect(ctx.res.body.error.missingFields);
+                            expect(ctx.res.body.error.data.missingFields);
+                            expect(ctx.res.body.error.data.missingFields.length).to.equal(1);
+                            expect(ctx.res.body.error.data.missingFields[0]).to.equal('date_of_birth');
                         });
 
                     });
@@ -214,7 +241,10 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.body.msg).equal("UNKNOWN_GENDER");
+                            expect(ctx.res.body.error);
+                            expect(ctx.res.body.error.code).to.equal('S4');
+                            expect(ctx.res.body.error.key).to.equal('UNKNOWN_GENDER');
+                            expect(ctx.res.body.error.message).to.equal('Unknown gender');
                         });
                     });
 
@@ -228,7 +258,7 @@ describe('API-V2 LOGIN', function () {
                             }, null, null, done);
                         });
 
-                        it('should return a success false', function () {
+                        it('should return a success true no content', function () {
                             expect(ctx.res.statusCode).equal(204);
                         });
                     });
