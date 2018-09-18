@@ -363,7 +363,7 @@ module.exports = function (app, options) {
     });
 
 
-}
+};
 
 // TODO Create /view/v2/signup or responsive/signup
 // TODO validate endpoint naming
