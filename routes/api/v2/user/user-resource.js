@@ -96,7 +96,7 @@ var get_user = function (req,res) {
                             include: [db.Permission]
                         })
                         .then(function (user) {
-                            res.send(user);
+                            res.json({user: user});
                         })
                         .catch(function (error) {
                             res.send(error);
@@ -152,6 +152,7 @@ module.exports = function (router) {
      *          "200":
      *            description: "user profile including permissions in json body"
      */
+
     router.delete('/api/v2/basicauth/user', cors_headers, delete_user);
     router.options('/api/v2/basicauth/user', cors_headers);
 
@@ -181,5 +182,5 @@ module.exports = function (router) {
     router.get('/api/v2/jwt/user/id', cors_headers, get_user_id);
     router.options('/api/v2/jwt/user/id', cors_headers);
 
-    router.get('/api/v2/basicauth/user', cors_headers, get_user);
+    router.get('/api/v2/basicauth/user/profile', cors_headers, get_user);
 };

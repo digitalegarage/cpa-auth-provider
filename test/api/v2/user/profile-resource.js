@@ -14,8 +14,18 @@ const NEW_GENDER = 'female';
 describe('API-V2 profile', function () {
 
     context('GET : /api/v2/<security>/user/profile ', function () {
-
         before(initData.resetDatabase);
+        context('using http basic auth', function() {
+            var ctx = this;
+
+            before(function(done) {
+                httpBasicGetProfile(ctx,done);
+            });
+
+            it('should return a success', function() {
+                expectGetPermissionEnrichedProfile(ctx);
+            });
+        });
 
         context('using oauth token', function () {
             var ctx = this;
@@ -268,7 +278,25 @@ function cpaUpdateProfile(context, done) {
 }
 
 //---------------
+// http basic auth calls
+function httpBasicGetProfile(context,done) {
+    requestHelper.sendRequest(context, "/api/v2/basicauth/user/profile", {
+        method: 'get',
+        tokenType: 'Basic',
+        accessToken: Buffer.from(initData.USER_1.email + ':' + initData.USER_1.password).toString('base64')
+    }, done);
+}
+
+//---------------
 // expected results
+
+function expectGetPermissionEnrichedProfile(context) {
+    expect(context.res.statusCode).equal(200);
+    expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
+    expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.user.permission_id).not.equal(undefined);
+    expect(context.res.body.user.Permission).not.equal(undefined);
+}
 
 function expectGetInitialProfile(context) {
     expect(context.res.statusCode).equal(200);
@@ -287,8 +315,3 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.body.user.gender).equal(NEW_GENDER);
     expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
 }
-
-
-
-
-
