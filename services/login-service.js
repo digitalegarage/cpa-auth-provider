@@ -10,22 +10,41 @@ const userHelper = require('../lib/user-helper');
 const errors = require('./errors');
 const isDateFormat = require('is-date-format');
 const dateFormat = config.broadcaster && config.broadcaster.date_format ? config.broadcaster.date_format : "dd.mm.yyyy";
+const Op = db.sequelize.Op;
+const afterLoginHelper = require('../lib/afterlogin-helper');
 
 
 module.exports = {
     checkSignupData: checkSignupData,
-    signup: signup
+    signup: signup,
+    login: login
 };
 
 const ERRORS = {
+    // Signup
     EMAIL_TAKEN: {key: 'EMAIL_TAKEN', message: 'Email already exists', code: 'S1'},
     PASSWORD_WEAK: {key: 'PASSWORD_WEAK', message: 'Password is not strong enough', code: 'S2'},
     MISSING_FIELDS: {key: 'MISSING_FIELDS', message: 'Missing required fields', code: 'S3'},
     UNKNOWN_GENDER: {key: 'UNKNOWN_GENDER', message: 'Unknown gender', code: 'S4'},
-    MALFORMED_DATE_OF_BIRTH: {key: 'MALFORMED_DATE_OF_BIRTH', message: 'Malformed date of birth', code: 'S5'},
+    MALFORMED_DATE_OF_BIRTH: {
+        key: 'MALFORMED_DATE_OF_BIRTH',
+        message: 'Malformed date of birth',
+        code: 'S5'
+    },
     INVALID_LAST_NAME: {key: 'INVALID_LAST_NAME', message: 'Invalid lastname', code: 'S6'},
     INVALID_FIRST_NAME: {key: 'INVALID_FIRST_NAME', message: 'Invalid firstname', code: 'S7'},
-    RECAPTCHA_ERROR: {key: 'API_SIGNUP_SOMETHING_WRONG_RECAPTCHA', message: 'recaptcha error', code: 'S8'}
+    RECAPTCHA_ERROR: {
+        key: 'API_SIGNUP_SOMETHING_WRONG_RECAPTCHA',
+        message: 'recaptcha error',
+        code: 'S8'
+    },
+
+    // Login
+    API_INCORRECT_LOGIN_OR_PASS: {
+        key: 'API_INCORRECT_LOGIN_OR_PASS',
+        message: 'incorrect login or password',
+        code: 'L1'
+    },
 
 };
 
@@ -151,6 +170,36 @@ function signup(userAttributes, email, password) {
                 });
     });
 
+}
+
+function login(req, res) {
+    return new Promise((resolve, reject) => {
+
+        return db.LocalLogin.findOne({
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
+            include: [db.User]
+        }).then(function (localLogin) {
+            if (localLogin && req.body.password) {
+                localLogin.verifyPassword(req.body.password)
+                    .then(function (isMatch) {
+                        if (isMatch) {
+                            localLogin.logLogin(localLogin.User);
+                            afterLoginHelper.afterLogin(localLogin.User, req.body.email || req.query.email, res);
+                            resolve(localLogin.User);
+                        } else {
+                            errors.throwBadCredentialError(ERRORS.API_INCORRECT_LOGIN_OR_PASS);
+                        }
+                    })
+                    .catch(function (err) {
+                        reject(err);
+                    });
+            } else {
+                errors.throwBadCredentialError(ERRORS.API_INCORRECT_LOGIN_OR_PASS);
+            }
+        }).catch(function (err) {
+            reject(err);
+        });
+    });
 }
 
 

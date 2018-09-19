@@ -1,14 +1,9 @@
 "use strict";
 
-const passport = require('passport');
-const afterLoginHelper = require('../../../../lib/afterlogin-helper');
 const cors = require('../../../../lib/cors');
 const config = require('../../../../config');
-const db = require('../../../../models');
 const logger = require('../../../../lib/logger');
 const requestHelper = require('../../../../lib/request-helper');
-const LocalStrategy = require('passport-local').Strategy;
-const authLocalHelper = require('../../../../lib/auth-local-helper');
 const limiterHelper = require('../../../../lib/limiter-helper');
 const authHelper = require('../../../../lib/auth-helper');
 const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
@@ -17,24 +12,8 @@ const passwordHelper = require('../../../../lib/password-helper');
 const jwt = require('jwt-simple');
 const loginService = require('../../../../services/login-service');
 const errors = require('../../../../services/errors');
-const Op = db.sequelize.Op;
-
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
-
-var localStrategyConf = {
-    // by default, local strategy uses username and password, we will override with email
-    usernameField: 'email',
-    passwordField: 'password',
-    passReqToCallback: true // allows us to pass back the entire request to the callback
-};
-
-const LOCAL_REDIRECT_STRATEGY = 'local-redirect';
-
-
-// TODO move that to login service
-passport.use(LOCAL_REDIRECT_STRATEGY, new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
-
 
 module.exports = function (app, options) {
 
@@ -173,14 +152,30 @@ module.exports = function (app, options) {
      *            schema:
      *              $ref: '#/definitions/SessionToken'
      */
-    app.post('/api/v2/session/login', cors,
-        passport.authenticate(LOCAL_REDIRECT_STRATEGY, {session: true}),
-        function (req, res) {
+    app.post('/api/v2/session/login', cors, function (req, res) {
 
-            afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
+        loginService.login(req, res)
+            .then(function (user) {
+                req.logIn(user, function () {
+                    handleAfterSessionRestLogin(user, req, res);
+                });
+            })
+            .catch(function (err) {
+                handleErrorForRestCalls(err, res);
+            });
+    });
+    app.post('/responsive/session/login', cors, function (req, res) {
 
-            handleAfterSessionRestLogin(req.user, req, res);
-        });
+        loginService.login(req, res)
+            .then(function (user) {
+                req.logIn(user, function () {
+                    handleAfterSessionHtlmLogin(user, req, res);
+                });
+            })
+            .catch(function (err) {
+                handleErrorForHtmlCalls(req, res, err);
+            });
+    });
 
 
     /**
@@ -226,7 +221,7 @@ module.exports = function (app, options) {
      *          "302":
      *            description: "a redirect with token as a get query parameter"
      */
-    app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
+    app.get(SESSION_LOGIN_PATH, cors, function (req, res) {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
             res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
@@ -308,26 +303,13 @@ module.exports = function (app, options) {
      */
     app.post('/api/v2/jwt/login', cors, function (req, res) {
 
-        // TODO : move that code to login service
-
-        db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
-            include: [db.User]
-        }).then(function (localLogin) {
-            if (localLogin && req.body.password) {
-                localLogin.verifyPassword(req.body.password)
-                    .then(function (isMatch) {
-                        if (isMatch) {
-                            localLogin.logLogin(localLogin.User);
-                            handleAfterJWTRestLogin(localLogin.User, req, res);
-                        } else {
-                            res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                        }
-                    });
-            } else {
-                res.status(401).json({msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-            }
-        });
+        loginService.login(req, res)
+            .then(function (user) {
+                handleAfterJWTRestLogin(user, req, res);
+            })
+            .catch(function (err) {
+                handleErrorForRestCalls(err, res);
+            });
     });
 
 
@@ -338,7 +320,7 @@ module.exports = function (app, options) {
             message: '',
             email: req.query.email ? req.query.email : '',
             signup: requestHelper.getPath('/responsive/signup' + redirect),
-            target: requestHelper.getPath('/api/v2/session/login' + redirect), //FIXME
+            target: requestHelper.getPath('/responsive/session/login' + redirect),
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
             googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
         };
@@ -361,13 +343,7 @@ module.exports = function (app, options) {
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
         res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
     });
-
-
 };
-
-// TODO Create /view/v2/signup or responsive/signup
-// TODO validate endpoint naming
-
 
 /////////////////////
 // signup
@@ -382,12 +358,7 @@ function signupREST(req, res, handleAfterLogin) {
             });
         })
         .catch(function (err) {
-            if (err.name === errors.VALIDATION_ERROR) {
-                res.status(400).json({error: err.errorData});
-            } else {
-                logger.warn("unexpected error.", err);
-                res.status(500).json({msg: "unexpected error."});
-            }
+            handleErrorForRestCalls(err, res);
         });
 }
 
@@ -474,38 +445,6 @@ function handleAfterJWTRestLogin(user, req, res) {
 /////////////////////
 // Utilities
 
-function buildJsonForError(err, req, username) {
-    var json;
-    if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
-        json = {msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')};
-    } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
-        json = {
-            msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
-            password_strength_errors: passwordHelper.getWeaknesses(username, req.body.password, req),
-            errors: [{msg: passwordHelper.getWeaknessesMsg(username, req.body.password, req)}],
-            score: passwordHelper.getQuality(username, req.body.password)
-        };
-    } else if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
-        logger.debug('[POST /api/v2/session/signup][email', username, '][ERR', err, ']');
-        json = {
-            msg: req.__('API_SIGNUP_MISSING_FIELDS'),
-            missingFields: err.data ? err.data.missingFields : undefined
-        };
-    } else if (err.message === userHelper.EXCEPTIONS.UNKNOWN_GENDER) {
-        json = {
-            msg: req.__('API_SIGNUP_MISSING_FIELDS')
-        };
-    } else if (err.message === userHelper.EXCEPTIONS.MALFORMED_DATE_OF_BIRTH) {
-        json = {
-            msg: req.__('API_SIGNUP_MISSING_FIELDS')
-        };
-    } else {
-        logger.error('[POST /api/v2/session/signup][email', username, '][ERR', err, ']');
-        json = {msg: req.__('API_ERROR') + err};
-    }
-    return json;
-}
-
 
 function isAllowedRedirectUri(redirectUri) {
     var allowed;
@@ -530,4 +469,31 @@ function getRedirectParams(req) {
         }
     }
     return redirect;
+}
+
+
+function handleErrorForRestCalls(err, res) {
+    if (err.name === errors.VALIDATION_ERROR) {
+        res.status(400).json({error: err.errorData});
+    } else if (err.name === errors.BAD_CREDENTIAL_ERROR) {
+        res.status(401).json({error: err.errorData});
+    } else {
+        logger.warn("unexpected error.", err);
+        res.status(500).json({msg: "unexpected error."});
+    }
+}
+
+function handleErrorForHtmlCalls(req,  res,err) {
+    var redirect = getRedirectParams(req);
+
+    var data = {
+        message: req.__(err.errorData.key),
+        email: req.body.email ? req.body.email : '',
+        signup: requestHelper.getPath('/responsive/signup' + redirect),
+        target: requestHelper.getPath('/responsive/session/login' + redirect),
+        fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
+        googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+    };
+    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+    res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
 }

@@ -441,7 +441,7 @@ describe('API-V2 LOGIN', function () {
                 before(function (done) {
                     login.cookieLoginWithCustomCrendentials(ctx, "wronglogin", "wrongpassword", done);
                 });
-                it('should return a success', function () {
+                it('should return unauthorize', function () {
                     expect(ctx.res.statusCode).equal(401);
                 });
             });
@@ -516,7 +516,7 @@ describe('API-V2 LOGIN', function () {
                     login.cookieLogout(ctx, done);
                 });
 
-                it('should return a success', function () {
+                it('should return a success without content', function () {
                     expect(ctx.res.statusCode).equal(204);
                 });
             });
@@ -528,7 +528,7 @@ describe('API-V2 LOGIN', function () {
                     login.cookieLogout(ctx, done);
                 });
 
-                it('should return a success', function () {
+                it('should return unauthorize', function () {
                     expect(ctx.res.statusCode).equal(401);
                 });
             });
@@ -548,7 +548,7 @@ describe('API-V2 LOGIN', function () {
                     login.cookieLogout(ctx, done);
                 });
 
-                it('should return a success', function () {
+                it('should return unauthorize', function () {
                     expect(ctx.res.statusCode).equal(401);
                 });
             });

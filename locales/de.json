@@ -352,5 +352,8 @@
 	"API_ERROR": "Ups! Irgendwas lief schief:",
 	"API_INCORRECT_LOGIN_OR_PASS": "Der Benutzername oder das Passwort ist falsch",
 	"API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH": "Das Passwort folgt den Sicherheitsregeln nicht",
-	"ADMIN_USERS_MSG_ERROR": "ADMIN_USERS_MSG_ERROR"
+	"ADMIN_USERS_MSG_ERROR": "ADMIN_USERS_MSG_ERROR",
+	"MALFORMED_DATE_OF_BIRTH": "Date of birth format is incorrect",
+	"EMAIL_TAKEN": "That email is already taken"
+
 }
