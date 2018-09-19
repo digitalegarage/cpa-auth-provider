@@ -417,7 +417,7 @@ function signupHTML(req, res, handleAfterLogin) {
 function handleAfterSessionRestLogin(user, req, res) {
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
-        if (req.query.code) {
+        if (req.query.withcode) {
             var allowed = isAllowedRedirectUri(REDIRECT_URI);
             if (allowed) {
                 res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
@@ -436,9 +436,19 @@ function handleAfterSessionRestLogin(user, req, res) {
 function handleAfterSessionHtlmLogin(user, req, res) {
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
-        res.redirect(REDIRECT_URI);
+        if (req.query.withcode) {
+            var allowed = isAllowedRedirectUri(REDIRECT_URI);
+            if (allowed) {
+                res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
+            } else {
+                // This is not supposed to happen => json error message is acceptable
+                res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+            }
+        } else {
+            res.redirect(REDIRECT_URI);
+        }
     } else {
-        res.redirect('/');
+        res.redirect(requestHelper.getPath('/'));
     }
 }
 
@@ -447,7 +457,7 @@ function handleAfterJWTRestLogin(user, req, res) {
     const token = jwt.encode(user, config.jwtSecret);
     const REDIRECT_URI = req.query.redirect;
     if (REDIRECT_URI) {
-        if (req.query.code) {
+        if (req.query.withcode) {
             var allowed = isAllowedRedirectUri(REDIRECT_URI);
             if (allowed) {
                 res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
