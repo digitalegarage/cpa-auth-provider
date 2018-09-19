@@ -320,6 +320,7 @@ module.exports = function (app, options) {
             message: '',
             email: req.query.email ? req.query.email : '',
             signup: requestHelper.getPath('/responsive/signup' + redirect),
+            forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
             target: requestHelper.getPath('/responsive/session/login' + redirect),
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
             googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
@@ -343,6 +344,25 @@ module.exports = function (app, options) {
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
         res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
     });
+
+
+    app.get('/responsive/forgotpassword', function (req, res) {
+        var redirect = getRedirectParams(req);
+
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
+            firstname: req.query.firstname ? req.query.firstname : '',
+            lastname: req.query.lastname ? req.query.lastname : '',
+            login: requestHelper.getPath('/responsive/login' + redirect),
+            target: requestHelper.getPath('/api/local/password/recover' + redirect)
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'forgot-password.ejs', data);
+    });
+
+
 };
 
 /////////////////////
@@ -490,6 +510,7 @@ function handleErrorForHtmlCalls(req,  res,err) {
         message: req.__(err.errorData.key),
         email: req.body.email ? req.body.email : '',
         signup: requestHelper.getPath('/responsive/signup' + redirect),
+        forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
         target: requestHelper.getPath('/responsive/session/login' + redirect),
         fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
         googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
