@@ -107,7 +107,7 @@ function resetDatabase(done) {
             );
         }
     });
-};
+}
 
 
 function resetEmptyDatabase(done) {
@@ -122,4 +122,4 @@ function resetEmptyDatabase(done) {
             );
         }
     });
-};
+}
