@@ -5,6 +5,7 @@ var logger = require('../../../../lib/logger');
 var db = require('../../../../models/index');
 var auth = require('basic-auth');
 var jwtHelper = require('../../../../lib/jwt-helper');
+var _ = require('underscore');
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
@@ -75,12 +76,50 @@ var get_user_id = function (req, res) {
 
 };
 
+var get_user = function (req,res) {
+    if (!req.headers.authorization) {
+        return res.status(401).send({error: 'missing header Authorization'});
+    } else {
+        var user = auth(req);
+        var login = user.name;
+        var password = user.pass;
+        db.LocalLogin.findOne({where: {login: login}})
+        .then(function (localLogin) {
+            if (!localLogin) {
+                logger.info('locallogin not found');
+                return res.status(401).send();
+            } else {
+                return localLogin.verifyPassword(password)
+                .then(function (isMatch) {
+                    logger.info('isMatch', isMatch);
+                    if (isMatch) {
+                        db.User.findOne({
+                            where: {id: localLogin.user_id},
+                            include: [db.Permission]
+                        })
+                        .then(function (user) {
+                            // be sure about what we send? here we go.
+                            res.json({user: _.pick(user,'id','display_name','photo_url','firstname','lastname','gender','language','permission_id')});
+                        })
+                        .catch(function (error) {
+                            logger.error(error);
+                            res.sendStatus(500);
+                        });
+                    } else {
+                        logger.debug("Authentication failed for " + user.name);
+                        res.sendStatus(401);
+                    }
+                });
+            }
+        });
+    }
+};
 
 module.exports = function (router) {
 
 
     // TODO configure the restriction of origins on the CORS preflight call
-    var cors_headers = cors({origin: true, methods: ['DELETE']});
+    var cors_headers = cors({origin: true, methods: ['DELETE','GET']});
 
     /**
      * @swagger
@@ -101,7 +140,24 @@ module.exports = function (router) {
      *     responses:
      *          "204":
      *            description: "user had been deleted"
+     *   get:
+     *     description: get a users profile by credentials
+     *     operationId: "getUser"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "user credentials basic authentication format AKA base64 applied to login+':'+password prefixed by 'Basic '"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: Basic bG9naW46cGFzc3dvcmQ=
+     *     responses:
+     *          "200":
+     *            description: "user profile including permissions in json body"
      */
+
     router.delete('/api/v2/basicauth/user', cors_headers, delete_user);
     router.options('/api/v2/basicauth/user', cors_headers);
 
@@ -131,5 +187,5 @@ module.exports = function (router) {
     router.get('/api/v2/jwt/user/id', cors_headers, get_user_id);
     router.options('/api/v2/jwt/user/id', cors_headers);
 
-
+    router.get('/api/v2/basicauth/user/profile', cors_headers, get_user);
 };

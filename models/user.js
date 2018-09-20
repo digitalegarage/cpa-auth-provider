@@ -69,15 +69,15 @@ module.exports = function (sequelize, DataTypes) {
         return {
             user: {
                 id: this.id,
-                    email: this.LocalLogin ? this.LocalLogin.login : null,
-                    email_verified: this.LocalLogin && this.LocalLogin.verified ? true : false,
-                    display_name: this.display_name,
-                    firstname: this.firstname,
-                    lastname: this.lastname,
-                    gender: this.gender,
-                    date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
+                email: this.LocalLogin ? this.LocalLogin.login : null,
+                email_verified: this.LocalLogin && this.LocalLogin.verified ? true : false,
+                display_name: this.display_name,
+                firstname: this.firstname,
+                lastname: this.lastname,
+                gender: this.gender,
+                date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
             }
-        }
+        };
     };
 
     return User;

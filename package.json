@@ -14,7 +14,7 @@
     "dev": "bin/server",
     "docker-dev": "yarn install && nodemon --watch package.json --exec \"yarn install && yarn run dev\"",
     "test-dev": "NODE_ENV=test mocha --bail --timeout 10000 --reporter dot --require test/test-helper test/lib/setup",
-    "test": "NODE_ENV=test mocha --bail --timeout 10000 --reporter dot --require test/test-helper test/lib test/api"
+    "test": "NODE_ENV=test mocha --bail --timeout 10000 --reporter dot --require test/test-helper test/lib test/api test/api/v2/user"
   },
   "dependencies": {
     "access-log": "^0.4.1",
