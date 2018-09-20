@@ -12,6 +12,7 @@ var logger = require('../../lib/logger');
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
 
+
 var routes = function (router) {
 
     router.get('/user/devices', authHelper.authenticateFirst, function (req, res, next) {
@@ -28,9 +29,9 @@ var routes = function (router) {
             .then(function (clients) {
                 var flash = {};
                 if (req.session.flashMessage) {
-                  flash.message = req.session.flashMessage;
-                  flash.type = 'info';
-                  delete req.session.flashMessage;
+                    flash.message = req.session.flashMessage;
+                    flash.type = 'info';
+                    delete req.session.flashMessage;
                 }
                 return res.render('./user/devices.ejs', {devices: clients, flash: flash});
             }, function (err) {
@@ -68,9 +69,9 @@ var routes = function (router) {
                     };
                     data.flash = {};
                     if (req.session.flashMessage) {
-                      data.flash.message = req.session.flashMessage;
-                      data.flash.type = "success";
-                      delete req.session.flashMessage;
+                        data.flash.message = req.session.flashMessage;
+                        data.flash.type = "success";
+                        delete req.session.flashMessage;
                     }
                     res.render('./user/profile.ejs', data);
                 });
@@ -80,22 +81,28 @@ var routes = function (router) {
 
 
     router.get('/responsive/login', function (req, res) {
+        var redirect = getRedirectParams(req);
+
         var data = {
             message: '',
             email: req.query.email ? req.query.email : '',
-            signup: requestHelper.getPath(req.query.redirect ? ('/responsive/signup' + '?redirect=' + req.query.redirect+'&code=true') : '/responsive/signup'),
-            target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/login' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/login')
+            signup: requestHelper.getPath('/responsive/signup' + redirect),
+            target: requestHelper.getPath('/api/v2/session/login' + redirect),
+            fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
+            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
         res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
     });
 
     router.get('/responsive/signup', function (req, res) {
+        var redirect = getRedirectParams(req);
+
         var data = {
             message: '',
             email: req.query.email ? req.query.email : '',
-            login: requestHelper.getPath(req.query.redirect ? ('/responsive/login' + '?redirect=' + req.query.redirect+'&code=true') : '/responsive/login'),
-            target: requestHelper.getPath(req.query.redirect ? ('/api/v2/session/signup' + '?redirect=' + req.query.redirect+'&code=true') : '/api/v2/session/signup')
+            login: requestHelper.getPath('/responsive/login' + redirect),
+            target: requestHelper.getPath('/api/v2/session/signup' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
         res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
@@ -189,7 +196,10 @@ var routes = function (router) {
                                 });
                             } else {
                                 logger.error('[POST /user/:user_id/password/create][email', req.body.email, '][ERR', err, ']');
-                                res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
+                                res.status(500).json({
+                                    success: false,
+                                    msg: req.__('API_ERROR') + err
+                                });
                             }
                         }
                     );
@@ -203,3 +213,15 @@ var routes = function (router) {
 };
 
 module.exports = routes;
+
+function getRedirectParams(req) {
+    var redirect = '';
+    if (req.query.redirect) {
+        redirect = '?redirect=' + encodeURI(req.query.redirect);
+        if (req.query.withcode) {
+            redirect += '&withcode=true';
+        }
+    }
+    return redirect;
+}
+
