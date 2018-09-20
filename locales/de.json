@@ -354,7 +354,7 @@
 	"API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH": "Das Passwort folgt den Sicherheitsregeln nicht",
 	"ADMIN_USERS_MSG_ERROR": "ADMIN_USERS_MSG_ERROR",
 	"MALFORMED_DATE_OF_BIRTH": "Das Geburtsdatum hat ein ungültiges Format",
-	"EMAIL_TAKEN": "Die Email-Adresse ist bereits in Benutzung"
-
+	"EMAIL_TAKEN": "Die Email-Adresse ist bereits in Benutzung",
+	"PASSWORD_WEAK": "Das Passwort ist zu einfach: Verwende auch Zahlen oder Groß/Kleinschreibung."
 }
 

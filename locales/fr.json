@@ -354,5 +354,6 @@
 	"API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH": "Le mot de passe ne respecte pas les règles de sécurité",
 	" souhaite accéder à votre compte maRTS.": " souhaite accéder à votre compte maRTS.",
 	"MALFORMED_DATE_OF_BIRTH": "la date de naissance n'a pas le bon format",
-	"EMAIL_TAKEN": "Cette adresse email est déjà utilisée"
+	"EMAIL_TAKEN": "Cette adresse email est déjà utilisée",
+	"PASSWORD_WEAK": "Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux."
 }
