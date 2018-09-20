@@ -4,12 +4,14 @@ var config = require('../../config');
 var db = require('../../models');
 var authHelper = require('../../lib/auth-helper');
 var passwordHelper = require('../../lib/password-helper');
+var requestHelper = require('../../lib/request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var userHelper = require('../../lib/user-helper');
 var logger = require('../../lib/logger');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
+
 
 var routes = function (router) {
 
@@ -27,9 +29,9 @@ var routes = function (router) {
             .then(function (clients) {
                 var flash = {};
                 if (req.session.flashMessage) {
-                  flash.message = req.session.flashMessage;
-                  flash.type = 'info';
-                  delete req.session.flashMessage;
+                    flash.message = req.session.flashMessage;
+                    flash.type = 'info';
+                    delete req.session.flashMessage;
                 }
                 return res.render('./user/devices.ejs', {devices: clients, flash: flash});
             }, function (err) {
@@ -48,6 +50,7 @@ var routes = function (router) {
                     var email = user.LocalLogin ? user.LocalLogin.login : undefined;
                     var data = {
                         profile: {
+                            login: email,
                             firstname: user.firstname,
                             lastname: user.lastname,
                             gender: user.gender,
@@ -66,15 +69,45 @@ var routes = function (router) {
                     };
                     data.flash = {};
                     if (req.session.flashMessage) {
-                      data.flash.message = req.session.flashMessage;
-                      data.flash.type = "success";
-                      delete req.session.flashMessage;
+                        data.flash.message = req.session.flashMessage;
+                        data.flash.type = "success";
+                        delete req.session.flashMessage;
                     }
                     res.render('./user/profile.ejs', data);
                 });
             });
         }
     });
+
+
+    router.get('/responsive/login', function (req, res) {
+        var redirect = getRedirectParams(req);
+
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            signup: requestHelper.getPath('/responsive/signup' + redirect),
+            target: requestHelper.getPath('/api/v2/session/login' + redirect),
+            fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
+            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
+    });
+
+    router.get('/responsive/signup', function (req, res) {
+        var redirect = getRedirectParams(req);
+
+        var data = {
+            message: '',
+            email: req.query.email ? req.query.email : '',
+            login: requestHelper.getPath('/responsive/login' + redirect),
+            target: requestHelper.getPath('/api/v2/session/signup' + redirect)
+        };
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
+    });
+
 
     router.post('/user/:user_id/password', authHelper.ensureAuthenticated, function (req, res) {
         req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();
@@ -163,7 +196,10 @@ var routes = function (router) {
                                 });
                             } else {
                                 logger.error('[POST /user/:user_id/password/create][email', req.body.email, '][ERR', err, ']');
-                                res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
+                                res.status(500).json({
+                                    success: false,
+                                    msg: req.__('API_ERROR') + err
+                                });
                             }
                         }
                     );
@@ -177,3 +213,15 @@ var routes = function (router) {
 };
 
 module.exports = routes;
+
+function getRedirectParams(req) {
+    var redirect = '';
+    if (req.query.redirect) {
+        redirect = '?redirect=' + encodeURI(req.query.redirect);
+        if (req.query.withcode) {
+            redirect += '&withcode=true';
+        }
+    }
+    return redirect;
+}
+

@@ -1,57 +1,14 @@
 "use strict";
 
-var db = require('../../models');
 var config = require('../../config');
 var requestHelper = require('../../lib/request-helper');
 var facebookHelper = require('../../lib/facebook-helper');
-var callbackHelper = require('../../lib/callback-helper');
-var socialLoginHelper = require('../../lib/social-login-helper');
 
 var passport = require('passport');
-var FacebookStrategy = require('passport-facebook').Strategy;
 
-// Fields to import: Email, First and Last Name, Gender, Birthdate
-// birthday => This is a fixed format string, like MM/DD/YYYY. However, people can control who can see the year they were born separately from the month and day so this string can be only the year (YYYY) or the month + day (MM/DD)
-// gender =>  male or female
-var REQUESTED_FIELDS = ['id', 'email', 'displayName', 'first_name', 'last_name', 'gender', 'birthday'];
-var REQUESTED_PERMISSIONS = ['email', 'user_birthday'];
+var REQUESTED_PERMISSIONS = ['email'];
 
-passport.use(new FacebookStrategy({
-        clientID: config.identity_providers.facebook.client_id,
-        clientSecret: config.identity_providers.facebook.client_secret,
-        callbackURL: callbackHelper.getURL('/auth/facebook/callback'),
-        profileFields: REQUESTED_FIELDS
-
-    },
-    function (accessToken, refreshToken, profile, done) {
-        var email = '';
-        if (profile.emails !== undefined) {
-            email = profile.emails[0].value;
-        }
-
-        var providerUid = facebookHelper.buildFBId(profile.id);
-
-        return socialLoginHelper.findOrCreateSocialLoginUser(socialLoginHelper.FB, email, providerUid, profile.displayName, profile.name.givenName, profile.name.familyName, profile.gender, facebookHelper.fbDateOfBirthToTimestamp(profile._json.birthday)).then(
-            function (user) {
-                if (user) {
-                    db.SocialLogin.findOne({
-                        where: {
-                            user_id: user.id,
-                            name: socialLoginHelper.FB
-                        }
-                    }).then(function (socialLogin) {
-                        socialLogin.logLogin(user);
-                    });
-                }
-                return done(null, user);
-            }
-        ).catch(
-            function (err) {
-                done(err);
-            }
-        );
-    }
-));
+passport.use(facebookHelper.getFacebookStrategy('/auth/facebook/callback'));
 
 module.exports = function (app, options) {
     app.get('/auth/facebook', passport.authenticate('facebook', {scope: REQUESTED_PERMISSIONS}));
@@ -75,4 +32,3 @@ module.exports = function (app, options) {
 
         });
 };
-

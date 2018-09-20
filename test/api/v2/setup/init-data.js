@@ -1,3 +1,5 @@
+"use strict";
+
 var promise = require('bluebird');
 var bcrypt = promise.promisifyAll(require('bcrypt'));
 
@@ -40,10 +42,12 @@ var USER_1_PROFILE = {
 module.exports = {
     OAUTH_CLIENT_1: OAUTH_CLIENT_1,
     USER_1: USER_1,
+    USER_1_ID: USER_1_ID,
     USER_1_PROFILE: USER_1_PROFILE,
     USER_1_DAB_STR: USER_1_DAB_STR,
     USER_1_CPA_TOKEN: USER_1_CPA_TOKEN,
-    resetDatabase: resetDatabase
+    resetDatabase: resetDatabase,
+    resetEmptyDatabase: resetEmptyDatabase
 }
 
 function createOAuth2Client(done) {
@@ -103,4 +107,19 @@ function resetDatabase(done) {
             );
         }
     });
-};
+}
+
+
+function resetEmptyDatabase(done) {
+    return dbHelper.clearDatabase(function (err) {
+        if (err) {
+            return done(err);
+        } else {
+            return createOAuth2Client(
+                function () {
+                        done();
+                }
+            );
+        }
+    });
+}

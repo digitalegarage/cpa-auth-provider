@@ -7,6 +7,10 @@ module.exports = {
         title: ''
     },
 
+    auth_session_cookie :{
+        name: 'connect.sid'
+    },
+
     limiter: {
         type: 'recaptcha', // 'no' || 'rate' || 'recaptcha-optional' || 'recaptcha'
         parameters: {
@@ -81,6 +85,11 @@ module.exports = {
     },
 
     auto_idp_redirect: 'local',
+
+    afterLogin: {
+        // White list of possible redirect URI (comma separated values) after login when token will be passed as a get parameter
+        allowedRedirectUris:'http://whitelistedredirecturl.com'
+    },
 
     // enable trusting of X-Forwarded-For headers
     trust_proxy: true,

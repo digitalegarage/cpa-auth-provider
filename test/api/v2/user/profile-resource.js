@@ -2,6 +2,7 @@
 
 var requestHelper = require('../../../request-helper');
 var initData = require('../setup/init-data');
+var login = require('../setup/login');
 
 
 const NEW_DAB = "1989-11-09";
@@ -13,14 +14,24 @@ const NEW_GENDER = 'female';
 describe('API-V2 profile', function () {
 
     context('GET : /api/v2/<security>/user/profile ', function () {
-
         before(initData.resetDatabase);
+        context('using http basic auth', function() {
+            var ctx = this;
+
+            before(function(done) {
+                httpBasicGetProfile(ctx,done);
+            });
+
+            it('should return a success', function() {
+                expectGetPermissionEnrichedProfile(ctx);
+            });
+        });
 
         context('using oauth token', function () {
             var ctx = this;
 
             before(function (done) {
-                oAuthLogin(ctx, done);
+                login.oAuthLogin(ctx, done);
             });
 
             before(function (done) {
@@ -36,7 +47,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                cookieLogin(ctx, done);
+                login.cookieLogin(ctx, done);
             });
 
             before(function (done) {
@@ -52,7 +63,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                jwtLogin(ctx, done);
+                login.jwtLogin(ctx, done);
             });
 
             before(function (done) {
@@ -87,7 +98,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                oAuthLogin(ctx, done);
+                login.oAuthLogin(ctx, done);
             });
             before(function (done) {
                 oAuthUpdateProfile(ctx, done);
@@ -106,7 +117,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                cookieLogin(ctx, done);
+                login.cookieLogin(ctx, done);
             });
 
             before(function (done) {
@@ -126,7 +137,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                jwtLogin(ctx, done);
+                login.jwtLogin(ctx, done);
             });
 
             before(function (done) {
@@ -162,21 +173,6 @@ describe('API-V2 profile', function () {
 
 //---------------
 // oAuth calls
-function oAuthLogin(context, done) {
-    requestHelper.sendRequest(context, '/oauth2/token', {
-        method: 'post',
-        data: {
-            grant_type: 'password',
-            username: initData.USER_1.email,
-            password: initData.USER_1.password,
-            client_id: initData.OAUTH_CLIENT_1.client_id,
-            client_secret: initData.OAUTH_CLIENT_1.client_secret
-        }
-    }, function () {
-        context.token = context.res.body.access_token;
-        done();
-    });
-}
 
 function oAuthGetProfile(context, done) {
     requestHelper.sendRequest(
@@ -207,13 +203,6 @@ function oAuthUpdateProfile(context, done) {
 //---------------
 // cookie calls
 
-function cookieLogin(httpContext, done) {
-    requestHelper.loginCustom(initData.USER_1.email, initData.USER_1.password, httpContext, function () {
-        context.cookie = httpContext.cookie;
-        done();
-    });
-}
-
 function cookieGetProfile(httpContext, done) {
     requestHelper.sendRequest(httpContext, '/api/v2/session/user/profile', {
         method: 'get',
@@ -239,25 +228,10 @@ function cookieUpdateProfile(context, done) {
 //---------------
 // jwt calls
 
-function jwtLogin(context, done) {
-    requestHelper.sendRequest(context, '/api/local/authenticate/jwt', {
-        method: 'post',
-        type: 'form',
-        data: {
-            email: initData.USER_1.email,
-            password: initData.USER_1.password
-        }
-    }, function () {
-        context.token = context.res.body.token.substring(4, context.res.body.token.size);
-        done();
-    });
-}
-
 function jwtGetProfile(context, done) {
     requestHelper.sendRequest(context, '/api/v2/jwt/user/profile', {
         method: 'get',
         accessToken: context.token,
-        tokenType: 'JWT'
     }, done);
 }
 
@@ -304,7 +278,29 @@ function cpaUpdateProfile(context, done) {
 }
 
 //---------------
+// http basic auth calls
+function httpBasicGetProfile(context,done) {
+    requestHelper.sendRequest(context, "/api/v2/basicauth/user/profile", {
+        method: 'get',
+        basicAuth: {
+            login: initData.USER_1.email,
+            password: initData.USER_1.password
+        }
+    }, done);
+}
+
+//---------------
 // expected results
+
+function expectGetPermissionEnrichedProfile(context) {
+    expect(context.res.statusCode).equal(200);
+    expect(context.res.body.user.id).not.equal(undefined);
+    expect(context.res.body.user.permission_id).not.equal(undefined);
+    expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
+    expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
+}
 
 function expectGetInitialProfile(context) {
     expect(context.res.statusCode).equal(200);
@@ -323,8 +319,3 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.body.user.gender).equal(NEW_GENDER);
     expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
 }
-
-
-
-
-
