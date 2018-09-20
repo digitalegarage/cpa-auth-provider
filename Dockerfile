@@ -34,6 +34,7 @@ COPY lib /src/lib
 COPY models /src/models
 COPY public /src/public
 COPY routes /src/routes
+COPY services /src/services
 COPY views /src/views
 COPY templates /src/templates
 COPY locales /src/locales
