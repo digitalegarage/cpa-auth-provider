@@ -26,6 +26,9 @@ const STRONG_PASSWORD = 'correct horse battery staple';
 const WEAK_PASSWORD = 'weak';
 const DATE_OF_BIRTH = 249782400000;
 
+const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
+const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
+
 const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
 
 describe('API-V2 LOGIN', function () {
@@ -288,33 +291,44 @@ describe('API-V2 LOGIN', function () {
             });
             context('when user request to be redirected', function () {
                 context('with code', function () {
+                    context('with whitelisted uri', function () {
 
-                    var ctx = this;
+                        var ctx = this;
 
-                    const REDIRECT_URI = 'http://google.ch';
+                        before(function (done) {
+                            login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, WHITELISTED_REDIRECT_URI, true, done);
+                        });
 
-                    before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, true, done);
+                        it('should return a 302', function () {
+                            expect(ctx.res.statusCode).to.equal(302);
+                            expect(ctx.res.header.location).to.equal('/ap/api/v2/session/cookie?redirect=' + WHITELISTED_REDIRECT_URI);
+                        });
                     });
+                    context('with not whitelisted uri', function () {
 
-                    it('should return a 302', function () {
-                        expect(ctx.res.statusCode).to.equal(302);
-                        expect(ctx.res.header.location).to.equal('/ap/api/v2/session/cookie?redirect=' + REDIRECT_URI);
+                        var ctx = this;
+
+                        before(function (done) {
+                            login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, NOT_WHITELISTED_REDIRECT_URI, true, done);
+                        });
+
+                        it('should return a 400', function () {
+                            expect(ctx.res.statusCode).to.equal(400);
+                            expect(ctx.res.body.msg).to.equal('redirect uri ' + NOT_WHITELISTED_REDIRECT_URI + ' is not an allowed redirection');
+                        });
                     });
                 });
                 context('without code', function () {
 
                     var ctx = this;
 
-                    const REDIRECT_URI = 'http://google.ch';
-
                     before(function (done) {
-                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, null, done);
+                        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, WHITELISTED_REDIRECT_URI, null, done);
                     });
 
                     it('should return a 302', function () {
                         expect(ctx.res.statusCode).to.equal(302);
-                        expect(ctx.res.header.location).to.equal(REDIRECT_URI);
+                        expect(ctx.res.header.location).to.equal(WHITELISTED_REDIRECT_URI);
                     });
                 });
             });
@@ -347,28 +361,26 @@ describe('API-V2 LOGIN', function () {
             context('when user request to be redirected', function () {
                 var ctx = this;
 
-                const REDIRECT_URI = 'http://google.ch';
-
                 context('with code', function () {
 
                     before(function (done) {
-                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, true, done);
+                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, WHITELISTED_REDIRECT_URI, true, done);
                     });
 
                     it('should return a 302', function () {
                         expect(ctx.res.statusCode).to.equal(302);
-                        expect(ctx.res.header.location).to.equal(REDIRECT_URI + '?token=' + ctx.token);
+                        expect(ctx.res.header.location).to.equal(WHITELISTED_REDIRECT_URI + '?token=' + ctx.token);
                     });
                 });
                 context('without code', function () {
 
                     before(function (done) {
-                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, REDIRECT_URI, null, done);
+                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, WHITELISTED_REDIRECT_URI, null, done);
                     });
 
                     it('should return a 302', function () {
                         expect(ctx.res.statusCode).to.equal(302);
-                        expect(ctx.res.header.location).to.equal(REDIRECT_URI);
+                        expect(ctx.res.header.location).to.equal(WHITELISTED_REDIRECT_URI);
                     });
                 });
             });
@@ -401,21 +413,37 @@ describe('API-V2 LOGIN', function () {
             context('with redirects and no code', function () {
                 var ctx = this;
                 before(function (done) {
-                    login.cookieLoginWithRedirectOption(ctx, 'http://somedomain.org', false, done);
+                    login.cookieLoginWithRedirectOption(ctx, WHITELISTED_REDIRECT_URI, false, done);
                 });
                 it('should return a 302 at request location', function () {
                     expect(ctx.res.statusCode).equal(302);
-                    expect(ctx.res.headers["location"]).equal('http://somedomain.org');
+                    expect(ctx.res.headers["location"]).equal(WHITELISTED_REDIRECT_URI);
                 });
             });
             context('with redirects and code', function () {
-                var ctx = this;
-                before(function (done) {
-                    login.cookieLoginWithRedirectOption(ctx, 'http://somedomain.org', true, done);
+                context('with whitelisted uri', function () {
+
+                    var ctx = this;
+                    before(function (done) {
+                        login.cookieLoginWithRedirectOption(ctx, WHITELISTED_REDIRECT_URI, true, done);
+                    });
+                    it('should return a 302 redirect to /api/v2/session/cookie', function () {
+                        expect(ctx.res.statusCode).equal(302);
+                        expect(ctx.res.headers["location"]).equal('/ap/api/v2/session/cookie?redirect=' + WHITELISTED_REDIRECT_URI);
+                    });
                 });
-                it('should return a 302 redirect to /api/v2/session/cookie', function () {
-                    expect(ctx.res.statusCode).equal(302);
-                    expect(ctx.res.headers["location"]).equal('/ap/api/v2/session/cookie?redirect=http://somedomain.org');
+                context('with whitelisted uri', function () {
+
+                    var ctx = this;
+                    before(function (done) {
+                        login.cookieLoginWithRedirectOption(ctx, NOT_WHITELISTED_REDIRECT_URI, true, done);
+                    });
+                    it('should return a 400', function () {
+                        expect(ctx.res.statusCode).to.equal(400);
+                        expect(ctx.res.body.msg).to.equal('redirect uri ' + NOT_WHITELISTED_REDIRECT_URI + ' is not an allowed redirection');
+                    });
+
+
                 });
             });
         });
@@ -426,14 +454,14 @@ describe('API-V2 LOGIN', function () {
             context('with redirects and code', function () {
                 var ctx = this;
                 before(function (done) {
-                    login.cookieLoginWithRedirectOption(ctx, 'http://somedomain.org', true, done);
+                    login.cookieLoginWithRedirectOption(ctx, WHITELISTED_REDIRECT_URI, true, done);
                 });
                 before(function (done) {
-                    requestHelper.sendRequest(ctx, '/api/v2/session/cookie?redirect=' + encodeURIComponent('http://somedomain.org'), {cookie: ctx.cookie}, done);
+                    requestHelper.sendRequest(ctx, '/api/v2/session/cookie?redirect=' + encodeURIComponent(WHITELISTED_REDIRECT_URI), {cookie: ctx.cookie}, done);
                 });
                 it('should return a 302 redirect to /api/v2/session/cookie', function () {
                     expect(ctx.res.statusCode).equal(302);
-                    expect(ctx.res.headers["location"]).equal('http://somedomain.org?token=' + getCookieValue(ctx.cookie));
+                    expect(ctx.res.headers["location"]).equal(WHITELISTED_REDIRECT_URI + '?token=' + getCookieValue(ctx.cookie));
                 });
             });
         });

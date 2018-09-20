@@ -116,6 +116,25 @@ module.exports = {
     auto_idp_redirect: '',
     use_landing_page: false,
 
+    afterLogin: {
+        // Store information in a custom cookie in json format
+        storeUserInfoInCookie: {
+            // true indicate that additional information will be stored
+            activated: true,
+            // name of the cookie
+            cookieName: 'peach_infos',
+            // cookie domain
+            domain: '.broadcaster.com',
+            duration: 999999999,
+            // if true cookie will contain userId as json property
+            storeUserId: true,
+            // if true cookie will contain displayName as json property
+            storeUserDisplayName: false
+        },
+        // White list of possible redirect URI (comma separated values) after login when token will be passed as a get parameter
+        allowedRedirectUris:'http://localhost:3000,http://localhost'
+    },
+
     // enable trusting of X-Forwarded-For headers
     trust_proxy: true,
 

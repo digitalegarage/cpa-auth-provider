@@ -90,14 +90,22 @@ module.exports = {
     },
 
     afterLogin: {
+        // Store information in a custom cookie in json format
         storeUserInfoInCookie: {
+            // true indicate that additional information will be stored
             activated: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_ACTIVATED,
+            // name of the cookie
             cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_NAME,
+            // cookie domain
             domain: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DOMAIN,
             duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION,
+            // if true cookie will contain userId as json property
             storeUserId: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_USER_ID,
+            // if true cookie will contain displayName as json property
             storeUserDisplayName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_DISPLAY_NAME
-        }
+        },
+        // White list of possible redirect URI (comma separated values) after login when token will be passed as a get parameter
+        allowedRedirectUris:process.env.AFTER_LOGIN_ALLOXED_REDIRECT_URIS
     },
 
     sentry: {
