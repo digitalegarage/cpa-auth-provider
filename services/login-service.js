@@ -143,30 +143,30 @@ function signup(userAttributes, email, password) {
                             function () {
                                 return codeHelper.getOrGenereateEmailVerificationCode(user, transaction);
                             }
+                        ).then(
+                            function (code) {
+                                localLogin.logLogin(user);
+                                emailHelper.send(
+                                    config.mail.from,
+                                    localLogin.login,
+                                    "validation-email",
+                                    {log: false},
+                                    {
+                                        confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                        host: config.mail.host,
+                                        mail: localLogin.login,
+                                        code: code
+                                    },
+                                    user.language || config.mail.local
+                                );
+                                resolve(user);
+                            }
                         ).catch(
                             function (err) {
                                 reject(err);
                             }
                         );
-                    }).then(
-                        function (code) {
-                            // Don't need to be part of the transaction
-                            localLogin.logLogin(user);
-                            emailHelper.send(
-                                config.mail.from,
-                                localLogin.login,
-                                "validation-email",
-                                {log: false},
-                                {
-                                    confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                    host: config.mail.host,
-                                    mail: localLogin.login,
-                                    code: code
-                                },
-                                user.language || config.mail.local
-                            );
-                            resolve(user);
-                        });
+                    });
                 });
     });
 
