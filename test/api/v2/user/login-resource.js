@@ -31,6 +31,16 @@ const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
 
 describe('API-V2 LOGIN', function () {
 
+    before(function (done) {
+
+        if (config.afterLogin) {
+            config.afterLogin.allowedRedirectUris = WHITELISTED_REDIRECT_URI;
+        } else {
+            config.afterLogin = {allowedRedirectUris: WHITELISTED_REDIRECT_URI};
+        }
+        done();
+    });
+
     context('signup', function () {
         beforeEach(initData.resetEmptyDatabase);
 
