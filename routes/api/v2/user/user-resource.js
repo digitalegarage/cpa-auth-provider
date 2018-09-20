@@ -5,6 +5,7 @@ var logger = require('../../../../lib/logger');
 var db = require('../../../../models/index');
 var auth = require('basic-auth');
 var jwtHelper = require('../../../../lib/jwt-helper');
+var _ = require('underscore');
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
@@ -82,7 +83,8 @@ var get_user = function (req,res) {
         var user = auth(req);
         var login = user.name;
         var password = user.pass;
-        db.LocalLogin.findOne({where: {login: login}}).then(function (localLogin) {
+        db.LocalLogin.findOne({where: {login: login}})
+        .then(function (localLogin) {
             if (!localLogin) {
                 logger.info('locallogin not found');
                 return res.status(401).send();
@@ -96,13 +98,16 @@ var get_user = function (req,res) {
                             include: [db.Permission]
                         })
                         .then(function (user) {
-                            res.json({user: user});
+                            // be sure about what we send? here we go.
+                            res.json({user: _.pick(user,'id','display_name','photo_url','firstname','lastname','gender','language','permission_id')});
                         })
                         .catch(function (error) {
-                            res.send(error);
+                            logger.error(error);
+                            res.sendStatus(500);
                         });
                     } else {
-                        res.sendStatus(404);
+                        logger.debug("Authentication failed for " + user.name);
+                        res.sendStatus(401);
                     }
                 });
             }

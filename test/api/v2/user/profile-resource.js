@@ -282,8 +282,10 @@ function cpaUpdateProfile(context, done) {
 function httpBasicGetProfile(context,done) {
     requestHelper.sendRequest(context, "/api/v2/basicauth/user/profile", {
         method: 'get',
-        tokenType: 'Basic',
-        accessToken: Buffer.from(initData.USER_1.email + ':' + initData.USER_1.password).toString('base64')
+        basicAuth: {
+            login: initData.USER_1.email,
+            password: initData.USER_1.password
+        }
     }, done);
 }
 
@@ -292,10 +294,12 @@ function httpBasicGetProfile(context,done) {
 
 function expectGetPermissionEnrichedProfile(context) {
     expect(context.res.statusCode).equal(200);
+    expect(context.res.body.user.id).not.equal(undefined);
+    expect(context.res.body.user.permission_id).not.equal(undefined);
     expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
     expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
-    expect(context.res.body.user.permission_id).not.equal(undefined);
-    expect(context.res.body.user.Permission).not.equal(undefined);
+    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
 }
 
 function expectGetInitialProfile(context) {
