@@ -317,7 +317,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: '',
+            message: req.query.error ? req.__(req.query.error):'',
             email: req.query.email ? req.query.email : '',
             signup: requestHelper.getPath('/responsive/signup' + redirect),
             forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
@@ -333,7 +333,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: '',
+            message: req.query.error ? req.__(req.query.error):'',
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
