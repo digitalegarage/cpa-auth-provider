@@ -392,5 +392,10 @@
 
     "API_ERROR": "Oops, something went wrong:",
     "API_INCORRECT_LOGIN_OR_PASS": "The username or password is incorrect",
-    "API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH": "Password is not strong enough"
+    "API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH": "Password is not strong enough",
+
+    "MALFORMED_DATE_OF_BIRTH": "Date of birth format is incorrect",
+    "EMAIL_TAKEN": "That email is already taken",
+
+    "PASSWORD_WEAK": "Password too simple. Use numbers and upper and lower case letters."
 }

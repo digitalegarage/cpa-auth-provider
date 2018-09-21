@@ -12,7 +12,8 @@ module.exports = {
         oauth: {
             // override the oauth validation message
             customMessage: process.env.CUSTOM_OAUTH_MSG || ''
-        }
+        },
+        date_format: process.env.DATA_FORMAT
     },
 
     i18n: {

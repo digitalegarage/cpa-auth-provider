@@ -21,6 +21,7 @@
         <div class="rts-panel main rts-overlay-hide-action">
             <div class="rts-module bg-default">
                 <div class="marts-form-container"><h1>Créer mon compte</h1>
+                    <div class="marts-form-error-message show-error-message"><%= message %></div>
                     <form id="marts-new-accound-form" class="marts-form" method="post"
                           action="<%= target %>"><p>Renseignez
                             les champs présents ci-dessous afin de créer un compte.</p>
@@ -28,7 +29,7 @@
                         <input type="text" id="create_account_birthdate"
                                name="date_of_birth"
                                class="text text-error custom-datepicker"
-                               placeholder="Date de naissance (JJ.MM.AAAA)" required/>
+                               placeholder="Date de naissance (JJ.MM.AAAA)" value="<%= date_of_birth %>" required/>
                         <div><label class="radio-inline"> <input type="radio" class="signup_gender"
                                                                  name="gender" value="male"
                                                                  required> Homme</label> <label

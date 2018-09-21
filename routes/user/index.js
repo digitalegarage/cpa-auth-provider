@@ -80,33 +80,6 @@ var routes = function (router) {
     });
 
 
-    router.get('/responsive/login', function (req, res) {
-        var redirect = getRedirectParams(req);
-
-        var data = {
-            message: '',
-            email: req.query.email ? req.query.email : '',
-            signup: requestHelper.getPath('/responsive/signup' + redirect),
-            target: requestHelper.getPath('/api/v2/session/login' + redirect),
-            fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
-            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
-        };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
-        res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
-    });
-
-    router.get('/responsive/signup', function (req, res) {
-        var redirect = getRedirectParams(req);
-
-        var data = {
-            message: '',
-            email: req.query.email ? req.query.email : '',
-            login: requestHelper.getPath('/responsive/login' + redirect),
-            target: requestHelper.getPath('/api/v2/session/signup' + redirect)
-        };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
-        res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
-    });
 
 
     router.post('/user/:user_id/password', authHelper.ensureAuthenticated, function (req, res) {
@@ -214,14 +187,4 @@ var routes = function (router) {
 
 module.exports = routes;
 
-function getRedirectParams(req) {
-    var redirect = '';
-    if (req.query.redirect) {
-        redirect = '?redirect=' + encodeURI(req.query.redirect);
-        if (req.query.withcode) {
-            redirect += '&withcode=true';
-        }
-    }
-    return redirect;
-}
 

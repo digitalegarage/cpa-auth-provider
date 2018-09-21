@@ -38,7 +38,7 @@ function cookieSignupWithProfile(httpContext, email, password, profileData, redi
     if (redirect) {
         uri += "?redirect=" + redirect;
         if (code) {
-            uri += "&code=true";
+            uri += "&withcode=true";
         }
     }
     requestHelper.sendRequest(httpContext, uri, {
@@ -69,7 +69,7 @@ function cookieLoginWithOptions(httpContext, email, password, redirect, code, do
     if (redirect) {
         uri += "?redirect=" + encodeURIComponent(redirect);
         if (code) {
-            uri += "&code=true";
+            uri += "&withcode=true";
         }
     }
     requestHelper.sendRequest(httpContext, uri, {
@@ -113,7 +113,7 @@ function jwtSignup(context, email, password, redirect, code, done) {
     if (redirect) {
         uri += "?redirect=" + redirect;
         if (code) {
-            uri += '&code=true'
+            uri += '&withcode=true'
         }
     }
     requestHelper.sendRequest(context, uri, {
