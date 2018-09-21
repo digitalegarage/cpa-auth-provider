@@ -21,6 +21,7 @@
         <div class="rts-panel main rts-overlay-hide-action">
             <div class="rts-module bg-default">
                 <div class="marts-form-container"><h1>Me connecter</h1>
+                    <div class="marts-form-error-message show-error-message"><%= message %></div>
                     <p>Pas encore membre ? <a href="<%= signup %>">Créer un
                             compte</a></p>
                     <form id="marts-login-form" class="marts-form" method="post"
@@ -35,7 +36,7 @@
                                placeholder="Mot de passe"
                                required>
                         <input class="marts-button" type="submit" value="Continuer">
-                        <p><a href="/profile/forgot-password?popup=true">Mot de passe oublié ?</a>
+                        <p><a href="<%= forgotPassword %>">Mot de passe oublié ?</a>
                         </p></form>
                     <ul class="alternative-logins">
                         <li class="alternative-login marts-login-facebook">

@@ -13,8 +13,8 @@
     "start": "bin/server -- $NODE_OPTS",
     "dev": "bin/server",
     "docker-dev": "yarn install && nodemon --watch package.json --exec \"yarn install && yarn run dev\"",
-    "test-dev": "NODE_ENV=test mocha --bail --timeout 10000 --reporter dot --require test/test-helper test/lib/setup",
-    "test": "NODE_ENV=test mocha --bail --timeout 10000 --reporter dot --require test/test-helper test/lib test/api test/api/v2/user"
+    "test-dev": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib/setup",
+    "test": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user"
   },
   "dependencies": {
     "access-log": "^0.4.1",
@@ -48,6 +48,7 @@
     "google-auth-library": "^0.10.0",
     "i18n": "^0.8.3",
     "install": "^0.10.1",
+    "is-date-format": "^0.1.1",
     "jquery": "^3.2.1",
     "jquery-form": "^4.2.1",
     "js-cookie": "^2.1.4",
