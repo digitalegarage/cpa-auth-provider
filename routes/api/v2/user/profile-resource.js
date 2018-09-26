@@ -124,10 +124,6 @@ module.exports = function (router) {
      *
      */
 
-        // TODO configure the restriction of origins on the CORS preflight call
-    var cors_headers = cors({origin: true, methods: ['GET, PUT']});
-
-
     /**
      * @swagger
      * /api/v2/oauth2/user/profile:
@@ -149,7 +145,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
-    router.get('/api/v2/oauth2/user/profile', cors_headers, passport.authenticate('bearer', {session: false}), user_profile);
+    router.get('/api/v2/oauth2/user/profile', cors(), passport.authenticate('bearer', {session: false}), user_profile);
 
     /**
      * @swagger
@@ -177,8 +173,8 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile udpated"
      */
-    router.put('/api/v2/oauth2/user/profile', cors_headers, passport.authenticate('bearer', {session: false}), user_profile_update);
-    router.options('/api/v2/oauth2/user/profile', cors_headers);
+    router.put('/api/v2/oauth2/user/profile', cors(), passport.authenticate('bearer', {session: false}), user_profile_update);
+    router.options('/api/v2/oauth2/user/profile', cors());
 
 
     /**
@@ -194,7 +190,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
-    router.get('/api/v2/session/user/profile', cors_headers, authHelper.ensureAuthenticated, user_profile);
+    router.get('/api/v2/session/user/profile', cors(), authHelper.ensureAuthenticated, user_profile);
 
     /**
      * @swagger
@@ -216,8 +212,8 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile udpated"
      */
-    router.put('/api/v2/session/user/profile', cors_headers, authHelper.ensureAuthenticated, user_profile_update);
-    router.options('/api/v2/session/user/profile', cors_headers);
+    router.put('/api/v2/session/user/profile', cors(), authHelper.ensureAuthenticated, user_profile_update);
+    router.options('/api/v2/session/user/profile', cors());
 
     /**
      * @swagger
@@ -240,7 +236,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
-    router.get('/api/v2/jwt/user/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile);
+    router.get('/api/v2/jwt/user/profile', cors(), passport.authenticate('jwt', {session: false}), user_profile);
 
     /**
      * @swagger
@@ -268,8 +264,8 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile udpated"
      */
-    router.put('/api/v2/jwt/user/profile', cors_headers, passport.authenticate('jwt', {session: false}), user_profile_update);
-    router.options('/api/v2/jwt/user/profile', cors_headers);
+    router.put('/api/v2/jwt/user/profile', cors(), passport.authenticate('jwt', {session: false}), user_profile_update);
+    router.options('/api/v2/jwt/user/profile', cors());
 
     /**
      * @swagger
@@ -292,7 +288,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
-    router.get('/api/v2/cpa/user/profile', cors_headers, authHelper.ensureCpaAuthenticated, user_profile);
+    router.get('/api/v2/cpa/user/profile', cors(), authHelper.ensureCpaAuthenticated, user_profile);
 
     /**
      * @swagger
@@ -320,8 +316,8 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile udpated"
      */
-    router.put('/api/v2/cpa/user/profile', cors_headers, authHelper.ensureCpaAuthenticated, user_profile_update);
-    router.options('/api/v2/cpa/user/profile', cors_headers);
+    router.put('/api/v2/cpa/user/profile', cors(), authHelper.ensureCpaAuthenticated, user_profile_update);
+    router.options('/api/v2/cpa/user/profile', cors());
 
 
 };
