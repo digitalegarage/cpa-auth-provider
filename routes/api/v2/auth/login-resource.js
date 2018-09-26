@@ -491,7 +491,7 @@ function isAllowedRedirectUri(redirectUri) {
 function getRedirectParams(req) {
     var redirect = '';
     if (req.query.redirect) {
-        redirect = '?redirect=' + encodeURI(req.query.redirect);
+        redirect = '?redirect=' + encodeURIComponent(req.query.redirect);
         if (req.query.withcode) {
             redirect += '&withcode=true';
         }
