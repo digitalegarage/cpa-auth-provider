@@ -17,7 +17,7 @@ module.exports = function (app, options) {
 
     app.get('/api/v2/auth/google/callback', passport.authenticate(GOOGLE_STRATEGY_NAME, {failureRedirect: config.urlPrefix + '/responsive/login?error=LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE'}), function (req, res) {
 
-        socialLoginHelper.afterSocialLoginSucced(req, res);
+        socialLoginHelper.afterSocialLoginSucceed(req, res);
 
     });
 };
