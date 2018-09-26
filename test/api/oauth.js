@@ -317,9 +317,6 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-            });
-
-            it('should redirect to login page', function () {
                 expect(this.res.headers.location).equal(URL_PREFIX + '/auth');
             });
         });
@@ -380,9 +377,6 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-            });
-
-            it('should redirect to login page', function () {
                 expect(this.res.headers.location).equal(URL_PREFIX + '/auth');
             });
         });

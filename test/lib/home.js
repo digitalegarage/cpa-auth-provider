@@ -108,7 +108,7 @@ describe('GET /', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
             expect(this.res.headers).to.have.property('location');
-            expect(this.res.headers.location).to.equal(urlPrefix + '/auth');
+            expect(this.res.headers.location).to.equal(urlPrefix + '/responsive/login?redirect=/ap/');
         });
     });
 });
