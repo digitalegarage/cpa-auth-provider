@@ -32,9 +32,8 @@ module.exports = function (router) {
             }
         }
         if (!url) {
-            res.render('./auth/provider_list.ejs');
-            return;
-        }
+            url = '/'
+        };
 
         requestHelper.redirect(res, url);
     });
