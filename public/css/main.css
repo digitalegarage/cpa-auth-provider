@@ -249,9 +249,23 @@ nav .peach-title {
 }
 
 #login .social {
+    display: flex;
+    flex-direction: column;
     margin-top: 25px;
     margin-bottom: 20px;
 }
+
+#login .social-entry {
+    flex: 1;
+}
+
+@media (min-width: 768px) {
+    #login .social {
+        flex-direction: row;
+    }
+}
+
+
 
 #login .providers-links{
     color: inherit;
