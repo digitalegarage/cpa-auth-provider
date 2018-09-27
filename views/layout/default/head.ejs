@@ -1,7 +1,7 @@
 <!-- views/layout/default/head.ejs -->
 
-<% if ( config.title !== "" ) { %>
-<title><%= config.title %></title>
+<% if ( config.broadcaster && config.broadcaster.title !== "" ) { %>
+<title><%= config.broadcaster.title %></title>
 <% } else { %>
 <title><%= __('LAYOUT_DEFAULT_HEAD_CROSS_PLATFORM_AUTHENTICATION_TITLE') %></title>
 <% } %>

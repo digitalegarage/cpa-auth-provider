@@ -35,17 +35,6 @@ passport.use('local-signup', new LocalStrategy(localStrategyConf, authLocalHelpe
 
 module.exports = function (app, options) {
 
-    app.get('/auth/local', function (req, res) {
-        var message = {};
-        if (req.query && req.query.error) {
-            message = req.__(req.query.error);
-        }
-        var loginMessage = req.flash('loginMessage');
-        if (loginMessage && loginMessage.length > 0) {
-            message = loginMessage;
-        }
-        res.render('login.ejs', {message: message});
-    });
     app.get('/auth/custom', recaptcha.middleware.render, function (req, res) {
         var required = userHelper.getRequiredFields();
         var profileAttributes = {
@@ -56,12 +45,12 @@ module.exports = function (app, options) {
             client_id: req.query.client_id
         };
 
-        db.OAuth2Client.findOne({where: {client_id: req.query.client_id}}).then(function (client) {
+        db.OAuth2Client.findOne({where: {client_id: req.query.client_id}}).then(function (client) { //TODO be compatible with laboutique
             if (client && client.use_template) {
                 res.render('broadcaster/' + client.use_template + '/custom-login-signup.ejs', profileAttributes);
             } else {
-                // No client found or no dedicated login window => redirect to login '/auth/local'
-                res.render('login.ejs', {message: ''});
+                // No client found or no dedicated login window => redirect to login 'responsive login'
+                requestHelper.redirect(res, '/responsive/login');
             }
         });
 
