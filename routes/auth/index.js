@@ -32,8 +32,8 @@ module.exports = function (router) {
             }
         }
         if (!url) {
-            url = '/'
-        };
+            url = '/';
+        }
 
         requestHelper.redirect(res, url);
     });
