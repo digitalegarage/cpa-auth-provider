@@ -4,6 +4,7 @@ const cors = require('../../../../lib/cors');
 const config = require('../../../../config');
 const logger = require('../../../../lib/logger');
 const requestHelper = require('../../../../lib/request-helper');
+const userHelper = require('../../../../lib/user-helper');
 const limiterHelper = require('../../../../lib/limiter-helper');
 const authHelper = require('../../../../lib/auth-helper');
 const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
@@ -11,6 +12,7 @@ const jwt = require('jwt-simple');
 const loginService = require('../../../../services/login-service');
 const errors = require('../../../../services/errors');
 var trackingCookie = require('../../../../lib/tracking-cookie');
+var recaptcha = require('express-recaptcha');
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
@@ -316,7 +318,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: req.query.error ? req.__(req.query.error):'',
+            message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             signup: requestHelper.getPath('/responsive/signup' + redirect),
             forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
@@ -328,11 +330,13 @@ module.exports = function (app, options) {
         res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
     });
 
-    app.get('/responsive/signup', trackingCookie.middleware, function (req, res) {
+    app.get('/responsive/signup', trackingCookie.middleware, recaptcha.middleware.render, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: req.query.error ? req.__(req.query.error):'',
+            captcha: req.recaptcha,
+            requiredFields: userHelper.getRequiredFields(),
+            message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
@@ -345,11 +349,12 @@ module.exports = function (app, options) {
     });
 
 
-    app.get('/responsive/forgotpassword', function (req, res) {
+    app.get('/responsive/forgotpassword', recaptcha.middleware.render, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
             message: '',
+            captcha: req.recaptcha,
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
@@ -512,7 +517,7 @@ function handleErrorForRestCalls(err, res) {
     }
 }
 
-function handleErrorForHtmlCalls(req,  res,err) {
+function handleErrorForHtmlCalls(req, res, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
