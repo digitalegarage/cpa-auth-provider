@@ -83,10 +83,6 @@ module.exports = function (app, options) {
         res.render('signup.ejs', profileAttributes);
     });
 
-    app.get('/password/recovery', recaptcha.middleware.render, function (req, res) {
-        res.render('password-recovery.ejs', {captcha: req.recaptcha});
-    });
-
     app.get('/password/edit', function (req, res) {
         res.render('password-edit.ejs', {email: req.query.email, code: req.query.code});
     });
