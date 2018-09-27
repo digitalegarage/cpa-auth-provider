@@ -1,435 +1,269 @@
-/*
-************
-************ GENERAL
-************
-*/
+* , * ::before, * ::after {
+  box-sizing: border-box
+}
+
 html {
-    font-size: 17px;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 1;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  -ms-overflow-style: scrollbar
 }
 
 body {
-    margin: 0;
-    color: #666666;
-    font-family: "Gotham SSm A", "Gotham SSm B", "Helvetica", "Arial", "Verdana", sans-serif;
+  margin: 0;
+  font-family: "Gotham Narrow SSm A", "Gotham Narrow SSm B", "Helvetica", "Arial", "Verdana", sans-serif;
+  font-size: 1rem;
+  color: #000;
+  text-align: left;
+  background-color: #fff
 }
 
-h1 {
-    font-size: 32px;
-    font-weight: 500;
-    line-height: 36px;
-    margin-top: 0;
-    color: #333333;
-}
-
-h2 {
-    font-size: 19px;
-    line-height: 20px;
-    color: #333333;
-    font-weight: normal;
-}
-
-h4 {
-    color: #666666;
-    font-size: 18px;
-    font-weight: normal;
-}
-
-/* so modals are always above topbar */
-.modal-open .modal {
-    z-index: 1350;
-}
-/* same for datepickers */
-.datepicker, .datepicker.datepicker-dropdown {
-    z-index: 1340 !important;
-}
-
-.btn-link {
-    color: #af001e;
-    font-size: 16px !important;
-}
-
-.last-link {
-    font-size: 15px !important;
-}
-
-.btn-link:hover, .btn-link:active, .btn-link:focus {
-    color: #bf0020;
-}
-
-.btn-primary, .btn-danger {
-    background-color: #af001e;
-    border: 0;
-    margin-right: 10px;
-    position: relative;
-    border-radius: 5px;
-    box-shadow: none;
-    max-width: 428px;
-    height: 45px;
-    color: rgba(255, 255, 255, 0.95);
-    font-size: 18px;
-    font-weight: 300;
-}
-
-.btn-success {
-    height: 45px;
-    font-size: 18px;
-    font-weight: 300;
-}
-
-.btn-primary:hover, .btn-danger:hover {
-    background-color: #af001e;
-}
-
-.btn-primary:active, .btn-primary:focus, .btn-danger:active, .btn-danger:focus, .btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover {
-    background-color: #af001e;
-}
-
-.btn.btn-large-submit.btn-primary, .btn.btn-large-submit.btn-danger {
-    font-size: 18px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-input.form-control, input.form-control, select.form-control {
-    display: inline-block;
-    max-width: 430px;
-    height: 45px;
-    font-size: 18px;
-    color: #666;
-    border: 1px solid #999999;
-    border-radius: 0;
-}
-
-select.form-control {
-    border: 0;
-    outline: 1px solid #999;
-    outline-offset: -1px;
-}
 
-.input-group .input-group-addon {
-    border-radius: 0;
-    border: 1px solid #999999;
-}
-
-.input-group .input-group-addon:last-child {
-    border-left: 0;
-}
 
-.form-group .input-group {
-    max-width: 430px;
-    margin: auto;
-}
-
-footer.rts-footer {
-    margin-top: 50px;
-}
+/*Overrides */
 
-.alert-success.alert-success-custom {
-    position: relative;
-    background-color: initial;
-    border: none;
-    padding: 0;
-    margin: 25px 0;
+.rts-body a {
+  color: #AF001E;
 }
 
-.alert-success.alert-success-custom > span.glyphicon {
-    position: absolute;
-    left: -20px;
-    top: 3px;
+.rts-body .text-danger {
+  color: #AF001E;
 }
 
-#login .btn.btn-large-submit.btn-primary,
-#password-recovery .btn.btn-large-submit.btn-primary,
-#signup .btn.btn-large-submit.btn-primary {
-    font-size: 17px;
+.rts-body .form-control {
+  display: inline-block;
+  width: 100%;
+  height: 45px;
+  font-size: 18px;
+  color: #666;
+  border: 1px solid #dcdcdc;
+  border-radius: 0;
 }
 
-#rts-custom-login {
-    text-align: center;
+.rts-body label {
+  font-weight: inherit;
 }
 
-#rts-custom-login form.connect-forms {
-    margin: 20px 0 5px 0;
-}
 
-#rts-custom-login .link-login {
-    font-size: 18px;
-}
 
-#rts-custom-login #rts-login-panel {
-    display: block;
-}
+/* FORMS */
 
-#rts-custom-login .link-login .btn-link {
-    font-size: 18px !important;
-}
+.rts-form-container {
+  max-width: 30rem;
+  margin: 0 auto;
+  padding: 2rem;
 
-#rts-custom-login #rts-login-panel .password-recovery-block {
-    display: block;
-    font-size: 17px;
-    margin-top: 2px;
-    text-align: right;
-    max-width: 430px;
-    margin-left: auto;
-    margin-right: auto;
+  font-weight: 300;
+  text-align: center;
 }
 
-#rts-custom-login .form-group #password-bar {
-    max-width: 430px;
-    margin-left: auto;
-    margin-right: auto;
+.rts-form-container .form-part {
+  display: block;
 }
 
-#rts-custom-login #rts-login-panel .login-images, #login .login-images {
-    height: 45px;
-    width: 45px;
-    cursor: pointer;
+.rts-form-container .rts-message {
+  display: none;
 }
 
-#rts-custom-login #rts-login-panel .login-social-labels, #login .login-social-labels {
-    font-size: 15px;
-    margin-top: 5px;
+.rts-form-container.success .rts-message.success {
+  display: block;
 }
 
-#rts-custom-login #rts-login-panel .identity_provider {
-    color: #666666;
-    display: inline-block;
-    margin-left: 20px;
+.rts-form-container.success .form-part {
+  display: none;
 }
 
-#rts-custom-login #rts-login-panel .identity_provider:first-child {
-    margin-left: 0;
+.rts-form-container.error .rts-message.error {
+  display: block;
 }
 
-#rts-custom-login #rts-login-panel .identity_provider:hover {
-    text-decoration: none;
-    color: #666666;
+.rts-form-title {
+  font-size: 1.75rem;
+  margin: 0 0 1rem;
 }
 
-#rts-custom-login #rts-login-panel .social {
-    margin-top: 30px;
-    margin-bottom: 20px;
+.rts-form-links {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-#rts-custom-login #rts-login-panel .providers-links{
-    color: inherit;
+.rts-form {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-#rts-custom-login #rts-signup-panel, #rts-custom-login #rts-password-panel {
-    display: none;
-}
 
-#rts-custom-login #rts-signup-panel select {
-    color: #999;
-}
+/* MESSAGE */
 
-#rts-custom-login .alert-message-error, #rts-custom-login .alert-message-success,  #rts-oauth-dialog .alert-message-error{
-    display: none;
-    max-width: 430px;
-    padding: 15px 10px;
-    text-align: left;
-    font-size: 15px;
-    margin: 30px auto 15px auto;
-}
+.rts-message.success {}
 
-#rts-oauth-dialog {
-    display: block;
-    font-size: 17px;
-    margin-top: 2px;
-    max-width: 430px;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-    color: #666666;
-    font-family: "Gotham SSm A", "Gotham SSm B", "Helvetica", "Arial", "Verdana", sans-serif;
+.rts-message.error {
+  font-weight: 500;
+  color: #AF001E;
+  text-align: center;
 }
 
-#rts-oauth-dialog h1 {
-    font-size: 20px;
-    overflow: auto;
-}
 
-#rts-oauth-dialog p {
-    margin: 20px 0 40px 0;
-}
+/* RECAPTCHA */
 
-#rts-oauth-dialog .alert-message-error p {
-    margin: 0;
+.g-recaptcha {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-#rts-oauth-dialog #allow {
-    width: 100%;
-    display: block;
+.g-recaptcha > div {
+  margin: 0 auto;
 }
 
-#rts-oauth-dialog .block-link {
-    display: block;
-    margin-top: 20px;
-}
 
-#rts-oauth-dialog .block-link .link-cancel{
-    display: block;
-    color: #af001e;
-    cursor: pointer;
-    background: none;
-    border: 0;
-    outline: none;
-    margin: auto;
-}
 
-#rts-oauth-dialog .disconnect-block {
-    display: block;
-    text-align: justify;
-    margin-top: 25px;
-}
+/* ALTERNATIVE LOGINS */
 
-#rts-oauth-dialog a#disconnect {
-    color: #af001e;
-    cursor: pointer;
-}
-#rts-oauth-dialog a#disconnect:hover {
-    text-decoration: none;
+#login .social {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
 }
 
-#profile hr, #devices hr {
-    border-color: #333;
+@media (min-width: 699px) {
+  #login .social {
+    flex-direction: row;
+  }
 }
 
-#profile .delete-container p, #profile .verification-link-container p {
-    color: #666666;
-    font-size: 1.6rem;
+#login .social-entry {
+  flex: 1;
+  padding: .5rem;
 }
 
-#profile #form-personnal-data h4 {
-    font-size: 18px;
-    margin-top: 10px;
-    color: #666666;
-    text-transform: uppercase;
+#login .social  .login-images {
+  width: 2.8125rem;
+  cursor: pointer;
 }
 
-#profile .accountNotVerified p, #profile .accountVerified p{
-    font-size: 17px;
+#login .social  .login-social-labels {
+  font-size: .875rem;
+  margin-top: 5px;
 }
 
-#profile .form-group #password-bar {
-    max-width: 430px;
+#login .social .identity_provider {
+  color: #666666;
 }
 
-#profile #form-personnal-data span {
-    font-size: 16px !important;
+#login .social .identity_provider:hover {
+  text-decoration: none;
+  color: #666666;
 }
 
-#profile #form-personnal-data #btn-container span.pull-right {
-    margin-top: 10px;
-}
 
-#profile #form-personnal-data .panel {
-    border: 0;
-}
 
-#profile .status-info {
-    font-size: 16px !important;
-}
+/* PASSWORD COMPLEXITY */
 
-#profile .providers-container .facebook-text {
-    font-size: 20px !important;
+.password-handler {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
-#profile #delete-div {
-    font-size: 16px;
+.password-handler .password-bar {
+  position: relative;
+  display: none;
+  width: 100%;
+  height: .375em;
+  background-color: #f4f4f4;
 }
 
-#profile #btn-container {
-    max-width: 430px;
+.password-handler .password-progress {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  background-color: red;
 }
 
-#profile .hasNoPassword {
-    margin-top: 20px;
+.password-complexity-explanation {
+  display: none;
+  padding: 1rem;
+  font-size: .875em;
+  font-style: normal;
+  line-height: 1em;
+  color: #333;
+  text-align: left;
+  background: #f9f9f9;
 }
 
-#profile label, #profile form label, #profile .form-group label{
-    display: block;
-    font-size: 17px;
-    font-weight: 300;
+.password-complexity-explanation ul {
+  margin: 1rem 0;
+  padding: 0 0 0 1.5em;
+  list-style: disc;
 }
 
-#profile .hasPassword {
-    margin-bottom: 15px;
-}
 
-#profile .hasPassword button.btn-link, #profile #btn-modify-password {
-    margin-top: 5px;
-}
 
-#profile .hasPassword button.btn-link i, #profile #btn-modify-password i {
-    display: none;
-}
+/* TEXTS */
 
-#profile .btn.btn-large-submit.btn-primary,#profile .btn.btn-large-submit.btn-danger {
-    font-size: 15px;
+.form-error {
+  display: block;
+  font-size: .875rem;
+  font-weight: 300;
+  color: #AF001E;
 }
 
-#profile .col-sm-9 .first.providers-container {
-    font-size: 16px;
+input[type='checkbox'].form-error {
+  display: inline-block;
 }
 
-#profile .input-group.date {
-    max-width: 430px;
-}
 
-#home .home-panel .panel-body h3 {
-    color: #333;
-}
+  /* BUTTONS */
 
-#home .home-panel .panel-body span.glyphicon {
-    color: #af001e;
+.btn-rts {
+  padding: .75rem;
+  width: 100%;
+  color: #fff;
+  background-color: #AF001E;
+  border: 0;
 }
 
-.modal .modal-dialog {
-    font-size: 16px;
-    text-align: justify;
+.btn-rts:hover {
+  color: #fff;
+  background-color: #9C0011;
 }
 
-.modal .modal-dialog .modal-content .form-group label{
-    display: block;
-    font-weight: 500;
+.rts-body.pop {
+  background-color: #fcfcfc;
 }
 
-.modal .modal-dialog .modal-content .form-group input{
-    margin-bottom: 10px;
-}
 
-.modal .modal-dialog .modal-content .form-group input:last-child{
-    margin-bottom: 0;
+.top-image {
+  display: none;
+  border-bottom: 1px solid #f5f5f5;
+  margin-bottom: 2rem
 }
 
-.modal .modal-dialog .modal-content p:first-child{
-    margin: 10px 0px 20px 0;
+.top-image img {
+  font-size: 3rem; height: 1em; margin-bottom: 2rem
 }
 
-.modal .modal-dialog .btn.btn-large-submit, .modal .modal-dialog .btn.btn-normal-submit {
-    font-size: 15px;
+.rts-body.pop .top-image {
+  display: block;
 }
 
-#profile .btn-default, .modal .modal-dialog .btn-default{
-    color: #333;
-    background-color: #fff;
-    border-color: #ccc;
-    margin-right: 10px;
-    position: relative;
-    border-radius: 5px;
-    box-shadow: none;
-    max-width: 428px;
-    height: 45px;
-    font-size: 15px;
-    font-weight: 300;
-}
+.rts-body.pop  .container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 
-/*FIXES for IE popup*/
-main.boutique {
-    margin-top: 10px;
+  display: flex;
+  justify-items: center;
 }
 
-main.boutique h1{
-    margin-bottom: 5px;
+.rts-body.pop  .rts-form-container {
+  box-shadow: 0 1px 5px 0 #d8d8d8;
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 3rem 6rem;
+  background: #fff;
 }
