@@ -6,9 +6,6 @@ var requestHelper = require('../../lib/request-helper');
 var trackingCookie = require('../../lib/tracking-cookie');
 let afterLogoutHelper = require('../../lib/afterlogout-helper');
 
-// Google reCAPTCHA
-var recaptcha = require('express-recaptcha');
-
 module.exports = function (router) {
     router.get('/logout', function (req, res) {
         afterLogoutHelper.afterLogout(res);
@@ -23,7 +20,7 @@ module.exports = function (router) {
 
     router.get('/auth', trackingCookie.middleware, function (req, res) {
         var url;
-        var autoIdpRedirect = config.auto_idp_redirect;
+        var autoIdpRedirect = false;
 
         if (req.session && req.session.auth_origin && req.session.client_id) {
             url = '/auth/custom?client_id=' + req.session.client_id;
