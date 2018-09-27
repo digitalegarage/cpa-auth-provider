@@ -10,6 +10,7 @@ const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
 const jwt = require('jwt-simple');
 const loginService = require('../../../../services/login-service');
 const errors = require('../../../../services/errors');
+var trackingCookie = require('../../../../lib/tracking-cookie');
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
@@ -311,7 +312,7 @@ module.exports = function (app, options) {
     });
 
 
-    app.get('/responsive/login', function (req, res) {
+    app.get('/responsive/login', trackingCookie.middleware, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
@@ -323,11 +324,11 @@ module.exports = function (app, options) {
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
             googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
         };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
     });
 
-    app.get('/responsive/signup', function (req, res) {
+    app.get('/responsive/signup', trackingCookie.middleware, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
@@ -339,7 +340,7 @@ module.exports = function (app, options) {
             login: requestHelper.getPath('/responsive/login' + redirect),
             target: requestHelper.getPath('/responsive/session/signup' + redirect)
         };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
     });
 
@@ -356,7 +357,7 @@ module.exports = function (app, options) {
             login: requestHelper.getPath('/responsive/login' + redirect),
             target: requestHelper.getPath('/api/local/password/recover' + redirect)
         };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         res.render('./login/broadcaster/' + broadcaster + 'forgot-password.ejs', data);
     });
 
@@ -523,6 +524,6 @@ function handleErrorForHtmlCalls(req,  res,err) {
         fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
         googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
     };
-    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
 }

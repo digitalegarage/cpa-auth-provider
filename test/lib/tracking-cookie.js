@@ -16,7 +16,7 @@ var resetDatabase = function (done) {
 
 describe('GET /auth - for tracking cookie', function () {
     before(function (done) {
-        requestHelper.sendRequest(this, '/auth', null, done);
+        requestHelper.sendRequest(this, '/responsive/login', null, done);
     });
 
     it('should set a cookie', function () {
@@ -45,7 +45,7 @@ describe('GET /auth - for ignore parameter', function () {
 
     before(function (done) {
         config.trackingCookie.enabled = true;
-        requestHelper.sendRequest(this, '/auth', null, done);
+        requestHelper.sendRequest(this, '/responsive/login', null, done);
     });
 
     before(function (done) {

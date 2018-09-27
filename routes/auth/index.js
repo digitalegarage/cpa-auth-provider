@@ -3,7 +3,6 @@
 var config = require('../../config');
 var authHelper = require('../../lib/auth-helper');
 var requestHelper = require('../../lib/request-helper');
-var trackingCookie = require('../../lib/tracking-cookie');
 let afterLogoutHelper = require('../../lib/afterlogout-helper');
 
 module.exports = function (router) {
@@ -16,26 +15,6 @@ module.exports = function (router) {
 
     router.get('/protected', authHelper.authenticateFirst, function (req, res) {
         res.send('protected');
-    });
-
-    router.get('/auth', trackingCookie.middleware, function (req, res) {
-        var url;
-        var autoIdpRedirect = false;
-
-        if (req.session && req.session.auth_origin && req.session.client_id) {
-            url = '/auth/custom?client_id=' + req.session.client_id;
-        }
-        if (!url && authHelper.validRedirect(autoIdpRedirect, config.identity_providers)) {
-            url = '/auth/' + autoIdpRedirect;
-            if (req.query && req.query.error) {
-                url += "?error=" + req.query.error;
-            }
-        }
-        if (!url) {
-            url = '/';
-        }
-
-        requestHelper.redirect(res, url);
     });
 
     authHelper.loadIdentityProviders(router, config.identity_providers);
