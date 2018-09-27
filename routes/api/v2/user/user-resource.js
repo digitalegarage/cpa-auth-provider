@@ -1,6 +1,6 @@
 "use strict";
 
-var cors = require('cors');
+const cors = require('../../../../lib/cors');
 var logger = require('../../../../lib/logger');
 var db = require('../../../../models/index');
 var auth = require('basic-auth');
@@ -154,8 +154,8 @@ module.exports = function (router) {
      *            description: "user profile including permissions in json body"
      */
 
-    router.delete('/api/v2/basicauth/user', cors(), delete_user);
-    router.options('/api/v2/basicauth/user', cors());
+    router.delete('/api/v2/basicauth/user', cors, delete_user);
+    router.options('/api/v2/basicauth/user', cors);
 
     /**
      * @swagger
@@ -180,8 +180,8 @@ module.exports = function (router) {
      *              type: string
      *              example: 42b
      */
-    router.get('/api/v2/jwt/user/id', cors(), get_user_id);
-    router.options('/api/v2/jwt/user/id', cors());
+    router.get('/api/v2/jwt/user/id', cors, get_user_id);
+    router.options('/api/v2/jwt/user/id', cors);
 
-    router.get('/api/v2/basicauth/user/profile', cors(), get_user);
+    router.get('/api/v2/basicauth/user/profile', cors, get_user);
 };
