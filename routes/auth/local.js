@@ -31,7 +31,7 @@ var localStrategyConf = {
 
 passport.use('local', new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
 
-passport.use('local-signup', new LocalStrategy(localStrategyConf, authLocalHelper.localSignupStrategyCallback));
+// passport.use('local-signup', new LocalStrategy(localStrategyConf, authLocalHelper.localSignupStrategyCallback));
 
 module.exports = function (app, options) {
 
@@ -54,22 +54,6 @@ module.exports = function (app, options) {
             }
         });
 
-    });
-
-    app.get('/signup', recaptcha.middleware.render, function (req, res) {
-        var required = userHelper.getRequiredFields();
-        var profileAttributes = {
-            email: req.query.email ? decodeURIComponent(req.query.email) : '',
-            captcha: req.recaptcha,
-            requiredFields: required,
-            message: req.flash('signupMessage')
-        };
-        for (var key in required) {
-            if (required.hasOwnProperty(key) && required[key]) {
-                profileAttributes[key] = req.query[key] ? decodeURIComponent(req.query[key]) : '';
-            }
-        }
-        res.render('signup.ejs', profileAttributes);
     });
 
     app.get('/password/edit', function (req, res) {
@@ -109,37 +93,6 @@ module.exports = function (app, options) {
         failureRedirect: config.urlPrefix + '/auth/local',
         failureFlash: true
     }), redirectOnSuccess);
-
-    app.post('/signup', limiterHelper.verify, function (req, res, next) {
-
-        passport.authenticate('local-signup', function (err, user, info) {
-
-            if (req.recaptcha.error) {
-                return requestHelper.redirect(res, '/signup?error=recaptcha');
-            }
-            if (err) {
-                return next(err);
-            }
-            // Redirect if it fails
-            if (!user) {
-                var params = ['email=' + encodeURIComponent(req.body.email)];
-                if (config.userProfiles && config.userProfiles.requiredFields) {
-                    for (var i = 0; i < config.userProfiles.requiredFields.length; ++i) {
-                        var element = config.userProfiles.requiredFields[i];
-                        params.push(element + "=" + encodeURIComponent(req.body[element]));
-                    }
-                }
-                return requestHelper.redirect(res, '/signup?' + params.join('&'));
-            }
-            req.logIn(user, function (err) {
-                if (err) {
-                    return next(err);
-                }
-                // Redirect if it succeeds
-                return redirectOnSuccess(req, res, next);
-            });
-        })(req, res, next);
-    });
 
     app.post('/password/code', limiterHelper.verify, function (req, res, next) {
 
