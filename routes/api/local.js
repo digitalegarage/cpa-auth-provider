@@ -2,7 +2,6 @@
 
 var db = require('../../models');
 var config = require('../../config');
-// var logger = require('../../lib/logger');
 
 var passport = require('passport');
 
@@ -99,17 +98,6 @@ module.exports = function (app, options) {
             });
         });
     });
-
-    app.post('/api/local/authenticate/cookie', cors,
-      passport.authenticate('local', { session: true }),
-      function(req,res) {
-
-        afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
-
-          // returned value is not relevant
-        res.sendStatus(204);
-      }
-    );
 
     app.post('/api/local/authenticate/jwt', cors, function (req, res) {
         db.LocalLogin.findOne({

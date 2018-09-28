@@ -4,34 +4,17 @@ var db = require('../../models');
 var config = require('../../config');
 var requestHelper = require('../../lib/request-helper');
 
-var passport = require('passport');
-
 var emailHelper = require('../../lib/email-helper');
 var codeHelper = require('../../lib/code-helper');
 var passwordHelper = require('../../lib/password-helper');
 var finder = require('../../lib/finder');
 var userHelper = require('../../lib/user-helper');
 var limiterHelper = require('../../lib/limiter-helper');
-var afterLoginHelper = require('../../lib/afterlogin-helper');
-var authLocalHelper = require('../../lib/auth-local-helper');
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
 var i18n = require('i18n');
 
-
-var localStrategyConf = {
-    // by default, local strategy uses username and password, we will override with email
-    usernameField: 'email',
-    passwordField: 'password',
-    passReqToCallback: true // allows us to pass back the entire request to the callback
-};
-
-passport.use('local', new LocalStrategy(localStrategyConf, authLocalHelper.localStrategyCallback));
-
-// passport.use('local-signup', new LocalStrategy(localStrategyConf, authLocalHelper.localSignupStrategyCallback));
 
 module.exports = function (app, options) {
 
@@ -88,11 +71,6 @@ module.exports = function (app, options) {
             next(error);
         });
     });
-
-    app.post('/login', passport.authenticate('local', {
-        failureRedirect: config.urlPrefix + '/auth/local',
-        failureFlash: true
-    }), redirectOnSuccess);
 
     app.post('/password/code', limiterHelper.verify, function (req, res, next) {
 
@@ -182,28 +160,5 @@ module.exports = function (app, options) {
         });
 
     });
-
-    function redirectOnSuccess(req, res, next) {
-        var redirectUri = req.session.auth_origin;
-        delete req.session.auth_origin;
-
-        if (req.session.callback_url) {
-            redirectUri = req.session.callback_url;
-            delete req.session.callback_url;
-        }
-
-        afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
-
-        req.session.save(
-            function () {
-                if (redirectUri) {
-                    return res.redirect(redirectUri);
-                }
-
-                return requestHelper.redirect(res, '/');
-            }
-        );
-    }
-
 
 };

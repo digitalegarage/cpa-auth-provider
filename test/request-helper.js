@@ -97,7 +97,7 @@ module.exports = {
     },
 
     loginUser: function (context, username, password, done) {
-        var loginUrl = this.urlPrefix + '/login';
+        var loginUrl = this.urlPrefix + '/api/v2/session/login';
 
         request
             .post(loginUrl)

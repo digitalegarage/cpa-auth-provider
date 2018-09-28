@@ -57,7 +57,7 @@ describe('user profile timestamps', function () {
             this.login_at = Date.now();
             requestHelper.sendRequest(
                 self,
-                '/login',
+                '/api/v2/session/login',
                 {
                     method: 'post',
                     cookie: self.cookie,
@@ -97,7 +97,7 @@ describe('user profile timestamps', function () {
             var self = this;
             requestHelper.sendRequest(
                 self,
-                '/login',
+                '/api/v2/session/login',
                 {
                     method: 'post',
                     cookie: self.cookie,
