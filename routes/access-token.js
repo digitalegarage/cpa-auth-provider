@@ -2,13 +2,9 @@
 
 var config = require('../config');
 var cors = require('../lib/cors');
-var db = require('../models');
-var generate = require('../lib/generate');
 
 var clientMode = require('./token/client-mode');
 var userMode = require('./token/user-mode');
-
-var async = require('async');
 
 var routes = function (router) {
 

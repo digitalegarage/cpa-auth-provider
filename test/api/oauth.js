@@ -667,7 +667,7 @@ describe('OAuth2 requests from cross domain with access token ', function () {
                 expect(this.res.statusCode).equal(200);
             });
         });
-        
+
     });
     describe('when config is set to not set info cookie', function () {
 
