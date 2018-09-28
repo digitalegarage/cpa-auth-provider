@@ -667,21 +667,7 @@ describe('OAuth2 requests from cross domain with access token ', function () {
                 expect(this.res.statusCode).equal(200);
             });
         });
-
-        describe('when when user logout', function () {
-
-            before(function (done) {
-                requestHelper.sendRequest(this, '/logout', {
-                    method: 'get',
-                }, done);
-            });
-
-
-            it('logout should invalidate cookie ', function () {
-                var peachInfoCookieString = searchCookieString.call(this, this.res);
-                expect(peachInfoCookieString).to.be.equal('peach_infos=; Max-Age=0; Domain=toto.com; Path=/; Expires=Invalid Date');
-            });
-        });
+        
     });
     describe('when config is set to not set info cookie', function () {
 
