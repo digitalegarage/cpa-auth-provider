@@ -1,7 +1,6 @@
 "use strict";
 
 var db = require('../../models');
-var logger = require('../../lib/logger');
 var authHelper = require('../../lib/auth-helper');
 
 module.exports = setupClientControlRoute;

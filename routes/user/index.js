@@ -1,10 +1,8 @@
 "use strict";
 
-var config = require('../../config');
 var db = require('../../models');
 var authHelper = require('../../lib/auth-helper');
 var passwordHelper = require('../../lib/password-helper');
-var requestHelper = require('../../lib/request-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var userHelper = require('../../lib/user-helper');
 var logger = require('../../lib/logger');

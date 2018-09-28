@@ -371,7 +371,6 @@ function cycle() {
                 logger.error('[EmailChange][DELETE/FAIL][error', error, ']');
             }
         )
-        ;
     } catch (e) {
         logger.error('[EmailChange][DELETE/FAIL][error', e, ']');
     }

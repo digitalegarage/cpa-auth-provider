@@ -1,6 +1,5 @@
 "use strict";
 
-var config = require('../../config');
 var db = require('../../models');
 var oauth2Token = require('../../lib/oauth2-token');
 var generate = require('../../lib/generate');
