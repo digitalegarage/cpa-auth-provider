@@ -23,15 +23,15 @@ module.exports = function (app, options) {
 
         db.OAuth2Client.findOne({where: {client_id: req.query.client_id}}).then(function (client) {
             if (client) {
-                var redirect = encodeURIComponent("/oauth2/dialog/authorize?"
-                    + "defaultLanguage=fr"
-                    + "&response_type=code&approval_prompt=auto"
-                    + "&client_id=" + client.client_id
-                    + "&display=popup"
-                    + "&redirect_uri=" + encodeURIComponent(client.redirect_uri));
+                var redirect = encodeURIComponent("/oauth2/dialog/authorize?" +
+                    "defaultLanguage=fr" +
+                    "&response_type=code&approval_prompt=auto" +
+                    "&client_id=" + client.client_id +
+                    "&display=popup" +
+                    "&redirect_uri=" + encodeURIComponent(client.redirect_uri));
                 requestHelper.redirect(res, '/responsive/login?redirect=' + redirect);
             } else {
-                res.json({'error':'Unknown client id' + req.query.client_id});
+                res.json({'error': 'Unknown client id' + req.query.client_id});
             }
         });
 
