@@ -236,7 +236,7 @@ describe('POST /api/local/authenticate/jwt', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -285,7 +285,7 @@ describe('POST /api/local/authenticate/jwt', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -337,7 +337,7 @@ describe('POST /api/local/authenticate/jwt', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -349,10 +349,12 @@ describe('POST /api/local/authenticate/jwt', function () {
         });
 
         it('/api/local/info should return a 401 ', function () {
-            expect(this.accessToken).to.be.undefined;
+            expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.body.success).to.equal(false);
-
+            expect(this.res.body.error);
+            expect(this.res.body.error.code).to.equal("L1");
+            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
+            expect(this.res.body.error.message).to.equal("incorrect login or password");
         });
     });
 
@@ -373,14 +375,8 @@ describe('POST /api/local/authenticate/jwt', function () {
             }, done);
         });
 
-        it('should return a success false', function () {
-            // if Test fail  here google should have change the recaptcha algorithm
-            // => update recaptchaResponse by getting the value post as parameter g-recaptcha-response in signup query using a browser
-            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
-        });
-
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -392,10 +388,12 @@ describe('POST /api/local/authenticate/jwt', function () {
         });
 
         it('should return a 401 ', function () {
-            //console.log('success:' + this.res.body.success);
+            expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.body.success).to.equal(false);
-            expect(this.res.body.msg).to.equal(INCORRECT_LOGIN_OR_PASS);
+            expect(this.res.body.error);
+            expect(this.res.body.error.code).to.equal("L1");
+            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
+            expect(this.res.body.error.message).to.equal("incorrect login or password");
         });
     });
 

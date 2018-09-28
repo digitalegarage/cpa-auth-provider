@@ -99,39 +99,6 @@ module.exports = function (app, options) {
         });
     });
 
-    app.post('/api/local/authenticate/jwt', cors, function (req, res) {
-        db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
-            include: [db.User]
-        }).then(function (localLogin) {
-                if (!localLogin || !req.body.password) {
-                    res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                    return;
-                }
-
-                localLogin.verifyPassword(req.body.password).then(function (isMatch) {
-                        if (isMatch) {
-                            localLogin.logLogin(localLogin.User).then(function () {
-                            }, function () {
-                            });
-                            // if user is found and password is right create a token
-                            var token = jwt.encode(localLogin.User, config.jwtSecret);
-                            // return the information including token as JSON
-                            res.json({success: true, token: 'JWT ' + token});
-                        } else {
-                            res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                            return;
-                        }
-                    },
-                    function (err) {
-                        res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
-                    });
-            },
-            function (error) {
-                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-            });
-    });
-
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
     // That following line avoid cross domain error like
     // XMLHttpRequest cannot load http://localhost.rts.ch:3000/api/local/info.
