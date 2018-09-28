@@ -18,22 +18,20 @@ var i18n = require('i18n');
 
 module.exports = function (app, options) {
 
+    // DO NOT REMOVE ENDPOINT : used for backward compatibility with laboutique.rts.ch
     app.get('/auth/custom', recaptcha.middleware.render, function (req, res) {
-        var required = userHelper.getRequiredFields();
-        var profileAttributes = {
-            captcha: req.recaptcha,
-            requiredFields: required,
-            message: req.flash('signupMessage'),
-            auth_origin: req.session.auth_origin,
-            client_id: req.query.client_id
-        };
 
-        db.OAuth2Client.findOne({where: {client_id: req.query.client_id}}).then(function (client) { //TODO be compatible with laboutique
-            if (client && client.use_template) {
-                res.render('broadcaster/' + client.use_template + '/custom-login-signup.ejs', profileAttributes);
+        db.OAuth2Client.findOne({where: {client_id: req.query.client_id}}).then(function (client) {
+            if (client) {
+                var redirect = encodeURIComponent("/oauth2/dialog/authorize?"
+                    + "defaultLanguage=fr"
+                    + "&response_type=code&approval_prompt=auto"
+                    + "&client_id=" + client.client_id
+                    + "&display=popup"
+                    + "&redirect_uri=" + encodeURIComponent(client.redirect_uri));
+                requestHelper.redirect(res, '/responsive/login?redirect=' + redirect);
             } else {
-                // No client found or no dedicated login window => redirect to login 'responsive login'
-                requestHelper.redirect(res, '/responsive/login');
+                res.json({'error':'Unknown client id' + req.query.client_id});
             }
         });
 
