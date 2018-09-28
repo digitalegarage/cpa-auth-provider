@@ -9,22 +9,27 @@ module.exports = {
             else {
                 queryInterface.addColumn('Sessions','userId',{type: Sequelize.STRING, allowNull: true})
                 .then(() => {
-                    // TODO fill userId with data.passport.user
-
+                    return queryInterface.sequelize.query('update public."Sessions" set "userId" = data::json->\'passport\'->\'user\'')
+                    .then(function(rows) {
+                        return;
+                    })
+                    .catch(function(e) {
+                        reject(e);
+                    });
                 })
                 .then(() => {
-                    // TODO create index on userId
+                    queryInterface.sequelize.query('﻿CREATE INDEX Sessions_userid_idx ON public."Sessions" ("userId");');
+                    resolve();
                 })
                 .catch((e) => {
                     reject(e);
                 });
             }
-            return resolve();
         });
     },
     down: function(queryInterface,Sequelize) {
         return new Promise((resolve,reject) => {
-            // TODO remove index
+            // TODO remove index?
             queryInterface.removeColumn('Sessions','userId')
             .then(() => {
                 return resolve();

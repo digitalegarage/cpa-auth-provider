@@ -122,11 +122,13 @@ var routes = function (router) {
                                                 req.session.destroy();
                                                 return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
                                             })
-                                            .catch(function() {
+                                            .catch(function(e) {
+                                                logger.error(e);
                                                 return res.sendStatus(500);
                                             });
                                         },
                                         function (err) {
+                                            logger.error(err);
                                             res.status(500).json({errors: [err]});
                                         }
                                     );
