@@ -79,7 +79,7 @@ describe('POST /authenticate/cookie', function () {
                 done();
             });
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                requestHelper.sendRequest(this, '/api/v2/session/login', {
                     method: 'post',
                     type: 'json',
                     data: {"email": TEST_USER_LOGIN, "password": TEST_USER_PASSWORD}
@@ -119,7 +119,7 @@ describe('POST /authenticate/cookie', function () {
         });
         context('with invalid credentials', function () {
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                requestHelper.sendRequest(this, '/api/v2/session/login', {
                     method: 'post',
                     type: 'json',
                     data: {"email": "foo", "password": "bar"}
@@ -131,7 +131,7 @@ describe('POST /authenticate/cookie', function () {
         });
         context('with uppercase login', function () {
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                requestHelper.sendRequest(this, '/api/v2/session/login', {
                     method: 'post',
                     type: 'json',
                     data: {"email": TEST_USER_LOGIN.toUpperCase(), "password": TEST_USER_PASSWORD}
