@@ -6,7 +6,6 @@ const config = require('../../config.test'),
     db = require('../../models/'),
     sequelize = require('sequelize'),
     sessionHelper = require('../../lib/session-helper'),
-    sleep = require('sleep'),
     generate = require('../../lib/generate');
 
 let fakeSessionId = generate.cryptoCode(20);
