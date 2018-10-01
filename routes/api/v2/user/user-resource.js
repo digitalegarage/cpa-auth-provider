@@ -1,11 +1,11 @@
 "use strict";
 
-var cors = require('cors');
-var logger = require('../../../../lib/logger');
-var db = require('../../../../models/index');
-var auth = require('basic-auth');
-var jwtHelper = require('../../../../lib/jwt-helper');
-var _ = require('underscore');
+const cors = require('../../../../lib/cors');
+const logger = require('../../../../lib/logger');
+const db = require('../../../../models/index');
+const auth = require('basic-auth');
+const jwtHelper = require('../../../../lib/jwt-helper');
+const _ = require('underscore');
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
@@ -154,8 +154,7 @@ module.exports = function (router) {
      *            description: "user profile including permissions in json body"
      */
 
-    router.delete('/api/v2/basicauth/user', cors(), delete_user);
-    router.options('/api/v2/basicauth/user', cors());
+    router.delete('/api/v2/basicauth/user', cors, delete_user);
 
     /**
      * @swagger
@@ -180,8 +179,7 @@ module.exports = function (router) {
      *              type: string
      *              example: 42b
      */
-    router.get('/api/v2/jwt/user/id', cors(), get_user_id);
-    router.options('/api/v2/jwt/user/id', cors());
+    router.get('/api/v2/jwt/user/id', cors, get_user_id);
 
-    router.get('/api/v2/basicauth/user/profile', cors(), get_user);
+    router.get('/api/v2/basicauth/user/profile', cors, get_user);
 };
