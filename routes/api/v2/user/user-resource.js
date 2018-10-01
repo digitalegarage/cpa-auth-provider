@@ -1,11 +1,11 @@
 "use strict";
 
 const cors = require('../../../../lib/cors');
-var logger = require('../../../../lib/logger');
-var db = require('../../../../models/index');
-var auth = require('basic-auth');
-var jwtHelper = require('../../../../lib/jwt-helper');
-var _ = require('underscore');
+const logger = require('../../../../lib/logger');
+const db = require('../../../../models/index');
+const auth = require('basic-auth');
+const jwtHelper = require('../../../../lib/jwt-helper');
+const _ = require('underscore');
 
 var delete_user = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
@@ -155,7 +155,6 @@ module.exports = function (router) {
      */
 
     router.delete('/api/v2/basicauth/user', cors, delete_user);
-    router.options('/api/v2/basicauth/user', cors);
 
     /**
      * @swagger
@@ -181,7 +180,6 @@ module.exports = function (router) {
      *              example: 42b
      */
     router.get('/api/v2/jwt/user/id', cors, get_user_id);
-    router.options('/api/v2/jwt/user/id', cors);
 
     router.get('/api/v2/basicauth/user/profile', cors, get_user);
 };
