@@ -330,10 +330,7 @@ describe('Using a Sequelize store', () => {
                                         store.sync();
                                         store.length((err,result3) => {
                                             expect(err).to.equal(null);
-                                            // FIXME all sessions but one should be deleted,
-                                            // but may still exist in db. model.destroy() doesn't
-                                            // give callbacks :-|
-                                            //expect(result3).to.equal(1);
+                                            expect(result3).to.equal(1);
                                             store.get(sessionData[0].sid, (err,result) => {
                                                 expect(err).to.equal(null);
                                                 expect(result.passport.user).to.equal(fakeUserId);
@@ -373,8 +370,7 @@ describe('Using a Sequelize store', () => {
                                         store.sync();
                                         store.length((err,result3) => {
                                             expect(err).to.equal(null);
-                                            // FIXME see above.
-                                            //expect(result3).to.equal(0);
+                                            expect(result3).to.equal(0);
                                             store.get(sessionData[0].sid, (err,result) => {
                                                 expect(err).to.equal(null);
                                                 expect(result).to.equal(null);
