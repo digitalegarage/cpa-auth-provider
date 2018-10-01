@@ -1,11 +1,11 @@
 "use strict";
 
-var passport = require('passport');
+const passport = require('passport');
 const cors = require('../../../../lib/cors');
-var logger = require('../../../../lib/logger');
-var db = require('../../../../models');
-var userHelper = require('../../../../lib/user-helper');
-var authHelper = require('../../../../lib/auth-helper');
+const logger = require('../../../../lib/logger');
+const db = require('../../../../models');
+const userHelper = require('../../../../lib/user-helper');
+const authHelper = require('../../../../lib/auth-helper');
 
 var user_profile = function (req, res) {
     logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
@@ -174,7 +174,6 @@ module.exports = function (router) {
      *            description: "profile udpated"
      */
     router.put('/api/v2/oauth2/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile_update);
-    router.options('/api/v2/oauth2/user/profile', cors);
 
 
     /**
@@ -213,7 +212,6 @@ module.exports = function (router) {
      *            description: "profile udpated"
      */
     router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile_update);
-    router.options('/api/v2/session/user/profile', cors);
 
     /**
      * @swagger
@@ -265,7 +263,6 @@ module.exports = function (router) {
      *            description: "profile udpated"
      */
     router.put('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), user_profile_update);
-    router.options('/api/v2/jwt/user/profile', cors);
 
     /**
      * @swagger
@@ -317,7 +314,6 @@ module.exports = function (router) {
      *            description: "profile udpated"
      */
     router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile_update);
-    router.options('/api/v2/cpa/user/profile', cors);
 
 
 };
