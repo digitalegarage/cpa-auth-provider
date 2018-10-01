@@ -310,6 +310,22 @@ module.exports = function (app, options) {
             });
     });
 
+    /**
+     * @swagger
+     * /api/v2/session/jwt:
+     *   get:
+     *     description: login
+     *     operationId: "getJWTToken"
+     *     responses:
+     *          "200":
+     *            description: "return jwt token for logged user"
+     *            schema:
+     *              $ref: '#/definitions/JWTToken'
+     */
+    app.get('/api/v2/session/jwt', cors, authHelper.ensureAuthenticated, function (req, res) {
+        res.json({token: 'JWT ' + jwt.encode(req.user, config.jwtSecret)});
+    });
+
 
     app.get('/responsive/login', function (req, res) {
         var redirect = getRedirectParams(req);

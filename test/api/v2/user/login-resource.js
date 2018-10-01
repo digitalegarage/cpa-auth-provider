@@ -567,6 +567,39 @@ describe('API-V2 LOGIN', function () {
 
 });
 
+describe('API-V2 GET JWT Token', function () {
+    before(initData.resetDatabase);
+
+
+    context('when user has a session', function () {
+        var ctx = this;
+        before(function (done) {
+            login.cookieLogin(ctx, done);
+        });
+        before(function (done) {
+            requestHelper.sendRequest(ctx, '/api/v2/session/jwt', {cookie: ctx.cookie}, done);
+        });
+        it('should return a success', function () {
+            expect(ctx.res.statusCode).equal(200);
+            expect(ctx.res.body.token);
+            expect(ctx.res.body.token.indexOf("JWT ")).equal(0);
+        });
+    });
+
+    context('when user doesn\'t have  a session', function () {
+        var ctx = this;
+        before(function (done) {
+            login.cookieLogin(ctx, done);
+        });
+        before(function (done) {
+            requestHelper.sendRequest(ctx, '/api/v2/session/jwt', {}, done);
+        });
+        it('should return a success', function () {
+            expect(ctx.res.statusCode).equal(401);
+        });
+    });
+});
+
 function getCookieValue(cookieStr) {
     //cookie format: connect.sid=s%3A0Xf6JiMbGdO9XJ_EUOY7kJnV832uLd9m.GNjQavwpwWIM6sqaDjxVQNxVIdYSzzSUS3%2Bjo%2BhD4RY; Path=/; HttpOnly
     var elements = (cookieStr + "").split(';');
