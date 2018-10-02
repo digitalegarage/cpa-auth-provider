@@ -199,7 +199,7 @@ describe('GET /admin', function () {
         it('should redirect to the login page', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(self.res.statusCode).to.equal(302);
-            expect(self.res.headers.location).to.equal(urlPrefix + "/auth");
+            expect(self.res.headers.location).to.equal(urlPrefix + "/responsive/login?redirect=" + encodeURIComponent("/ap/admin"));
         });
     });
 });
@@ -256,7 +256,7 @@ describe('GET /admin/domains', function () {
         it('should redirect to the login page', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
-            expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
+            expect(this.res.headers.location).to.equal(urlPrefix + "/responsive/login?redirect=" + encodeURIComponent("/ap/admin/domains"));
         });
     });
 });
@@ -303,7 +303,7 @@ describe('GET /admin/domains/add', function () {
         it('should redirect to the login page', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
-            expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
+            expect(this.res.headers.location).to.equal(urlPrefix + "/responsive/login?redirect=" + encodeURIComponent("/ap/admin/domains/add"));
         });
     });
 });
