@@ -112,19 +112,3 @@ describe('GET /', function () {
         });
     });
 });
-
-describe('GET home', function () {
-
-    before(resetDatabase);
-
-    context('and let empty title in configuration file', function () {
-
-        before(function (done) {
-            requestHelper.sendRequest(this, '/responsive/login', {cookie: this.cookie, parseDOM: true}, done);
-        });
-
-        it('the title should be the default one : ' + i18n4test.__('LAYOUT_DEFAULT_HEAD_CROSS_PLATFORM_AUTHENTICATION_TITLE'), function () {
-            expect(this.$('title').text()).to.equal(i18n4test.__('LAYOUT_DEFAULT_HEAD_CROSS_PLATFORM_AUTHENTICATION_TITLE'));
-        });
-    });
-});
