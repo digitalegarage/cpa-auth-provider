@@ -438,7 +438,7 @@ describe('GET /admin/users', function () {
 
         it('should return redirect to login (status 302)', function () {
             expect(this.res.statusCode).to.equal(302);
-            expect(this.res.text).to.equal('Found. Redirecting to /ap/login?redirect='+encodeURIComponent('/ap/admin/users'));
+            expect(this.res.text).to.equal('Found. Redirecting to /ap/responsive/login?redirect='+encodeURIComponent('/ap/admin/users'));
         });
 
     });

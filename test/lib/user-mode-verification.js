@@ -126,7 +126,7 @@ describe('GET /verify', function () {
                 it('should redirect to the login page', function () {
                     var urlPrefix = requestHelper.urlPrefix;
                     expect(this.res.statusCode).to.equal(302);
-                    expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/verify?user_code=1234&redirect_uri=" + encodeURIComponent("example://cpa_callback")));
+                    expect(this.res.headers.location).to.equal(urlPrefix + "/responsive/login?redirect=" + encodeURIComponent("/ap/verify?user_code=1234&redirect_uri=" + encodeURIComponent("example://cpa_callback")));
                     // TODO: check redirect location and page to return to after login
                 });
             });
@@ -169,7 +169,7 @@ describe('GET /verify', function () {
                 it('should redirect to the login page', function () {
                     var urlPrefix = requestHelper.urlPrefix;
                     expect(this.res.statusCode).to.equal(302);
-                    expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/verify"));
+                    expect(this.res.headers.location).to.equal(urlPrefix + "/responsive/login?redirect=" + encodeURIComponent("/ap/verify"));
                     // TODO: check redirect location and page to return to after login
                 });
             });

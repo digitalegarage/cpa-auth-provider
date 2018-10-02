@@ -317,7 +317,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=code&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
+                expect(this.res.headers.location).equal(URL_PREFIX + '/responsive/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=code&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
             });
         });
     });
@@ -377,7 +377,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=token&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
+                expect(this.res.headers.location).equal(URL_PREFIX + '/responsive/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=token&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
             });
         });
     });
