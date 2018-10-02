@@ -311,7 +311,7 @@ module.exports = function (app, options) {
     });
 
 
-    app.get('/responsive/login', function (req, res) {
+    app.get('/login', function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
@@ -336,7 +336,7 @@ module.exports = function (app, options) {
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
             lastname: req.query.lastname ? req.query.lastname : '',
-            login: requestHelper.getPath('/responsive/login' + redirect),
+            login: requestHelper.getPath('/login' + redirect),
             target: requestHelper.getPath('/responsive/session/signup' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
@@ -353,7 +353,7 @@ module.exports = function (app, options) {
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
             lastname: req.query.lastname ? req.query.lastname : '',
-            login: requestHelper.getPath('/responsive/login' + redirect),
+            login: requestHelper.getPath('/login' + redirect),
             target: requestHelper.getPath('/api/local/password/recover' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
@@ -399,7 +399,7 @@ function signupHTML(req, res, handleAfterLogin) {
                 date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
                 firstname: req.body.firstname ? req.body.firstname : '',
                 lastname: req.body.lastname ? req.body.lastname : '',
-                login: requestHelper.getPath('/responsive/login' + redirect),
+                login: requestHelper.getPath('/login' + redirect),
                 target: requestHelper.getPath('/responsive/session/signup' + redirect)
             };
             let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';

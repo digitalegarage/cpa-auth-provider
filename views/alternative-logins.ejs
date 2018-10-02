@@ -3,7 +3,7 @@
     <div class="social">
         <% if(config.identity_providers.google.enabled) { %>
             <div class="social-entry text-center">
-                <a href="<%= link('/api/v2/auth/google') %>"
+                <a href="<%= googleTarget %>"
                    class="identity_provider googleplus">
                     <img class="login-images" src="<%= link('/assets/img/logoroundg+.svg') %>"/>
                     <p class="login-social-labels">
@@ -14,7 +14,7 @@
         <% } %>
         <% if(config.identity_providers.facebook.enabled) { %>
             <div class="social-entry text-center">
-                <a href="<%= link('/api/v2/auth/facebook') %>"
+                <a href="<%= fbTarget %>"
                    class="identity_provider facebook">
                     <img class="login-images" src="<%= link('/assets/img/logoroundfacebook.svg') %>"/>
                     <p class="login-social-labels">
