@@ -17,7 +17,7 @@
                     <div class="signup-error alert alert-danger" id="errorBox"><%- message %></div>
                     <% } %>
 
-                    <form class="connect-forms" action="<%= link('/signup') %>" method="post">
+                    <form class="connect-forms" action="<%= target %>" method="post">
 
                         <div class="signup-fields">
 
@@ -136,7 +136,7 @@
                     </form>
 
                     <p class="last-link"><%= __('SIGNUP_ALREADY_HAVE_AN_ACCOUNT_LABEL') %> <a
-                                class="btn-link" href="<%= link('/auth/local') %>"><%= __('SIGNUP_LOGIN_BUTTON') %></a>
+                                class="btn-link" href="<%= login %>"><%= __('SIGNUP_LOGIN_BUTTON') %></a>
                     </p>
                 </div>
             </div>
