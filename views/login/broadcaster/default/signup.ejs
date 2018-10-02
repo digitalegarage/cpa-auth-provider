@@ -29,7 +29,7 @@
                                         <% } %>
                                        required>
                             </div>
-                            <% if(requiredFields.firstname) { %>
+                            <% if(config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.firstname) { %>
                             <div class="form-group">
                                 <input id="firstname" name="firstname" class="form-control"
                                        type="text" placeholder="<%= __('PROFILE_PLACE_FIRSTNAME_HOLDER') %>"
@@ -39,7 +39,7 @@
                                 >
                             </div>
                             <% } %>
-                            <% if(requiredFields.lastname) { %>
+                            <% if(config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.lastname) { %>
                             <div class="form-group">
                                 <input id="lastname" name="lastname" class="form-control"
                                        type="text" placeholder="<%= __('PROFILE_PLACE_LASTNAME_HOLDER') %>"
@@ -50,7 +50,7 @@
                             </div>
                             <% } %>
 
-                            <% if(requiredFields.date_of_birth) { %>
+                            <% if(config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.date_of_birth) { %>
                             <div class="form-group">
                                 <div class="input-group date" data-provide="datepicker"
                                      data-language="en">
@@ -67,7 +67,7 @@
                             </div>
                             <% } %>
 
-                            <% if(requiredFields.gender) { %>
+                            <% if(config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.gender) { %>
                             <div class="form-group">
                                 <select id="gender" name="gender" class="form-control personnal-data-input">
                                     <option class="input-gender"

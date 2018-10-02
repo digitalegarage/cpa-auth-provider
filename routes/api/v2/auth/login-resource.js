@@ -113,7 +113,7 @@ module.exports = function (app, options) {
         signupREST(req, res, handleAfterSessionRestLogin);
     });
 
-    app.post('/responsive/session/signup', limiterHelper.verify, function (req, res, next) {
+    app.post('/responsive/session/signup', limiterHelper.verify, recaptcha.middleware.render, function (req, res, next) {
         signupHTML(req, res, handleAfterSessionHtlmLogin);
     });
 
@@ -401,6 +401,7 @@ function signupHTML(req, res, handleAfterLogin) {
 
             var data = {
                 message: req.__(err.errorData.key),
+                captcha: req.recaptcha,
                 email: req.body.email ? req.body.email : '',
                 date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
                 firstname: req.body.firstname ? req.body.firstname : '',
