@@ -408,7 +408,7 @@ function signupHTML(req, res, handleAfterLogin) {
                 login: requestHelper.getPath('/responsive/login' + redirect),
                 target: requestHelper.getPath('/responsive/session/signup' + redirect)
             };
-            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
             res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
         });
 }
