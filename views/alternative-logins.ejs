@@ -1,0 +1,33 @@
+<% if(config.identity_providers.facebook.enabled || config.identity_providers.google.enabled || config.identity_providers.twitter.enabled) { %>
+
+    <div class="social">
+        <% if(config.identity_providers.google.enabled) { %>
+            <div class="social-entry text-center">
+                <a href="<%= link('/api/v2/auth/google') %>"
+                   class="identity_provider googleplus">
+                    <img class="login-images" src="<%= link('/assets/img/logoroundg+.svg') %>"/>
+                    <p class="login-social-labels">
+                        <%= __('LOGIN_GOOGLE_PLUS_BUTTON') %>
+                    </p>
+                </a>
+            </div>
+        <% } %>
+        <% if(config.identity_providers.facebook.enabled) { %>
+            <div class="social-entry text-center">
+                <a href="<%= link('/api/v2/auth/facebook') %>"
+                   class="identity_provider facebook">
+                    <img class="login-images" src="<%= link('/assets/img/logoroundfacebook.svg') %>"/>
+                    <p class="login-social-labels">
+                        <%= __('LOGIN_FACEBOOK_BUTTON') %>
+                    </p>
+                </a>
+            </div>
+        <% } %>
+        <% if(config.identity_providers.twitter.enabled) { %>
+            <div class="social-entry text-center">
+                <img class="login-images" src="<%= link('/assets/img/logoroundtwitter.svg') %>"/>
+                <p class="login-social-labels"><%= __('LOGIN_TWITTER_BUTTON') %></p>
+            </div>
+        <% } %>
+    </div>
+<% } %>
