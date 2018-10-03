@@ -29,6 +29,15 @@ const DATE_OF_BIRTH = '31.08.1978';
 const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
 const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
 
+const AFTER_LOGIN = {
+    activated: true,
+    cookieName: 'peach_infos',
+    domain: 'http://localhost.rts.ch:3000',
+    duration: 999999999,
+    storeUserId: true,
+    storeUserDisplayName: false
+};
+
 describe('API-V2 LOGIN', function () {
 
     before(function (done) {
@@ -565,6 +574,31 @@ describe('API-V2 LOGIN', function () {
         });
     });
 
+    context('after login', function () {
+        before(initData.resetDatabase);
+
+        before(function (done) {
+            if (config.afterLogin) {
+                config.afterLogin.storeUserInfoInCookie = AFTER_LOGIN;
+            } else {
+                config.afterLogin = {storeUserInfoInCookie: AFTER_LOGIN};
+            }
+            done();
+        });
+
+        context('When after login is set', function () {
+            var ctx = this;
+            before(function (done) {
+                login.cookieLogin(ctx, done);
+            });
+            it('should return a sete cookie header', function () {
+                expect(ctx.res.statusCode).equal(204);
+                expect(ctx.res.header["set-cookie"].length).to.be.above(1);
+                expect(ctx.res.header["set-cookie"][0].indexOf("peach_infos=")).equal(0);
+
+            });
+        });
+    });
 });
 
 function getCookieValue(cookieStr) {
