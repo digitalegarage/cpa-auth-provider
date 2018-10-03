@@ -315,7 +315,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: req.query.error ? req.__(req.query.error):'',
+            message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             signup: requestHelper.getPath('/responsive/signup' + redirect),
             forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
@@ -331,7 +331,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: req.query.error ? req.__(req.query.error):'',
+            message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
@@ -394,7 +394,7 @@ function signupHTML(req, res, handleAfterLogin) {
             var redirect = getRedirectParams(req);
 
             var data = {
-                message: req.__(err.errorData.key),
+                message: err.errorData ? req.__(err.errorData.key) : err.toString(),
                 email: req.body.email ? req.body.email : '',
                 date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
                 firstname: req.body.firstname ? req.body.firstname : '',
@@ -511,11 +511,11 @@ function handleErrorForRestCalls(err, res) {
     }
 }
 
-function handleErrorForHtmlCalls(req,  res,err) {
+function handleErrorForHtmlCalls(req, res, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: req.__(err.errorData.key),
+        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
         email: req.body.email ? req.body.email : '',
         signup: requestHelper.getPath('/responsive/signup' + redirect),
         forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
