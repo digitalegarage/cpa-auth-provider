@@ -400,7 +400,7 @@ function signupHTML(req, res, handleAfterLogin) {
             var redirect = getRedirectParams(req);
 
             var data = {
-                message: req.__(err.errorData.key),
+                message: err.errorData ? req.__(err.errorData.key) : err.toString(),
                 captcha: req.recaptcha,
                 email: req.body.email ? req.body.email : '',
                 date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
@@ -522,7 +522,7 @@ function handleErrorForHtmlCalls(req, res, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: req.__(err.errorData.key),
+        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
         email: req.body.email ? req.body.email : '',
         signup: requestHelper.getPath('/responsive/signup' + redirect),
         forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
