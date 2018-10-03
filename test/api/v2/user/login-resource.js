@@ -308,7 +308,7 @@ describe('API-V2 LOGIN', function () {
                         expect('female').equal(ctx.user.gender);
                         expect('firstname').equal(ctx.user.firstname);
                         expect('lastname').equal(ctx.user.lastname);
-                        expect(DATE_OF_BIRTH).equal(ctx.user.date_of_birth);
+                        expect("1978-08-31").equal(ctx.user.date_of_birth_ymd);
                     });
                 });
             });
