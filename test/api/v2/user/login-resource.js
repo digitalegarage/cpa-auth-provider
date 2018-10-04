@@ -574,28 +574,56 @@ describe('API-V2 LOGIN', function () {
         });
     });
 
-    context('after login', function () {
-        before(initData.resetDatabase);
+    context('Peach info cookie', function () {
+        context('after login', function () {
+            before(initData.resetDatabase);
 
-        before(function (done) {
-            if (config.afterLogin) {
-                config.afterLogin.storeUserInfoInCookie = AFTER_LOGIN;
-            } else {
-                config.afterLogin = {storeUserInfoInCookie: AFTER_LOGIN};
-            }
-            done();
+            before(function (done) {
+                if (config.afterLogin) {
+                    config.afterLogin.storeUserInfoInCookie = AFTER_LOGIN;
+                } else {
+                    config.afterLogin = {storeUserInfoInCookie: AFTER_LOGIN};
+                }
+                done();
+            });
+
+            context('When after login is set', function () {
+                var ctx = this;
+                before(function (done) {
+                    login.cookieLogin(ctx, done);
+                });
+                it('should return a set cookie header', function () {
+                    expect(ctx.res.statusCode).equal(204);
+                    expect(ctx.res.header["set-cookie"].length).to.be.above(1);
+                    expect(ctx.res.header["set-cookie"][0].indexOf("peach_infos=")).equal(0);
+
+                });
+            });
         });
 
-        context('When after login is set', function () {
-            var ctx = this;
-            before(function (done) {
-                login.cookieLogin(ctx, done);
-            });
-            it('should return a sete cookie header', function () {
-                expect(ctx.res.statusCode).equal(204);
-                expect(ctx.res.header["set-cookie"].length).to.be.above(1);
-                expect(ctx.res.header["set-cookie"][0].indexOf("peach_infos=")).equal(0);
+        context('after signup', function () {
+            before(initData.resetDatabase);
 
+            before(function (done) {
+                if (config.afterLogin) {
+                    config.afterLogin.storeUserInfoInCookie = AFTER_LOGIN;
+                } else {
+                    config.afterLogin = {storeUserInfoInCookie: AFTER_LOGIN};
+                }
+                done();
+            });
+
+            context('When after login is set', function () {
+                var ctx = this;
+                before(function (done) {
+                    login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+                });
+                it('should return a set cookie header', function () {
+                    expect(ctx.res.statusCode).equal(204);
+                    expect(ctx.res.header["set-cookie"].length).to.be.above(1);
+                    expect(ctx.res.header["set-cookie"][0].indexOf("peach_infos=")).equal(0);
+
+                });
             });
         });
     });
