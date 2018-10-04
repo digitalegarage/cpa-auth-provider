@@ -15,7 +15,7 @@ i18n4test.configure({
     directory: __dirname + '/../../locales'
 });
 
-config.title = "";
+config.broadcaster.title = "";
 
 var resetDatabase = function (done) {
     db.sequelize.query('DELETE FROM Users')
@@ -108,7 +108,7 @@ describe('GET /', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
             expect(this.res.headers).to.have.property('location');
-            expect(this.res.headers.location).to.equal(urlPrefix + '/responsive/login?redirect=' + encodeURIComponent(urlPrefix + '/'));
+            expect(this.res.headers.location).to.equal(urlPrefix + '/login?redirect=' + encodeURIComponent(urlPrefix + '/'));
         });
     });
 });

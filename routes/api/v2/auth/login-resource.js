@@ -4,12 +4,15 @@ const cors = require('../../../../lib/cors');
 const config = require('../../../../config');
 const logger = require('../../../../lib/logger');
 const requestHelper = require('../../../../lib/request-helper');
+const userHelper = require('../../../../lib/user-helper');
 const limiterHelper = require('../../../../lib/limiter-helper');
 const authHelper = require('../../../../lib/auth-helper');
 const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
 const jwt = require('jwt-simple');
 const loginService = require('../../../../services/login-service');
 const errors = require('../../../../services/errors');
+var trackingCookie = require('../../../../lib/tracking-cookie');
+var recaptcha = require('express-recaptcha');
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
@@ -110,7 +113,7 @@ module.exports = function (app, options) {
         signupREST(req, res, handleAfterSessionRestLogin);
     });
 
-    app.post('/responsive/session/signup', limiterHelper.verify, function (req, res, next) {
+    app.post('/signup', limiterHelper.verify, recaptcha.middleware.render, function (req, res, next) {
         signupHTML(req, res, handleAfterSessionHtlmLogin);
     });
 
@@ -162,7 +165,7 @@ module.exports = function (app, options) {
                 handleErrorForRestCalls(err, res);
             });
     });
-    app.post('/responsive/session/login', cors, function (req, res) {
+    app.post('/login', cors, function (req, res) {
 
         loginService.login(req, res)
             .then(function (user) {
@@ -311,52 +314,55 @@ module.exports = function (app, options) {
     });
 
 
-    app.get('/responsive/login', function (req, res) {
+    app.get('/login', trackingCookie.middleware, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
             message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
-            signup: requestHelper.getPath('/responsive/signup' + redirect),
-            forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
-            target: requestHelper.getPath('/responsive/session/login' + redirect),
+            signup: requestHelper.getPath('/signup' + redirect),
+            forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
+            target: requestHelper.getPath('/login' + redirect),
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
             googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
         };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
     });
 
-    app.get('/responsive/signup', function (req, res) {
+    app.get('/signup', trackingCookie.middleware, recaptcha.middleware.render, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
+            captcha: req.recaptcha,
+            requiredFields: userHelper.getRequiredFields(),
             message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
             lastname: req.query.lastname ? req.query.lastname : '',
-            login: requestHelper.getPath('/responsive/login' + redirect),
-            target: requestHelper.getPath('/responsive/session/signup' + redirect)
+            login: requestHelper.getPath('/login' + redirect),
+            target: requestHelper.getPath('/signup' + redirect)
         };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
     });
 
 
-    app.get('/responsive/forgotpassword', function (req, res) {
+    app.get('/forgotpassword', recaptcha.middleware.render, function (req, res) {
         var redirect = getRedirectParams(req);
 
         var data = {
             message: '',
+            captcha: req.recaptcha,
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
             lastname: req.query.lastname ? req.query.lastname : '',
-            login: requestHelper.getPath('/responsive/login' + redirect),
+            login: requestHelper.getPath('/login' + redirect),
             target: requestHelper.getPath('/api/local/password/recover' + redirect)
         };
-        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+        let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         res.render('./login/broadcaster/' + broadcaster + 'forgot-password.ejs', data);
     });
 
@@ -395,14 +401,15 @@ function signupHTML(req, res, handleAfterLogin) {
 
             var data = {
                 message: err.errorData ? req.__(err.errorData.key) : err.toString(),
+                captcha: req.recaptcha,
                 email: req.body.email ? req.body.email : '',
                 date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
                 firstname: req.body.firstname ? req.body.firstname : '',
                 lastname: req.body.lastname ? req.body.lastname : '',
-                login: requestHelper.getPath('/responsive/login' + redirect),
-                target: requestHelper.getPath('/responsive/session/signup' + redirect)
+                login: requestHelper.getPath('/login' + redirect),
+                target: requestHelper.getPath('/signup' + redirect)
             };
-            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
             res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
         });
 }
@@ -517,12 +524,12 @@ function handleErrorForHtmlCalls(req, res, err) {
     var data = {
         message: err.errorData ? req.__(err.errorData.key) : err.toString(),
         email: req.body.email ? req.body.email : '',
-        signup: requestHelper.getPath('/responsive/signup' + redirect),
-        forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
-        target: requestHelper.getPath('/responsive/session/login' + redirect),
+        signup: requestHelper.getPath('/signup' + redirect),
+        forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
+        target: requestHelper.getPath('/login' + redirect),
         fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
         googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
     };
-    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : '';
+    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
 }

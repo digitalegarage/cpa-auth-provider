@@ -1,4 +1,4 @@
-<% include layout/header %>
+<% include ../../../layout/header %>
 
 <div id="login">
 
@@ -22,7 +22,7 @@
                         <div id="login-info" class="alert alert-info"></div>
 
                         <!-- LOGIN FORM -->
-                        <form class="connect-forms" action="<%= link('/login') %>" method="post">
+                        <form class="connect-forms" action="<%= target %>" method="post">
                             <div class="form-group">
                                 <input type="email" class="form-control" name="email"
                                        placeholder="<%= __('LOGIN_EMAIL_LABEL') %>">
@@ -32,17 +32,15 @@
                                        placeholder="<%= __('LOGIN_PASSWORD_LABEL') %>">
                                 <a id="password-recovery"
                                    class="btn-link"
-                                   href="<%= link('/password/recovery') %>"><%= __('LOGIN_FORGOT_PASSWORD_LINK') %></a>
+                                   href="<%= forgotPassword %>"><%= __('LOGIN_FORGOT_PASSWORD_LINK') %></a>
                             </div>
 
                             <button type="submit"
                                     class="btn btn-primary btn-block btn-large-submit"><%= __('LOGIN_LOGIN_BUTTON') %></button>
                         </form>
-
-                        <% include ./alternative-logins.ejs %>
-
+                        
                         <p class="last-link"><%= __('LOGIN_NEED_AN_ACCOUNT_LINK') %>
-                            <a class="btn-link" href="<%= link('/signup') %>"><%= __('LOGIN_SIGNUP_LINK') %></a>
+                            <a class="btn-link" href="<%= signup %>"><%= __('LOGIN_SIGNUP_LINK') %></a>
                         </p>
 
                     </div>
@@ -85,4 +83,4 @@
     })();
 </script>
 
-<% include layout/foot %>
+<% include ../../../layout/foot %>
