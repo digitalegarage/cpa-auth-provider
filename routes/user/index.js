@@ -1,5 +1,7 @@
 "use strict";
 
+var config = require('../../config');
+var appHelper = require('../../lib/app-helper');
 var db = require('../../models');
 var authHelper = require('../../lib/auth-helper');
 var passwordHelper = require('../../lib/password-helper');
@@ -114,9 +116,18 @@ var routes = function (router) {
                                 if (isMatch) {
                                     user.LocalLogin.setPassword(req.body.password).then(
                                         function () {
-                                            res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
+                                            appHelper.destroySessionsByUserId(req.user.dataValues.id, req.sessionID)
+                                            .then(function() {
+                                                req.session.destroy();
+                                                return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
+                                            })
+                                            .catch(function(e) {
+                                                logger.error(e);
+                                                return res.sendStatus(500);
+                                            });
                                         },
                                         function (err) {
+                                            logger.error(err);
                                             res.status(500).json({errors: [err]});
                                         }
                                     );
