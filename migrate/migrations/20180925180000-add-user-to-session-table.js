@@ -12,7 +12,7 @@ module.exports = {
                     if (res[0][0].exists === true) {
                         queryInterface.addColumn('Sessions','userId',{type: Sequelize.STRING, allowNull: true})
                         .then(() => {
-                            return queryInterface.sequelize.query('update public."Sessions" set "userId" = data::json->\'passport\'->\'user\'')
+                            return queryInterface.sequelize.query('update public."Sessions" set "userId" = data::json->\'passport\'->\'user\' where data::json->\'passport\' IS NOT NULL')
                             .then(function(rows) {
                                 return;
                             })
