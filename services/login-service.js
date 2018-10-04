@@ -153,7 +153,7 @@ function signup(userAttributes, email, password, res) {
                         ).then(
                             function (code) {
                                 localLogin.logLogin(user);
-                                afterLoginHelper.afterLogin(localLogin.User, email, res);
+                                afterLoginHelper.afterLogin(user, email, res);
                                 emailHelper.send(
                                     config.mail.from,
                                     localLogin.login,
