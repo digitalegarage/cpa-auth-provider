@@ -7,8 +7,6 @@ const requestHelper = require('../../../../lib/request-helper');
 const limiterHelper = require('../../../../lib/limiter-helper');
 const authHelper = require('../../../../lib/auth-helper');
 const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
-const userHelper = require('../../../../lib/user-helper');
-const passwordHelper = require('../../../../lib/password-helper');
 const jwt = require('jwt-simple');
 const loginService = require('../../../../services/login-service');
 const errors = require('../../../../services/errors');
@@ -317,7 +315,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: req.query.error ? req.__(req.query.error):'',
+            message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             signup: requestHelper.getPath('/responsive/signup' + redirect),
             forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),
@@ -333,7 +331,7 @@ module.exports = function (app, options) {
         var redirect = getRedirectParams(req);
 
         var data = {
-            message: req.query.error ? req.__(req.query.error):'',
+            message: req.query.error ? req.__(req.query.error) : '',
             email: req.query.email ? req.query.email : '',
             date_of_birth: req.query.date_of_birth ? req.query.date_of_birth : '',
             firstname: req.query.firstname ? req.query.firstname : '',
@@ -396,7 +394,7 @@ function signupHTML(req, res, handleAfterLogin) {
             var redirect = getRedirectParams(req);
 
             var data = {
-                message: req.__(err.errorData.key),
+                message: err.errorData ? req.__(err.errorData.key) : err.toString(),
                 email: req.body.email ? req.body.email : '',
                 date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
                 firstname: req.body.firstname ? req.body.firstname : '',
@@ -493,7 +491,7 @@ function isAllowedRedirectUri(redirectUri) {
 function getRedirectParams(req) {
     var redirect = '';
     if (req.query.redirect) {
-        redirect = '?redirect=' + encodeURI(req.query.redirect);
+        redirect = '?redirect=' + encodeURIComponent(req.query.redirect);
         if (req.query.withcode) {
             redirect += '&withcode=true';
         }
@@ -513,11 +511,11 @@ function handleErrorForRestCalls(err, res) {
     }
 }
 
-function handleErrorForHtmlCalls(req,  res,err) {
+function handleErrorForHtmlCalls(req, res, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: req.__(err.errorData.key),
+        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
         email: req.body.email ? req.body.email : '',
         signup: requestHelper.getPath('/responsive/signup' + redirect),
         forgotPassword: requestHelper.getPath('/responsive/forgotpassword' + redirect),

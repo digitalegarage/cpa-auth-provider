@@ -108,23 +108,7 @@ describe('GET /', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
             expect(this.res.headers).to.have.property('location');
-            expect(this.res.headers.location).to.equal(urlPrefix + '/auth');
-        });
-    });
-});
-
-describe('GET home', function () {
-
-    before(resetDatabase);
-
-    context('and let empty title in configuration file', function () {
-
-        before(function (done) {
-            requestHelper.sendRequest(this, '/auth/local', {cookie: this.cookie, parseDOM: true}, done);
-        });
-
-        it('the title should be the default one : ' + i18n4test.__('LAYOUT_DEFAULT_HEAD_CROSS_PLATFORM_AUTHENTICATION_TITLE'), function () {
-            expect(this.$('title').text()).to.equal(i18n4test.__('LAYOUT_DEFAULT_HEAD_CROSS_PLATFORM_AUTHENTICATION_TITLE'));
+            expect(this.res.headers.location).to.equal(urlPrefix + '/responsive/login?redirect=' + encodeURIComponent(urlPrefix + '/'));
         });
     });
 });
