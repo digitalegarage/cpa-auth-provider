@@ -109,7 +109,7 @@ function checkSignupData(req) {
     });
 }
 
-function signup(userAttributes, email, password) {
+function signup(userAttributes, email, password, res) {
 
     //use XSS filters to prevent users storing malicious data/code that could be interpreted then
     for (var k in userAttributes) {
@@ -153,6 +153,7 @@ function signup(userAttributes, email, password) {
                         ).then(
                             function (code) {
                                 localLogin.logLogin(user);
+                                afterLoginHelper.afterLogin(localLogin.User, email, res);
                                 emailHelper.send(
                                     config.mail.from,
                                     localLogin.login,
