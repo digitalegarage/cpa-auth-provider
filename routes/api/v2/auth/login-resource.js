@@ -374,7 +374,7 @@ module.exports = function (app, options) {
 function signupREST(req, res, handleAfterLogin) {
     loginService.checkSignupData(req)
         .then(function (userAttributes) {
-            return loginService.signup(userAttributes, req.body.email, req.body.password);
+            return loginService.signup(userAttributes, req.body.email, req.body.password, res);
         })
         .then(function (user) {
             req.logIn(user, function () {
@@ -389,7 +389,7 @@ function signupREST(req, res, handleAfterLogin) {
 function signupHTML(req, res, handleAfterLogin) {
     loginService.checkSignupData(req)
         .then(function (userAttributes) {
-            return loginService.signup(userAttributes, req.body.email, req.body.password);
+            return loginService.signup(userAttributes, req.body.email, req.body.password, res);
         })
         .then(function (user) {
             req.logIn(user, function () {
