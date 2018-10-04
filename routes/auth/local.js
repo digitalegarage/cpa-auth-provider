@@ -29,7 +29,7 @@ module.exports = function (app, options) {
                     "&client_id=" + client.client_id +
                     "&display=popup" +
                     "&redirect_uri=" + encodeURIComponent(client.redirect_uri));
-                requestHelper.redirect(res, '/responsive/login?redirect=' + redirect);
+                requestHelper.redirect(res, '/login?redirect=' + redirect);
             } else {
                 res.json({'error': 'Unknown client id' + req.query.client_id});
             }
