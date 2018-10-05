@@ -7,7 +7,7 @@ var requestHelper = require("../request-helper");
 
 describe('Check response for headers', function () {
     before(function (done) {
-        requestHelper.sendRequest(this, '/auth', null, done);
+        requestHelper.sendRequest(this, '/login', null, done);
     });
 
     it('should set x-frame-options', function () {

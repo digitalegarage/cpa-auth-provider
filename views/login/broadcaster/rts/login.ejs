@@ -1,56 +1,54 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <%- include ../../../layout/rts/head %>
     <title>Connexion - MaRTS - rts.ch</title>
-    <meta name="viewport"
-          content="width=device-width, viewport-fit=cover, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" type="text/css"
-          href="https://cloud.typography.com/7638132/678348/css/fonts.css">
-    <link rel="stylesheet" type="text/css"
-          href="https://hummingbird.rts.ch/hummingbird/res/fonts/srgssr/srgssr.css">
-    <link rel="stylesheet" type="text/css" href="https://www.rts.ch/hummingbird-static/css/navigation-rts.css">
-    <link rel="stylesheet" type="text/css" href="https://www.rts.ch/hummingbird-static/css/rts.css"/>
-    <link rel="stylesheet" type="text/css" href="https://www.rts.ch/hummingbird-static/css/marts.css"/>
 </head>
-<body class="marts-overlay universe-rts">
-<main class="rts-layout layout-page large rts-overlay-hide-action">
-    <div class="layout-container">
-        <div class="rts-panel main rts-overlay-hide-action">
-            <div class="rts-module bg-default">
-                <div class="marts-form-container"><h1>Me connecter</h1>
-                    <div class="marts-form-error-message show-error-message"><%= message %></div>
-                    <p>Pas encore membre ? <a href="<%= signup %>">Créer un
-                            compte</a></p>
-                    <form id="marts-login-form" class="marts-form" method="post"
-                          action="<%= target %>">
-                        <div class="marts-form-error-message"></div>
-                        <input id="login_email" type="email" name="email" class="text" value="<%= email %>"
-                               placeholder="Email" required>
-                        <input id="login_password"
-                               type="password"
-                               name="password"
-                               class="text"
-                               placeholder="Mot de passe"
-                               required>
-                        <input class="marts-button" type="submit" value="Continuer">
-                        <p><a href="<%= forgotPassword %>">Mot de passe oublié ?</a>
-                        </p></form>
-                    <ul class="alternative-logins">
-                        <li class="alternative-login marts-login-facebook">
-                            <a href="<%= fbTarget %>"><span
-                                        class="rts-picto social facebook colored"></span>
-                                <p class="login-name">Connectez-vous avec Facebook</p></a></li>
-                        <li class="alternative-login marts-login-google">
-                            <a href="<%= googleTarget %>"><span
-                                        class="rts-picto social google colored"></span>
-                                <p class="login-name">Connectez-vous avec Google</p></a>
-                        </li>
-                    </ul>
-                    <p> Créer un compte maRTS m'offre la possibilité de classer mes médias dans des
-                        listes et les consommer plus tard, d'accéder à mon historique de
-                        consommation média, ainsi que la gestion de mon profil personnel</p></div>
-            </div>
+<body class="rts-body web">
+
+<main class="container">
+
+    <div id="login" class="rts-form-container">
+
+        <div class="top-image">
+            <img src="<% link('/img/logo_marts-black.svg')%>">
         </div>
+
+        <h1 class="rts-form-title">Me connecter</h1>
+
+        <p>Pas encore membre ? <a href="<%= signup %>">Créer un compte</a></p>
+
+        <% if (message.length > 0) { %>
+            <div class="text-danger"><%= message %></div>
+        <% } %>
+
+        <form class="rts-form" method="post" action="<%= target %>">
+
+            <div class="form-group">
+                <input id="login_email" type="email" name="email" class="form-control" value="<%= email %>" placeholder="Email">
+            </div>
+
+            <div class="form-group">
+                <input id="login_password" type="password" name="password" class="form-control" placeholder="Mot de passe">
+            </div>
+
+
+            <input class="btn btn-rts" type="submit" value="Continuer">
+        </form>
+
+        <div class="rts-form-links">
+            <a href="<%= forgotPassword %>">Mot de passe oublié ?</a>
+        </div>
+
+
+        <% include ../../../alternative-logins.ejs %>
+
+        <p>
+            Créer un compte maRTS m'offre la possibilité de classer mes médias dans des
+            listes et les consommer plus tard, d'accéder à mon historique de
+            consommation média, ainsi que la gestion de mon profil personnel
+        </p>
+
     </div>
 </main>
 

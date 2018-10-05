@@ -108,7 +108,7 @@ describe('Limiter test', function () {
         });
 
         it('should return a success true', function () {
-            expect(this.res.statusCode).to.equal(200);
+            expect(this.res.statusCode).to.equal(204);
         });
     });
 
@@ -169,7 +169,7 @@ describe('Limiter test', function () {
 
 
 function signup(mail, done) {
-    requestHelper.sendRequest(this, '/api/local/signup', {
+    requestHelper.sendRequest(this, '/api/v2/session/signup', {
         method: 'post',
         cookie: this.cookie,
         type: 'form',
@@ -182,7 +182,7 @@ function signup(mail, done) {
 
 
 function signupWithCpatcha(mail, done) {
-    requestHelper.sendRequest(this, '/api/local/signup', {
+    requestHelper.sendRequest(this, '/api/v2/session/signup', {
         method: 'post',
         cookie: this.cookie,
         type: 'form',

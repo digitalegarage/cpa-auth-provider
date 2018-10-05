@@ -1,7 +1,6 @@
 /* globals module,require */
 "use strict";
 
-var db = require('../models');
 var config = require('../config');
 var cors = require('cors');
 const pwHelper = require('../lib/password-helper');

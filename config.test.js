@@ -84,8 +84,6 @@ module.exports = {
         additional_endpoint: true,
     },
 
-    auto_idp_redirect: 'local',
-
     afterLogin: {
         // White list of possible redirect URI (comma separated values) after login when token will be passed as a get parameter
         allowedRedirectUris:'http://whitelistedredirecturl.com'

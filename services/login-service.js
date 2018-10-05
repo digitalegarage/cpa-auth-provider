@@ -10,6 +10,7 @@ const userHelper = require('../lib/user-helper');
 const errors = require('./errors');
 const isDateFormat = require('is-date-format');
 const dateFormat = config.broadcaster && config.broadcaster.date_format ? config.broadcaster.date_format : "dd.mm.yyyy";
+const dateAndTime = require('date-and-time')
 const Op = db.sequelize.Op;
 const afterLoginHelper = require('../lib/afterlogin-helper');
 
@@ -108,12 +109,18 @@ function checkSignupData(req) {
     });
 }
 
-function signup(userAttributes, email, password) {
+function signup(userAttributes, email, password, res) {
 
     //use XSS filters to prevent users storing malicious data/code that could be interpreted then
     for (var k in userAttributes) {
         userAttributes[k] = xssFilters.inHTMLData(userAttributes[k]);
     }
+
+    if (userAttributes.hasOwnProperty('date_of_birth')) {
+        userAttributes.date_of_birth_ymd = dateAndTime.parse(userAttributes.date_of_birth, dateFormat.toUpperCase());
+        userAttributes.date_of_birth = userAttributes.date_of_birth_ymd.getTime();
+    }
+
 
     var localLogin;
     var user;
@@ -146,6 +153,7 @@ function signup(userAttributes, email, password) {
                         ).then(
                             function (code) {
                                 localLogin.logLogin(user);
+                                afterLoginHelper.afterLogin(user, email, res);
                                 emailHelper.send(
                                     config.mail.from,
                                     localLogin.login,
