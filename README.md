@@ -18,7 +18,7 @@ More information on the [EBU Cross-Platform Authentication project](http://tech.
 
     $ git clone https://git.ebu.io/pipe/identity-provider.git
     $ cd identity-provider
-    $ npm install
+    $ yarn
     $ NODE_ENV=development bin/init-db
 
 If you're using ssh to git clone use: `git clone git@git.ebu.io:pipe/identity-provider.git`
