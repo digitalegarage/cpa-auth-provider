@@ -1,5 +1,6 @@
 "use strict";
 
+const cors = require('../../../../lib/cors');
 var config = require('../../../../config');
 var socialLoginHelper = require('../../../../lib/social-login-helper');
 var googleHelper = require('../../../../lib/google-helper');
