@@ -162,7 +162,7 @@ module.exports = function (router) {
      *          "200":
      *            description: "user profile including permissions in json body"
      */
-
+    router.options('/api/v2/basicauth/user', cors);
     router.delete('/api/v2/basicauth/user', cors, delete_user_with_credentials);
 
     /**
@@ -211,7 +211,9 @@ module.exports = function (router) {
      *              type: string
      *              example: 42b
      */
+    router.options('/api/v2/jwt/user/id', cors);
     router.get('/api/v2/jwt/user/id', cors, get_user_id);
 
+    router.options('/api/v2/basicauth/user/profile', cors);
     router.get('/api/v2/basicauth/user/profile', cors, get_user);
 };
