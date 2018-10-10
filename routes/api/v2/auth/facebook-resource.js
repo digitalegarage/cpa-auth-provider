@@ -14,9 +14,9 @@ passport.use(FACEBOOK_STRATEGY_NAME, facebookHelper.getFacebookStrategy('/api/v2
 module.exports = function (app, options) {
     app.get('/api/v2/auth/facebook', passport.authenticate(FACEBOOK_STRATEGY_NAME, {scope: REQUESTED_PERMISSIONS}));
 
-    app.get('/api/v2/auth/facebook/callback', passport.authenticate(FACEBOOK_STRATEGY_NAME, {failureRedirect: config.urlPrefix + '/responsive/login?error=LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB'}), function (req, res) {
+    app.get('/api/v2/auth/facebook/callback', passport.authenticate(FACEBOOK_STRATEGY_NAME, {failureRedirect: config.urlPrefix + '/login?error=LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB'}), function (req, res) {
 
-        socialLoginHelper.afterSocialLoginSucced(req, res);
+        socialLoginHelper.afterSocialLoginSucceed(req, res);
 
     });
 };

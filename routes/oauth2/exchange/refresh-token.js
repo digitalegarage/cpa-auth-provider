@@ -1,7 +1,6 @@
 "use strict";
 
 var oauthTokenHelper = require('../../../lib/oauth2-token');
-var TokenError = require('oauth2orize').TokenError;
 var logger = require('../../../lib/logger');
 
 exports.issueToken = issueToken;

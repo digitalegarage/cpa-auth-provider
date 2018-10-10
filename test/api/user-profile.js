@@ -26,7 +26,7 @@ describe('GET /api/local/profile', function () {
         // That should detect possible bug if a developer return the first item of the table instead of the user by it's key.
         // That's happen when "where" is missing in db.user.find({where: {id: <id>}})...
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -39,7 +39,7 @@ describe('GET /api/local/profile', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -52,7 +52,7 @@ describe('GET /api/local/profile', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -269,7 +269,7 @@ describe('GET /api/local/profile', function () {
             before(resetDatabase);
 
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                     method: 'post',
                     cookie: this.cookie,
                     type: 'form',
@@ -324,7 +324,7 @@ describe('GET /api/local/profile', function () {
                 before(resetDatabase);
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                         method: 'post',
                         cookie: this.cookie,
                         type: 'form',
@@ -357,7 +357,7 @@ describe('GET /api/local/profile', function () {
                 before(resetDatabase);
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                         method: 'post',
                         cookie: this.cookie,
                         type: 'form',
@@ -390,7 +390,7 @@ describe('GET /api/local/profile', function () {
                 before(resetDatabase);
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                         method: 'post',
                         cookie: this.cookie,
                         type: 'form',
@@ -424,7 +424,7 @@ describe('GET /api/local/profile', function () {
                 before(resetDatabase);
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                         method: 'post',
                         cookie: this.cookie,
                         type: 'form',
@@ -468,7 +468,7 @@ describe('GET /api/local/profile', function () {
                 before(resetDatabase);
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                         method: 'post',
                         cookie: this.cookie,
                         type: 'form',
@@ -506,7 +506,7 @@ describe('GET /api/local/profile', function () {
                 before(resetDatabase);
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/api/local/authenticate/jwt', {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                         method: 'post',
                         cookie: this.cookie,
                         type: 'form',

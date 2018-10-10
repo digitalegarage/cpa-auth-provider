@@ -1,4 +1,4 @@
-<% include layout/header %>
+<% include ../../../layout/header %>
 
 <div id="login">
 
@@ -22,7 +22,7 @@
                         <div id="login-info" class="alert alert-info"></div>
 
                         <!-- LOGIN FORM -->
-                        <form class="connect-forms" action="<%= link('/login') %>" method="post">
+                        <form class="connect-forms" action="<%= target %>" method="post">
                             <div class="form-group">
                                 <input type="email" class="form-control" name="email"
                                        placeholder="<%= __('LOGIN_EMAIL_LABEL') %>">
@@ -32,49 +32,18 @@
                                        placeholder="<%= __('LOGIN_PASSWORD_LABEL') %>">
                                 <a id="password-recovery"
                                    class="btn-link"
-                                   href="<%= link('/password/recovery') %>"><%= __('LOGIN_FORGOT_PASSWORD_LINK') %></a>
+                                   href="<%= forgotPassword %>"><%= __('LOGIN_FORGOT_PASSWORD_LINK') %></a>
                             </div>
 
                             <button type="submit"
                                     class="btn btn-primary btn-block btn-large-submit"><%= __('LOGIN_LOGIN_BUTTON') %></button>
                         </form>
 
-                        <% if(config.identity_providers.facebook.enabled || config.identity_providers.google.enabled || config.identity_providers.twitter.enabled) { %>
+                        <% include ../../../alternative-logins.ejs %>
 
-                        <div class="row social">
-                            <% if(config.identity_providers.google.enabled) { %>
-                            <div class="text-center">
-                                <a href="<%= link('/auth/google') %>"
-                                   class="identity_provider googleplus">
-                                    <img class="login-images" src="<%= link('/assets/img/logoroundg+.svg') %>"/>
-                                    <p class="login-social-labels">
-                                        <%= __('LOGIN_GOOGLE_PLUS_BUTTON') %>
-                                    </p>
-                                </a>
-                            </div>
-                            <% } %>
-                            <% if(config.identity_providers.facebook.enabled) { %>
-                            <div class="text-center">
-                                <a href="<%= link('/auth/facebook') %>"
-                                   class="identity_provider facebook">
-                                    <img class="login-images" src="<%= link('/assets/img/logoroundfacebook.svg') %>"/>
-                                    <p class="login-social-labels">
-                                        <%= __('LOGIN_FACEBOOK_BUTTON') %>
-                                    </p>
-                                </a>
-                            </div>
-                            <% } %>
-                            <% if(config.identity_providers.twitter.enabled) { %>
-                            <div class="text-center">
-                                <img class="login-images" src="<%= link('/assets/img/logoroundtwitter.svg') %>"/>
-                                <p class="login-social-labels"><%= __('LOGIN_TWITTER_BUTTON') %></p>
-                            </div>
-                            <% } %>
-                        </div>
-                        <% } %>
 
                         <p class="last-link"><%= __('LOGIN_NEED_AN_ACCOUNT_LINK') %>
-                            <a class="btn-link" href="<%= link('/signup') %>"><%= __('LOGIN_SIGNUP_LINK') %></a>
+                            <a class="btn-link" href="<%= signup %>"><%= __('LOGIN_SIGNUP_LINK') %></a>
                         </p>
 
                     </div>
@@ -117,4 +86,4 @@
     })();
 </script>
 
-<% include layout/foot %>
+<% include ../../../layout/foot %>

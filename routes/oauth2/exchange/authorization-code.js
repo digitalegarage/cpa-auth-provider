@@ -1,10 +1,6 @@
 "use strict";
 
 var db = require('../../../models');
-var generate = require('../../../lib/generate');
-var jwtHelper = require('../../../lib/jwt-helper');
-var oauthToken = require('../../../lib/oauth2-token');
-var TokenError = require('oauth2orize').TokenError;
 var logger = require('../../../lib/logger');
 var oauthTokenHelper = require('../../../lib/oauth2-token');
 var userDeletion = require('../../../lib/user-deletion');

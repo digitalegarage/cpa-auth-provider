@@ -79,7 +79,7 @@ describe('POST /authenticate/cookie', function () {
                 done();
             });
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                requestHelper.sendRequest(this, '/api/v2/session/login', {
                     method: 'post',
                     type: 'json',
                     data: {"email": TEST_USER_LOGIN, "password": TEST_USER_PASSWORD}
@@ -119,7 +119,7 @@ describe('POST /authenticate/cookie', function () {
         });
         context('with invalid credentials', function () {
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                requestHelper.sendRequest(this, '/api/v2/session/login', {
                     method: 'post',
                     type: 'json',
                     data: {"email": "foo", "password": "bar"}
@@ -131,7 +131,7 @@ describe('POST /authenticate/cookie', function () {
         });
         context('with uppercase login', function () {
             before(function (done) {
-                requestHelper.sendRequest(this, '/api/local/authenticate/cookie', {
+                requestHelper.sendRequest(this, '/api/v2/session/login', {
                     method: 'post',
                     type: 'json',
                     data: {"email": TEST_USER_LOGIN.toUpperCase(), "password": TEST_USER_PASSWORD}
@@ -139,67 +139,6 @@ describe('POST /authenticate/cookie', function () {
             });
             it('should response 204', function () {
                 expect(this.res.statusCode).to.equal(204);
-            });
-        });
-    });
-});
-
-describe('GET /auth', function () {
-    before(function () {
-        this.auto_idp_redirect = config.auto_idp_redirect;
-    });
-
-    after(function () {
-        config.auto_idp_redirect = this.auto_idp_redirect;
-    });
-
-    context('When requesting the list of identity providers', function () {
-        context('with config.auto_idp_redirect corresponds to a correct identity provider', function () {
-            before(function (done) {
-                config.auto_idp_redirect = 'local';
-                requestHelper.sendRequest(this, '/auth', {}, done);
-            });
-
-            it('should redirect to the idp endpoint', function () {
-                var urlPrefix = requestHelper.urlPrefix;
-                expect(this.res.statusCode).to.equal(302);
-                expect(this.res.headers.location).to.equal(urlPrefix + "/auth/local");
-            });
-        });
-
-        ['github', 'wrong', null].forEach(function (autoIdpRedirect) {
-            context('When config.auto_idp_redirect is set to a ' + autoIdpRedirect + ' identity provider', function () {
-                before(function (done) {
-                    config.auto_idp_redirect = autoIdpRedirect;
-                    requestHelper.sendRequest(this, '/auth', {parseDOM: true}, done);
-                });
-
-                it('should return a status 200', function () {
-                    expect(this.res.statusCode).to.equal(200);
-                });
-
-                it('should return HTML', function () {
-                    expect(this.res.headers['content-type']).to.equal('text/html; charset=utf-8');
-                    expect(this.res.text).to.match(/^<!DOCTYPE html>/);
-                });
-
-                describe('the response body', function () {
-                    it('should display links for every enabled identity provider', function () {
-                        var enabledIdentityProviders = authHelper.getEnabledIdentityProviders();
-
-                        for (var label in enabledIdentityProviders) {
-                            var link = this.$('a.identity_provider.' + label);
-                            expect(link.length).to.equal(1);
-
-                            // Clean class in order to identify disabled identity provider
-                            link.removeClass('identity_provider').addClass(label);
-                        }
-                    });
-
-                    it('should display only enabled identity providers', function () {
-                        expect(this.$('a.identity_provider').length).to.equal(0);
-                    });
-                });
             });
         });
     });

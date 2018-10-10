@@ -7,7 +7,7 @@ var passport = require('passport');
 var emailHelper = require('../../lib/email-helper');
 var config = require('../../config');
 var uuid = require('uuid');
-var finder = require ('../../lib/finder');
+var finder = require('../../lib/finder');
 const Op = db.sequelize.Op;
 
 var STATES = {
@@ -370,8 +370,7 @@ function cycle() {
             error => {
                 logger.error('[EmailChange][DELETE/FAIL][error', error, ']');
             }
-        )
-        ;
+        );
     } catch (e) {
         logger.error('[EmailChange][DELETE/FAIL][error', e, ']');
     }

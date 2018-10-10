@@ -317,10 +317,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-            });
-
-            it('should redirect to login page', function () {
-                expect(this.res.headers.location).equal(URL_PREFIX + '/auth');
+                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=code&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
             });
         });
     });
@@ -380,10 +377,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-            });
-
-            it('should redirect to login page', function () {
-                expect(this.res.headers.location).equal(URL_PREFIX + '/auth');
+                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=token&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
             });
         });
     });
@@ -607,7 +601,7 @@ function searchCookieString(res) {
         setcookie.forEach(
             function (cookiestr) {
                 if (cookiestr.indexOf('peach_infos') == 0) {
-                    found =  cookiestr;
+                    found = cookiestr;
                 }
             }
         );
@@ -674,20 +668,6 @@ describe('OAuth2 requests from cross domain with access token ', function () {
             });
         });
 
-        describe('when when user logout', function () {
-
-            before(function (done) {
-                requestHelper.sendRequest(this, '/logout', {
-                    method: 'get',
-                }, done);
-            });
-
-
-            it('logout should invalidate cookie ', function () {
-                var peachInfoCookieString = searchCookieString.call(this, this.res);
-                expect(peachInfoCookieString).to.be.equal('peach_infos=; Max-Age=0; Domain=toto.com; Path=/; Expires=Invalid Date');
-            });
-        });
     });
     describe('when config is set to not set info cookie', function () {
 

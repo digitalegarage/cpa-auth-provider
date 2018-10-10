@@ -2,7 +2,6 @@
 
 var db = require('../../models');
 var config = require('../../config');
-var logger = require('../../lib/logger');
 
 var passport = require('passport');
 
@@ -13,8 +12,6 @@ var cors = require('../../lib/cors');
 
 var emailHelper = require('../../lib/email-helper');
 var authHelper = require('../../lib/auth-helper');
-var passwordHelper = require('../../lib/password-helper');
-var userHelper = require('../../lib/user-helper');
 
 var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
@@ -51,73 +48,6 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 }));
 
 module.exports = function (app, options) {
-    app.post('/api/local/signup', cors, limiterHelper.verify, function (req, res) {
-
-        if (req.recaptcha.error) {
-            res.status(400).json({success: false, msg: req.__('API_SIGNUP_SOMETHING_WRONG_RECAPTCHA')});
-            return;
-        }
-
-        if (!req.body.email || !req.body.password) {
-            res.status(400).json({success: false, msg: req.__('API_SIGNUP_PLEASE_PASS_EMAIL_AND_PWD')});
-        } else {
-            var username = req.body.email;
-            var password = req.body.password;
-            var requiredAttributes = {};
-            config.userProfiles.requiredFields.forEach(
-                function (element) {
-                    if (req.body[element]) {
-                        requiredAttributes[element] = req.body[element];
-                    }
-                }
-            );
-            var optionnalAttributes = {};
-            for (var element in userHelper.getRequiredFields()) {
-                if (req.body[element] && !config.userProfiles.requiredFields.includes(element)) {
-                    optionnalAttributes[element] = req.body[element];
-                }
-            }
-
-            userHelper.createLocalLogin(username, password, requiredAttributes, optionnalAttributes).then(
-                function (user) {
-                    res.json({success: true, msg: req.__('API_SIGNUP_SUCCESS')});
-                },
-                function (err) {
-                    if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
-                        return res.status(400).json({success: false, msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')});
-                    } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
-                        return res.status(400).json({
-                            success: false,
-                            msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
-                            password_strength_errors: passwordHelper.getWeaknesses(username, req.body.password, req),
-                            errors: [{msg: passwordHelper.getWeaknessesMsg(username, req.body.password, req)}],
-                            score: passwordHelper.getQuality(username, req.body.password)
-                        });
-                    } else if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
-                        logger.debug('[POST /api/local/signup][email', username, '][ERR', err, ']');
-                        return res.status(400).json({
-                            success: false,
-                            msg: req.__('API_SIGNUP_MISSING_FIELDS'),
-                            missingFields: err.data ? err.data.missingFields : undefined
-                        });
-                    } else if (err.message === userHelper.EXCEPTIONS.UNKNOWN_GENDER) {
-                        return res.status(400).json({
-                            success: false,
-                            msg: req.__('API_SIGNUP_MISSING_FIELDS')
-                        });
-                    } else if (err.message === userHelper.EXCEPTIONS.MALFORMED_DATE_OF_BIRTH) {
-                        return res.status(400).json({
-                            success: false,
-                            msg: req.__('API_SIGNUP_MISSING_FIELDS')
-                        });
-                    } else {
-                        logger.error('[POST /api/local/signup][email', username, '][ERR', err, ']');
-                        res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
-                    }
-                }
-            );
-        }
-    });
 
     app.post('/api/local/password/recover', cors, limiterHelper.verify, function (req, res) {
 
@@ -167,50 +97,6 @@ module.exports = function (app, options) {
                 res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
             });
         });
-    });
-
-    app.post('/api/local/authenticate/cookie', cors,
-      passport.authenticate('local', { session: true }),
-      function(req,res) {
-
-        afterLoginHelper.afterLogin(req.user, req.body.email || req.query.email, res);
-
-          // returned value is not relevant
-        res.sendStatus(204);
-      }
-    );
-
-    app.post('/api/local/authenticate/jwt', cors, function (req, res) {
-        db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
-            include: [db.User]
-        }).then(function (localLogin) {
-                if (!localLogin || !req.body.password) {
-                    res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                    return;
-                }
-
-                localLogin.verifyPassword(req.body.password).then(function (isMatch) {
-                        if (isMatch) {
-                            localLogin.logLogin(localLogin.User).then(function () {
-                            }, function () {
-                            });
-                            // if user is found and password is right create a token
-                            var token = jwt.encode(localLogin.User, config.jwtSecret);
-                            // return the information including token as JSON
-                            res.json({success: true, token: 'JWT ' + token});
-                        } else {
-                            res.status(401).json({success: false, msg: req.__('API_INCORRECT_LOGIN_OR_PASS')});
-                            return;
-                        }
-                    },
-                    function (err) {
-                        res.status(500).json({success: false, msg: req.__('API_ERROR') + err});
-                    });
-            },
-            function (error) {
-                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-            });
     });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.

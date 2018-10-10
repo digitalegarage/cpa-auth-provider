@@ -1,6 +1,5 @@
 "use strict";
 
-var db = require('../../models');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var cors = require('../../lib/cors');
 var googleHelper = require('../../lib/google-helper');
