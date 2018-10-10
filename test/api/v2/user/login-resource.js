@@ -502,6 +502,42 @@ describe('API-V2 LOGIN', function () {
             });
         });
     });
+
+
+    context('remove account', function () {
+        context('session', function () {
+
+            var ctx = this;
+
+            before(function (done) {
+                login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+            });
+
+            before(function (done) {
+                requestHelper.sendRequest(ctx, '/api/v2/session/user', {method: 'delete', cookie: context.cookie}, done);
+
+            });
+
+            //TODO
+        });
+        context('jwt', function () {
+            var ctx = this;
+
+            before(function (done) {
+
+                login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+            });
+
+            before(function (done) {
+                requestHelper.sendRequest(ctx, '/api/v2/jwt/user', {method: 'delete', accessToken: context.token}, done);
+
+            });
+
+            //TODO
+        });
+
+
+    });
     context('retrieve session token', function () {
         before(initData.resetDatabase);
         context('session', function () {
