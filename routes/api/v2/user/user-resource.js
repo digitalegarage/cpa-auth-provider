@@ -8,26 +8,30 @@ const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
 const _ = require('underscore');
 
-function delete_user(localLogin, res) {
+function delete_user_by_id(userId, res) {
 // Transactional part
     return db.sequelize.transaction(function (transaction) {
         return db.LocalLogin.destroy({
-            where: {user_id: localLogin.user_id},
+            where: {user_id: userId},
             transaction: transaction
         }).then(function () {
             return db.SocialLogin.destroy({
-                where: {user_id: localLogin.user_id},
+                where: {user_id: userId},
                 transaction: transaction
             });
         }).then(function () {
             return db.User.destroy({
-                where: {id: localLogin.user_id},
+                where: {id: userId},
                 transaction: transaction
             });
         }).then(function () {
             return res.status(204).send();
         });
     });
+}
+
+function delete_user(req, res){
+    return delete_user_by_id(req.user.id, res);
 }
 
 var delete_user_with_credentials = function (req, res) {
@@ -51,7 +55,7 @@ var delete_user_with_credentials = function (req, res) {
                     .then(function (isMatch) {
                         logger.info('isMatch', isMatch);
                         if (isMatch) {
-                            return delete_user(localLogin, res);
+                            return delete_user_by_id(localLogin.user_id, res);
                         } else {
                             return res.status(401).send();
                         }
