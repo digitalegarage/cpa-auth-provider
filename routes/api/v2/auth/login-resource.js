@@ -109,6 +109,7 @@ module.exports = function (app, options) {
      *            schema:
      *              $ref: '#/definitions/SessionToken'
      */
+    app.options('/api/v2/session/signup', cors);
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
         signupREST(req, res, handleAfterSessionRestLogin);
     });
@@ -153,6 +154,7 @@ module.exports = function (app, options) {
      *            schema:
      *              $ref: '#/definitions/SessionToken'
      */
+    app.options('/api/v2/session/login', cors);
     app.post('/api/v2/session/login', cors, function (req, res) {
 
         loginService.login(req, res)
@@ -189,6 +191,7 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "user disconnected"
      */
+    app.options('/api/v2/session/logout', cors);
     app.delete('/api/v2/session/logout', cors, authHelper.ensureAuthenticated, function (req, res, next) {
 
         afterLogoutHelper.afterLogout(res);
@@ -222,6 +225,7 @@ module.exports = function (app, options) {
      *          "302":
      *            description: "a redirect with token as a get query parameter"
      */
+    app.options(SESSION_LOGIN_PATH, cors);
     app.get(SESSION_LOGIN_PATH, cors, function (req, res) {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
@@ -260,8 +264,8 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/JWTToken'
      *          "302":
      *            description: "redirect"
-
      */
+    app.options('/api/v2/jwt/signup', cors);
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
         signupREST(req, res, handleAfterJWTRestLogin);
     });
@@ -302,6 +306,7 @@ module.exports = function (app, options) {
      *          "302":
      *            description: "redirect"
      */
+    app.options('/api/v2/jwt/login', cors);
     app.post('/api/v2/jwt/login', cors, function (req, res) {
 
         loginService.login(req, res)

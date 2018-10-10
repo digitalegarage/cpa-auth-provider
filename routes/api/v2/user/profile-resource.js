@@ -145,6 +145,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
+    router.options('/api/v2/oauth2/user/profile', cors);
     router.get('/api/v2/oauth2/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile);
 
     /**
@@ -235,6 +236,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
+    router.options('/api/v2/jwt/user/profile', cors);
     router.get('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), user_profile);
 
     /**
@@ -286,6 +288,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
+    router.options('/api/v2/cpa/user/profile', cors);
     router.get('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile);
 
     /**
