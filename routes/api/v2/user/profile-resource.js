@@ -189,6 +189,7 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
+    router.options('/api/v2/session/user/profile', cors);
     router.get('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile);
 
     /**
