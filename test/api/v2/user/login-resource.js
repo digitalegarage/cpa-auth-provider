@@ -505,35 +505,64 @@ describe('API-V2 LOGIN', function () {
 
 
     context('remove account', function () {
-        context('session', function () {
 
-            var ctx = this;
+        var ctx = this;
 
+
+        before(function (done) {
+            db.User.count({}).then(function (count) {
+                ctx.countBefore = count;
+                done();
+            });
+        });
+
+        context('using basic auth', function () {
             before(function (done) {
                 login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
             });
-
             before(function (done) {
-                requestHelper.sendRequest(ctx, '/api/v2/session/user', {method: 'delete', cookie: context.cookie}, done);
-
+                requestHelper.sendRequest(ctx, '/api/v2/basicauth/user', {method: 'delete', cookie: context.cookie, basicAuth: {login: AN_EMAIL, password: STRONG_PASSWORD}}, done);
             });
 
-            //TODO
-        });
-        context('jwt', function () {
-            var ctx = this;
-
             before(function (done) {
+                db.User.count({}).then(function (count) {
+                    ctx.count = count;
+                    done();
+                });
+            });
 
+            it('user should be deleted', function () {
+                expect(ctx.countBefore).to.equal(ctx.count);
+            });
+
+            it('should return a 204', function () {
+                expect(ctx.res.statusCode).to.equal(204);
+            });
+
+        });
+        context('using jwt', function () {
+            before(function (done) {
                 login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
             });
-
             before(function (done) {
-                requestHelper.sendRequest(ctx, '/api/v2/jwt/user', {method: 'delete', accessToken: context.token}, done);
+                requestHelper.sendRequest(ctx, '/api/v2/jwt/user', {method: 'delete', accessToken: ctx.token}, done);
 
             });
 
-            //TODO
+            before(function (done) {
+                db.User.count({}).then(function (count) {
+                    ctx.count = count;
+                    done();
+                });
+            });
+
+            it('User should be deleted', function () {
+                expect(ctx.countBefore).to.equal(ctx.count);
+            });
+
+            it('should return a 204', function () {
+                expect(ctx.res.statusCode).to.equal(204);
+            });
         });
 
 
@@ -663,7 +692,8 @@ describe('API-V2 LOGIN', function () {
             });
         });
     });
-});
+})
+;
 
 describe('API-V2 GET JWT Token', function () {
     before(initData.resetDatabase);
