@@ -16,8 +16,6 @@ var authHelper = require('../../lib/auth-helper');
 var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 
-var afterLoginHelper = require('../../lib/afterlogin-helper');
-
 var i18n = require('i18n');
 
 const Op = db.sequelize.Op;
