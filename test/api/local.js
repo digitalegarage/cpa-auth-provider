@@ -216,7 +216,7 @@ describe('POST /api/local/password/recover', function () {
 
 // Test authenticate
 
-describe('POST /api/local/authenticate/jwt', function () {
+describe('POST /api/v2/jwt/login', function () {
 
     context('When unauthenticated user signup with correct credential', function () {
 
