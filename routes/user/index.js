@@ -194,5 +194,3 @@ var routes = function (router) {
 };
 
 module.exports = routes;
-
-
