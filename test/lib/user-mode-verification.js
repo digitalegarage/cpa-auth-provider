@@ -103,7 +103,7 @@ describe('GET /verify', function () {
                 });
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURI('example://cpa_callback'), {
+                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURIComponent('example://cpa_callback'), {
                         cookie: this.cookie,
                         parseDOM: true
                     }, done);
@@ -120,13 +120,13 @@ describe('GET /verify', function () {
 
             context('and the user is not authenticated', function () {
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURI('example://cpa_callback'), null, done);
+                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURIComponent('example://cpa_callback'), null, done);
                 });
 
                 it('should redirect to the login page', function () {
                     var urlPrefix = requestHelper.urlPrefix;
                     expect(this.res.statusCode).to.equal(302);
-                    expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
+                    expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/verify?user_code=1234&redirect_uri=" + encodeURIComponent("example://cpa_callback")));
                     // TODO: check redirect location and page to return to after login
                 });
             });
@@ -169,7 +169,7 @@ describe('GET /verify', function () {
                 it('should redirect to the login page', function () {
                     var urlPrefix = requestHelper.urlPrefix;
                     expect(this.res.statusCode).to.equal(302);
-                    expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
+                    expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/verify"));
                     // TODO: check redirect location and page to return to after login
                 });
             });

@@ -37,22 +37,22 @@ build:
   tags:
     - dind
 
-build_exporter:
-  stage: build
-  image: docker:stable
-  variables:
-    IMAGE: registry.ebu.io/pipe/idp-hdfs-exporter:$CI_COMMIT_REF_NAME
-    DOCKER_HOST: tcp://docker:2375
-  services:
-    - docker:dind
-  script:
-    - cd exports
-    - docker build -t idp-exporter .
-    - docker login -u dind-runner -p $REGISTRY_PASSWORD $CONTAINER_REGISTRY
-    - docker tag idp-exporter $IMAGE
-    - docker push $IMAGE
-  tags:
-    - dind
+#build_exporter:
+#  stage: build
+#  image: docker:stable
+#  variables:
+#    IMAGE: registry.ebu.io/pipe/idp-hdfs-exporter:$CI_COMMIT_REF_NAME
+#    DOCKER_HOST: tcp://docker:2375
+#  services:
+#    - docker:dind
+#  script:
+#    - cd exports
+#    - docker build -t idp-exporter .
+#    - docker login -u dind-runner -p $REGISTRY_PASSWORD $CONTAINER_REGISTRY
+#    - docker tag idp-exporter $IMAGE
+#    - docker push $IMAGE
+#  tags:
+#    - dind
 
 
 deploy_review_environment:

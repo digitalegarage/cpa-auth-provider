@@ -59,7 +59,7 @@ describe('Local login after', function () {
 
         it('should return 400 OK', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.error.text).equal('{"success":false,"msg":"email already exists"}');
+            expect(this.res.error.text).equal('{"error":{"key":"EMAIL_TAKEN","message":"Email already exists","code":"S1"}}');
         });
     });
     describe('Google API login first', function () {
@@ -85,7 +85,7 @@ describe('Local login after', function () {
 
         it('should return 400 OK', function () {
                 expect(this.res.statusCode).equal(400);
-                expect(this.res.error.text).equal('{"success":false,"msg":"email already exists"}');
+                expect(this.res.error.text).equal('{"error":{"key":"EMAIL_TAKEN","message":"Email already exists","code":"S1"}}');
             }
         );
     });
@@ -1026,7 +1026,7 @@ describe('Facebook and Google', function () {
 
 
 function localSignup(done) {
-    requestHelper.sendRequest(this, '/api/local/signup', {
+    requestHelper.sendRequest(this, '/api/v2/session/signup', {
         method: 'post',
         cookie: this.cookie,
         type: 'form',
@@ -1039,7 +1039,7 @@ function localSignup(done) {
 }
 
 function localUpperCaseSignup(done) {
-    requestHelper.sendRequest(this, '/api/local/signup', {
+    requestHelper.sendRequest(this, '/api/v2/session/signup', {
         method: 'post',
         cookie: this.cookie,
         type: 'form',

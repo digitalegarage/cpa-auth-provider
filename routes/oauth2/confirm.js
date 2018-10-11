@@ -3,7 +3,6 @@
 "use strict";
 
 var db = require('../../models/index');
-var passport = require('passport');
 var jwtHelper = require('../../lib/jwt-helper');
 
 module.exports = function (app, options) {

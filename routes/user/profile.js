@@ -3,7 +3,6 @@
 var config = require('../../config');
 var authHelper = require('../../lib/auth-helper');
 var emailHelper = require('../../lib/email-helper');
-var recaptcha = require('express-recaptcha');
 var codeHelper = require('../../lib/code-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
 var userHelper = require('../../lib/user-helper');

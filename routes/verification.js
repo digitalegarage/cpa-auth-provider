@@ -5,7 +5,6 @@ var config = require('../config');
 var authHelper = require('../lib/auth-helper');
 var requestHelper = require('../lib/request-helper');
 var urlHelper = require('../lib/url-helper');
-var i18n = require('i18n');
 
 
 var async = require('async');

@@ -1,6 +1,5 @@
 "use strict";
 
-var db = require('../models');
 var config = require('../config');
 var requestHelper = require('../lib/request-helper');
 var authHelper = require('../lib/auth-helper');

@@ -5,7 +5,6 @@ var db = require('../../models');
 var logger = require('../../lib/logger');
 var email = require('../../lib/email-util');
 var cors = require('cors');
-var passport = require('passport');
 
 module.exports = setupRoutes;
 

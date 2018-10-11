@@ -32,6 +32,8 @@ services:
       - FACEBOOK_LOGIN_ID=315223112568780
       - FACEBOOK_LOGIN_SECRET=ccd7c4568fb402585e4acb3eb1eb9068
       - BASE_URL=http://identity-provider-review-week-plus-9ozrwk.pipe-swarm.ebu.io
+      - DISPLAY_MENU_BAR=
+      - IDP_LIMITER_TYPE=recaptcha-optional
 
     networks:
       - default
