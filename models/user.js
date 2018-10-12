@@ -36,6 +36,9 @@ module.exports = function (sequelize, DataTypes) {
 
 
     User.prototype.getDisplayName = function (policy, defaultDisplayName) {
+        if (defaultDisplayName && defaultDisplayName.match(/^\s*$/)) {
+            return (this.LocalLogin && this.LocalLogin.login) ? this.LocalLogin.login : '';
+        }
         if (!policy) {
             return defaultDisplayName;
         }
@@ -71,7 +74,7 @@ module.exports = function (sequelize, DataTypes) {
                 id: this.id,
                 email: this.LocalLogin ? this.LocalLogin.login : null,
                 email_verified: this.LocalLogin && this.LocalLogin.verified ? true : false,
-                display_name: this.display_name,
+                display_name: this.display_name.match(/^\s*$/) ? ((this.LocalLogin && this.LocalLogin.login) ? this.LocalLogin.login : '') : this.display_name, 
                 firstname: this.firstname,
                 lastname: this.lastname,
                 gender: this.gender,
@@ -79,6 +82,5 @@ module.exports = function (sequelize, DataTypes) {
             }
         };
     };
-
     return User;
 };
