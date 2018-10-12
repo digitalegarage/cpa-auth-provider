@@ -32,7 +32,8 @@ module.exports = {
         facebook: {
             enabled: ('true' == process.env.FACEBOOK_LOGIN_ENABLED),
             client_id: process.env.FACEBOOK_LOGIN_ID,
-            client_secret: process.env.FACEBOOK_LOGIN_SECRET
+            client_secret: process.env.FACEBOOK_LOGIN_SECRET,
+            reauthenticate: ('true' == process.env.FACEBOOK_REAUTHENTICATE)
         },
         google: {
             enabled: ('true' == process.env.GOOGLE_LOGIN_ENABLED),
