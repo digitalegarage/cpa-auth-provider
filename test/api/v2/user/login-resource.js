@@ -502,6 +502,71 @@ describe('API-V2 LOGIN', function () {
             });
         });
     });
+
+
+    context('remove account', function () {
+
+        var ctx = this;
+
+
+        before(function (done) {
+            db.User.count({}).then(function (count) {
+                ctx.countBefore = count;
+                done();
+            });
+        });
+
+        context('using basic auth', function () {
+            before(function (done) {
+                login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+            });
+            before(function (done) {
+                requestHelper.sendRequest(ctx, '/api/v2/basicauth/user', {method: 'delete', cookie: context.cookie, basicAuth: {login: AN_EMAIL, password: STRONG_PASSWORD}}, done);
+            });
+
+            before(function (done) {
+                db.User.count({}).then(function (count) {
+                    ctx.count = count;
+                    done();
+                });
+            });
+
+            it('user should be deleted', function () {
+                expect(ctx.countBefore).to.equal(ctx.count);
+            });
+
+            it('should return a 204', function () {
+                expect(ctx.res.statusCode).to.equal(204);
+            });
+
+        });
+        context('using jwt', function () {
+            before(function (done) {
+                login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+            });
+            before(function (done) {
+                requestHelper.sendRequest(ctx, '/api/v2/jwt/user', {method: 'delete', accessToken: ctx.token}, done);
+
+            });
+
+            before(function (done) {
+                db.User.count({}).then(function (count) {
+                    ctx.count = count;
+                    done();
+                });
+            });
+
+            it('User should be deleted', function () {
+                expect(ctx.countBefore).to.equal(ctx.count);
+            });
+
+            it('should return a 204', function () {
+                expect(ctx.res.statusCode).to.equal(204);
+            });
+        });
+
+
+    });
     context('retrieve session token', function () {
         before(initData.resetDatabase);
         context('session', function () {
@@ -625,6 +690,40 @@ describe('API-V2 LOGIN', function () {
 
                 });
             });
+        });
+    });
+})
+;
+
+describe('API-V2 GET JWT Token', function () {
+    before(initData.resetDatabase);
+
+
+    context('when user has a session', function () {
+        var ctx = this;
+        before(function (done) {
+            login.cookieLogin(ctx, done);
+        });
+        before(function (done) {
+            requestHelper.sendRequest(ctx, '/api/v2/session/jwt', {cookie: ctx.cookie}, done);
+        });
+        it('should return a success', function () {
+            expect(ctx.res.statusCode).equal(200);
+            expect(ctx.res.body.token);
+            expect(ctx.res.body.token.indexOf("JWT ")).equal(0);
+        });
+    });
+
+    context('when user doesn\'t have  a session', function () {
+        var ctx = this;
+        before(function (done) {
+            login.cookieLogin(ctx, done);
+        });
+        before(function (done) {
+            requestHelper.sendRequest(ctx, '/api/v2/session/jwt', {}, done);
+        });
+        it('should return a success', function () {
+            expect(ctx.res.statusCode).equal(401);
         });
     });
 });

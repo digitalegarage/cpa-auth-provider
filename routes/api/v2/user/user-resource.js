@@ -1,5 +1,6 @@
 "use strict";
 
+const passport = require('passport');
 const cors = require('../../../../lib/cors');
 const logger = require('../../../../lib/logger');
 const db = require('../../../../models/index');
@@ -7,7 +8,33 @@ const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
 const _ = require('underscore');
 
-var delete_user = function (req, res) {
+function delete_user_by_id(userId, res) {
+// Transactional part
+    return db.sequelize.transaction(function (transaction) {
+        return db.LocalLogin.destroy({
+            where: {user_id: userId},
+            transaction: transaction
+        }).then(function () {
+            return db.SocialLogin.destroy({
+                where: {user_id: userId},
+                transaction: transaction
+            });
+        }).then(function () {
+            return db.User.destroy({
+                where: {id: userId},
+                transaction: transaction
+            });
+        }).then(function () {
+            return res.status(204).send();
+        });
+    });
+}
+
+function delete_user(req, res){
+    return delete_user_by_id(req.user.id, res);
+}
+
+var delete_user_with_credentials = function (req, res) {
     logger.debug('[API-V2][User][DELETE]');
 
     var user = auth(req);
@@ -28,25 +55,7 @@ var delete_user = function (req, res) {
                     .then(function (isMatch) {
                         logger.info('isMatch', isMatch);
                         if (isMatch) {
-                            // Transactional part
-                            return db.sequelize.transaction(function (transaction) {
-                                return db.LocalLogin.destroy({
-                                    where: {user_id: localLogin.user_id},
-                                    transaction: transaction
-                                }).then(function () {
-                                    return db.SocialLogin.destroy({
-                                        where: {user_id: localLogin.user_id},
-                                        transaction: transaction
-                                    });
-                                }).then(function () {
-                                    return db.User.destroy({
-                                        where: {id: localLogin.user_id},
-                                        transaction: transaction
-                                    });
-                                }).then(function () {
-                                    return res.status(204).send();
-                                });
-                            });
+                            return delete_user_by_id(localLogin.user_id, res);
                         } else {
                             return res.status(401).send();
                         }
@@ -154,7 +163,30 @@ module.exports = function (router) {
      *            description: "user profile including permissions in json body"
      */
     router.options('/api/v2/basicauth/user', cors);
-    router.delete('/api/v2/basicauth/user', cors, delete_user);
+    router.delete('/api/v2/basicauth/user', cors, delete_user_with_credentials);
+
+    /**
+     * @swagger
+     * /api/v2/jwt/user:
+     *   delete:
+     *     description: delete the user providing user credentials
+     *     operationId: "deleteUser"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "JWT token"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: JWT blablabla
+     *     responses:
+     *          "204":
+     *            description: "user had been deleted"
+     */
+
+    router.delete('/api/v2/jwt/user', cors, passport.authenticate('jwt', {session: false}), delete_user);
 
     /**
      * @swagger

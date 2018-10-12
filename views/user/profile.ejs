@@ -9,12 +9,12 @@
             </h1>
         </div>
     </div>
-    <% if (flash.message && ['danger','warning','info','success'].indexOf(flash.type) !== -1) { %>
-      <div class="alert alert-<%= flash.type %>">
+    <% if (flash.message && ['danger', 'warning', 'info', 'success'].indexOf(flash.type) !== -1) { %>
+    <div class="alert alert-<%= flash.type %>">
         <strong><%= flash.message %></strong>
-      </div>
+    </div>
     <% } %>
-    
+
     <hr/>
 
     <div class="row">
@@ -387,7 +387,6 @@
     <% include ../util/password-simple-support %>
     <% } %>
 
-
     <script type="text/javascript">
         (function () {
 
@@ -686,43 +685,80 @@
                     return;
                 }
 
-                $.ajax({
-                    <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL){ %>
-                        url: '<%=config.gdprManager.useGDPRManagerWithURL%>',
-                        type: 'DELETE',
-                        headers: {
-                            "Authorization": "Basic " + btoa("<%=profile.login%>:" + $password.val()) // TODO social login without password.
-                        },
-                    <%} else { %>
-                        url: "<%= link('/user') %>",
-                        type: 'POST',
-                        data: {
-                            password: $password.val()
-                        },
-                    <%}%>
-                    success: function (result) {
-                        //set success message in storage to get it back on login page and LOGOUT
-                        if (typeof localStorage !== 'undefined') {
-                            localStorage.setItem('loginMessage', "<%= __('PROFILE_JS_SUCCESS_DELETE_ACCOUNT') %>");
-                        }
-                        window.location = "<%= link('/logout') %>";
-                    },
-                    error: function (error) {
-                        if (error.responseJSON.msg) {
-                            $passwordError.html(error.responseJSON.msg);
-                            $deleteUserForm.first('div.form-group').addClass('has-error');
-                            $spinner.hide()
-                            $label.show();
-                            $passwordError.show();
-                        } else {
-                            $deleteUserModal.modal('toggle');
-                            $deleteError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>");
-                            $spinner.hide();
-                            $label.show();
-                            $deleteError.show();
-                        }
+                var deleteSuccess = function (result) {
+                    //set success message in storage to get it back on login page and LOGOUT
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('loginMessage', "<%= __('PROFILE_JS_SUCCESS_DELETE_ACCOUNT') %>");
                     }
+                    window.location = "<%= link('/logout') %>";
+                };
+
+                var deleteFail = function (error) {
+                    console.log('error: ', error);
+                    if (error.responseJSON && error.responseJSON.msg) {
+                        $passwordError.html(error.responseJSON.msg);
+                        $deleteUserForm.first('div.form-group').addClass('has-error');
+                        $spinner.hide()
+                        $label.show();
+                        $passwordError.show();
+                    } else {
+                        $deleteUserModal.modal('toggle');
+                        $deleteError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>");
+                        $spinner.hide();
+                        $label.show();
+                        $deleteError.show();
+                    }
+                }
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL && profile.hasPassword){ %>
+                // Using GDPR manager with local account
+                $.ajax({
+                    url: '<%= config.gdprManager.useGDPRManagerWithURL %>',
+                    type: 'DELETE',
+                    headers: {
+                        "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
+                    },
+                    success: deleteSuccess,
+                    error: deleteFail
                 });
+                <% } %>
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL && !profile.hasPassword){ %>
+                // Using GDPR manager without local account
+                $.ajax({
+                    url: '/api/v2/session/jwt',
+                    type: 'GET',
+                    success: function (result) {
+                        $.ajax({
+                            url: '<%= config.gdprManager.useGDPRManagerWithURL %>',
+                            type: 'DELETE',
+                            headers: {
+                                "Authorization": result.token
+                            },
+                            success: deleteSuccess,
+                            error: deleteFail
+                        });
+                    },
+                    error: deleteFail
+                });
+
+                <% } %>
+
+                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerWithURL){ %>
+                // Not using GDPR manager
+
+                $.ajax({
+
+                    url: "<%= link('/user') %>",
+                    type: 'POST',
+                    data: {
+                        password: $password.val()
+                    },
+                    success: deleteSuccess,
+                    error: deleteFail
+                });
+                <% } %>
+
+
             });
 
             $saveDataBtn.on('click', function (e) {

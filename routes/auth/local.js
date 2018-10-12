@@ -8,8 +8,8 @@ var emailHelper = require('../../lib/email-helper');
 var codeHelper = require('../../lib/code-helper');
 var passwordHelper = require('../../lib/password-helper');
 var finder = require('../../lib/finder');
-var userHelper = require('../../lib/user-helper');
 var limiterHelper = require('../../lib/limiter-helper');
+var afterLogoutHelper = require('../../lib/afterlogout-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
@@ -45,6 +45,7 @@ module.exports = function (app, options) {
     app.get('/logout', function (req, res) {
         req.logout();
         req.session.destroy();
+        afterLogoutHelper.afterLogout(res);
         requestHelper.redirect(res, '/');
     });
 
