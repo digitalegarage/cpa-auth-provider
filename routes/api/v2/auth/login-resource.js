@@ -155,24 +155,38 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/SessionToken'
      */
     app.options('/api/v2/session/login', cors);
-    app.post('/api/v2/session/login', cors, function (req, res) {
+    app.post('/api/v2/session/login', cors, function (req, res, next) {
 
         loginService.login(req, res)
             .then(function (user) {
-                req.logIn(user, function () {
-                    handleAfterSessionRestLogin(user, req, res);
+                // force renew cookie so a cookie value couldn't point at different time to different user
+                req.session.regenerate(function (err) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        req.logIn(user, function () {
+                            handleAfterSessionRestLogin(user, req, res);
+                        });
+                    }
                 });
             })
             .catch(function (err) {
                 handleErrorForRestCalls(err, res);
             });
     });
-    app.post('/login', cors, function (req, res) {
+    app.post('/login', cors, function (req, res, next) {
 
         loginService.login(req, res)
             .then(function (user) {
-                req.logIn(user, function () {
-                    handleAfterSessionHtlmLogin(user, req, res);
+                // force renew cookie so a cookie value couldn't point at different time to different user
+                req.session.regenerate(function (err) {
+                    if (err) {
+                        next(err);
+                    } else {
+                        req.logIn(user, function () {
+                            handleAfterSessionHtlmLogin(user, req, res);
+                        });
+                    }
                 });
             })
             .catch(function (err) {
@@ -196,7 +210,9 @@ module.exports = function (app, options) {
 
         afterLogoutHelper.afterLogout(res);
         req.logout();
-        req.session.destroy(function (err) {
+
+        // force renew cookie so a cookie value couldn't point at different time to different user
+        return req.session.regenerate(function (err) {
             if (err) {
                 return next(err);
             }
@@ -398,8 +414,15 @@ function signupREST(req, res, handleAfterLogin) {
             return loginService.signup(userAttributes, req.body.email, req.body.password, res);
         })
         .then(function (user) {
-            req.logIn(user, function () {
-                handleAfterLogin(user, req, res);
+            // force renew cookie so a cookie value couldn't point at different time to different user
+            req.session.regenerate(function (err) {
+                if (err) {
+                    handleErrorForRestCalls(err, res);
+                } else {
+                    req.logIn(user, function () {
+                        handleAfterLogin(user, req, res);
+                    });
+                }
             });
         })
         .catch(function (err) {
@@ -413,25 +436,19 @@ function signupHTML(req, res, handleAfterLogin) {
             return loginService.signup(userAttributes, req.body.email, req.body.password, res);
         })
         .then(function (user) {
-            req.logIn(user, function () {
-                handleAfterLogin(user, req, res);
+            // force renew cookie so a cookie value couldn't point at different time to different user
+            req.session.regenerate(function (err) {
+                if (err) {
+                    handleErrorForSignupHTMLCalls(req, err, res);
+                } else {
+                    req.logIn(user, function () {
+                        handleAfterLogin(user, req, res);
+                    });
+                }
             });
         })
         .catch(function (err) {
-            var redirect = getRedirectParams(req);
-
-            var data = {
-                message: err.errorData ? req.__(err.errorData.key) : err.toString(),
-                captcha: req.recaptcha,
-                email: req.body.email ? req.body.email : '',
-                date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
-                firstname: req.body.firstname ? req.body.firstname : '',
-                lastname: req.body.lastname ? req.body.lastname : '',
-                login: requestHelper.getPath('/login' + redirect),
-                target: requestHelper.getPath('/signup' + redirect)
-            };
-            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-            res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
+            handleErrorForSignupHTMLCalls(req, err, res);
         });
 }
 
@@ -553,4 +570,21 @@ function handleErrorForHtmlCalls(req, res, err) {
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
+}
+
+function handleErrorForSignupHTMLCalls(req, err, res) {
+    var redirect = getRedirectParams(req);
+
+    var data = {
+        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
+        captcha: req.recaptcha,
+        email: req.body.email ? req.body.email : '',
+        date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
+        firstname: req.body.firstname ? req.body.firstname : '',
+        lastname: req.body.lastname ? req.body.lastname : '',
+        login: requestHelper.getPath('/login' + redirect),
+        target: requestHelper.getPath('/signup' + redirect)
+    };
+    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
+    res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
 }
