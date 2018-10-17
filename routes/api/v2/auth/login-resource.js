@@ -229,7 +229,11 @@ module.exports = function (app, options) {
     app.get(SESSION_LOGIN_PATH, cors, function (req, res) {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
-            res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+            if (REDIRECT_URI.indexOf("?") >= 0) {
+                res.redirect(REDIRECT_URI + '&token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+            } else {
+                res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+            }
         } else {
             res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
         }
