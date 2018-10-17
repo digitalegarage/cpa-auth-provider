@@ -21,7 +21,7 @@ module.exports = {
                             });
                         })
                         .then(() => {
-                            queryInterface.sequelize.query('﻿CREATE INDEX Sessions_userid_idx ON public."Sessions" ("userId");');
+                            queryInterface.sequelize.query('CREATE INDEX Sessions_userid_idx ON public."Sessions" ("userId");');
                             resolve();
                         })
                         .catch((e) => {
