@@ -505,7 +505,7 @@ describe('API-V2 LOGIN', function () {
                 var firstCookie;
                 var secondCookie;
                 before(function (done) {
-                    requestHelper.sendRequest(ctx, '/', {}, function(){
+                    login.cookieLogin(ctx, function(){
                         firstCookie = ctx.cookie[0];
                         done();
                     });
