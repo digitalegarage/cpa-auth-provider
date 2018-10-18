@@ -42,11 +42,16 @@ module.exports = function (app, options) {
     });
 
     // For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
-    app.get('/logout', function (req, res) {
+    app.get('/logout', function (req, res, next) {
         req.logout();
-        req.session.destroy();
-        afterLogoutHelper.afterLogout(res);
-        requestHelper.redirect(res, '/');
+        req.session.regenerate(function (err) {
+            if (err) {
+                next(err);
+            } else {
+                afterLogoutHelper.afterLogout(res);
+                requestHelper.redirect(res, '/');
+            }
+        });
     });
 
     app.get('/email_verify', function (req, res, next) {
