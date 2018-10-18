@@ -170,6 +170,19 @@ describe('Test user profile', function () {
                 expect(user.getDisplayName('FIRSTNAME_LASTNAME', 'user1@earth.com')).to.equal('firstname lastname');
                 expect(user.getDisplayName('EMAIL', 'user1@earth.com')).to.equal('user1@earth.com');
 
+                user = db.User.build({
+                    id: 1,
+                    display_name: ' ',
+                    user_id: 1,
+                });
+                user.LocalLogin = {};
+                user.LocalLogin.login = 'trulla@lala';
+
+                expect(user.getDisplayName('FIRSTNAME')).to.equal(undefined);
+                expect(user.getDisplayName()).to.equal(undefined);
+                expect(user.getDisplayName('FOOBAR','lala@trulla')).to.equal('lala@trulla');
+                expect(user.getDisplayName('FOOBAR','   ')).to.equal('trulla@lala');
+                expect(user.getDisplayName('FOOBAR','')).to.equal('');
 
                 done();
             });

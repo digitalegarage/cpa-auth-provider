@@ -725,7 +725,7 @@
                 <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL && !profile.hasPassword){ %>
                 // Using GDPR manager without local account
                 $.ajax({
-                    url: '/api/v2/session/jwt',
+                    url: '<%= link('/api/v2/session/jwt')%>',
                     type: 'GET',
                     success: function (result) {
                         $.ajax({
