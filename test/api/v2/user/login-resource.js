@@ -500,6 +500,28 @@ describe('API-V2 LOGIN', function () {
 
                 });
             });
+            context('Cookie', function () {
+                var ctx = this;
+                var firstCookie;
+                var secondCookie;
+                before(function (done) {
+                    login.cookieLogin(ctx, function(){
+                        firstCookie = ctx.cookie[0];
+                        done();
+                    });
+                });
+
+                before(function (done) {
+                    login.cookieLogin(ctx, function(){
+                        secondCookie = ctx.cookie[0];
+                        done();
+                    });
+                });
+
+                it('should change', function () {
+                    expect(firstCookie).not.equal(secondCookie);
+                });
+            });
         });
     });
 
@@ -634,6 +656,29 @@ describe('API-V2 LOGIN', function () {
 
                 it('should return unauthorize', function () {
                     expect(ctx.res.statusCode).equal(401);
+                });
+            });
+
+            context('Cookie', function () {
+                var ctx = this;
+                var firstCookie;
+                var secondCookie;
+                before(function (done) {
+                    login.cookieLogin(ctx, function(){
+                        firstCookie = ctx.cookie[0];
+                        done();
+                    });
+                });
+
+                before(function (done) {
+                    login.cookieLogout(ctx, function(){
+                        secondCookie = ctx.cookie[0];
+                        done();
+                    });
+                });
+
+                it('should change', function () {
+                    expect(firstCookie).not.equal(secondCookie);
                 });
             });
         });

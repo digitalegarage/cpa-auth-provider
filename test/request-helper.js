@@ -65,7 +65,7 @@ module.exports = {
         }
 
         req.end(function (err, res) {
-            if (res && !context.cookie && res.headers['set-cookie']) {
+            if (res && res.headers['set-cookie']) {
                 context.cookie = res.headers['set-cookie'];
             }
 
