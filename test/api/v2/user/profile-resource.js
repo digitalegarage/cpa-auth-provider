@@ -294,12 +294,12 @@ function httpBasicGetProfile(context,done) {
 
 function expectGetPermissionEnrichedProfile(context) {
     expect(context.res.statusCode).equal(200);
-    expect(context.res.body.user.id).not.equal(undefined);
-    expect(context.res.body.user.permission_id).not.equal(undefined);
-    expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
-    expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
-    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
-    expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
+    expect(context.res.body.id).not.equal(undefined);
+    expect(context.res.body.permission_id).not.equal(undefined);
+    expect(context.res.body.firstname).equal(initData.USER_1_PROFILE.firstname);
+    expect(context.res.body.lastname).equal(initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.gender).equal(initData.USER_1_PROFILE.gender);
 }
 
 function expectGetInitialProfile(context) {
