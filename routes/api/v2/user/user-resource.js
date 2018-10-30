@@ -108,7 +108,7 @@ var get_user = function (req,res) {
                         })
                         .then(function (user) {
                             // be sure about what we send? here we go.
-                            res.json({user: _.pick(user,'id','display_name','firstname','lastname','gender','language','permission_id')});
+                            res.json(_.pick(user,'id','display_name','firstname','lastname','gender','language','permission_id'));
                         })
                         .catch(function (error) {
                             logger.error(error);
@@ -179,7 +179,7 @@ module.exports = function (router) {
      *            required: true
      *            schema:
      *              type: string
-     *              example: Basic bG9naW46cGFzc3dvcmQ=
+     *            example: Basic ZG9taW5pcXVlLmNoaW9uQGdtYWlsLmNvbTphemVydHl1aW9wYXplcnR5dWlvcA==
      *     responses:
      *          "204":
      *            description: "user had been deleted"
@@ -195,7 +195,7 @@ module.exports = function (router) {
      *            required: true
      *            schema:
      *              type: string
-     *              example: Basic bG9naW46cGFzc3dvcmQ=
+     *            example: Basic ZG9taW5pcXVlLmNoaW9uQGdtYWlsLmNvbTphemVydHl1aW9wYXplcnR5dWlvcA==
      *     responses:
      *          "200":
      *            description: "user profile including permissions in json body"
