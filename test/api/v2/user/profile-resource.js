@@ -280,7 +280,7 @@ function cpaUpdateProfile(context, done) {
 //---------------
 // http basic auth calls
 function httpBasicGetProfile(context,done) {
-    requestHelper.sendRequest(context, "/api/v2/basicauth/user/profile", {
+    requestHelper.sendRequest(context, "/api/v2/basicauth/user", {
         method: 'get',
         basicAuth: {
             login: initData.USER_1.email,
