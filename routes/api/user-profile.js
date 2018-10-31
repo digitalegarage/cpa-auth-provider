@@ -146,21 +146,41 @@ module.exports = function (app, options) {
 
 function returnProfileAsJson(user, res, req) {
     db.LocalLogin.findOne({where: {user_id: user.id}}).then(function (localLogin) {
-        var email = localLogin.login;
-        res.json({
-            success: true,
-            user_profile: {
-                id: user.id,
-                firstname: user.firstname,
-                lastname: user.lastname,
-                gender: user.gender,
-                date_of_birth: user.date_of_birth ? parseInt(user.date_of_birth) : user.date_of_birth,
-                date_of_birth_ymd: user.date_of_birth_ymd,
-                language: user.language,
-                email: email,
-                display_name: user.getDisplayName(req.query.policy, email)
-            }
-        });
+        if (localLogin){
+            var email = localLogin.login;
+            res.json({
+                success: true,
+                user_profile: {
+                    id: user.id,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    gender: user.gender,
+                    date_of_birth: user.date_of_birth ? parseInt(user.date_of_birth) : user.date_of_birth,
+                    date_of_birth_ymd: user.date_of_birth_ymd,
+                    language: user.language,
+                    email: email,
+                    display_name: user.getDisplayName(req.query.policy, email)
+                }
+            });
+        } else {
+            db.SocialLogin.findOne({where: {user_id: user.id}}).then(function(socialLogin) {
+                var email = socialLogin.email;
+                res.json({
+                    success: true,
+                    user_profile: {
+                        id: user.id,
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                        gender: user.gender,
+                        date_of_birth: user.date_of_birth ? parseInt(user.date_of_birth) : user.date_of_birth,
+                        date_of_birth_ymd: user.date_of_birth_ymd,
+                        language: user.language,
+                        email: email,
+                        display_name: user.getDisplayName(req.query.policy, email)
+                    }
+                });
+            });
+        }
     });
 }
 
