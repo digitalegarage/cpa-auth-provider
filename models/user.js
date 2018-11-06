@@ -20,6 +20,10 @@ module.exports = function (sequelize, DataTypes) {
         language: DataTypes.STRING,
         last_seen: DataTypes.BIGINT,
         scheduled_for_deletion_at: DataTypes.DATE,
+        public_uid: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4
+        }
     }, {
         underscored: true,
 
