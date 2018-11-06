@@ -20,6 +20,7 @@ module.exports = function (sequelize, DataTypes) {
         language: DataTypes.STRING,
         last_seen: DataTypes.BIGINT,
         scheduled_for_deletion_at: DataTypes.DATE,
+        public_uid: DataTypes.STRING
     }, {
         underscored: true,
 
