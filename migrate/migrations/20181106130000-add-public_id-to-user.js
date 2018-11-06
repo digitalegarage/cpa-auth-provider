@@ -1,8 +1,6 @@
 /* jslint node:true, esversion:6 */
 'use strict';
 
-const uuid = require('uuid/v4');
-
 module.exports = {
     up: function(queryInterface,Sequelize) {
         return new Promise((resolve,reject) => {
