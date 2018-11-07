@@ -158,7 +158,7 @@ module.exports = {
                 // delay per request
                 delayMs: process.env.RATE_LIMIT_DELAY_MS || 1000,
                 // max allowed requests (0 to disable)
-                max: 0,
+                max: process.env.RATE_LIMIT_MAX || 0,
             }
         }
     },
