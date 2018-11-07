@@ -36,7 +36,8 @@ var USER_1_PROFILE = {
     gender: 'M',
     date_of_birth: new Date(USER_1_DAB_STR).getTime(),
     date_of_birth_ymd: USER_1_DAB_STR,
-    language: 'FR'
+    language: 'FR',
+    public_uid: '2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9'
 };
 
 module.exports = {

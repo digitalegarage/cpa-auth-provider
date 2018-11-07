@@ -300,6 +300,7 @@ function expectGetPermissionEnrichedProfile(context) {
     expect(context.res.body.lastname).equal(initData.USER_1_PROFILE.lastname);
     expect(context.res.body.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
     expect(context.res.body.gender).equal(initData.USER_1_PROFILE.gender);
+    expect(context.res.body.public_uid).equal(initData.USER_1_PROFILE.public_uid);
 }
 
 function expectGetInitialProfile(context) {
@@ -309,6 +310,7 @@ function expectGetInitialProfile(context) {
     expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
     expect(context.res.body.user.date_of_birth).equal(initData.USER_1_DAB_STR);
+    expect(context.res.body.user.public_uid).equal(initData.USER_1_PROFILE.public_uid);
 }
 
 function expectedGetUpdatedProfile(context) {
@@ -318,4 +320,5 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.body.user.display_name).equal(NEW_FIRSTNAME + " " + NEW_LASTNAME);
     expect(context.res.body.user.gender).equal(NEW_GENDER);
     expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
+    expect(context.res.body.user.public_uid).equal(initData.USER_1_PROFILE.public_uid);
 }
