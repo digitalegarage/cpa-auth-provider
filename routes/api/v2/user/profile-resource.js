@@ -16,13 +16,7 @@ var user_profile = function (req, res) {
         }
         res.json(data);
     } else {
-        db.SocialLogin.findOne({where: {user_id: req.user.id}}).then(function (socialLogin) {
-            let data = socialLogin.getProfile();
-            if (req.authInfo && req.authInfo.scope) {
-                data.score = req.authInfo.scope;
-            }
-            res.json(data);
-        });
+        res.status(400).send();
     }
 };
 

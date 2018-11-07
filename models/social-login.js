@@ -50,22 +50,6 @@ module.exports = function (sequelize, DataTypes) {
             return user.logLastSeen();
         });
     };
-
-    SocialLogin.prototype.getProfile = function(){
-        return {
-            user: {
-                id: this.user_id,
-                    email: this.email,
-                    email_verified: true,
-                    display_name: this.display_name ? this.display_name : this.email,
-                    firstname: this.firstname,
-                    lastname: this.lastname,
-                    gender: this.gender,
-                    date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
-                    public_uid: this.public_uid
-            }
-        };
-    };
-
+    
     return SocialLogin;
 };
