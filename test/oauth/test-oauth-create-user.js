@@ -108,6 +108,7 @@ describe('POST /oauth2/create', function () {
         it('should have created the user', function (done) {
             db.User.findOne({include: {model: db.LocalLogin, where: {login: NEW_USER.email}}}).then(
                 user => {
+                    expect(user.public_uid).a('String');
                     expect(user).a('Object');
                     expect(user.LocalLogin.login).equal(NEW_USER.email);
                     expect(user.LocalLogin.verified).equal(null);

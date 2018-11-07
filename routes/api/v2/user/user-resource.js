@@ -86,8 +86,8 @@ var get_user_id = function (req, res) {
 };
 
 var get_user = function (req,res) {
-    if (!req.headers.authorization) {
-        return res.status(401).send({error: 'missing header Authorization'});
+    if (!req.headers.authorization || !auth(req)) {
+        return res.status(401).send({error: 'missing or bad credential in header Authorization'});
     } else {
         var user = auth(req);
         var login = user.name;
@@ -108,7 +108,7 @@ var get_user = function (req,res) {
                         })
                         .then(function (user) {
                             // be sure about what we send? here we go.
-                            res.json({user: _.pick(user,'id','display_name','photo_url','firstname','lastname','gender','language','permission_id')});
+                            res.json(_.pick(user,'id','display_name','firstname','lastname','gender','language','permission_id', 'public_uid'));
                         })
                         .catch(function (error) {
                             logger.error(error);
@@ -128,6 +128,48 @@ module.exports = function (router) {
 
     /**
      * @swagger
+     * definitions:
+     *  User:
+     *     type: object
+     *     properties:
+     *         id:
+     *             type: integer
+     *             example: 42
+     *             description: database primary key
+     *             required: true
+     *         firstName:
+     *             type: string
+     *             example: John
+     *             description: user firstname
+     *         lastName:
+     *             type: string
+     *             example: Doe
+     *             description: user lastname
+     *         display_name:
+     *             type: string
+     *             example: John Doe
+     *             description: user display name
+     *         gender:
+     *             type: string
+     *             enum: [other, male, female]
+     *             example: male
+     *             description: user gender
+     *         language:
+     *             type: string
+     *             example: fr
+     *             description: user language
+     *         permission_id:
+     *             type: integer
+     *             example: 2
+     *             description: user has permission with id
+     *         public_uid:
+     *             type: string
+     *             example: 2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9
+     *             description: public id for unauthorized get of public data
+     */
+
+    /**
+     * @swagger
      * /api/v2/basicauth/user:
      *   delete:
      *     description: delete the user providing user credentials
@@ -141,7 +183,7 @@ module.exports = function (router) {
      *            required: true
      *            schema:
      *              type: string
-     *              example: Basic bG9naW46cGFzc3dvcmQ=
+     *            example: Basic ZG9taW5pcXVlLmNoaW9uQGdtYWlsLmNvbTphemVydHl1aW9wYXplcnR5dWlvcA==
      *     responses:
      *          "204":
      *            description: "user had been deleted"
@@ -157,13 +199,15 @@ module.exports = function (router) {
      *            required: true
      *            schema:
      *              type: string
-     *              example: Basic bG9naW46cGFzc3dvcmQ=
+     *            example: Basic ZG9taW5pcXVlLmNoaW9uQGdtYWlsLmNvbTphemVydHl1aW9wYXplcnR5dWlvcA==
      *     responses:
      *          "200":
      *            description: "user profile including permissions in json body"
-     */
+     *            schema:
+     *              $ref: '#/definitions/User'     */
     router.options('/api/v2/basicauth/user', cors);
     router.delete('/api/v2/basicauth/user', cors, delete_user_with_credentials);
+    router.get('/api/v2/basicauth/user', cors, get_user);
 
     /**
      * @swagger
@@ -214,6 +258,4 @@ module.exports = function (router) {
     router.options('/api/v2/jwt/user/id', cors);
     router.get('/api/v2/jwt/user/id', cors, get_user_id);
 
-    router.options('/api/v2/basicauth/user/profile', cors);
-    router.get('/api/v2/basicauth/user/profile', cors, get_user);
 };

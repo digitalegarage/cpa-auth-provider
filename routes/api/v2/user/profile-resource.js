@@ -93,6 +93,10 @@ module.exports = function (router) {
      *                      type: string
      *                      example: 2018-08-31
      *                      description: user data of birth using yyyy-mm-dd format
+     *                  public_uid:
+     *                      type: string
+     *                      example: 2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9
+     *                      description: public id for unauthorized get of public data
      *          scope:
      *              type: string
      *              description: oAuth2 stuff
