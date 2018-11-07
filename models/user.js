@@ -20,14 +20,11 @@ module.exports = function (sequelize, DataTypes) {
         language: DataTypes.STRING,
         last_seen: DataTypes.BIGINT,
         scheduled_for_deletion_at: DataTypes.DATE,
-<<<<<<< HEAD
         public_uid: {
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4
         }
-=======
-        public_uid: DataTypes.STRING
->>>>>>> PEACH-1628-add-uuid-on-new-profiles
+
     }, {
         underscored: true,
 
