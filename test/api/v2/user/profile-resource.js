@@ -169,6 +169,46 @@ describe('API-V2 profile', function () {
             });
         });
     });
+
+    context('GET : /api/v2/all/nameByUid', function () {
+
+        before(initData.resetDatabase);
+
+        context('providing an invalid uuid', function() {
+            var ctx = this;
+            ctx.uuidToCall = '110';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return an error', function(done) {
+                expect(ctx.res.statusCode).to.equal(400);
+                done();
+            });
+        });
+        context('providing a valid and used uuid', function(done) {
+            var ctx = this;
+            ctx.uuidToCall = '2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return the name object', function(done) {
+                expect(ctx.res.body.firstname).to.equal("John");
+                expect(ctx.res.body.lastname).to.equal("Doe");
+                done();
+            });
+        });
+        context('providing a valid and unused uuid', function(done) {
+            var ctx = this;
+            ctx.uuidToCall = 'e2feaa99-f7dd-4e4c-a326-1bab74a25419';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return an error', function(done) {
+                expect(ctx.res.statusCode).to.equal(404);
+                done();
+            });
+        });
+    });
 });
 
 //---------------
@@ -286,6 +326,15 @@ function httpBasicGetProfile(context,done) {
             login: initData.USER_1.email,
             password: initData.USER_1.password
         }
+    }, done);
+}
+
+//---------------
+// http name lookup call
+function getNameByUid(context,done) {
+    context.log = "Calling " + context.uuidToCall;
+    requestHelper.sendRequest(context, "/api/v2/all/nameByUid/" + context.uuidToCall, {
+        method: 'get'
     }, done);
 }
 

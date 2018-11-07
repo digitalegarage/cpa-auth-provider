@@ -4,6 +4,7 @@ const passport = require('passport');
 const cors = require('../../../../lib/cors');
 const config = require('../../../../config');
 const logger = require('../../../../lib/logger');
+const uuidValidator = require('uuid-validate');
 const db = require('../../../../models');
 const userHelper = require('../../../../lib/user-helper');
 const authHelper = require('../../../../lib/auth-helper');
@@ -45,14 +46,23 @@ var user_profile_update =
 
 var user_nameByPublicUid = function(req,res,next) {
     if (config.allow_name_access_by_puid) {
-        userHelper.getUserNameByPublicId(req.params.puid)
-        .then((username) => {
-            res.json(username);
-        })
-        .catch((e) => {
-            logger.error("Error fetching user name by public id",e);
-            res.status(500);
-        });
+        if (uuidValidator(req.params.puid, 4)) {
+            userHelper.getUserNameByPublicId(req.params.puid)
+            .then((username) => {
+                if (!username) {
+                    logger.error("UUID request for non-existant user",req.params.puid);
+                    res.sendStatus(404);
+                }
+                else
+                    res.json(username);
+            })
+            .catch((e) => {
+                logger.error("Error fetching user name by public id",e);
+                res.status(500);
+            });            
+        } else {
+            res.sendErrorResponse(400, "bad_request", "No valid UUIDv4!");
+        }
     } else {
         res.sendErrorResponse(404, "not_found", "Unknown ressource");
     }
