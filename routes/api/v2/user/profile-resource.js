@@ -257,7 +257,6 @@ module.exports = function (router) {
      * /api/v2/jwt/user/profile:
      *   put:
      *     description: update user profile (using JWT token security)
-     *     operationId: "updateProfile"
      *     content:
      *        - application/json
      *     parameters:
@@ -332,5 +331,24 @@ module.exports = function (router) {
      */
     router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile_update);
 
+    /**
+     * @swagger
+     * /api/v2/all/nameByUid/{puid}:
+     *   get:
+     *     description: get the saved names by public_uid
+     *     operationId: "getNamesByPUid"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *        - in: path
+     *          name: "puid"
+     *          description: "uid to fetch names for"
+     *          required: true
+     *          schema:
+     *            type: UUIDv4
+     *     responses:
+     *        "200":
+     *          description: "anonymous object containing first- and lastname"
+     */
     router.get('/api/v2/all/nameByUid/:puid', cors, user_nameByPublicUid);
 };
