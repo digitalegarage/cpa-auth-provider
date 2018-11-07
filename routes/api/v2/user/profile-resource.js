@@ -64,7 +64,7 @@ var user_nameByPublicUid = function(req,res,next) {
             res.sendErrorResponse(400, "bad_request", "No valid UUIDv4!");
         }
     } else {
-        res.sendErrorResponse(404, "not_found", "Unknown ressource");
+        res.sendErrorResponse(409, "disabled", "Service disabled by configuration.");
     }
 };
 
