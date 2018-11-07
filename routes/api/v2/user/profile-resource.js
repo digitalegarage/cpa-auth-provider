@@ -2,6 +2,7 @@
 
 const passport = require('passport');
 const cors = require('../../../../lib/cors');
+const config = require('../../../../config');
 const logger = require('../../../../lib/logger');
 const db = require('../../../../models');
 const userHelper = require('../../../../lib/user-helper');
@@ -42,6 +43,20 @@ var user_profile_update =
         });
     };
 
+var user_nameByPublicUid = function(req,res,next) {
+    if (config.allow_name_access_by_puid) {
+        userHelper.getUserNameByPublicId(req.params.puid)
+        .then((username) => {
+            res.json(username);
+        })
+        .catch((e) => {
+            logger.error("Error fetching user name by public id",e);
+            res.status(500);
+        });
+    } else {
+        res.sendErrorResponse(404, "not_found", "Unknown ressource");
+    }
+};
 
 module.exports = function (router) {
 
@@ -317,5 +332,5 @@ module.exports = function (router) {
      */
     router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile_update);
 
-
+    router.get('/api/v2/all/nameByUid/:puid', cors, user_nameByPublicUid);
 };
