@@ -42,7 +42,14 @@ module.exports = {
         return new Promise((resolve,reject) => {
             queryInterface.removeColumn('Users','public_uid')
             .then(() => {
-                return resolve();
+                queryInterface.sequelize.query('ALTER TABLE Users DROP INDEX users.publicUid_idx')
+                .then(() => {
+                    return resolve();
+                })
+                .catch(() => {
+                    // ignore.
+                    return resolve();
+                });
             })
             .catch((e) => {
                 reject(e);
