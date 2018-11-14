@@ -108,7 +108,7 @@ var get_user = function (req,res) {
                         })
                         .then(function (user) {
                             // be sure about what we send? here we go.
-                            res.json(_.pick(user,'id','display_name','firstname','lastname','gender','language','permission_id'));
+                            res.json(_.pick(user,'id','display_name','firstname','lastname','gender','language','permission_id', 'public_uid'));
                         })
                         .catch(function (error) {
                             logger.error(error);
@@ -162,6 +162,10 @@ module.exports = function (router) {
      *             type: integer
      *             example: 2
      *             description: user has permission with id
+     *         public_uid:
+     *             type: string
+     *             example: 2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9
+     *             description: public id for unauthorized get of public data
      */
 
     /**

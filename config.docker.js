@@ -2,6 +2,8 @@
 
 module.exports = {
 
+    allow_name_access_by_puid: process.env.ALLOW_NAME_ACCESS_BY_PUID || false,
+
     broadcaster: {
         // Name of the Broadcaster
         name: '',

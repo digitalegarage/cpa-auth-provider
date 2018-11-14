@@ -15,8 +15,8 @@ services:
       - DB_TYPE=postgres
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USER=dockeridp
-      - DB_PASSWORD=SchiefesHausBautFalsch
+      - DB_USER=postgres
+      - DB_PASSWORD=BlinkenderWaldRegnetFrohlich
       - MAIL_TRANSPORT_TYPE=test
       - TRACKING_COOKIE=true
       - CUSTOM_OAUTH_MSG={client} souhaite accéder à votre compte maRTS.
@@ -31,6 +31,7 @@ services:
       - FACEBOOK_LOGIN_ENABLED=true
       - FACEBOOK_LOGIN_ID=315223112568780
       - FACEBOOK_LOGIN_SECRET=ccd7c4568fb402585e4acb3eb1eb9068
+      - ALLOW_NAME_ACCESS_BY_PUID=true
     depends_on:
       - postgres
     links:

@@ -13,6 +13,7 @@ const dateFormat = config.broadcaster && config.broadcaster.date_format ? config
 const dateAndTime = require('date-and-time')
 const Op = db.sequelize.Op;
 const afterLoginHelper = require('../lib/afterlogin-helper');
+const uuid = require('uuid');
 
 
 module.exports = {
@@ -121,6 +122,9 @@ function signup(userAttributes, email, password, res) {
         userAttributes.date_of_birth = userAttributes.date_of_birth_ymd.getTime();
     }
 
+    if(!userAttributes.hasOwnProperty('public_uid')){
+        userAttributes.public_uid = uuid.v4();
+    }
 
     var localLogin;
     var user;
