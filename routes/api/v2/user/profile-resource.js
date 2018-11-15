@@ -2,7 +2,9 @@
 
 const passport = require('passport');
 const cors = require('../../../../lib/cors');
+const config = require('../../../../config');
 const logger = require('../../../../lib/logger');
+const uuidValidator = require('uuid-validate');
 const db = require('../../../../models');
 const userHelper = require('../../../../lib/user-helper');
 const authHelper = require('../../../../lib/auth-helper');
@@ -16,13 +18,7 @@ var user_profile = function (req, res) {
         }
         res.json(data);
     } else {
-        db.SocialLogin.findOne({where: {user_id: req.user.id}}).then(function (socialLogin) {
-            let data = socialLogin.getProfile();
-            if (req.authInfo && req.authInfo.scope) {
-                data.score = req.authInfo.scope;
-            }
-            res.json(data);
-        });
+        res.status(400).send();
     }
 };
 
@@ -48,6 +44,29 @@ var user_profile_update =
         });
     };
 
+var user_nameByPublicUid = function(req,res,next) {
+    if (config.allow_name_access_by_puid) {
+        if (uuidValidator(req.params.puid, 4)) {
+            userHelper.getUserNameByPublicId(req.params.puid)
+            .then((username) => {
+                if (!username) {
+                    logger.error("UUID request for non-existant user",req.params.puid);
+                    res.sendStatus(404);
+                }
+                else
+                    res.json(username);
+            })
+            .catch((e) => {
+                logger.error("Error fetching user name by public id",e);
+                res.status(500);
+            });            
+        } else {
+            res.sendErrorResponse(400, "bad_request", "No valid UUIDv4!");
+        }
+    } else {
+        res.sendErrorResponse(409, "disabled", "Service disabled by configuration.");
+    }
+};
 
 module.exports = function (router) {
 
@@ -93,6 +112,10 @@ module.exports = function (router) {
      *                      type: string
      *                      example: 2018-08-31
      *                      description: user data of birth using yyyy-mm-dd format
+     *                  public_uid:
+     *                      type: string
+     *                      example: 2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9
+     *                      description: public id for unauthorized get of public data
      *          scope:
      *              type: string
      *              description: oAuth2 stuff
@@ -244,7 +267,6 @@ module.exports = function (router) {
      * /api/v2/jwt/user/profile:
      *   put:
      *     description: update user profile (using JWT token security)
-     *     operationId: "updateProfile"
      *     content:
      *        - application/json
      *     parameters:
@@ -319,5 +341,24 @@ module.exports = function (router) {
      */
     router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile_update);
 
-
+    /**
+     * @swagger
+     * /api/v2/all/nameByUid/{puid}:
+     *   get:
+     *     description: get the saved names by public_uid
+     *     operationId: "getNamesByPUid"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *        - in: path
+     *          name: "puid"
+     *          description: "uid to fetch names for"
+     *          required: true
+     *          schema:
+     *            type: UUIDv4
+     *     responses:
+     *        "200":
+     *          description: "anonymous object containing first- and lastname"
+     */
+    router.get('/api/v2/all/nameByUid/:puid', cors, user_nameByPublicUid);
 };

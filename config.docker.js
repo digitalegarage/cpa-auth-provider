@@ -2,6 +2,8 @@
 
 module.exports = {
 
+    allow_name_access_by_puid: process.env.ALLOW_NAME_ACCESS_BY_PUID || false,
+
     broadcaster: {
         // Name of the Broadcaster
         name: '',
@@ -158,7 +160,7 @@ module.exports = {
                 // delay per request
                 delayMs: process.env.RATE_LIMIT_DELAY_MS || 1000,
                 // max allowed requests (0 to disable)
-                max: 0,
+                max: process.env.RATE_LIMIT_MAX || 0,
             }
         }
     },

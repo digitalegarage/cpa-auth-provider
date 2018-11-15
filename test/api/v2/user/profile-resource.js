@@ -3,6 +3,8 @@
 var requestHelper = require('../../../request-helper');
 var initData = require('../setup/init-data');
 var login = require('../setup/login');
+var config = require('../../../../config');
+
 
 
 const NEW_DAB = "1989-11-09";
@@ -169,6 +171,77 @@ describe('API-V2 profile', function () {
             });
         });
     });
+
+    context('GET : /api/v2/all/nameByUid', function () {
+        var preState;
+        before(initData.resetDatabase);
+        before(function() {
+            preState = config.allow_name_access_by_puid;
+            config.allow_name_access_by_puid = true;
+        });
+        after(function() {
+            config.allow_name_access_by_puid = preState;
+        });
+
+        context('providing an invalid uuid', function() {
+            var ctx = this;
+            ctx.uuidToCall = '110';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return an error', function(done) {
+                expect(ctx.res.statusCode).to.equal(400);
+                done();
+            });
+        });
+        context('providing a valid and used uuid', function(done) {
+            var ctx = this;
+            ctx.uuidToCall = '2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return the name object', function(done) {
+                expect(ctx.res.body.firstname).to.equal("John");
+                expect(ctx.res.body.lastname).to.equal("Doe");
+                done();
+            });
+        });
+        context('providing a valid and unused uuid', function(done) {
+            var ctx = this;
+            ctx.uuidToCall = 'e2feaa99-f7dd-4e4c-a326-1bab74a25419';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return an error', function(done) {
+                expect(ctx.res.statusCode).to.equal(404);
+                done();
+            });
+        });
+    });
+    context('GET : /api/v2/all/nameByUid', function() {
+        var preState;
+        before(function() {
+            initData.resetDatabase;
+            preState = config.allow_name_access_by_puid;
+            config.allow_name_access_by_puid = false;
+        });
+        after(function() {
+            config.allow_name_access_by_puid = preState;
+        });
+
+        context('access to endpoint is denied by config', function(done) {
+            config.allow_name_access_by_puid = false;
+            var ctx = this;
+            ctx.uuidToCall = '2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9';
+            before(function(done) {
+                getNameByUid(ctx,done);
+            });
+            it('should return an error', function(done) {
+                expect(ctx.res.statusCode).to.equal(409);
+                done();
+            });
+        });
+    });
 });
 
 //---------------
@@ -280,7 +353,7 @@ function cpaUpdateProfile(context, done) {
 //---------------
 // http basic auth calls
 function httpBasicGetProfile(context,done) {
-    requestHelper.sendRequest(context, "/api/v2/basicauth/user/profile", {
+    requestHelper.sendRequest(context, "/api/v2/basicauth/user", {
         method: 'get',
         basicAuth: {
             login: initData.USER_1.email,
@@ -290,16 +363,26 @@ function httpBasicGetProfile(context,done) {
 }
 
 //---------------
+// http name lookup call
+function getNameByUid(context,done) {
+    context.log = "Calling " + context.uuidToCall;
+    requestHelper.sendRequest(context, "/api/v2/all/nameByUid/" + context.uuidToCall, {
+        method: 'get'
+    }, done);
+}
+
+//---------------
 // expected results
 
 function expectGetPermissionEnrichedProfile(context) {
     expect(context.res.statusCode).equal(200);
-    expect(context.res.body.user.id).not.equal(undefined);
-    expect(context.res.body.user.permission_id).not.equal(undefined);
-    expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
-    expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
-    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
-    expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
+    expect(context.res.body.id).not.equal(undefined);
+    expect(context.res.body.permission_id).not.equal(undefined);
+    expect(context.res.body.firstname).equal(initData.USER_1_PROFILE.firstname);
+    expect(context.res.body.lastname).equal(initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
+    expect(context.res.body.gender).equal(initData.USER_1_PROFILE.gender);
+    expect(context.res.body.public_uid).equal(initData.USER_1_PROFILE.public_uid);
 }
 
 function expectGetInitialProfile(context) {
@@ -309,6 +392,7 @@ function expectGetInitialProfile(context) {
     expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
     expect(context.res.body.user.date_of_birth).equal(initData.USER_1_DAB_STR);
+    expect(context.res.body.user.public_uid).equal(initData.USER_1_PROFILE.public_uid);
 }
 
 function expectedGetUpdatedProfile(context) {
@@ -318,4 +402,5 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.body.user.display_name).equal(NEW_FIRSTNAME + " " + NEW_LASTNAME);
     expect(context.res.body.user.gender).equal(NEW_GENDER);
     expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
+    expect(context.res.body.user.public_uid).equal(initData.USER_1_PROFILE.public_uid);
 }

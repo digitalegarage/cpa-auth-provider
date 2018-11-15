@@ -1,6 +1,8 @@
 "use strict";
 
 module.exports = {
+    allow_name_access_by_puid: true,
+
     baseUrl: 'http://localhost',
 
     broadcaster: {

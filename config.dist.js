@@ -2,6 +2,8 @@
 
 module.exports = {
 
+    allow_name_access_by_puid: false,
+    
     broadcaster: {
         // Name of the Broadcaster
         name: 'rts',

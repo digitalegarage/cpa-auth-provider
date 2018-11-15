@@ -1,7 +1,6 @@
 "use strict";
 var dateFormat = require('dateformat');
 
-
 module.exports = function (sequelize, DataTypes) {
     var User = sequelize.define('User', {
         id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
@@ -20,6 +19,11 @@ module.exports = function (sequelize, DataTypes) {
         language: DataTypes.STRING,
         last_seen: DataTypes.BIGINT,
         scheduled_for_deletion_at: DataTypes.DATE,
+        public_uid: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4
+        }
+
     }, {
         underscored: true,
 
@@ -79,6 +83,7 @@ module.exports = function (sequelize, DataTypes) {
                 lastname: this.lastname,
                 gender: this.gender,
                 date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
+                public_uid: this.public_uid
             }
         };
     };

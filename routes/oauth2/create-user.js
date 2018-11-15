@@ -59,7 +59,8 @@ function createUser(req, res) {
                 db.User.create(
                     {
                         email: req.body.username,
-                        account_uid: generate.accountId()
+                        account_uid: generate.accountId(),
+                        public_uid: generate.publicId()
                     }
                 ).then(
                     function (user_) {
