@@ -4,9 +4,11 @@
 module.exports = {
     up: function(queryInterface,Sequelize) {
         return new Promise((resolve,reject) => {
-            if (process.env.DB_TYPE === 'sqlite')
-                resolve();
-            else if (process.env.DB_TYPE === 'postgres') {
+            if (process.env.DB_TYPE === 'sqlite'){
+                queryInterface.addColumn('Users', 'public_uid', {type: Sequelize.STRING, allowNull: true}).then(() => {
+                    resolve();
+                });
+            } else if (process.env.DB_TYPE === 'postgres') {
                 queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"')
                 .then(() => {
                     queryInterface.addColumn('Users','public_uid',{type: Sequelize.UUID, defaultValue: Sequelize.literal('uuid_generate_v4()'), allowNull: false})

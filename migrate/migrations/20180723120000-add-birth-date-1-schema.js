@@ -18,8 +18,7 @@ module.exports = {
                         type: Sequelize.DATEONLY,
                         allowNull: true
                     }
-                )
-            }).then(function () {
+                ).then(function () {
                 if (process.env.DB_TYPE === "postgres") {
                     var offSet = new Date().getTimezoneOffset();
                     return queryInterface.sequelize.query("UPDATE public.\"Users\" SET date_of_birth_ymd = TO_TIMESTAMP(date_of_birth / 1000 -1*(" + offSet + "*60))::date").then(function () {
@@ -31,6 +30,7 @@ module.exports = {
                     });
                 }
             }).then(resolve).catch(reject);
+            });
         });
     },
 
