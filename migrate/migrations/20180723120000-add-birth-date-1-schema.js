@@ -10,7 +10,7 @@ module.exports = {
                 {
                     type: Sequelize.DATEONLY,
                     allowNull: true,
-                },
+                }
             ).then(function() {
                 queryInterface.addColumn(
                     'SocialLogins',
@@ -18,13 +18,13 @@ module.exports = {
                     {
                         type: Sequelize.DATEONLY,
                         allowNull: true,
-                    },
+                    }
                 ).then(function() {
                     if (process.env.DB_TYPE === 'postgres') {
                         console.log('postgres');
                         var offSet = new Date().getTimezoneOffset();
                         queryInterface.sequelize.query(
-                            'UPDATE public."Users" SET date_of_birth_ymd = TO_TIMESTAMP(date_of_birth / 1000 -1*(' + offSet + '*60))::date',
+                            'UPDATE public."Users" SET date_of_birth_ymd = TO_TIMESTAMP(date_of_birth / 1000 -1*(' + offSet + '*60))::date'
                         ).then(function() {
                             queryInterface.sequelize.query(
                                 'UPDATE public."SocialLogins" SET date_of_birth_ymd = TO_TIMESTAMP(date_of_birth::bigint / 1000 -1*(' + offSet + '*60))::date'
