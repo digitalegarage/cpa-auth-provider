@@ -27,10 +27,54 @@ module.exports = function(app, options) {
 
         });
 
+
+    /**
+     * @swagger
+     * definitions:
+     *   FBCodeData:
+     *      type: "object"
+     *      properties:
+     *           code:
+     *               type: "string"
+     *               example: "AQDubYxjE3f9eKc5giY5rT1m8Cfumx3Fyb-UVwrHglj_RfNpfbMbdNcDj8DtUN3l4dIvC_NIzAGI9KebNKJ1H3sqLJq8QZg9nnJvKxfWglN6dmL7Ysk98kvVQ9wHvTcF50CZZ6F-9wUz59-q-Z5MlgcJgwPm_zvu_MpNabewH6-Nn9xOgPOs2FQVHqZcdRppZ2GQ8PIQliRNjZ2kYUn6xqBoBMSRoffzkeTBvFUpTMKRfxlBIe2u9MpJ_L9awQi_usA4GRx6V5uJUmBdhefDyFLThynYnHq7AWuA3k1hkIGVbweZkeFZW76rfoO0WodHuVn7cfniCy6iWYnmgnPqXm1a"
+     *               description: "A facebook oAuth code"
+     *           redirect_uri:
+     *               type: "string"
+     *               example: "http://demo-peach.ebu.io/idp/api/v2/auth/facebook/callback"
+     *               description: "Redirect uri that had been used to get the code"
+     *
+     *   FBTokenData:
+     *      type: "object"
+     *      properties:
+     *           token:
+     *               type: "string"
+     *               example: "EAAeu393hv5gBAO7eEHXZBo24SJCUbgUZBuMgO69GvGQriNQ03ePFqMBf9o9JwAa8tlTwyQHKSqsOAZBsZAAzWnlCyDz57ZBSbGfBgPX8CaK3fkb6LAqzILrXyGF43gCtZB88kBxAZCK3AmW0ECqgRaaiDznDb88XCNaZCsQJIL98mrk63bivI3Oe"
+     *               description: "A facebook oAuth token"
+     *
+     */
+
+    /**
+     * @swagger
+     * /api/v2/auth/facebook/code:
+     *   post:
+     *     description: log user (session) using FB code
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "Facebook code"
+     *            description: "FB code data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/FBCodeData"
+     *     responses:
+     *          "204":
+     *            description: "login succeed"
+     */
     app.options('/api/v2/auth/facebook/code', cors);
     app.post('/api/v2/auth/facebook/code', function(req, res) {
-        if (!req.body.code) {
-            return res.json({error: 'missing code in request body'}).status(400).send();
+        if (!req.body.code || !req.body.redirect_uri) {
+            return res.json({error: 'missing code and/or redirect_uri in request body'}).status(400).send();
         }
 
         var options = {
@@ -51,6 +95,24 @@ module.exports = function(app, options) {
 
     });
 
+    /**
+     * @swagger
+     * /api/v2/auth/facebook/token:
+     *   post:
+     *     description: log user (session) using FB token
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "Facebook token"
+     *            description: "FB token data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/FBTokenData"
+     *     responses:
+     *          "204":
+     *            description: "login succeed"
+     */
     app.options('/api/v2/auth/facebook/token', cors);
     app.post('/api/v2/auth/facebook/token', function(req, res) {
         if (!req.body.token) {
