@@ -27,6 +27,7 @@ module.exports = function(app, options) {
 
         });
 
+    app.options('/api/v2/auth/facebook/code', cors);
     app.post('/api/v2/auth/facebook/code', function(req, res) {
         if (!req.body.code) {
             return res.json({error: 'missing code in request body'}).status(400).send();
@@ -50,6 +51,7 @@ module.exports = function(app, options) {
 
     });
 
+    app.options('/api/v2/auth/facebook/token', cors);
     app.post('/api/v2/auth/facebook/token', function(req, res) {
         if (!req.body.token) {
             return res.json({error: 'missing token in request body'}).status(400).send();
