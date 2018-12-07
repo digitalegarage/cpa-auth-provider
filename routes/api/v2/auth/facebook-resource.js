@@ -73,7 +73,7 @@ module.exports = function(app, options) {
     app.options('/api/v2/auth/facebook/code', cors);
     app.post('/api/v2/auth/facebook/code', function(req, res) {
         if (!req.body.code || !req.body.redirect_uri) {
-            return res.json({error: 'missing code and/or redirect_uri in request body'}).status(400).send();
+            return res.status(400).json({error: 'missing code and/or redirect_uri in request body'}).send();
         }
 
         var options = {
@@ -89,7 +89,7 @@ module.exports = function(app, options) {
             validateTokenAndLog(tokenJsonResponse.access_token, res, req);
         }).catch(function(err) {
             logger.info('An error occured while requesting the token', err);
-            return res.json({error: 'An error occured while requesting the token'}).status(401).send();
+            return res.status(401).json({error: 'An error occured while requesting the token'}).send();
         });
 
     });
@@ -115,7 +115,7 @@ module.exports = function(app, options) {
     app.options('/api/v2/auth/facebook/token', cors);
     app.post('/api/v2/auth/facebook/token', function(req, res) {
         if (!req.body.token) {
-            return res.json({error: 'missing token in request body'}).status(400).send();
+            return res.status(400).json({error: 'missing token in request body'}).send();
         }
         validateTokenAndLog(req.body.token, res, req);
 
@@ -136,7 +136,7 @@ function validateTokenAndLog(accessToken, res, req) {
     request(options).then(function(jsonResponse) {
 
         if (!jsonResponse.data || !jsonResponse.data.user_id) {
-            return res.json({error: 'An error occured while validating the token'}).status(401).send();
+            return res.status(401).json({error: 'An error occured while validating the token'}).send();
         } else {
 
             // Step 2: request user profile to graph API
@@ -177,22 +177,22 @@ function validateTokenAndLog(accessToken, res, req) {
                             });
                         });
                     } else {
-                        return res.json({error: 'An error occurred while validating the token'}).status(401).send();
+                        return res.status(401).json({error: 'An error occurred while validating the token'}).send();
                     }
                 }).catch(function(err) {
                     logger.info('An error occurred while saving user in IDP db', err);
-                    return res.json({error: 'An error occurred while saving user in IDP db'}).status(401).send();
+                    return res.status(401).json({error: 'An error occurred while saving user in IDP db'}).send();
 
                 });
             }).catch(function(err) {
                 logger.info('An error occurred while retrieving user data using the token', err);
-                return res.json({error: 'An error occurred while retrieving user data using the token'}).status(401).send();
+                return res.status(401).json({error: 'An error occurred while retrieving user data using the token'}).send();
 
             });
         }
     }).catch(function(err) {
         logger.info('An error occured while validating the token', err);
-        return res.json({error: 'An error occured while validating the token'}).status(401).send();
+        return res.status(401).json({error: 'An error occured while validating the token'}).send();
 
     });
 }
