@@ -13,6 +13,8 @@ const loginService = require('../../../../services/login-service');
 const errors = require('../../../../services/errors');
 var trackingCookie = require('../../../../lib/tracking-cookie');
 var recaptcha = require('express-recaptcha');
+var fs = require('fs');
+
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
 
@@ -368,7 +370,12 @@ module.exports = function (app, options) {
             googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-        res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
+        const path = './login/broadcaster/' + broadcaster + 'login.ejs';
+        if (fs.existsSync(path)) {
+            res.render(path, data);
+        } else {
+            res.render('./login/broadcaster/default/login.ejs', data);
+        }
     });
 
     app.get('/signup', trackingCookie.middleware, recaptcha.middleware.render, function (req, res) {
@@ -386,7 +393,12 @@ module.exports = function (app, options) {
             target: requestHelper.getPath('/signup' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-        res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
+        const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
+        if (fs.existsSync(path)) {
+            res.render(path, data);
+        } else {
+            res.render('./login/broadcaster/default/signup.ejs', data);
+        }
     });
 
 
@@ -404,7 +416,12 @@ module.exports = function (app, options) {
             target: requestHelper.getPath('/api/local/password/recover' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-        res.render('./login/broadcaster/' + broadcaster + 'forgot-password.ejs', data);
+        const path = './login/broadcaster/' + broadcaster + 'forgot-password.ejs';
+        if (fs.existsSync(path)) {
+            res.render(path, data);
+        } else {
+            res.render('./login/broadcaster/default/forgot-password.ejs', data);
+        }
     });
 
 
@@ -573,7 +590,12 @@ function handleErrorForHtmlCalls(req, res, err) {
         googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-    res.render('./login/broadcaster/' + broadcaster + 'login.ejs', data);
+    const path = './login/broadcaster/' + broadcaster + 'login.ejs';
+    if (fs.existsSync(path)) {
+        res.render(path, data);
+    } else {
+        res.render('./login/broadcaster/default/login.ejs', data);
+    }
 }
 
 function handleErrorForSignupHTMLCalls(req, err, res) {
@@ -590,5 +612,11 @@ function handleErrorForSignupHTMLCalls(req, err, res) {
         target: requestHelper.getPath('/signup' + redirect)
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-    res.render('./login/broadcaster/' + broadcaster + 'signup.ejs', data);
+    const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
+    if (fs.existsSync(path)) {
+        res.render(path, data);
+    } else {
+        res.render('./login/broadcaster/default/signup.ejs', data);
+    }
+
 }
