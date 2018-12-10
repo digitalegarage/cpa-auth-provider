@@ -1,9 +1,9 @@
 'use strict';
 
-var requestHelper = require('../../../request-helper');
-var initData = require('../setup/init-data');
-var nock = require('nock');
-var config = require('../../../../config');
+const requestHelper = require('../../../request-helper'),
+      initData = require('../setup/init-data'),
+      nock = require('nock'),
+      config = require('../../../../config');
 
 const VALID_FB_CODE = 42;
 const REDIRECT_URI = 'https://localhost.ebu.io/unexistingurl';
