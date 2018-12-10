@@ -7,7 +7,7 @@ var config = require('../../../../config');
 
 const VALID_FB_CODE = 42;
 const REDIRECT_URI = 'https://localhost.ebu.io/unexistingurl';
-const ACCESS_TOKEN = 'AccessTokenA';
+const VALID_ACCESS_TOKEN = 'AccessTokenA';
 const EMAIL = 'someone@gmail.com';
 const USER_PROFILE = {
     first_name: 'Hans',
@@ -21,8 +21,15 @@ describe('API-V2 Facebook for AJAX', function() {
 
     beforeEach(initData.resetEmptyDatabase);
 
+    before(function() {
+        mockFBForOneCallSequence();
+    });
+
+    after(function() {
+        nock.cleanAll();
+    });
+
     context('Code', function() {
-        beforeEach(initData.resetEmptyDatabase);
 
         context('when missing body data', function() {
             var ctx = this;
@@ -45,14 +52,6 @@ describe('API-V2 Facebook for AJAX', function() {
         context('with valid FB code', function() {
             var ctx = this;
 
-            before(function() {
-                mockFBForOneCallSequence();
-            });
-
-            after(function() {
-                nock.cleanAll();
-            });
-
             before(function(done) {
                 requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/code', {
                     method: 'post',
@@ -63,29 +62,68 @@ describe('API-V2 Facebook for AJAX', function() {
                 }, done);
             });
 
-            context('return code', function() {
+            before(function(done) {
 
-                it('should return a 204', function() {
-                    expect(ctx.res.statusCode).to.equal(204);
-                });
+                requestHelper.sendRequest(ctx, '/api/v2/session/user/profile', {
+                    cookie: ctx.cookie,
+                }, done);
             });
 
-            context('using session cookie', function() {
-
-                before(function(done) {
-                    requestHelper.sendRequest(ctx, '/api/v2/session/user/profile', {
-                        cookie : ctx.cookie,
-                    }, done);
-                });
-                it('authenticated endpoint should return a 200', function() {
-                    expect(ctx.res.statusCode).to.equal(200);
-                });
+            it('user should be logged', function() {
+                expect(ctx.res.statusCode).to.equal(200);
             });
 
         });
 
     });
 
+    context('Token', function() {
+        context('when missing token', function() {
+            var ctx = this;
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/token', {
+                    method: 'post',
+                    data: {},
+                }, done);
+            });
+
+            it('should return a 400', function() {
+                expect(ctx.res.statusCode).to.equal(400);
+                expect(ctx.res.body.error);
+                expect(ctx.res.body.error).to.equal('missing token in request body');
+            });
+
+        });
+
+
+        context('with valid FB token', function() {
+            var ctx = this;
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/token', {
+                    method: 'post',
+                    data: {
+                        token: VALID_ACCESS_TOKEN,
+                    },
+                }, done);
+            });
+
+            before(function(done) {
+
+
+                requestHelper.sendRequest(ctx, '/api/v2/session/user/profile', {
+                    cookie: ctx.cookie,
+                }, done);
+            });
+
+            it('user should be logged', function() {
+                expect(ctx.res.statusCode).to.equal(200);
+            });
+
+        });
+
+    });
 });
 
 function mockFBForOneCallSequence() {
@@ -94,11 +132,11 @@ function mockFBForOneCallSequence() {
         'redirect_uri=' + REDIRECT_URI +
         '&client_id=' + config.identity_providers.facebook.client_id +
         '&client_secret=' + config.identity_providers.facebook.client_secret +
-        '&code=' + VALID_FB_CODE).reply(200, {access_token: ACCESS_TOKEN, token_type: 'Bearer', expires_in: 3600});
+        '&code=' + VALID_FB_CODE).reply(200, {access_token: VALID_ACCESS_TOKEN, token_type: 'Bearer', expires_in: 3600});
 
     nock('https://graph.facebook.com').persist().
     get(function(uri) { // Probably due to pipe encoding (%7C) matcher fail using 'https://graph.facebook.com/debug_token?input_token=AccessTokenA&access_token=abc%7C123'
-        return uri.indexOf('/debug_token?input_token=' + ACCESS_TOKEN + '&access_token=' + config.identity_providers.facebook.client_id + '%7C' +
+        return uri.indexOf('/debug_token?input_token=' + VALID_ACCESS_TOKEN + '&access_token=' + config.identity_providers.facebook.client_id + '%7C' +
             config.identity_providers.facebook.client_secret) === 0;
     }).
     reply(200,
@@ -121,7 +159,7 @@ function mockFBForOneCallSequence() {
     nock('https://graph.facebook.com').persist().
     get('/v3.2/me?' +
         'fields=id,name,email,first_name,last_name,gender' +
-        '&access_token=' + ACCESS_TOKEN).
+        '&access_token=' + VALID_ACCESS_TOKEN).
     reply(200, {
         id: 'fffaaa-123',
         name: 'Cool Name',
