@@ -76,9 +76,10 @@ module.exports = function(app, options) {
             return res.status(400).json({error: 'missing code and/or redirect_uri in request body'}).send();
         }
 
+        // Request an access token from the code
         var options = {
             uri: 'https://graph.facebook.com/v3.2/oauth/access_token?' +
-                'redirect_uri=' + 'https://localhost.ebu.io/unexistingurl' + //FIXME <===============================
+                'redirect_uri=' + req.body.redirect_uri +
                 '&client_id=' + config.identity_providers.facebook.client_id +
                 '&client_secret=' + config.identity_providers.facebook.client_secret +
                 '&code=' + req.body.code,
