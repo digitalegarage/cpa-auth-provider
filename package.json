@@ -79,6 +79,7 @@
     "prom-client": "^10.2.0",
     "raven": "^2.1.2",
     "request": "^2.87.0",
+    "request-promise": "^4.2.2",
     "sequelize": "^4.7.5",
     "serve-favicon": "~2.4.3",
     "serve-static": "^1.13.2",
