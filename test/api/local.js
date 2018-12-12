@@ -316,6 +316,57 @@ describe('POST /api/v2/jwt/login', function () {
 
         });
     });
+
+    context('When unauthenticated user signup with email "like" another user email', function () {
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'first-email@mail.com',
+                    password: 'first-password',
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'email@mail.com',
+                    password: 'second-password',
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/login', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'email@mail.com',
+                    password: 'first-password'
+                }
+            }, done);
+        });
+
+
+        it('should 401', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+
     // Check that the like SQL function has no side effect
     context('When unauthenticated user tries to login with email that is a sub part of another login', function () {
 
