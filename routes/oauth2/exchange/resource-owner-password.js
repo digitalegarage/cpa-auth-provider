@@ -26,7 +26,7 @@ function confirmUser(client, username, password, scope, extraArgs, done) {
     db.User.findOne({
             include: [{
                 model: db.LocalLogin,
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: username.toLowerCase()})
+                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), username.toLowerCase())
             }]
         }
     ).then(

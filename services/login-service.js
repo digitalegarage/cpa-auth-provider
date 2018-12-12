@@ -188,7 +188,7 @@ function login(req, res) {
     return new Promise((resolve, reject) => {
 
         return db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), {[Op.like]: req.body.email.toLowerCase()}),
+            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), req.body.email.toLowerCase()),
             include: [db.User]
         }).then(function (localLogin) {
             if (localLogin && req.body.password) {
