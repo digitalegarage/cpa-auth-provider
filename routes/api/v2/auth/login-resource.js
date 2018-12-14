@@ -371,7 +371,7 @@ module.exports = function (app, options) {
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         const path = './login/broadcaster/' + broadcaster + 'login.ejs';
-        if (fs.existsSync(path)) {
+        if (templateExists(path)) {
             res.render(path, data);
         } else {
             res.render('./login/broadcaster/default/login.ejs', data);
@@ -393,8 +393,8 @@ module.exports = function (app, options) {
             target: requestHelper.getPath('/signup' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-        const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
-        if (fs.existsSync(path)) {
+        const path = 'login/broadcaster/' + broadcaster + 'signup.ejs';
+        if (templateExists(path)) {
             res.render(path, data);
         } else {
             res.render('./login/broadcaster/default/signup.ejs', data);
@@ -417,7 +417,7 @@ module.exports = function (app, options) {
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         const path = './login/broadcaster/' + broadcaster + 'forgot-password.ejs';
-        if (fs.existsSync(path)) {
+        if (templateExists(path)) {
             res.render(path, data);
         } else {
             res.render('./login/broadcaster/default/forgot-password.ejs', data);
@@ -591,7 +591,7 @@ function handleErrorForHtmlCalls(req, res, err) {
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     const path = './login/broadcaster/' + broadcaster + 'login.ejs';
-    if (fs.existsSync(path)) {
+    if (templateExists(path)) {
         res.render(path, data);
     } else {
         res.render('./login/broadcaster/default/login.ejs', data);
@@ -613,10 +613,15 @@ function handleErrorForSignupHTMLCalls(req, err, res) {
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
-    if (fs.existsSync(path)) {
+    if (templateExists(path)) {
         res.render(path, data);
     } else {
         res.render('./login/broadcaster/default/signup.ejs', data);
     }
 
+}
+
+
+function templateExists(path) {
+    return fs.existsSync(__dirname + '/../../../../views/' + path);
 }
