@@ -703,6 +703,7 @@
                         $passwordError.show();
                     } else {
                         $deleteUserModal.modal('toggle');
+                        $('.modal-backdrop').remove();
                         $deleteError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>");
                         $spinner.hide();
                         $label.show();
