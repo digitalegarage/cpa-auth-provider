@@ -5,18 +5,50 @@ const cors = require('../../../../lib/cors');
 const config = require('../../../../config');
 const logger = require('../../../../lib/logger');
 const uuidValidator = require('uuid-validate');
-const db = require('../../../../models');
 const userHelper = require('../../../../lib/user-helper');
 const authHelper = require('../../../../lib/auth-helper');
+const socialLoginHelper = require('../../../../lib/social-login-helper');
 
-var user_profile = function (req, res) {
+var user_profile = function(req, res) {
     logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
     if (req.user) {
-        let data = req.user.getProfile();
-        if (req.authInfo && req.authInfo.scope) {
-            data.score = req.authInfo.scope;
-        }
-        res.json(data);
+        let user = req.user;
+        socialLoginHelper.getSocialEmails(user).then(function(emails) {
+            var socialEmails = [];
+            if (emails && emails.length > 0) {
+                socialEmails = emails;
+            }
+            // var socialEmail = (emails && emails.length > 0) ? emails[0] : "";
+            socialLoginHelper.getSocialLogins(user).then(function(logins) {
+                var email = user.LocalLogin ? user.LocalLogin.login : undefined;
+                var data = {
+                    user: {
+                        id: user.id,
+                        email: email,
+                        email_verified: !user.LocalLogin || user.LocalLogin.verified,
+                        display_name: user.getDisplayName("FIRSTNAME_LASTNAME", email),
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                        gender: user.gender,
+                        date_of_birth: user.date_of_birth_ymd ? user.date_of_birth_ymd : null,
+                        public_uid: user.public_uid,
+                        language: user.language,
+                        social_emails: socialEmails,
+                        login: email,
+                        has_password: user.LocalLogin && !!user.LocalLogin.password,
+                        has_facebook_login: logins.indexOf(socialLoginHelper.FB) > -1,
+                        has_google_login: logins.indexOf(socialLoginHelper.GOOGLE) > -1,
+                        has_social_login: logins.length > 0,
+                        has_local_login: user.LocalLogin && user.LocalLogin.login != null,
+                    },
+                    captcha: req.recaptcha,
+                };
+                if (req.authInfo && req.authInfo.scope) {
+                    data.score = req.authInfo.scope;
+                }
+                res.json(data);
+            });
+        });
     } else {
         res.status(400).send();
     }
@@ -59,7 +91,7 @@ var user_nameByPublicUid = function(req,res,next) {
             .catch((e) => {
                 logger.error("Error fetching user name by public id",e);
                 res.status(500);
-            });            
+            });
         } else {
             res.sendErrorResponse(400, "bad_request", "No valid UUIDv4!");
         }
@@ -83,18 +115,6 @@ module.exports = function (router) {
      *                      example: 42
      *                      description: database primary key
      *                      required: true
-     *                  firstName:
-     *                      type: string
-     *                      example: John
-     *                      description: user firstname
-     *                  lastName:
-     *                      type: string
-     *                      example: Doe
-     *                      description: user lastname
-     *                  display_name:
-     *                      type: string
-     *                      example: John Doe
-     *                      description: user display name
      *                  email:
      *                      type: string
      *                      example: john@doe.com
@@ -103,6 +123,18 @@ module.exports = function (router) {
      *                      type: boolean
      *                      example: false
      *                      description: true if email has been verified
+     *                  display_name:
+     *                      type: string
+     *                      example: John Doe
+     *                      description: user display name
+     *                  firstName:
+     *                      type: string
+     *                      example: John
+     *                      description: user firstname
+     *                  lastName:
+     *                      type: string
+     *                      example: Doe
+     *                      description: user lastname
      *                  gender:
      *                      type: string
      *                      enum: [other, male, female]
@@ -116,6 +148,38 @@ module.exports = function (router) {
      *                      type: string
      *                      example: 2b61aade-f9b5-47c3-8b5b-b9f4545ec9f9
      *                      description: public id for unauthorized get of public data
+     *                  language:
+     *                      type: string
+     *                      example: en
+     *                      description: user language using 2 letters iso code
+     *                  social_emails:
+     *                      type: array
+     *                      example: ['john.doe@gmail.com', 'john.doe@isp.com']
+     *                      description: user emails' from social login
+     *                  login:
+     *                      type: string
+     *                      example: john.doe@isp.com
+     *                      description: user login (email in current implementation)
+     *                  has_password:
+     *                      type: boolean
+     *                      example: true
+     *                      description: user has defined a password / has a local login
+     *                  has_facebook_login:
+     *                      type: boolean
+     *                      example: true
+     *                      description: user has a facebook login on the IDP
+     *                  has_google_login:
+     *                      type: boolean
+     *                      example: true
+     *                      description: user has a google login on the IDP
+     *                  has_social_login:
+     *                      type: boolean
+     *                      example: true
+     *                      description: user has a social login (google of facebook in current implementation)
+     *                  has_local_login:
+     *                      type: boolean
+     *                      example: true
+     *                      description: user has a local login (login using username and password)
      *          scope:
      *              type: string
      *              description: oAuth2 stuff
