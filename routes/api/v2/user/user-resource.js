@@ -6,6 +6,9 @@ const logger = require('../../../../lib/logger');
 const db = require('../../../../models/index');
 const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
+const passwordHelper = require('../../../../lib/password-helper');
+const authHelper = require('../../../../lib/auth-helper');
+const userHelper = require('../../../../lib/user-helper');
 const _ = require('underscore');
 
 function delete_user_by_id(userId, res) {
@@ -123,6 +126,55 @@ var get_user = function (req,res) {
         });
     }
 };
+
+var create_local_login = function (req, res) {
+    req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
+    req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
+    req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
+    req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
+
+    req.getValidationResult().then(function (result) {
+        if (!result.isEmpty()) {
+            res.status(400).json({errors: result.array()});
+        } else {
+            if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
+                res.status(400).json({
+                    errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}],
+                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                    score: passwordHelper.getQuality(req.body.email, req.body.password)
+                });
+            } else {
+                userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
+                    function () {
+                        res.json({success: true, msg: req.__('BACK_SUCCESS_PASS_CREATED')});
+                    },
+                    function (err) {
+                        if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
+                            return res.status(400).json({
+                                success: false,
+                                msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
+                            return res.status(400).json({
+                                success: false,
+                                msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+                                password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                                errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}]
+                            });
+                        } else {
+                            logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
+                            res.status(500).json({
+                                success: false,
+                                msg: req.__('API_ERROR') + err
+                            });
+                        }
+                    }
+                );
+            }
+
+        }
+    });
+}
 
 module.exports = function (router) {
 
@@ -257,5 +309,48 @@ module.exports = function (router) {
      */
     router.options('/api/v2/jwt/user/id', cors);
     router.get('/api/v2/jwt/user/id', cors, get_user_id);
+
+
+    /**
+     * @swagger
+     * definitions:
+     *  AddLocalLogin:
+     *      properties:
+     *          email:
+     *              type: string
+     *              example: jhon@doe.com
+     *              description: oAuth2 stuff
+     *          password:
+     *              type: string
+     *              example: passw0rd
+     *              description: the password to set
+     *          confirm_password:
+     *              type: string
+     *              example: passw0rd
+     *              description:  confirm password
+     */
+
+    /**
+     * @swagger
+     * /api/v2/session/user/password/create:
+     *   post:
+     *     description: add a local login for an user having only social logins
+     *     operationId: "createPassword"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          -
+     *            name: "localLoginData"
+     *            in: "body"
+     *            description: "local login data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/AddLocalLogin"
+     *     responses:
+     *        "200":
+     *          description: "local login had been created"
+     */
+
+    router.post('/api/v2/session/user/login/create', cors, authHelper.ensureAuthenticated, create_local_login);
 
 };

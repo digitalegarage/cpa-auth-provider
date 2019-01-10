@@ -832,7 +832,7 @@
                 var url = "<%= link('/user/') %>" + userId + "/password";
                 var data = {}
                 if (hasPassword !== "true") {
-                    url = "<%= link('/user/') %>" + userId + "/password/create";
+                    url = "<%= link('/api/v2/session/user/login/create')%>";
                     data["email"] = $newEmail.val();
                     data["password"] = $newPassword.val();
                     data["confirm_password"] = $newConfirmPassword.val();
