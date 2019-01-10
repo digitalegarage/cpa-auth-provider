@@ -58,7 +58,7 @@ var routes = function (router) {
                             date_of_birth: user.date_of_birth_ymd ? user.date_of_birth_ymd : null,
                             email: email,
                             socialEmail: socialEmail,
-                            display_name: user.getDisplayName(email, req.query.policy),
+                            display_name: user.getDisplayName(req.query.policy, email),
                             verified: !user.LocalLogin || user.LocalLogin.verified,
                             hasPassword: user.LocalLogin && !!user.LocalLogin.password,
                             facebook: logins.indexOf(socialLoginHelper.FB) > -1,
