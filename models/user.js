@@ -72,20 +72,5 @@ module.exports = function (sequelize, DataTypes) {
         return !!this.scheduled_for_deletion_at;
     };
 
-    User.prototype.getProfile = function(){
-        return {
-            user: {
-                id: this.id,
-                email: this.LocalLogin ? this.LocalLogin.login : null,
-                email_verified: this.LocalLogin && this.LocalLogin.verified ? true : false,
-                display_name: this.display_name.match(/^\s*$/) ? ((this.LocalLogin && this.LocalLogin.login) ? this.LocalLogin.login : '') : this.display_name, 
-                firstname: this.firstname,
-                lastname: this.lastname,
-                gender: this.gender,
-                date_of_birth: this.date_of_birth_ymd ? dateFormat(this.date_of_birth_ymd, "yyyy-mm-dd") : null,
-                public_uid: this.public_uid
-            }
-        };
-    };
     return User;
 };

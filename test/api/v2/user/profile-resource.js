@@ -387,13 +387,26 @@ function expectGetPermissionEnrichedProfile(context) {
 
 function expectGetInitialProfile(context) {
     expect(context.res.statusCode).equal(200);
+    expect(context.res.body.user.id);
+    expect(context.res.body.user.email).equals(initData.USER_1.email);
+    expect(!context.res.body.user.email_verified);
+    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.firstname).equal(initData.USER_1_PROFILE.firstname);
     expect(context.res.body.user.lastname).equal(initData.USER_1_PROFILE.lastname);
-    expect(context.res.body.user.display_name).equal(initData.USER_1_PROFILE.firstname + " " + initData.USER_1_PROFILE.lastname);
     expect(context.res.body.user.gender).equal(initData.USER_1_PROFILE.gender);
     expect(context.res.body.user.date_of_birth).equal(initData.USER_1_DAB_STR);
     expect(context.res.body.user.public_uid).equal(initData.USER_1_PROFILE.public_uid);
+    expect(!context.res.body.user.language);
+    expect(context.res.body.user.social_emails);
+    expect(context.res.body.user.social_emails).to.be.empty;
+    expect(context.res.body.user.login).equal(initData.USER_1.email);
+    expect(context.res.body.user.has_password);
+    expect(!context.res.body.user.has_facebook_login);
+    expect(!context.res.body.user.has_google_login);
+    expect(!context.res.body.user.has_social_login);
+    expect(context.res.body.user.has_local_login);
 }
+
 
 function expectedGetUpdatedProfile(context) {
     expect(context.res.statusCode).equal(200);
