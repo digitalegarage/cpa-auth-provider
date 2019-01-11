@@ -531,8 +531,5 @@ module.exports = function(router) {
 
     router.get('/api/v2/session/user/email/move/:token', changeEmailHelper.move_email);
 
-    router.options('/api/v2/session/user/email/moved/:token', cors);
-    router.get('/api/v2/session/user/email/moved/:token', cors, changeEmailHelper.email_moved);
-
 
 };
