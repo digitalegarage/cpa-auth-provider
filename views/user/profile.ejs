@@ -766,19 +766,19 @@
                 e.preventDefault();
                 resetMessages("form-personnal-data-errors", "personnal-data-errors");
 
-                var userId = "<%= user.id %>";
                 var dab = $birthday.val();
                 var dab_str = dab ? createDate(dab) : '';
 
                 $.ajax({
                     url: "<%= link('/api/v2/session/user/profile') %>",
-                    data: {
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
                         firstname: $firstname.val(),
                         lastname: $lastname.val(),
                         gender: $gender.val(),
                         language: $language.val(),
                         date_of_birth: dab_str
-                    },
+                    }),
                     type: 'PUT',
                     success: function (result) {
                         $firstname.prev(".data-value").text($firstname.val());
@@ -845,7 +845,8 @@
 
                 $.ajax({
                     url: url,
-                    data: data,
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
                     type: 'POST',
                     success: function (result) {
                         // Password stuff
