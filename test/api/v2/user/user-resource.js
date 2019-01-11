@@ -387,7 +387,6 @@ describe('API-V2 change password', function() {
 
                 it(' should be 400', function() {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.text).to.equal('{"errors":[{"param":"new_password","msg":"Les mots de passe ne correspondent pas","value":"azertyuiopazertyuiop2"}]}');
                 });
             });
             context('(new password is weak)', function() {
@@ -407,7 +406,6 @@ describe('API-V2 change password', function() {
 
                 it(' should be 400', function() {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.text).to.equal('{"errors":[{"msg":"Le mot de passe saisi ne répond pas aux règles de sécurité suivantes: - Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux.<br/>"}],"password_strength_errors":["Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux."],"score":0}');
                 });
             });
             context('(unexisting user)', function() {
@@ -427,7 +425,6 @@ describe('API-V2 change password', function() {
 
                 it(' should be 401', function() {
                     expect(ctx.res.statusCode).to.equal(401);
-                    expect(ctx.res.text).to.equal('{"errors":[{"msg":"Utilisateur inconnu"}]}');
                 });
             });
         });
