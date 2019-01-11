@@ -174,7 +174,7 @@ var create_local_login = function (req, res) {
 
         }
     });
-}
+};
 
 module.exports = function (router) {
 
