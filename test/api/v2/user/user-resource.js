@@ -11,6 +11,8 @@ const REDIRECT_URI = 'https://localhost.ebu.io/unexistingurl';
 const VALID_FB_CODE = 42;
 const VALID_ACCESS_TOKEN = 'AccessTokenA';
 const EMAIL = 'someone@gmail.com';
+const EMAIL_JWT = 'someonejwt@gmail.com';
+const PASSWORD = 'azertyuiopazertyuiop';
 const USER_PROFILE = {
     first_name: 'Hans',
     last_name: 'Wurst',
@@ -146,9 +148,12 @@ describe('API-V2 add local login', function() {
     after(function() {
         nock.cleanAll();
     });
-    context('using session', function() {
 
-        var ctx = this;
+    var ctx = this;
+
+
+    context('using session', function() {
+        before(initData.resetDatabase);
 
         before(function(done) {
             requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/token', {
@@ -159,15 +164,16 @@ describe('API-V2 add local login', function() {
             }, done);
         });
 
-        context('with correct incorrect data', function() {
+
+        context('with incorrect data', function() {
             before(function(done) {
 
                 requestHelper.sendRequest(ctx, '/api/v2/session/user/login/create', {
                     method: 'post',
                     cookie: ctx.cookie,
                     data: {
-                        email: 'aaa@dumydomain.org',
-                        password: 'azertyuiopazertyuiop',
+                        email: EMAIL,
+                        password: PASSWORD,
                         confirm_password: 'different password',
                     },
                 }, done);
@@ -186,9 +192,9 @@ describe('API-V2 add local login', function() {
                     method: 'post',
                     cookie: ctx.cookie,
                     data: {
-                        email: 'aaa@dumydomain.org',
-                        password: 'azertyuiopazertyuiop',
-                        confirm_password: 'azertyuiopazertyuiop',
+                        email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: PASSWORD,
                     },
                 }, done);
             });
@@ -201,18 +207,86 @@ describe('API-V2 add local login', function() {
             context('User can login using new credentials', function() {
 
                 before(function(done) {
-                    requestHelper.sendRequest(ctx, '/api/v2/session/login', {
-                            method: 'post',
-                            data: {
-                                email: 'aaa@dumydomain.org',
-                                password: 'azertyuiopazertyuiop',
-                            },
-                        },
-                        done,
-                    );
+                    loginWithNewLocalLogin(ctx, done);
                 });
 
-                it('user should be logged', function() {
+                it('user should be able to log', function() {
+                    expect(ctx.res.statusCode).to.equal(204);
+                });
+            });
+        });
+
+    });
+    context('using jwt', function() {
+        before(initData.resetDatabase);
+
+        before(function(done) {
+            requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/token', {
+                method: 'post',
+                data: {
+                    token: VALID_ACCESS_TOKEN,
+                },
+            }, done);
+        });
+
+
+        before(function(done) {
+            requestHelper.sendRequest(ctx, '/api/v2/session/jwt', {
+                method: 'get',
+                cookie: ctx.cookie,
+            }, function() {
+                ctx.token = ctx.res.body.token.substring(4, ctx.res.body.token.size);
+                done();
+            });
+        });
+
+        context('with incorrect data', function() {
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/jwt/user/login/create', {
+                    method: 'post',
+                    accessToken: ctx.token,
+                    data: {
+                        email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: 'different password',
+                    },
+                }, done);
+            });
+
+            it(' should be 400', function() {
+                expect(ctx.res.statusCode).to.equal(400);
+            });
+        });
+
+        context('with correct data', function() {
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/jwt/user/login/create', {
+                    method: 'post',
+                    accessToken: ctx.token,
+                    data: {
+                        email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: PASSWORD,
+                    },
+                }, done);
+            });
+            context('response', function() {
+
+                it(' should be 200', function() {
+                    expect(ctx.res.statusCode).to.equal(200);
+                });
+            });
+            context('User can login using new credentials', function() {
+
+                before(function(done) {
+                    loginWithNewLocalLogin(ctx, done);
+                });
+
+                it('user should be able to log', function() {
                     expect(ctx.res.statusCode).to.equal(204);
                 });
             });
@@ -278,8 +352,14 @@ function mockFBForOneCallSequence() {
 
 }
 
-
-
-
-
-
+function loginWithNewLocalLogin(ctx, done) {
+    requestHelper.sendRequest(ctx, '/api/v2/session/login', {
+            method: 'post',
+            data: {
+                email: EMAIL,
+                password: PASSWORD,
+            },
+        },
+        done,
+    );
+}

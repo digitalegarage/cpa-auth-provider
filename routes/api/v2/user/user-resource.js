@@ -351,6 +351,38 @@ module.exports = function (router) {
      *          description: "local login had been created"
      */
 
+    router.options('/api/v2/session/user/login/create', cors);
     router.post('/api/v2/session/user/login/create', cors, authHelper.ensureAuthenticated, create_local_login);
+
+    /**
+     * @swagger
+     * /api/v2/jwt/user/password/create:
+     *   post:
+     *     description: add a local login for an user having only social logins
+     *     operationId: "createPassword"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "jwt token"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c=
+     *          -
+     *            name: "localLoginData"
+     *            in: "body"
+     *            description: "local login data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/AddLocalLogin"
+     *     responses:
+     *        "200":
+     *          description: "local login had been created"
+     */
+
+    router.options('/api/v2/jwt/user/login/create', cors);
+    router.post('/api/v2/jwt/user/login/create', cors, passport.authenticate('jwt', {session: false}), create_local_login);
 
 };
