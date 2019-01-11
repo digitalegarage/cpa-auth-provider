@@ -526,10 +526,133 @@ module.exports = function(router) {
 
 
 
+    /**
+     * @swagger
+     * definitions:
+     *  ChangeEmail:
+     *      properties:
+     *          new_email:
+     *              type: string
+     *              example: jhon@doe.com
+     *              description: user email / login
+     *          password:
+     *              type: string
+     *              example: 0ldPassw0rd
+     *              description:  previous password
+     */
+
+    /**
+     * @swagger
+     * /api/v2/session/user/email/change:
+     *   post:
+     *     description: add a local login for an user having only social logins
+     *     operationId: "changeEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          -
+     *            name: "ChangeEmail"
+     *            in: "body"
+     *            description: "changing password data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ChangePassword"
+     *     responses:
+     *        "200":
+     *          description: "Password had been updated"
+     */
     router.options('/api/v2/session/user/email/change', cors);
     router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
 
-    router.get('/api/v2/session/user/email/move/:token', changeEmailHelper.move_email);
+    /**
+     * @swagger
+     * /api/v2/session/user/email/change:
+     *   post:
+     *     description: request email change
+     *     operationId: "requestChangeEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "JWT token"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: JWT blablabla
+     *          -
+     *            name: "ChangeEmail"
+     *            in: "body"
+     *            description: "changing email data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ChangeEmail"
+     *     responses:
+     *        "200":
+     *          description: "Password had been updated"
+     */
+    router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
+
+    /**
+     * @swagger
+     * /api/v2/session/user/email/change:
+     *   post:
+     *     description: request email change
+     *     operationId: "requestChangeEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: blablabla
+     *            description: CPA token
+     *            required: true
+     *          -
+     *            name: "ChangeEmail"
+     *            in: "body"
+     *            description: "changing email data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ChangeEmail"
+     *     responses:
+     *        "200":
+     *          description: "Password had been updated"
+     */
+    router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
+
+
+    /**
+     * @swagger
+     * /api/v2/session/user/email/change:
+     *   post:
+     *     description: request email change
+     *     operationId: "requestChangeEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: Bearer blablabla
+     *            description: oAuth access token
+     *            required: true
+     *          -
+     *            name: "ChangeEmail"
+     *            in: "body"
+     *            description: "changing email data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ChangeEmail"
+     *     responses:
+     *        "200":
+     *          description: "Password had been updated"
+     */
+    router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
+
+    router.get('/api/v2/session/user/email/move/:token', changeEmailHelper.move_email_ajax);
 
 
 };

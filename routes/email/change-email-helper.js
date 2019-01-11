@@ -26,12 +26,21 @@ let activeInterval = 0;
 startCycle();
 
 module.exports = {
-    move_email: move_email,
+    move_email_ajax: move_email_ajax,
+    move_email_html: move_email_html,
     change_email: change_email,
     email_moved: email_moved
 };
 
-function move_email(req, res) {
+function move_email_ajax(req, res){
+    return move_email(req, res, true);
+}
+
+function move_email_html(req, res){
+    return move_email(req, res, false);
+}
+
+function move_email(req, res, ajax) {
     var localLogin, token;
     var oldEmail, newUsername;
     var redirect;
@@ -90,11 +99,19 @@ function move_email(req, res) {
             return token.consume();
         }).then(
         function() {
-            return renderLandingPage(true, undefined);
+            if (ajax){
+                res.status(204);
+            } else {
+                return renderLandingPage(true, undefined);
+            }
         }).catch(
         function(err) {
             logger.error('[GET /email/move/:token][FAIL][old', oldEmail, '][new', newUsername, '][err', err, ']');
-            return renderLandingPage(err.data && err.data.success, err.message);
+            if (ajax){
+                res.status(500).send({error: "fail to change email"});
+            } else {
+                return renderLandingPage(err.data && err.data.success, err.message);
+            }
         });
 
     function renderLandingPage(success, message) {
