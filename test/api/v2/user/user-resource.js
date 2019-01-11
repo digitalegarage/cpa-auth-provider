@@ -446,7 +446,6 @@ describe('API-V2 change password', function() {
             context('response', function() {
 
                 it(' should be 200', function() {
-                    console.log("ctx.res: " , ctx.res);
                     expect(ctx.res.statusCode).to.equal(200);
                 });
             });
