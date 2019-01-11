@@ -12,6 +12,7 @@ const VALID_FB_CODE = 42;
 const VALID_ACCESS_TOKEN = 'AccessTokenA';
 const EMAIL = 'someone@gmail.com';
 const PASSWORD = 'azertyuiopazertyuiop';
+const NEW_PASSWORD = 'azertyuiopazertyuiop2';
 const USER_PROFILE = {
     first_name: 'Hans',
     last_name: 'Wurst',
@@ -150,7 +151,6 @@ describe('API-V2 add local login', function() {
 
     var ctx = this;
 
-
     context('using session', function() {
         before(initData.resetDatabase);
 
@@ -162,7 +162,6 @@ describe('API-V2 add local login', function() {
                 },
             }, done);
         });
-
 
         context('with incorrect data', function() {
             before(function(done) {
@@ -228,7 +227,6 @@ describe('API-V2 add local login', function() {
             }, done);
         });
 
-
         before(function(done) {
             requestHelper.sendRequest(ctx, '/api/v2/session/jwt', {
                 method: 'get',
@@ -293,7 +291,7 @@ describe('API-V2 add local login', function() {
 
     });
 
-    context('using CPA', function () {
+    context('using CPA', function() {
         before(initData.resetDatabase);
 
         before(function(done) {
@@ -361,6 +359,118 @@ describe('API-V2 add local login', function() {
     context('using oAuth', function() {
         // there is no way to have a valid oAuth access token without a local login => no endpoint => no test
 
+    });
+
+});
+
+describe('API-V2 change password', function() {
+
+    let ctx = this;
+    context('using any protocol', function() {
+        before(initData.resetDatabase);
+
+        context('with incorrect data', function() {
+            context('(password are different)', function() {
+
+                before(function(done) {
+
+                    requestHelper.sendRequest(ctx, '/api/v2/all/user/password', {
+                        method: 'post',
+                        data: {
+                            email: initData.USER_1.email,
+                            previous_password: initData.USER_1.password,
+                            new_password: NEW_PASSWORD,
+                            confirm_password: 'different password',
+                        },
+                    }, done);
+                });
+
+                it(' should be 400', function() {
+                    expect(ctx.res.statusCode).to.equal(400);
+                    expect(ctx.res.text).to.equal('{"errors":[{"param":"new_password","msg":"Les mots de passe ne correspondent pas","value":"azertyuiopazertyuiop2"}]}');
+                });
+            });
+            context('(new password is weak)', function() {
+
+                before(function(done) {
+
+                    requestHelper.sendRequest(ctx, '/api/v2/all/user/password', {
+                        method: 'post',
+                        data: {
+                            email: initData.USER_1.email,
+                            previous_password: initData.USER_1.password,
+                            new_password: "weak",
+                            confirm_password: "weak",
+                        },
+                    }, done);
+                });
+
+                it(' should be 400', function() {
+                    expect(ctx.res.statusCode).to.equal(400);
+                    expect(ctx.res.text).to.equal('{"errors":[{"msg":"Le mot de passe saisi ne répond pas aux règles de sécurité suivantes: - Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux.<br/>"}],"password_strength_errors":["Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux."],"score":0}');
+                });
+            });
+            context('(unexisting user)', function() {
+
+                before(function(done) {
+
+                    requestHelper.sendRequest(ctx, '/api/v2/all/user/password', {
+                        method: 'post',
+                        data: {
+                            email: "unexistig@user.com",
+                            previous_password: initData.USER_1.password,
+                            new_password: NEW_PASSWORD,
+                            confirm_password: NEW_PASSWORD,
+                        },
+                    }, done);
+                });
+
+                it(' should be 401', function() {
+                    expect(ctx.res.statusCode).to.equal(401);
+                    expect(ctx.res.text).to.equal('{"errors":[{"msg":"Utilisateur inconnu"}]}');
+                });
+            });
+        });
+
+        context('with correct data', function() {
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/all/user/password', {
+                    method: 'post',
+                    data: {
+                        email: initData.USER_1.email,
+                        previous_password: initData.USER_1.password,
+                        new_password: NEW_PASSWORD,
+                        confirm_password: NEW_PASSWORD,
+                    },
+                }, done);
+            });
+            context('response', function() {
+
+                it(' should be 200', function() {
+                    expect(ctx.res.statusCode).to.equal(200);
+                });
+            });
+            context('User can login using new credentials', function() {
+
+                before(function(done) {
+                    requestHelper.sendRequest(ctx, '/api/v2/session/login', {
+                            method: 'post',
+                            data: {
+                                email: initData.USER_1.email,
+                                password: NEW_PASSWORD,
+                            },
+                        },
+                        done,
+                    );
+                });
+
+                it('user should be able to log', function() {
+                    expect(ctx.res.statusCode).to.equal(204);
+                });
+            });
+        });
 
     });
 

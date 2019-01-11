@@ -189,12 +189,12 @@ var change_password = function(req, res) {
             res.status(400).json({errors: result.array()});
         } else {
             let email = req.body.email;
-            let previousPassword = req.body.previous_password;
-            if (!passwordHelper.isStrong(email, previousPassword)) {
+            let newPassword = req.body.new_password;
+            if (!passwordHelper.isStrong(email, newPassword)) {
                 res.status(400).json({
-                    errors: [{msg: passwordHelper.getWeaknessesMsg(email, previousPassword, req)}],
-                    password_strength_errors: passwordHelper.getWeaknesses(email, previousPassword, req),
-                    score: passwordHelper.getQuality(email, previousPassword),
+                    errors: [{msg: passwordHelper.getWeaknessesMsg(email, newPassword, req)}],
+                    password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
+                    score: passwordHelper.getQuality(email, newPassword),
                 });
             } else {
                 db.LocalLogin.findOne({
@@ -209,7 +209,7 @@ var change_password = function(req, res) {
                             if (isMatch) {
                                 localLogin.setPassword(req.body.new_password).then(
                                     function() {
-                                        appHelper.destroySessionsByUserId(req.user.dataValues.id, req.sessionID).then(function() {
+                                        appHelper.destroySessionsByUserId(localLogin.user_id, req.sessionID).then(function() {
                                             return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
                                         }).catch(function(e) {
                                             logger.error(e);
