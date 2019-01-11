@@ -219,7 +219,7 @@ var change_password = function(req, res) {
                                     function(err) {
                                         logger.error(err);
                                         res.status(500).json({errors: [err]});
-                                    },
+                                    }
                                 );
                             } else {
                                 res.status(401).json({errors: [{msg: req.__('BACK_INCORRECT_PREVIOUS_PASS')}]});
