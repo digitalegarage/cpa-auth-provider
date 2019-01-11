@@ -8,6 +8,7 @@ const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
 const passwordHelper = require('../../../../lib/password-helper');
 const authHelper = require('../../../../lib/auth-helper');
+const appHelper = require('../../../../lib/app-helper');
 const userHelper = require('../../../../lib/user-helper');
 const _ = require('underscore');
 
@@ -127,13 +128,13 @@ var get_user = function (req,res) {
     }
 };
 
-var create_local_login = function (req, res) {
+var create_local_login = function(req, res) {
     req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
     req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
 
-    req.getValidationResult().then(function (result) {
+    req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
             res.status(400).json({errors: result.array()});
         } else {
@@ -145,10 +146,10 @@ var create_local_login = function (req, res) {
                 });
             } else {
                 userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
-                    function () {
+                    function() {
                         res.json({success: true, msg: req.__('BACK_SUCCESS_PASS_CREATED')});
                     },
-                    function (err) {
+                    function(err) {
                         if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
                             return res.status(400).json({
                                 success: false,
@@ -176,7 +177,62 @@ var create_local_login = function (req, res) {
     });
 };
 
-module.exports = function (router) {
+var change_password = function(req, res) {
+    req.checkBody('email', req.__('API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL')).isEmail();
+    req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();
+    req.checkBody('new_password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
+    req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
+    req.checkBody('new_password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
+
+    req.getValidationResult().then(function(result) {
+        if (!result.isEmpty()) {
+            res.status(400).json({errors: result.array()});
+        } else {
+            let email = req.body.email;
+            let previousPassword = req.body.previous_password;
+            if (!passwordHelper.isStrong(email, previousPassword)) {
+                res.status(400).json({
+                    errors: [{msg: passwordHelper.getWeaknessesMsg(email, previousPassword, req)}],
+                    password_strength_errors: passwordHelper.getWeaknesses(email, previousPassword, req),
+                    score: passwordHelper.getQuality(email, previousPassword),
+                });
+            } else {
+                db.LocalLogin.findOne({
+                    where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), email.toLowerCase()),
+                    include: [db.User]
+                }).then(function (localLogin) {
+                    if (!localLogin) {
+                        return res.status(401).send({errors: [{msg: req.__('BACK_USER_NOT_FOUND')}]});
+                    } else {
+                        localLogin.verifyPassword(req.body.previous_password).then(function(isMatch) {
+                            // if user is found and password is right change password
+                            if (isMatch) {
+                                localLogin.setPassword(req.body.new_password).then(
+                                    function() {
+                                        appHelper.destroySessionsByUserId(req.user.dataValues.id, req.sessionID).then(function() {
+                                            return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
+                                        }).catch(function(e) {
+                                            logger.error(e);
+                                            return res.sendStatus(500);
+                                        });
+                                    },
+                                    function(err) {
+                                        logger.error(err);
+                                        res.status(500).json({errors: [err]});
+                                    },
+                                );
+                            } else {
+                                res.status(401).json({errors: [{msg: req.__('BACK_INCORRECT_PREVIOUS_PASS')}]});
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    });
+};
+
+module.exports = function(router) {
 
     /**
      * @swagger
@@ -310,7 +366,6 @@ module.exports = function (router) {
     router.options('/api/v2/jwt/user/id', cors);
     router.get('/api/v2/jwt/user/id', cors, get_user_id);
 
-
     /**
      * @swagger
      * definitions:
@@ -319,7 +374,7 @@ module.exports = function (router) {
      *          email:
      *              type: string
      *              example: jhon@doe.com
-     *              description: oAuth2 stuff
+     *              description: user email / login
      *          password:
      *              type: string
      *              example: passw0rd
@@ -332,7 +387,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * /api/v2/session/user/password/create:
+     * /api/v2/session/user/login/create:
      *   post:
      *     description: add a local login for an user having only social logins
      *     operationId: "createPassword"
@@ -356,7 +411,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * /api/v2/jwt/user/password/create:
+     * /api/v2/jwt/user/login/create:
      *   post:
      *     description: add a local login for an user having only social logins
      *     operationId: "createPassword"
@@ -391,7 +446,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * /api/v2/cpa/user/password/create:
+     * /api/v2/cpa/user/login/create:
      *   post:
      *     description: add a local login for an user having only social logins
      *     operationId: "createPassword"
@@ -419,5 +474,53 @@ module.exports = function (router) {
 
     router.options('/api/v2/cpa/user/login/create', cors);
     router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, create_local_login);
+
+
+
+    /**
+     * @swagger
+     * definitions:
+     *  ChangePassword:
+     *      properties:
+     *          email:
+     *              type: string
+     *              example: jhon@doe.com
+     *              description: user email / login
+     *          previous_password:
+     *              type: string
+     *              example: 0ldPassw0rd
+     *              description:  previous password
+     *          new_password:
+     *              type: string
+     *              example: passw0rd
+     *              description: the password to set
+     *          confirm_password:
+     *              type: string
+     *              example: passw0rd
+     *              description:  confirm password
+     */
+
+    /**
+     * @swagger
+     * /api/v2/all/user/password:
+     *   post:
+     *     description: add a local login for an user having only social logins
+     *     operationId: "createPassword"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          -
+     *            name: "ChangePassword"
+     *            in: "body"
+     *            description: "changing password data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/ChangePassword"
+     *     responses:
+     *        "200":
+     *          description: "Password had been updated"
+     */
+    router.options('/api/v2/all/user/password', cors);
+    router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
 
 };
