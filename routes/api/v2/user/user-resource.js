@@ -209,7 +209,7 @@ var change_password = function(req, res) {
                             if (isMatch) {
                                 localLogin.setPassword(req.body.new_password).then(
                                     function() {
-                                        appHelper.destroySessionsByUserId(localLogin.user_id, req.sessionID).then(function() {
+                                        appHelper.destroySessionsByUserId(localLogin.User.id, req.sessionID).then(function() {
                                             return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
                                         }).catch(function(e) {
                                             logger.error(e);
