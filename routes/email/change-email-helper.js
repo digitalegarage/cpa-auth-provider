@@ -2,8 +2,6 @@
 
 var db = require('../../models/index');
 var logger = require('../../lib/logger');
-var cors = require('cors');
-var passport = require('passport');
 var emailHelper = require('../../lib/email-helper');
 var config = require('../../config');
 var uuid = require('uuid');
@@ -30,8 +28,7 @@ startCycle();
 module.exports = {
     move_email: move_email,
     change_email: change_email,
-    email_moved: email_moved,
-
+    email_moved: email_moved
 };
 
 function move_email(req, res) {
@@ -40,7 +37,7 @@ function move_email(req, res) {
     var redirect;
     db.UserEmailToken.findOne({
         where: {key: req.params.token},
-        include: [db.User],
+        include: [db.User]
     }).then(
         function(token_) {
             token = token_;
@@ -55,14 +52,12 @@ function move_email(req, res) {
                 throw err;
             }
             return db.LocalLogin.findOne({where: {user_id: token.user_id}});
-        },
-    ).then(
+        }).then(
         function(ll) {
             localLogin = ll;
             oldEmail = localLogin.login;
             return finder.findUserByLocalAccountEmail(newUsername);
-        },
-    ).then(
+        }).then(
         function(takenLocalLogin) {
             if (takenLocalLogin) {
                 throw new Error(STATES.EMAIL_ALREADY_TAKEN);
@@ -87,24 +82,20 @@ function move_email(req, res) {
                     });
                 });
             });
-        },
-    ).then(
+        }).then(
         function() {
             if (req.user && req.user.id === token.user_id) {
                 req.user.display_name = newUsername;
             }
             return token.consume();
-        },
-    ).then(
+        }).then(
         function() {
             return renderLandingPage(true, undefined);
-        },
-    ).catch(
+        }).catch(
         function(err) {
             logger.error('[GET /email/move/:token][FAIL][old', oldEmail, '][new', newUsername, '][err', err, ']');
             return renderLandingPage(err.data && err.data.success, err.message);
-        },
-    );
+        });
 
     function renderLandingPage(success, message) {
         res.render('./verify-mail-changed.ejs', {
@@ -114,7 +105,7 @@ function move_email(req, res) {
             newMail: newUsername,
         });
     }
-};
+}
 
 function change_email(req, res) {
     var oldUser = req.user;
@@ -138,16 +129,14 @@ function change_email(req, res) {
                 oldLocalLogin = localLogin;
                 return localLogin.verifyPassword(password);
             });
-        },
-    ).then(
+        }).then(
         function(correct) {
             if (!correct) {
                 throw new Error(STATES.WRONG_PASSWORD);
             }
             const validityDate = new Date(new Date().getTime() - VALIDITY_DURATION * 1000);
             return db.UserEmailToken.count({where: {user_id: oldUser.id, created_at: {[Op.gte]: validityDate}}});
-        },
-    ).then(
+        }).then(
         function(tokenCount) {
             if (tokenCount >= REQUEST_LIMIT) {
                 throw new Error(STATES.TOO_MANY_REQUESTS);
@@ -159,11 +148,9 @@ function change_email(req, res) {
                 },
                 function(e) {
                     logger.warn('[POST /email/change][EMAILS][ERROR][', e, ']');
-                },
-            );
+                });
             return res.status(200).json({success: true});
-        },
-    ).catch(
+        }).catch(
         function(err) {
             logger.warn('[POST /email/change][FAIL][user_id', oldUser.id, '][from',
                 oldUser.email, '][to', newUsername, '][err', err, ']');
@@ -185,9 +172,8 @@ function change_email(req, res) {
                 reason: err.message,
                 msg: message,
             });
-        },
-    );
-};
+        });
+}
 
 function email_moved(req, res) {
     var user, token, localLogin;
@@ -196,8 +182,7 @@ function email_moved(req, res) {
         {
             where: {key: req.params.token},
             include: [db.User, db.OAuth2Client],
-        },
-    ).then(
+        }).then(
         function(token_) {
             token = token_;
             clientId = req.query.client_id;
@@ -211,8 +196,7 @@ function email_moved(req, res) {
 
             user = token.User;
             return db.LocalLogin.findOne({where: {user_id: user.id}});
-        },
-    ).then(
+        }).then(
         function(localLogin_) {
             localLogin = localLogin_;
             oldEmail = localLogin.login;
@@ -225,15 +209,13 @@ function email_moved(req, res) {
             }
 
             return finder.findUserByLocalAccountEmail(newUsername);
-        },
-    ).then(
+        }).then(
         function(takenUser) {
             if (takenUser) {
                 throw new Error(STATES.EMAIL_ALREADY_TAKEN);
             }
             return finder.findUserBySocialAccountEmail(newUsername);
-        },
-    ).then(
+        }).then(
         function(socialLogin_) {
             if (socialLogin_) {
                 throw new Error(STATES.EMAIL_ALREADY_TAKEN);
@@ -242,16 +224,13 @@ function email_moved(req, res) {
                 login: newUsername,
                 verified: true,
             });
-        },
-    ).then(
+        }).then(
         function() {
             return token.consume();
-        },
-    ).then(
+        }).then(
         function() {
             return res.status(200).json({success: true});
-        },
-    ).catch(
+        }).catch(
         function(err) {
             logger.error('[GET /email/moved/:token][FAIL][old', oldEmail, '][new', newUsername, '][user.id', user ? user.id : null, '][err', err, ']');
             if (err.data && err.data.success) {
@@ -259,9 +238,8 @@ function email_moved(req, res) {
             } else {
                 return res.status(400).json({success: false, reason: err.message});
             }
-        },
-    );
-};
+        });
+}
 
 function triggerAccountChangeEmails(email, user, client, newUsername) {
     return new Promise(
@@ -276,7 +254,7 @@ function triggerAccountChangeEmails(email, user, client, newUsername) {
                 type: 'MOV$' + newUsername,
                 user_id: user.id,
                 redirect_uri: redirectUri,
-                oauth2_client_id: client ? client.id : undefined,
+                oauth2_client_id: client ? client.id : undefined
             }).then(
                 function(verifyToken) {
                     let host = config.mail.host || '';
@@ -294,10 +272,8 @@ function triggerAccountChangeEmails(email, user, client, newUsername) {
                             oldEmail: email,
                             newEmail: newUsername,
                             confirmLink: confirmLink,
-                        },
-                    );
-                },
-            ).then(
+                        });
+                }).then(
                 function() {
                     db.LocalLogin.findOne({where: {user_id: user.id}}).then(function(localLogin) {
                         if (localLogin.verified) {
@@ -309,27 +285,19 @@ function triggerAccountChangeEmails(email, user, client, newUsername) {
                                 {
                                     oldEmail: email,
                                     newEmail: newUsername,
-                                },
-                            );
+                                });
                         } else {
                             return new Promise(
                                 function(resolve, reject) {
                                     return resolve();
-                                },
-                            );
+                                });
                         }
                     });
-                },
-            ).then(
+                }).then(
                 function() {
                     resolve();
-                },
-            ).catch(
-                reject,
-            );
-
-        },
-    );
+                }).catch(reject);
+        });
 }
 
 function cycle() {
@@ -346,24 +314,18 @@ function cycle() {
                         [Op.lt]: deletionDate,
                     },
                 },
-            },
-        ).then(
+            }).then(
             count => {
                 logger.debug('[EmailChange][DELETE/FAIL][count', count, ']');
-            },
-        ).catch(
+            }).catch(
             error => {
                 logger.error('[EmailChange][DELETE/FAIL][error', error, ']');
-            },
-        );
+            });
     } catch (e) {
         logger.error('[EmailChange][DELETE/FAIL][error', e, ']');
     }
 
-    activeInterval = setTimeout(
-        cycle,
-        DELETION_INTERVAL * 1000,
-    );
+    activeInterval = setTimeout(cycle, DELETION_INTERVAL * 1000);
 }
 
 function startCycle() {

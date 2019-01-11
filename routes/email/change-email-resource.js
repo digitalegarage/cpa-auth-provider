@@ -14,8 +14,7 @@ module.exports = function(app, options) {
                 return passport.authenticate('bearer', {session: false})(req, res, next);
             }
         },
-        changeEmailHelper.change_email,
-    );
+        changeEmailHelper.change_email);
 
     app.get('/email/move/:token', changeEmailHelper.move_email);
 

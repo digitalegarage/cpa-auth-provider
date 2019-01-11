@@ -10,6 +10,7 @@ const passwordHelper = require('../../../../lib/password-helper');
 const authHelper = require('../../../../lib/auth-helper');
 const appHelper = require('../../../../lib/app-helper');
 const userHelper = require('../../../../lib/user-helper');
+const changeEmailHelper = require ('../../../email/change-email-helper');
 const _ = require('underscore');
 
 function delete_user_by_id(userId, res) {
@@ -522,5 +523,16 @@ module.exports = function(router) {
      */
     router.options('/api/v2/all/user/password', cors);
     router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
+
+
+
+    router.options('/api/v2/session/user/email/change', cors);
+    router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
+
+    router.get('/api/v2/session/user/email/move/:token', changeEmailHelper.move_email);
+
+    router.options('/api/v2/session/user/email/moved/:token', cors);
+    router.get('/api/v2/session/user/email/moved/:token', cors, changeEmailHelper.email_moved);
+
 
 };
