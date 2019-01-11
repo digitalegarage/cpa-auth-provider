@@ -398,8 +398,8 @@ describe('API-V2 change password', function() {
                         data: {
                             email: initData.USER_1.email,
                             previous_password: initData.USER_1.password,
-                            new_password: "weak",
-                            confirm_password: "weak",
+                            new_password: 'weak',
+                            confirm_password: 'weak',
                         },
                     }, done);
                 });
@@ -415,7 +415,7 @@ describe('API-V2 change password', function() {
                     requestHelper.sendRequest(ctx, '/api/v2/all/user/password', {
                         method: 'post',
                         data: {
-                            email: "unexistig@user.com",
+                            email: 'unexistig@user.com',
                             previous_password: initData.USER_1.password,
                             new_password: NEW_PASSWORD,
                             confirm_password: NEW_PASSWORD,
@@ -443,29 +443,20 @@ describe('API-V2 change password', function() {
                     },
                 }, done);
             });
-            context('response', function() {
-
-                it(' should be 200', function() {
-                    expect(ctx.res.statusCode).to.equal(200);
-                });
-            });
-            context('User can login using new credentials', function() {
-
-                before(function(done) {
-                    requestHelper.sendRequest(ctx, '/api/v2/session/login', {
-                            method: 'post',
-                            data: {
-                                email: initData.USER_1.email,
-                                password: NEW_PASSWORD,
-                            },
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/session/login', {
+                        method: 'post',
+                        data: {
+                            email: initData.USER_1.email,
+                            password: NEW_PASSWORD,
                         },
-                        done,
-                    );
-                });
+                    },
+                    done,
+                );
+            });
 
-                it('user should be able to log', function() {
-                    expect(ctx.res.statusCode).to.equal(204);
-                });
+            it('user should be able to log with new credentials', function() {
+                expect(ctx.res.statusCode).to.equal(204);
             });
         });
 
