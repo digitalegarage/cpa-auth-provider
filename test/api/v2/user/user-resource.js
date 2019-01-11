@@ -11,7 +11,6 @@ const REDIRECT_URI = 'https://localhost.ebu.io/unexistingurl';
 const VALID_FB_CODE = 42;
 const VALID_ACCESS_TOKEN = 'AccessTokenA';
 const EMAIL = 'someone@gmail.com';
-const EMAIL_JWT = 'someonejwt@gmail.com';
 const PASSWORD = 'azertyuiopazertyuiop';
 const USER_PROFILE = {
     first_name: 'Hans',
@@ -291,6 +290,77 @@ describe('API-V2 add local login', function() {
                 });
             });
         });
+
+    });
+
+    context('using CPA', function () {
+        before(initData.resetDatabase);
+
+        before(function(done) {
+            requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/token', {
+                method: 'post',
+                data: {
+                    token: VALID_ACCESS_TOKEN,
+                },
+            }, done);
+        });
+
+        context('with incorrect data', function() {
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
+                    method: 'post',
+                    accessToken: initData.USER_1_CPA_TOKEN,
+                    data: {
+                        email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: 'different password',
+                    },
+                }, done);
+            });
+
+            it(' should be 400', function() {
+                expect(ctx.res.statusCode).to.equal(400);
+            });
+        });
+
+        context('with correct data', function() {
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
+                    method: 'post',
+                    accessToken: initData.USER_1_CPA_TOKEN,
+                    data: {
+                        email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: PASSWORD,
+                    },
+                }, done);
+            });
+            context('response', function() {
+
+                it(' should be 200', function() {
+                    expect(ctx.res.statusCode).to.equal(200);
+                });
+            });
+            context('User can login using new credentials', function() {
+
+                before(function(done) {
+                    loginWithNewLocalLogin(ctx, done);
+                });
+
+                it('user should be able to log', function() {
+                    expect(ctx.res.statusCode).to.equal(204);
+                });
+            });
+        });
+    });
+
+    context('using oAuth', function() {
+        // there is no way to have a valid oAuth access token without a local login => no endpoint => no test
+
 
     });
 

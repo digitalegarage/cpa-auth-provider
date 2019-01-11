@@ -385,4 +385,39 @@ module.exports = function (router) {
     router.options('/api/v2/jwt/user/login/create', cors);
     router.post('/api/v2/jwt/user/login/create', cors, passport.authenticate('jwt', {session: false}), create_local_login);
 
+    // Those endpoints are not available since there is no way in IDP to get an oAuth access token from a facebook or google login. So there is no way to have a valid oAuth access token without a local login
+    // router.options('/api/v2/oauth2/user/login/create', cors);
+    // router.post('/api/v2/oauth2/user/login/create', cors, passport.authenticate('bearer', {session: false}), create_local_login);
+
+    /**
+     * @swagger
+     * /api/v2/cpa/user/password/create:
+     *   post:
+     *     description: add a local login for an user having only social logins
+     *     operationId: "createPassword"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: blablabla
+     *            description: CPA token
+     *            required: true
+     *          -
+     *            name: "localLoginData"
+     *            in: "body"
+     *            description: "local login data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/AddLocalLogin"
+     *     responses:
+     *        "200":
+     *          description: "local login had been created"
+     */
+
+    router.options('/api/v2/cpa/user/login/create', cors);
+    router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, create_local_login);
+
 };
