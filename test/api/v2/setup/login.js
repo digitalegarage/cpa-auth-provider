@@ -154,9 +154,16 @@ function session_authenticate() {
     };
 }
 
-function jwt_authenticate(context, done) {
+function jwt_authenticate() {
     return function(done) {
         jwtLogin(this, done);
+    };
+}
+
+function cpa_authenticate() {
+    return function(done) {
+        this.token = initData.USER_1_CPA_TOKEN;
+        done();
     };
 }
 
@@ -172,5 +179,6 @@ module.exports = {
     jwtSignup: jwtSignup,
     oAuth_authenticate: oAuth_authenticate,
     session_authenticate: session_authenticate,
-    jwt_authenticate: jwt_authenticate
+    jwt_authenticate: jwt_authenticate,
+    cpa_authenticate: cpa_authenticate
 };

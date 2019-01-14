@@ -5,6 +5,25 @@ const requestHelper = require('../../../request-helper');
 const initData = require('../setup/init-data');
 const login = require('../setup/login');
 
+describe('API V2 POST change email', function() {
+
+    context('Using session', function() {
+        change_email_test_suite(login.session_authenticate, change_password_with_session);
+    });
+
+    context('Using oauth', function() {
+        change_email_test_suite(login.oAuth_authenticate, change_password_with_oauth);
+    });
+
+    context('Using jwt', function() {
+        change_email_test_suite(login.jwt_authenticate, change_password_with_jwt);
+    });
+
+    context('Using cpa', function() {
+        change_email_test_suite(login.cpa_authenticate, change_password_with_cpa);
+    });
+});
+
 function change_email_test_suite(authenticate, change_password) {
     context('with correct information', function() {
         before(initData.resetDatabase);
@@ -150,21 +169,6 @@ function change_email_test_suite(authenticate, change_password) {
     });
 }
 
-describe('API V2 POST change email', function() {
-
-    context('Using session', function() {
-        change_email_test_suite(login.session_authenticate, change_password_with_session);
-    });
-
-    context('Using oauth', function() {
-        change_email_test_suite(login.oAuth_authenticate, change_password_with_oauth);
-    });
-
-    context('Using jwt', function() {
-        change_email_test_suite(login.jwt_authenticate, change_password_with_jwt);
-    });
-});
-
 // oAuth
 
 function change_password_with_oauth(newEmail, password, done) {
@@ -204,6 +208,22 @@ function change_password_with_jwt(newEmail, password, done) {
     requestHelper.sendRequest(
         this,
         '/api/v2/jwt/user/email/change',
+        {
+            method: 'post',
+            accessToken: this.token,
+            data: {
+                new_email: newEmail,
+                password: password
+            }
+        },
+        done
+    );
+}
+
+function change_password_with_cpa(newEmail, password, done) {
+    requestHelper.sendRequest(
+        this,
+        '/api/v2/cpa/user/email/change',
         {
             method: 'post',
             accessToken: this.token,
