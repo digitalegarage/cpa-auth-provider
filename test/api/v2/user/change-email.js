@@ -159,6 +159,10 @@ describe('API V2 POST change email', function() {
     context('Using oauth', function() {
         change_email_test_suite(login.oAuth_authenticate, change_password_with_oauth);
     });
+
+    context('Using jwt', function() {
+        change_email_test_suite(login.jwt_authenticate, change_password_with_jwt);
+    });
 });
 
 // oAuth
@@ -187,6 +191,22 @@ function change_password_with_session(newEmail, password, done) {
         {
             method: 'post',
             cookie: this.cookie,
+            data: {
+                new_email: newEmail,
+                password: password
+            }
+        },
+        done
+    );
+}
+
+function change_password_with_jwt(newEmail, password, done) {
+    requestHelper.sendRequest(
+        this,
+        '/api/v2/jwt/user/email/change',
+        {
+            method: 'post',
+            accessToken: this.token,
             data: {
                 new_email: newEmail,
                 password: password
