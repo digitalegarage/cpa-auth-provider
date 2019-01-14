@@ -65,7 +65,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                login.jwtLogin(ctx, done);
+                login.jwt_authenticate(ctx, done);
             });
 
             before(function (done) {
@@ -139,7 +139,7 @@ describe('API-V2 profile', function () {
             var ctx = this;
 
             before(function (done) {
-                login.jwtLogin(ctx, done);
+                login.jwt_authenticate(ctx, done);
             });
 
             before(function (done) {

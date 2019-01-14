@@ -153,11 +153,11 @@ function change_email_test_suite(authenticate, change_password) {
 describe('API V2 POST change email', function() {
 
     context('Using session', function() {
-        change_email_test_suite(session_authenticate, change_password_with_session);
+        change_email_test_suite(login.session_authenticate, change_password_with_session);
     });
 
     context('Using oauth', function() {
-        change_email_test_suite(oAuth_authenticate, change_password_with_oauth);
+        change_email_test_suite(login.oAuth_authenticate, change_password_with_oauth);
     });
 });
 
@@ -196,29 +196,7 @@ function change_password_with_session(newEmail, password, done) {
     );
 }
 
-// Security
-
-function oAuth_authenticate() {
-    return function(done) {
-        let ctx = this;
-        login.oAuthLogin(ctx, function() {
-            ctx.accessToken = ctx.res.body.access_token;
-            done();
-        });
-    };
-}
-
-function session_authenticate() {
-    return function(done) {
-        let ctx = this;
-        login.cookieLogin(ctx, function() {
-            ctx.cookie = ctx.res.headers['set-cookie'];
-            done();
-        });
-    };
-}
-
-// Utils
+// Checks
 
 function user_should_have_a_generated_token(done) {
     db.UserEmailToken.findOne({where: {user_id: initData.USER_1.id}}).then(

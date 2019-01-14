@@ -28,7 +28,7 @@ describe('API-V2 JWT get user id', function() {
         before(initData.resetDatabase);
 
         before(function(done) {
-            login.jwtLogin(ctx, done);
+            login.jwt_authenticate(ctx, done);
         });
 
         before(function(done) {
@@ -48,7 +48,7 @@ describe('API-V2 JWT get user id', function() {
         before(initData.resetDatabase);
 
         before(function(done) {
-            login.jwtLogin(ctx, done);
+            login.jwt_authenticate(ctx, done);
         });
 
         before(function(done) {
@@ -68,7 +68,7 @@ describe('API-V2 JWT get user id', function() {
         before(initData.resetDatabase);
 
         before(function(done) {
-            login.jwtLogin(ctx, done);
+            login.jwt_authenticate(ctx, done);
         });
 
         before(function(done) {

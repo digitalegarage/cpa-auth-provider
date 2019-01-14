@@ -94,19 +94,6 @@ function cookieLogout(httpContext, done) {
 //---------------
 // jwt calls
 
-function jwtLogin(context, done) {
-    requestHelper.sendRequest(context, '/api/v2/jwt/login', {
-        method: 'post',
-        data: {
-            email: initData.USER_1.email,
-            password: initData.USER_1.password
-        }
-    }, function () {
-        context.token = context.res.body.token.substring(4, context.res.body.token.size);
-        done();
-    });
-}
-
 function jwtSignup(context, email, password, redirect, code, done) {
 
     var uri = '/api/v2/jwt/signup';
@@ -135,6 +122,44 @@ function jwtSignup(context, email, password, redirect, code, done) {
     });
 }
 
+//---------------
+// short cuts
+
+function oAuth_authenticate() {
+    return function(done) {
+        let ctx = this;
+        oAuthLogin(ctx, function() {
+            ctx.accessToken = ctx.res.body.access_token;
+            done();
+        });
+    };
+}
+
+function session_authenticate() {
+    return function(done) {
+        let ctx = this;
+        cookieLogin(ctx, function() {
+            ctx.cookie = ctx.res.headers['set-cookie'];
+            done();
+        });
+    };
+}
+
+function jwt_authenticate(context, done) {
+    requestHelper.sendRequest(context, '/api/v2/jwt/login', {
+        method: 'post',
+        data: {
+            email: initData.USER_1.email,
+            password: initData.USER_1.password
+        }
+    }, function () {
+        context.token = context.res.body.token.substring(4, context.res.body.token.size);
+        done();
+    });
+}
+
+
+
 module.exports = {
     oAuthLogin: oAuthLogin,
     cookieLogin: cookieLogin,
@@ -143,6 +168,8 @@ module.exports = {
     cookieLogout: cookieLogout,
     cookieSignup: cookieSignup,
     cookieSignupWithProfile: cookieSignupWithProfile,
-    jwtLogin: jwtLogin,
-    jwtSignup: jwtSignup
+    jwt_authenticate: jwt_authenticate,
+    jwtSignup: jwtSignup,
+    oAuth_authenticate:oAuth_authenticate,
+    session_authenticate:session_authenticate
 };
