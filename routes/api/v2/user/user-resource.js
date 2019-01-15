@@ -537,7 +537,7 @@ module.exports = function(router) {
      *              description: user email / login
      *          password:
      *              type: string
-     *              example: 0ldPassw0rd
+     *              example: Passw0rd
      *              description:  previous password
      *          redirect:
      *              type: string
