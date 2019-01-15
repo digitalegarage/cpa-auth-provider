@@ -148,17 +148,15 @@ var create_local_login = function(req, res) {
             } else {
                 userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
                     function() {
-                        res.json({success: true, msg: req.__('BACK_SUCCESS_PASS_CREATED')});
+                        res.sendStatus(204);
                     },
                     function(err) {
                         if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
                             return res.status(400).json({
-                                success: false,
                                 msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')
                             });
                         } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
                             return res.status(400).json({
-                                success: false,
                                 msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
                                 password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
                                 errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}]
@@ -166,7 +164,6 @@ var create_local_login = function(req, res) {
                         } else {
                             logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
                             res.status(500).json({
-                                success: false,
                                 msg: req.__('API_ERROR') + err
                             });
                         }
@@ -541,7 +538,7 @@ module.exports = function(router) {
      *              description:  previous password
      *          redirect:
      *              type: string
-     *              example: http://brodcaster.com/changeEmailSuccess.html
+     *              example: http://brodcaster.com/changeEmailResult.html
      *              description: an optional url to redirect the user after email had been changed
      *              required: false
      */
@@ -593,7 +590,7 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/ChangeEmail"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "Password had been updated"
      */
     router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
@@ -622,7 +619,7 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/ChangeEmail"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "Password had been updated"
      */
     router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
@@ -652,11 +649,40 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/ChangeEmail"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "Password had been updated"
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
 
+
+    /**
+     * @swagger
+     * /api/v2/all/user/email/move/{token}:
+     *   post:
+     *     description: request email change
+     *     operationId: "requestChangeEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: "path"
+     *            name: "token"
+     *            description: "token for email changing"
+     *            required: true
+     *            schema:
+     *              type: string
+     *          - in: "query"
+     *            name: "redirect"
+     *            description: "optional redirect page "
+     *            required: false
+     *            schema:
+     *              type: string
+     *              example: http://brodcaster.com/changeEmailResponse.html
+     *     responses:
+     *        "200":
+     *          description: a confirmation page is displayed and indicate if the email had been updated or not
+     *        "302":
+     *          description: User is redirected to an url post fixed with '?success=true/false' depending on the success of email change. That happens when redirect query parameter is set
+     */
     router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email_ajax);
 
 

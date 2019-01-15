@@ -117,8 +117,7 @@ function change_email_test_suite(authenticate, change_password) {
         });
 
         it('should report a success', function() {
-            expect(this.res.statusCode).equal(200);
-            expect(this.res.body.success).equal(true);
+            expect(this.res.statusCode).equal(204);
         });
 
         it('should have generated a token', function(done) {
@@ -137,7 +136,6 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure forbidden', function() {
             expect(this.res.statusCode).equal(403);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('WRONG_PASSWORD');
         });
 
@@ -157,7 +155,6 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure email token', function() {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
         });
 
@@ -176,7 +173,6 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure email token', function() {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
         });
 
@@ -206,8 +202,7 @@ function change_email_test_suite(authenticate, change_password) {
         });
 
         it('should report a success', function() {
-            expect(this.res.statusCode).equal(200);
-            expect(this.res.body.success).equal(true);
+            expect(this.res.statusCode).equal(204);
         });
 
         it('should have five tokens', function(done) {
@@ -241,7 +236,6 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure', function() {
             expect(this.res.statusCode).equal(429);
-            expect(this.res.body.success).equal(false);
         });
 
         it('should have five tokens', function(done) {

@@ -167,7 +167,7 @@ function change_email(req, res) {
                 function(e) {
                     logger.warn('[POST /email/change][EMAILS][ERROR][', e, ']');
                 });
-            return res.status(200).json({success: true});
+            return res.sendStatus(204);
         }).catch(
         function(err) {
             logger.warn('[POST /email/change][FAIL][user_id', oldUser.id, '][from',
@@ -186,7 +186,6 @@ function change_email(req, res) {
                 status = 429;
             }
             return res.status(status).json({
-                success: false,
                 reason: err.message,
                 msg: message
             });
@@ -247,14 +246,14 @@ function email_moved(req, res) {
             return token.consume();
         }).then(
         function() {
-            return res.status(200).json({success: true});
+            return res.sendStatus(204);
         }).catch(
         function(err) {
             logger.error('[GET /email/moved/:token][FAIL][old', oldEmail, '][new', newUsername, '][user.id', user ? user.id : null, '][err', err, ']');
             if (err.data && err.data.success) {
-                return res.status(200).json({success: true, reason: err.message});
+                return res.sendStatus(204);
             } else {
-                return res.status(400).json({success: false, reason: err.message});
+                return res.status(400).json({reason: err.message});
             }
         });
 }

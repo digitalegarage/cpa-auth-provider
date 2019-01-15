@@ -199,7 +199,7 @@ describe('API-V2 add local login', function() {
             context('response', function() {
 
                 it(' should be 200', function() {
-                    expect(ctx.res.statusCode).to.equal(200);
+                    expect(ctx.res.statusCode).to.equal(204);
                 });
             });
             context('User can login using new credentials', function() {
@@ -274,7 +274,7 @@ describe('API-V2 add local login', function() {
             context('response', function() {
 
                 it(' should be 200', function() {
-                    expect(ctx.res.statusCode).to.equal(200);
+                    expect(ctx.res.statusCode).to.equal(204);
                 });
             });
             context('User can login using new credentials', function() {
@@ -340,7 +340,7 @@ describe('API-V2 add local login', function() {
             context('response', function() {
 
                 it(' should be 200', function() {
-                    expect(ctx.res.statusCode).to.equal(200);
+                    expect(ctx.res.statusCode).to.equal(204);
                 });
             });
             context('User can login using new credentials', function() {
