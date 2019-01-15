@@ -761,7 +761,7 @@ module.exports = function(router) {
      *          description: another validation email had been sent
      */
 
-    router.post('/api/v2/jwt/user/profile/request_verification_email', [authHelper.ensureAuthenticated, limiterHelper.verify], resend_validation_email);
+    router.post('/api/v2/jwt/user/profile/request_verification_email', [ passport.authenticate('jwt', {session: false}), limiterHelper.verify], resend_validation_email);
 
     /**
      * @swagger
