@@ -329,7 +329,7 @@
         <div class="col-sm-9 accountNotVerified">
             <p><%= __('PROFILE_FILL_VERIFICATION_LABEL') %></p>
             <form id="verification-link-form"
-                  action='<%= link('/user/profile/request_verification_email') %>'
+                  action='<%= link('/api/v2/session/user/profile/request_verification_email') %>'
                   method="post">
                 <div class="form-group">
                     <% if(config.limiter.type === 'recaptcha' || config.limiter.type === 'recaptcha-optional') { %>

@@ -1,8 +1,5 @@
 "use strict";
 
-var generate = require('../../lib/generate');
-var db = require('../../models');
-
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 

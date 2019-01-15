@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const passport = require('passport');
 const cors = require('../../../../lib/cors');
@@ -10,36 +10,41 @@ const passwordHelper = require('../../../../lib/password-helper');
 const authHelper = require('../../../../lib/auth-helper');
 const appHelper = require('../../../../lib/app-helper');
 const userHelper = require('../../../../lib/user-helper');
-const changeEmailHelper = require ('../../../email/change-email-helper');
+const changeEmailHelper = require('../../../email/change-email-helper');
+const config = require('../../../../config');
+const emailHelper = require('../../../../lib/email-helper');
+const codeHelper = require('../../../../lib/code-helper');
+const limiterHelper = require('../../../../lib/limiter-helper');
+const i18n = require('i18n');
 const _ = require('underscore');
 
 function delete_user_by_id(userId, res) {
 // Transactional part
-    return db.sequelize.transaction(function (transaction) {
+    return db.sequelize.transaction(function(transaction) {
         return db.LocalLogin.destroy({
             where: {user_id: userId},
             transaction: transaction
-        }).then(function () {
+        }).then(function() {
             return db.SocialLogin.destroy({
                 where: {user_id: userId},
                 transaction: transaction
             });
-        }).then(function () {
+        }).then(function() {
             return db.User.destroy({
                 where: {id: userId},
                 transaction: transaction
             });
-        }).then(function () {
+        }).then(function() {
             return res.status(204).send();
         });
     });
 }
 
-function delete_user(req, res){
+function delete_user(req, res) {
     return delete_user_by_id(req.user.id, res);
 }
 
-var delete_user_with_credentials = function (req, res) {
+const delete_user_with_credentials = function(req, res) {
     logger.debug('[API-V2][User][DELETE]');
 
     var user = auth(req);
@@ -50,33 +55,31 @@ var delete_user_with_credentials = function (req, res) {
         var login = user.name;
         var password = user.pass;
 
-
-        db.LocalLogin.findOne({where: {login: login}}).then(function (localLogin) {
+        db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
                 logger.info('locallogin not found');
                 return res.status(401).send();
             } else {
-                return localLogin.verifyPassword(password)
-                    .then(function (isMatch) {
-                        logger.info('isMatch', isMatch);
-                        if (isMatch) {
-                            return delete_user_by_id(localLogin.user_id, res);
-                        } else {
-                            return res.status(401).send();
-                        }
-                    });
+                return localLogin.verifyPassword(password).then(function(isMatch) {
+                    logger.info('isMatch', isMatch);
+                    if (isMatch) {
+                        return delete_user_by_id(localLogin.user_id, res);
+                    } else {
+                        return res.status(401).send();
+                    }
+                });
             }
         });
     }
 };
 
-var get_user_id = function (req, res) {
+const get_user_id = function(req, res) {
     var auth = req.headers.authorization;
     if (!auth) {
         return res.status(401).send({error: 'missing header Authorization'});
     } else {
-        if (auth.indexOf("Bearer ") == 0) {
-            var token = auth.substring("Bearer ".length);
+        if (auth.indexOf('Bearer ') == 0) {
+            var token = auth.substring('Bearer '.length);
             try {
                 let userId = jwtHelper.decode(token).id;
                 return res.status(200).send({id: userId});
@@ -90,37 +93,33 @@ var get_user_id = function (req, res) {
 
 };
 
-var get_user = function (req,res) {
+const get_user = function(req, res) {
     if (!req.headers.authorization || !auth(req)) {
         return res.status(401).send({error: 'missing or bad credential in header Authorization'});
     } else {
         var user = auth(req);
         var login = user.name;
         var password = user.pass;
-        db.LocalLogin.findOne({where: {login: login}})
-        .then(function (localLogin) {
+        db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
                 logger.info('locallogin not found');
                 return res.status(401).send();
             } else {
-                return localLogin.verifyPassword(password)
-                .then(function (isMatch) {
+                return localLogin.verifyPassword(password).then(function(isMatch) {
                     logger.info('isMatch', isMatch);
                     if (isMatch) {
                         db.User.findOne({
                             where: {id: localLogin.user_id},
                             include: [db.Permission]
-                        })
-                        .then(function (user) {
+                        }).then(function(user) {
                             // be sure about what we send? here we go.
-                            res.json(_.pick(user,'id','display_name','firstname','lastname','gender','language','permission_id', 'public_uid'));
-                        })
-                        .catch(function (error) {
+                            res.json(_.pick(user, 'id', 'display_name', 'firstname', 'lastname', 'gender', 'language', 'permission_id', 'public_uid'));
+                        }).catch(function(error) {
                             logger.error(error);
                             res.sendStatus(500);
                         });
                     } else {
-                        logger.debug("Authentication failed for " + user.name);
+                        logger.debug('Authentication failed for ' + user.name);
                         res.sendStatus(401);
                     }
                 });
@@ -129,7 +128,7 @@ var get_user = function (req,res) {
     }
 };
 
-var create_local_login = function(req, res) {
+const create_local_login = function(req, res) {
     req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
     req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
@@ -175,7 +174,7 @@ var create_local_login = function(req, res) {
     });
 };
 
-var change_password = function(req, res) {
+const change_password = function(req, res) {
     req.checkBody('email', req.__('API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL')).isEmail();
     req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();
     req.checkBody('new_password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
@@ -192,13 +191,13 @@ var change_password = function(req, res) {
                 res.status(400).json({
                     errors: [{msg: passwordHelper.getWeaknessesMsg(email, newPassword, req)}],
                     password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
-                    score: passwordHelper.getQuality(email, newPassword),
+                    score: passwordHelper.getQuality(email, newPassword)
                 });
             } else {
                 db.LocalLogin.findOne({
                     where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), email.toLowerCase()),
                     include: [db.User]
-                }).then(function (localLogin) {
+                }).then(function(localLogin) {
                     if (!localLogin) {
                         return res.status(401).send({errors: [{msg: req.__('BACK_USER_NOT_FOUND')}]});
                     } else {
@@ -228,6 +227,37 @@ var change_password = function(req, res) {
             }
         }
     });
+};
+
+const resend_validation_email = function(req, res) {
+    if (req.recaptcha.error){
+        return res.status(400).json({msg: 'reCaptcha is empty or wrong. '});
+    }
+
+    var user = req.user;
+    var email = req.user.LocalLogin ? req.user.LocalLogin.login : '';
+    codeHelper.getOrGenereateEmailVerificationCode(user).then(function(code) {
+        emailHelper.send(
+            config.mail.from,
+            email,
+            'validation-email',
+            {log: false},
+            {
+                confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
+                host: config.mail.host,
+                mail: email,
+                code: code
+            },
+            (user.language) ? user.language : i18n.getLocale()
+        ).then(
+            function() {
+            },
+            function() {
+            }
+        );
+    });
+    return res.sendStatus(204);
+
 };
 
 module.exports = function(router) {
@@ -473,8 +503,6 @@ module.exports = function(router) {
     router.options('/api/v2/cpa/user/login/create', cors);
     router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, create_local_login);
 
-
-
     /**
      * @swagger
      * definitions:
@@ -521,8 +549,6 @@ module.exports = function(router) {
     router.options('/api/v2/all/user/password', cors);
     router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
 
-
-
     /**
      * @swagger
      * definitions:
@@ -568,7 +594,7 @@ module.exports = function(router) {
 
     /**
      * @swagger
-     * /api/v2/session/user/email/change:
+     * /api/v2/jwt/user/email/change:
      *   post:
      *     description: request email change
      *     operationId: "requestChangeEmail"
@@ -597,7 +623,7 @@ module.exports = function(router) {
 
     /**
      * @swagger
-     * /api/v2/session/user/email/change:
+     * /api/v2/cpa/user/email/change:
      *   post:
      *     description: request email change
      *     operationId: "requestChangeEmail"
@@ -623,7 +649,6 @@ module.exports = function(router) {
      *          description: "Password had been updated"
      */
     router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
-
 
     /**
      * @swagger
@@ -653,7 +678,6 @@ module.exports = function(router) {
      *          description: "Password had been updated"
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
-
 
     /**
      * @swagger
@@ -685,5 +709,118 @@ module.exports = function(router) {
      */
     router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email_ajax);
 
+
+    /**
+     * @swagger
+     * /api/v2/session/user/profile/request_verification_email:
+     *   post:
+     *     description: request another validation email
+     *     operationId: "requestValidationEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: "body"
+     *            name: "g-recaptcha-response"
+     *            description: "recaptcha response (sent if broadcaster user recaptcha limiter)"
+     *            required: false
+     *            schema:
+     *              type: string
+     *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
+     *     responses:
+     *        "200":
+     *          description: another validation email had been sent
+     */
+    router.options('/api/v2/session/user/profile/request_verification_email', cors);
+    router.post('/api/v2/session/user/profile/request_verification_email', [authHelper.ensureAuthenticated, limiterHelper.verify], resend_validation_email);
+
+    /**
+     * @swagger
+     * /api/v2/jwt/user/profile/request_verification_email:
+     *   post:
+     *     description: request another validation email
+     *     operationId: "requestValidationEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: "Authorization"
+     *            description: "JWT token"
+     *            required: true
+     *            schema:
+     *              type: string
+     *              example: JWT blablabla
+     *          - in: "body"
+     *            name: "g-recaptcha-response"
+     *            description: "recaptcha response (sent if broadcaster user recaptcha limiter)"
+     *            required: false
+     *            schema:
+     *              type: string
+     *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
+     *     responses:
+     *        "200":
+     *          description: another validation email had been sent
+     */
+
+    router.post('/api/v2/jwt/user/profile/request_verification_email', [authHelper.ensureAuthenticated, limiterHelper.verify], resend_validation_email);
+
+    /**
+     * @swagger
+     * /api/v2/cpa/user/profile/request_verification_email:
+     *   post:
+     *     description: request another validation email
+     *     operationId: "requestValidationEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: blablabla
+     *            description: CPA token
+     *            required: true
+     *          - in: "body"
+     *            name: "g-recaptcha-response"
+     *            description: "recaptcha response (sent if broadcaster user recaptcha limiter)"
+     *            required: false
+     *            schema:
+     *              type: string
+     *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
+     *     responses:
+     *        "200":
+     *          description: another validation email had been sent
+     */
+
+    router.post('/api/v2/cpa/user/profile/request_verification_email', [authHelper.ensureCpaAuthenticated, limiterHelper.verify], resend_validation_email);
+
+    /**
+     * @swagger
+     * /api/v2/oauth/user/profile/request_verification_email:
+     *   post:
+     *     description: request another validation email
+     *     operationId: "requestValidationEmail"
+     *     content:
+     *       - application/json
+     *     parameters:
+     *          - in: header
+     *            name: Authorization
+     *            schema:
+     *              type: string
+     *            example: Bearer blablabla
+     *            description: oAuth access token
+     *            required: true
+     *          - in: "body"
+     *            name: "g-recaptcha-response"
+     *            description: "recaptcha response (sent if broadcaster user recaptcha limiter)"
+     *            required: false
+     *            schema:
+     *              type: string
+     *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
+     *     responses:
+     *        "200":
+     *          description: another validation email had been sent
+     */
+
+    router.post('/api/v2/oauth/user/profile/request_verification_email', [passport.authenticate('bearer', {session: false}), limiterHelper.verify], resend_validation_email);
 
 };
