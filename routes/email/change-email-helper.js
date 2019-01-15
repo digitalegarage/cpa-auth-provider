@@ -14,7 +14,7 @@ var STATES = {
     ALREADY_USED: 'ALREADY_USED',
     EMAIL_ALREADY_TAKEN: 'EMAIL_ALREADY_TAKEN',
     WRONG_PASSWORD: 'WRONG_PASSWORD',
-    TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS',
+    TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS'
 };
 
 const APPEND_MOVED = '?auth=account_moved';
@@ -32,15 +32,15 @@ module.exports = {
     email_moved: email_moved
 };
 
-function move_email_ajax(req, res){
-    return move_email(req, res, true);
+function move_email_ajax(req, res) {
+    return move_email(req, res);
 }
 
-function move_email_html(req, res){
-    return move_email(req, res, false);
+function move_email_html(req, res) {
+    return move_email(req, res);
 }
 
-function move_email(req, res, ajax) {
+function move_email(req, res) {
     var localLogin, token;
     var oldEmail, newUsername;
     var redirect;
@@ -77,15 +77,15 @@ function move_email(req, res, ajax) {
                 }
                 return db.LocalLogin.findOne({
                     where: {user_id: token.user_id},
-                    include: [db.User],
+                    include: [db.User]
                 }).then(function(localLogin) {
                     return db.sequelize.transaction(function(transaction) {
                         return localLogin.updateAttributes({
                             login: newUsername,
-                            verified: true,
+                            verified: true
                         }, {transaction: transaction}).then(function() {
                             return localLogin.User.updateAttributes({
-                                display_name: newUsername,
+                                display_name: newUsername
                             }, {transaction: transaction});
                         });
                     });
@@ -99,16 +99,16 @@ function move_email(req, res, ajax) {
             return token.consume();
         }).then(
         function() {
-            if (ajax){
-                res.status(204);
+            if (req.query.redirect) {
+                return res.redirect(req.query.redirect + '?success=true');
             } else {
                 return renderLandingPage(true, undefined);
             }
         }).catch(
         function(err) {
             logger.error('[GET /email/move/:token][FAIL][old', oldEmail, '][new', newUsername, '][err', err, ']');
-            if (ajax){
-                res.status(500).send({error: "fail to change email"});
+            if (req.query.redirect) {
+                return res.redirect(req.query.redirect + '?success=' + (err.message === 'ALREADY_USED'));
             } else {
                 return renderLandingPage(err.data && err.data.success, err.message);
             }
@@ -119,7 +119,7 @@ function move_email(req, res, ajax) {
             success: success,
             message: message,
             redirect: redirect,
-            newMail: newUsername,
+            newMail: newUsername
         });
     }
 }
@@ -129,6 +129,7 @@ function change_email(req, res) {
     var oldLocalLogin;
     var newUsername = req.body.new_email;
     var password = req.body.password;
+    var redirect = req.body.redirect;
 
     if (!oldUser) {
         logger.debug('[POST /email/change][FAIL][user_id ][from ][to', newUsername, ' where old user is ', oldUser, ']');
@@ -138,15 +139,15 @@ function change_email(req, res) {
     logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
 
     return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
-            if (localLogin) {
-                throw new Error(STATES.EMAIL_ALREADY_TAKEN);
-            }
-            // At last check password
-            return db.LocalLogin.findOne({where: {user_id: oldUser.id}}).then(function(localLogin) {
-                oldLocalLogin = localLogin;
-                return localLogin.verifyPassword(password);
-            });
-        }).then(
+        if (localLogin) {
+            throw new Error(STATES.EMAIL_ALREADY_TAKEN);
+        }
+        // At last check password
+        return db.LocalLogin.findOne({where: {user_id: oldUser.id}}).then(function(localLogin) {
+            oldLocalLogin = localLogin;
+            return localLogin.verifyPassword(password);
+        });
+    }).then(
         function(correct) {
             if (!correct) {
                 throw new Error(STATES.WRONG_PASSWORD);
@@ -159,7 +160,7 @@ function change_email(req, res) {
                 throw new Error(STATES.TOO_MANY_REQUESTS);
             }
             logger.debug('[POST /email/change][SUCCESS][user_id', oldUser.id, '][from', oldLocalLogin.login, '][to', newUsername, ']');
-            triggerAccountChangeEmails(oldLocalLogin.login, oldUser, req.authInfo ? req.authInfo.client : null, newUsername).then(
+            triggerAccountChangeEmails(oldLocalLogin.login, oldUser, req.authInfo ? req.authInfo.client : null, newUsername, redirect).then(
                 function() {
                     logger.debug('[POST /email/change][EMAILS][SENT]');
                 },
@@ -187,7 +188,7 @@ function change_email(req, res) {
             return res.status(status).json({
                 success: false,
                 reason: err.message,
-                msg: message,
+                msg: message
             });
         });
 }
@@ -198,7 +199,7 @@ function email_moved(req, res) {
     db.UserEmailToken.findOne(
         {
             where: {key: req.params.token},
-            include: [db.User, db.OAuth2Client],
+            include: [db.User, db.OAuth2Client]
         }).then(
         function(token_) {
             token = token_;
@@ -239,7 +240,7 @@ function email_moved(req, res) {
             }
             return localLogin.updateAttributes({
                 login: newUsername,
-                verified: true,
+                verified: true
             });
         }).then(
         function() {
@@ -258,7 +259,7 @@ function email_moved(req, res) {
         });
 }
 
-function triggerAccountChangeEmails(email, user, client, newUsername) {
+function triggerAccountChangeEmails(email, user, client, newUsername, redirect) {
     return new Promise(
         function(resolve, reject) {
             var redirectUri = client ? client.redirect_uri : undefined;
@@ -275,7 +276,10 @@ function triggerAccountChangeEmails(email, user, client, newUsername) {
             }).then(
                 function(verifyToken) {
                     let host = config.mail.host || '';
-                    let confirmLink = host + '/email/move/' + encodeURIComponent(key);
+                    let confirmLink = host + '/api/v2/all/user/email/move/' + encodeURIComponent(key);
+                    if (redirect) {
+                        confirmLink += '?redirect=' + encodeURIComponent(redirect);
+                    }
                     if (redirectUri) {
                         confirmLink = redirectUri + APPEND_MOVED + '&username=' + encodeURIComponent(user.email) + '&token=' + encodeURIComponent(key);
                     }
@@ -288,7 +292,7 @@ function triggerAccountChangeEmails(email, user, client, newUsername) {
                         {
                             oldEmail: email,
                             newEmail: newUsername,
-                            confirmLink: confirmLink,
+                            confirmLink: confirmLink
                         });
                 }).then(
                 function() {
@@ -301,7 +305,7 @@ function triggerAccountChangeEmails(email, user, client, newUsername) {
                                 {},
                                 {
                                     oldEmail: email,
-                                    newEmail: newUsername,
+                                    newEmail: newUsername
                                 });
                         } else {
                             return new Promise(
@@ -328,9 +332,9 @@ function cycle() {
             {
                 where: {
                     created_at: {
-                        [Op.lt]: deletionDate,
-                    },
-                },
+                        [Op.lt]: deletionDate
+                    }
+                }
             }).then(
             count => {
                 logger.debug('[EmailChange][DELETE/FAIL][count', count, ']');

@@ -4,24 +4,105 @@ const db = require('../../../../models/index');
 const requestHelper = require('../../../request-helper');
 const initData = require('../setup/init-data');
 const login = require('../setup/login');
+const finder = require ('../../../../lib/finder');
+
 
 describe('API V2 POST change email', function() {
 
     context('Using session', function() {
-        change_email_test_suite(login.session_authenticate, change_password_with_session);
+        change_email_test_suite(login.session_authenticate, change_email_with_session);
     });
 
     context('Using oauth', function() {
-        change_email_test_suite(login.oAuth_authenticate, change_password_with_oauth);
+        change_email_test_suite(login.oAuth_authenticate, change_email_with_oauth);
     });
 
     context('Using jwt', function() {
-        change_email_test_suite(login.jwt_authenticate, change_password_with_jwt);
+        change_email_test_suite(login.jwt_authenticate, change_email_with_jwt);
     });
 
     context('Using cpa', function() {
-        change_email_test_suite(login.cpa_authenticate, change_password_with_cpa);
+        change_email_test_suite(login.cpa_authenticate, change_email_with_cpa);
     });
+});
+
+
+describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
+    const URL = '/api/v2/all/user/email/move/{token}';
+    const NEW_EMAIL = 'number2@second.org';
+    const VALID_TOKEN = 'ABC';
+    const send_valid_change_token = function(done) {
+        requestHelper.sendRequest(
+            this,
+            URL.replace(/{token}/, VALID_TOKEN),
+            {
+                method: 'get'
+            },
+            done
+        );
+    };
+    const send_wrong_token = function(done) {
+        requestHelper.sendRequest(
+            this,
+            URL.replace(/{token}/, 'wrong'),
+            {
+                method: 'get',
+                cookie: this.cookie,
+                accessToken: this.accessToken
+            },
+            done
+        );
+    };
+
+    context('with correct token', function() {
+        before(initData.resetDatabase);
+        before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
+        before(send_valid_change_token);
+
+
+        it('should send success status', function() {
+            expect(this.res.statusCode).equal(200);
+        });
+
+        it('should change the email', function(done) {
+            check_email_has_been_changed(NEW_EMAIL, done);
+        });
+    });
+
+    context('using a correct token twice', function() {
+        before(initData.resetDatabase);
+        before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
+
+        before(send_valid_change_token);
+        before(send_valid_change_token);
+
+        it('should send success status', function() {
+            expect(this.res.statusCode).equal(200);
+        });
+
+        it('should have changed the email', function(done) {
+            check_email_has_been_changed(NEW_EMAIL, done);
+
+        });
+    });
+
+    context('using the wrong kind of token', function() {
+        before(initData.resetDatabase);
+        before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
+
+        before(send_wrong_token);
+
+        it('should report a failure', function() {
+            expect(this.res.statusCode).equal(200);
+            expect(this.res.text.indexOf('Invalid token for authentication') > 0).equal(true);
+        });
+
+        it('should not have changed the email', function(done) {
+            check_email_hasn_t_changed(done);
+        });
+    });
+
+
 });
 
 function change_email_test_suite(authenticate, change_password) {
@@ -169,9 +250,10 @@ function change_email_test_suite(authenticate, change_password) {
     });
 }
 
+// Change email with different security protocol
 // oAuth
 
-function change_password_with_oauth(newEmail, password, done) {
+function change_email_with_oauth(newEmail, password, done) {
     requestHelper.sendRequest(
         this,
         '/api/v2/oauth/user/email/change',
@@ -188,7 +270,7 @@ function change_password_with_oauth(newEmail, password, done) {
     );
 }
 
-function change_password_with_session(newEmail, password, done) {
+function change_email_with_session(newEmail, password, done) {
     requestHelper.sendRequest(
         this,
         '/api/v2/session/user/email/change',
@@ -204,7 +286,7 @@ function change_password_with_session(newEmail, password, done) {
     );
 }
 
-function change_password_with_jwt(newEmail, password, done) {
+function change_email_with_jwt(newEmail, password, done) {
     requestHelper.sendRequest(
         this,
         '/api/v2/jwt/user/email/change',
@@ -220,7 +302,7 @@ function change_password_with_jwt(newEmail, password, done) {
     );
 }
 
-function change_password_with_cpa(newEmail, password, done) {
+function change_email_with_cpa(newEmail, password, done) {
     requestHelper.sendRequest(
         this,
         '/api/v2/cpa/user/email/change',
@@ -265,4 +347,45 @@ function user_should_have_five_tokens(done) {
         }
     ).catch(done);
 }
+
+function check_email_has_been_changed(NEW_EMAIL, done) {
+    finder.findUserByLocalAccountEmail(NEW_EMAIL).then(
+        function(localLogin) {
+            expect(localLogin).a('object');
+            expect(localLogin.user_id).equal(initData.USER_1.id);
+            expect(localLogin.verified).equal(true);
+            done();
+        }
+    ).catch(done);
+}
+
+function check_email_hasn_t_changed(done) {
+    db.LocalLogin.findOne({where: {user_id: initData.USER_1.id}}).then(
+        function(localLogin) {
+            expect(localLogin).a('object');
+            expect(localLogin.login).equal(initData.USER_1.email);
+            done();
+        }
+    ).catch(done);
+}
+
+// Utils
+
+function createToken(key, address, user) {
+    return function(done) {
+        db.UserEmailToken.create(
+            {
+                user_id: user.id,
+                key: key,
+                type: 'MOV$' + address,
+            }
+        ).then(
+            function(t) {
+                done();
+            },
+            done
+        );
+    };
+}
+
 

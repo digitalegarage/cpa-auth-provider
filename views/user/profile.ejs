@@ -620,7 +620,7 @@
 
                 $.ajax(
                     {
-                        url: '<%= link('/email/change') %>',
+                        url: '<%= link('/api/v2/session/user/email/change') %>',
                         contentType: "application/json; charset=utf-8",
                         type: 'POST',
                         data: JSON.stringify({

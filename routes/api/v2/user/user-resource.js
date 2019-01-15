@@ -539,6 +539,11 @@ module.exports = function(router) {
      *              type: string
      *              example: 0ldPassw0rd
      *              description:  previous password
+     *          redirect:
+     *              type: string
+     *              example: http://brodcaster.com/changeEmailSuccess.html
+     *              description: an optional url to redirect the user after email had been changed
+     *              required: false
      */
 
     /**
@@ -652,7 +657,7 @@ module.exports = function(router) {
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
 
-    router.get('/api/v2/session/user/email/move/:token', changeEmailHelper.move_email_ajax);
+    router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email_ajax);
 
 
 };
