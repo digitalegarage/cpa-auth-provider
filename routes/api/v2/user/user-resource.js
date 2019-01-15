@@ -659,13 +659,6 @@ module.exports = function(router) {
      *     content:
      *       - application/json
      *     parameters:
-     *          - in: header
-     *            name: Authorization
-     *            schema:
-     *              type: string
-     *            example: Bearer blablabla
-     *            description: oAuth access token
-     *            required: true
      *          -
      *            name: "ChangeEmail"
      *            in: "body"

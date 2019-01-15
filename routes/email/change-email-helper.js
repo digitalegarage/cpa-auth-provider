@@ -258,7 +258,7 @@ function email_moved(req, res) {
         });
 }
 
-function triggerAccountChangeEmails(email, user, client, newUsername, redirect) {
+function triggerAccountChangeEmails(email, user, client, newUsername, overrideRedirect) {
     return new Promise(
         function(resolve, reject) {
             var redirectUri = client ? client.redirect_uri : undefined;
@@ -276,11 +276,12 @@ function triggerAccountChangeEmails(email, user, client, newUsername, redirect) 
                 function(verifyToken) {
                     let host = config.mail.host || '';
                     let confirmLink = host + '/api/v2/all/user/email/move/' + encodeURIComponent(key);
-                    if (redirect) {
-                        confirmLink += '?redirect=' + encodeURIComponent(redirect);
-                    }
-                    if (redirectUri) {
-                        confirmLink = redirectUri + APPEND_MOVED + '&username=' + encodeURIComponent(user.email) + '&token=' + encodeURIComponent(key);
+                    if (overrideRedirect) {
+                        confirmLink += '?redirect=' + encodeURIComponent(overrideRedirect);
+                    } else {
+                        if (redirectUri) {
+                            confirmLink = redirectUri + APPEND_MOVED + '&username=' + encodeURIComponent(user.email) + '&token=' + encodeURIComponent(key);
+                        }
                     }
                     logger.debug('send email', confirmLink);
                     return emailHelper.send(

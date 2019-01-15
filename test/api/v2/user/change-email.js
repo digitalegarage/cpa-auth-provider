@@ -4,8 +4,7 @@ const db = require('../../../../models/index');
 const requestHelper = require('../../../request-helper');
 const initData = require('../setup/init-data');
 const login = require('../setup/login');
-const finder = require ('../../../../lib/finder');
-
+const finder = require('../../../../lib/finder');
 
 describe('API V2 POST change email', function() {
 
@@ -26,15 +25,25 @@ describe('API V2 POST change email', function() {
     });
 });
 
-
 describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     const URL = '/api/v2/all/user/email/move/{token}';
     const NEW_EMAIL = 'number2@second.org';
     const VALID_TOKEN = 'ABC';
+    const REDIRECT = 'http://localhost/changemailresult.html';
     const send_valid_change_token = function(done) {
         requestHelper.sendRequest(
             this,
             URL.replace(/{token}/, VALID_TOKEN),
+            {
+                method: 'get'
+            },
+            done
+        );
+    };
+    const send_valid_change_token_with_redirect = function(done) {
+        requestHelper.sendRequest(
+            this,
+            URL.replace(/{token}/, VALID_TOKEN) + '?redirect=' + REDIRECT,
             {
                 method: 'get'
             },
@@ -53,15 +62,42 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
             done
         );
     };
+    const send_wrong_token_with_redirect = function(done) {
+        requestHelper.sendRequest(
+            this,
+            URL.replace(/{token}/, 'wrong')+ '?redirect=' + REDIRECT,
+            {
+                method: 'get',
+                cookie: this.cookie,
+                accessToken: this.accessToken
+            },
+            done
+        );
+    };
 
     context('with correct token', function() {
         before(initData.resetDatabase);
         before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
         before(send_valid_change_token);
 
-
         it('should send success status', function() {
             expect(this.res.statusCode).equal(200);
+        });
+
+        it('should change the email', function(done) {
+            check_email_has_been_changed(NEW_EMAIL, done);
+        });
+    });
+
+    context('with redirect', function() {
+        before(initData.resetDatabase);
+        before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
+        before(send_valid_change_token_with_redirect);
+
+        it('should send success status', function() {
+            expect(this.res.statusCode).equal(302);
+            expect(this.res.header.location).to.equal(REDIRECT + '?success=true');
+
         });
 
         it('should change the email', function(done) {
@@ -86,7 +122,7 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
         });
     });
 
-    context('using the wrong kind of token', function() {
+    context('using the wrong token', function() {
         before(initData.resetDatabase);
         before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
 
@@ -102,6 +138,21 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
         });
     });
 
+    context('using the wrong token and redirect', function() {
+        before(initData.resetDatabase);
+        before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
+
+        before(send_wrong_token_with_redirect);
+
+        it('should report a failure', function() {
+            expect(this.res.statusCode).equal(302);
+            expect(this.res.header.location).to.equal(REDIRECT + '?success=false');
+        });
+
+        it('should not have changed the email', function(done) {
+            check_email_hasn_t_changed(done);
+        });
+    });
 
 });
 
@@ -113,7 +164,7 @@ function change_email_test_suite(authenticate, change_password) {
         before(function(done) {
             const newEmail = 'new_email@second.org';
             const password = initData.USER_1.password;
-            change_password.call(this, newEmail, password, done);
+            change_password.call(this, newEmail, password, null, done);
         });
 
         it('should report a success', function() {
@@ -130,7 +181,7 @@ function change_email_test_suite(authenticate, change_password) {
         before(authenticate.call(this));
 
         before(function(done) {
-            change_password.call(this, 'new_email@second.org', initData.USER_1.password + 'madeWrong!', done);
+            change_password.call(this, 'new_email@second.org', initData.USER_1.password + 'madeWrong!', null, done);
 
         });
 
@@ -149,7 +200,7 @@ function change_email_test_suite(authenticate, change_password) {
         before(authenticate.call(this));
 
         before(function(done) {
-            change_password.call(this, initData.USER_2.email, initData.USER_1.password, done);
+            change_password.call(this, initData.USER_2.email, initData.USER_1.password, null, done);
 
         });
 
@@ -168,7 +219,7 @@ function change_email_test_suite(authenticate, change_password) {
         before(authenticate.call(this));
 
         before(function(done) {
-            change_password.call(this, initData.USER_2.email.toUpperCase(), initData.USER_1.password, done);
+            change_password.call(this, initData.USER_2.email.toUpperCase(), initData.USER_1.password, null, done);
         });
 
         it('should report a failure email token', function() {
@@ -186,19 +237,19 @@ function change_email_test_suite(authenticate, change_password) {
         before(authenticate.call(this));
 
         before(function(done) {
-            change_password.call(this, 'n1@one.org', initData.USER_1.password, done);
+            change_password.call(this, 'n1@one.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n2@two.org', initData.USER_1.password, done);
+            change_password.call(this, 'n2@two.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n3@three.org', initData.USER_1.password, done);
+            change_password.call(this, 'n3@three.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n4@four.org', initData.USER_1.password, done);
+            change_password.call(this, 'n4@four.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n5@five.org', initData.USER_1.password, done);
+            change_password.call(this, 'n5@five.org', initData.USER_1.password, null, done);
         });
 
         it('should report a success', function() {
@@ -216,22 +267,22 @@ function change_email_test_suite(authenticate, change_password) {
         before(authenticate.call(this));
 
         before(function(done) {
-            change_password.call(this, 'n1@one.org', initData.USER_1.password, done);
+            change_password.call(this, 'n1@one.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n2@two.org', initData.USER_1.password, done);
+            change_password.call(this, 'n2@two.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n3@three.org', initData.USER_1.password, done);
+            change_password.call(this, 'n3@three.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n4@four.org', initData.USER_1.password, done);
+            change_password.call(this, 'n4@four.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n5@five.org', initData.USER_1.password, done);
+            change_password.call(this, 'n5@five.org', initData.USER_1.password, null, done);
         });
         before(function(done) {
-            change_password.call(this, 'n6@six.org', initData.USER_1.password, done);
+            change_password.call(this, 'n6@six.org', initData.USER_1.password, null, done);
         });
 
         it('should report a failure', function() {
@@ -242,12 +293,39 @@ function change_email_test_suite(authenticate, change_password) {
             user_should_have_five_tokens(done);
         });
     });
+    context('with redirect', function() {
+        const redirect = 'http://localhost/';
+        before(initData.resetDatabase);
+        before(authenticate.call(this));
+
+        before(function(done) {
+            const newEmail = 'new_email@second.org';
+            const password = initData.USER_1.password;
+            change_password.call(this, newEmail, password, redirect, done);
+        });
+
+        it('should report a success', function() {
+            expect(this.res.statusCode).equal(204);
+        });
+
+        it('should have generated a token', function(done) {
+            user_should_have_a_generated_token(done);
+        });
+    });
+
 }
 
 // Change email with different security protocol
 // oAuth
 
-function change_email_with_oauth(newEmail, password, done) {
+function change_email_with_oauth(newEmail, password, redirect, done) {
+    let data = {
+        new_email: newEmail,
+        password: password
+    };
+    if (redirect) {
+        data.redirect = redirect;
+    }
     requestHelper.sendRequest(
         this,
         '/api/v2/oauth/user/email/change',
@@ -255,58 +333,67 @@ function change_email_with_oauth(newEmail, password, done) {
             method: 'post',
             accessToken: this.accessToken,
             tokenType: 'Bearer',
-            data: {
-                new_email: newEmail,
-                password: password
-            }
+            data: data
         },
         done
     );
 }
 
-function change_email_with_session(newEmail, password, done) {
+function change_email_with_session(newEmail, password, redirect, done) {
+    let data = {
+        new_email: newEmail,
+        password: password
+    };
+    if (redirect) {
+        data.redirect = redirect;
+    }
     requestHelper.sendRequest(
         this,
         '/api/v2/session/user/email/change',
         {
             method: 'post',
             cookie: this.cookie,
-            data: {
-                new_email: newEmail,
-                password: password
-            }
+            data: data
         },
         done
     );
 }
 
-function change_email_with_jwt(newEmail, password, done) {
+function change_email_with_jwt(newEmail, password, redirect, done) {
+    let data = {
+        new_email: newEmail,
+        password: password
+    };
+    if (redirect) {
+        data.redirect = redirect;
+    }
     requestHelper.sendRequest(
         this,
         '/api/v2/jwt/user/email/change',
         {
             method: 'post',
             accessToken: this.token,
-            data: {
-                new_email: newEmail,
-                password: password
-            }
+            data: data
         },
         done
     );
 }
 
-function change_email_with_cpa(newEmail, password, done) {
+function change_email_with_cpa(newEmail, password, redirect, done) {
+    let data = {
+        new_email: newEmail,
+        password: password
+    };
+    if (redirect) {
+        data.redirect = redirect;
+    }
     requestHelper.sendRequest(
         this,
         '/api/v2/cpa/user/email/change',
         {
             method: 'post',
             accessToken: this.token,
-            data: {
-                new_email: newEmail,
-                password: password
-            }
+            data: data
         },
         done
     );
@@ -371,7 +458,7 @@ function createToken(key, address, user) {
             {
                 user_id: user.id,
                 key: key,
-                type: 'MOV$' + address,
+                type: 'MOV$' + address
             }
         ).then(
             function(t) {
