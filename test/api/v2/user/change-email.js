@@ -29,11 +29,10 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     const URL = '/api/v2/all/user/email/move/{token}';
     const NEW_EMAIL = 'number2@second.org';
     const VALID_TOKEN = 'ABC';
-    const REDIRECT = 'http://localhost/changemailresult.html';
     const send_valid_change_token = function(done) {
         requestHelper.sendRequest(
             this,
-            URL.replace(/{token}/, VALID_TOKEN),
+            URL.replace(/{token}/, VALID_TOKEN) + '?use_custom_redirect=false',
             {
                 method: 'get'
             },
@@ -43,7 +42,7 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     const send_valid_change_token_with_redirect = function(done) {
         requestHelper.sendRequest(
             this,
-            URL.replace(/{token}/, VALID_TOKEN) + '?redirect=' + REDIRECT,
+            URL.replace(/{token}/, VALID_TOKEN) + '?use_custom_redirect=true',
             {
                 method: 'get'
             },
@@ -65,7 +64,7 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     const send_wrong_token_with_redirect = function(done) {
         requestHelper.sendRequest(
             this,
-            URL.replace(/{token}/, 'wrong')+ '?redirect=' + REDIRECT,
+            URL.replace(/{token}/, 'wrong') + '?use_custom_redirect=true',
             {
                 method: 'get',
                 cookie: this.cookie,
@@ -96,7 +95,7 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
 
         it('should send success status', function() {
             expect(this.res.statusCode).equal(302);
-            expect(this.res.header.location).to.equal(REDIRECT + '?success=true');
+            expect(this.res.header.location).to.equal('http://localhost/changemailresult.html?success=true');
 
         });
 
@@ -146,7 +145,7 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
 
         it('should report a failure', function() {
             expect(this.res.statusCode).equal(302);
-            expect(this.res.header.location).to.equal(REDIRECT + '?success=false');
+            expect(this.res.header.location).to.equal('http://localhost/changemailresult.html?success=false');
         });
 
         it('should not have changed the email', function(done) {

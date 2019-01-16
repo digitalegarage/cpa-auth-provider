@@ -26,19 +26,10 @@ let activeInterval = 0;
 startCycle();
 
 module.exports = {
-    move_email_ajax: move_email_ajax,
-    move_email_html: move_email_html,
+    move_email: move_email,
     change_email: change_email,
     email_moved: email_moved
 };
-
-function move_email_ajax(req, res) {
-    return move_email(req, res);
-}
-
-function move_email_html(req, res) {
-    return move_email(req, res);
-}
 
 function move_email(req, res) {
     var localLogin, token;
@@ -99,16 +90,24 @@ function move_email(req, res) {
             return token.consume();
         }).then(
         function() {
-            if (req.query.redirect) {
-                return res.redirect(req.query.redirect + '?success=true');
+            if (req.query.use_custom_redirect && req.query.use_custom_redirect + '' === 'true' && config.broadcaster.changeEmailConfirmationPage) {
+                if (config.broadcaster.changeEmailConfirmationPage.indexOf('?') >= 0) {
+                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '&success=true');
+                } else {
+                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '?success=true');
+                }
             } else {
                 return renderLandingPage(true, undefined);
             }
         }).catch(
         function(err) {
             logger.error('[GET /email/move/:token][FAIL][old', oldEmail, '][new', newUsername, '][err', err, ']');
-            if (req.query.redirect) {
-                return res.redirect(req.query.redirect + '?success=' + (err.message === 'ALREADY_USED'));
+            if (req.query.use_custom_redirect && req.query.use_custom_redirect + '' === 'true' && config.broadcaster.changeEmailConfirmationPage) {
+                if (config.broadcaster.changeEmailConfirmationPage.indexOf('?') >= 0) {
+                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '&success=' + (err.message === 'ALREADY_USED'));
+                } else {
+                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '?success=' + (err.message === 'ALREADY_USED'));
+                }
             } else {
                 return renderLandingPage(err.data && err.data.success, err.message);
             }
@@ -129,7 +128,7 @@ function change_email(req, res) {
     var oldLocalLogin;
     var newUsername = req.body.new_email;
     var password = req.body.password;
-    var redirect = req.body.redirect;
+    var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
 
     if (!oldUser) {
         logger.debug('[POST /email/change][FAIL][user_id ][from ][to', newUsername, ' where old user is ', oldUser, ']');
@@ -275,14 +274,11 @@ function triggerAccountChangeEmails(email, user, client, newUsername, overrideRe
             }).then(
                 function(verifyToken) {
                     let host = config.mail.host || '';
-                    let confirmLink = host + '/api/v2/all/user/email/move/' + encodeURIComponent(key);
-                    if (overrideRedirect) {
-                        confirmLink += '?redirect=' + encodeURIComponent(overrideRedirect);
-                    } else {
-                        if (redirectUri) {
-                            confirmLink = redirectUri + APPEND_MOVED + '&username=' + encodeURIComponent(user.email) + '&token=' + encodeURIComponent(key);
-                        }
+                    let confirmLink = host + '/api/v2/all/user/email/move/' + encodeURIComponent(key) + '?use_custom_redirect=' + overrideRedirect;
+                    if (redirectUri) {
+                        confirmLink = redirectUri + APPEND_MOVED + '&username=' + encodeURIComponent(user.email) + '&token=' + encodeURIComponent(key);
                     }
+
                     logger.debug('send email', confirmLink);
                     return emailHelper.send(
                         config.mail.from,

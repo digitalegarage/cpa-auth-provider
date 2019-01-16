@@ -16,7 +16,7 @@ module.exports = function(app, options) {
         },
         changeEmailHelper.change_email);
 
-    app.get('/email/move/:token', changeEmailHelper.move_email_html);
+    app.get('/email/move/:token', changeEmailHelper.move_email);
 
     app.options('/email/moved/:token', cors());
     app.get('/email/moved/:token', cors(), changeEmailHelper.email_moved);

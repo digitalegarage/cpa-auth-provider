@@ -562,10 +562,10 @@ module.exports = function(router) {
      *              type: string
      *              example: Passw0rd
      *              description:  previous password
-     *          redirect:
-     *              type: string
-     *              example: http://brodcaster.com/changeEmailResult.html
-     *              description: an optional url to redirect the user after email had been changed
+     *          use_custom_redirect:
+     *              type: boolean
+     *              example: false
+     *              description: if set to true then broadcaster specific redirection'd be used
      *              required: false
      */
 
@@ -586,8 +586,8 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
      *     responses:
-     *        "200":
-     *          description: "Password had been updated"
+     *        "204":
+     *          description: "Change email request had been done"
      */
     router.options('/api/v2/session/user/email/change', cors);
     router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
@@ -617,7 +617,7 @@ module.exports = function(router) {
      *              $ref: "#/definitions/ChangeEmail"
      *     responses:
      *        "204":
-     *          description: "Password had been updated"
+     *          description: "Change email request had been done"
      */
     router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
 
@@ -646,7 +646,7 @@ module.exports = function(router) {
      *              $ref: "#/definitions/ChangeEmail"
      *     responses:
      *        "204":
-     *          description: "Password had been updated"
+     *          description: "Change email request had been done"
      */
     router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
 
@@ -668,7 +668,7 @@ module.exports = function(router) {
      *              $ref: "#/definitions/ChangeEmail"
      *     responses:
      *        "204":
-     *          description: "Password had been updated"
+     *          description: "Change email request had been done"
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
 
@@ -688,19 +688,19 @@ module.exports = function(router) {
      *            schema:
      *              type: string
      *          - in: "query"
-     *            name: "redirect"
-     *            description: "optional redirect page "
+     *            name: "use_custom_redirect"
+     *            description: "if set to true then user'd be redirected to broadcaster specified redirect URI"
      *            required: false
      *            schema:
-     *              type: string
-     *              example: http://brodcaster.com/changeEmailResponse.html
+     *              type: boolean
+     *              example: false
      *     responses:
      *        "200":
      *          description: a confirmation page is displayed and indicate if the email had been updated or not
      *        "302":
-     *          description: User is redirected to an url post fixed with '?success=true/false' depending on the success of email change. That happens when redirect query parameter is set
+     *          description: User is to broadcaster specified redirect URI post fixed with '?success=true/false' depending on the success of email change. That happens when use_custom_redirect query parameter is set to true
      */
-    router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email_ajax);
+    router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email);
 
 
     /**
