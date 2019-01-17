@@ -329,7 +329,7 @@
         <div class="col-sm-9 accountNotVerified">
             <p><%= __('PROFILE_FILL_VERIFICATION_LABEL') %></p>
             <form id="verification-link-form"
-                  action='<%= link('/user/profile/request_verification_email') %>'
+                  action='<%= link('/api/v2/session/user/profile/request_verification_email') %>'
                   method="post">
                 <div class="form-group">
                     <% if(config.limiter.type === 'recaptcha' || config.limiter.type === 'recaptcha-optional') { %>
@@ -620,12 +620,13 @@
 
                 $.ajax(
                     {
-                        url: '<%= link('/email/change') %>',
+                        url: '<%= link('/api/v2/session/user/email/change') %>',
+                        contentType: "application/json; charset=utf-8",
                         type: 'POST',
-                        data: {
+                        data: JSON.stringify({
                             new_email: $changeEmailNew.val(),
                             password: $changeEmailPassword.val(),
-                        },
+                        }),
                         success: function (result) {
                             $("#changeEmailModal").modal('toggle');
                             $changeEmailPassword.val('');
@@ -766,19 +767,19 @@
                 e.preventDefault();
                 resetMessages("form-personnal-data-errors", "personnal-data-errors");
 
-                var userId = "<%= user.id %>";
                 var dab = $birthday.val();
                 var dab_str = dab ? createDate(dab) : '';
 
                 $.ajax({
                     url: "<%= link('/api/v2/session/user/profile') %>",
-                    data: {
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
                         firstname: $firstname.val(),
                         lastname: $lastname.val(),
                         gender: $gender.val(),
                         language: $language.val(),
                         date_of_birth: dab_str
-                    },
+                    }),
                     type: 'PUT',
                     success: function (result) {
                         $firstname.prev(".data-value").text($firstname.val());
@@ -828,24 +829,25 @@
                 $("#form-security-success").hide();
                 $("#form-new-email-success").hide();
 
-                var userId = "<%= user.id %>";
-                var url = "<%= link('/user/') %>" + userId + "/password";
+                var url = "<%= link('/api/v2/all/user/password')%>";
                 var data = {}
                 if (hasPassword !== "true") {
-                    url = "<%= link('/user/') %>" + userId + "/password/create";
+                    url = "<%= link('/api/v2/session/user/login/create')%>";
                     data["email"] = $newEmail.val();
                     data["password"] = $newPassword.val();
                     data["confirm_password"] = $newConfirmPassword.val();
                 } else {
                     password: $password.val();
-                    data["password"] = $password.val();
+                    data["email"] = "<%= profile.login %>";
+                    data["new_password"] = $password.val();
                     data["previous_password"] = $previousPassword.val();
                     data["confirm_password"] = $confirmPassword.val();
                 }
 
                 $.ajax({
                     url: url,
-                    data: data,
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
                     type: 'POST',
                     success: function (result) {
                         // Password stuff

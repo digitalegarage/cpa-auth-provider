@@ -6,7 +6,8 @@ module.exports = {
     baseUrl: 'http://localhost',
 
     broadcaster: {
-        title: ''
+        title: '',
+        changeEmailConfirmationPage: "http://localhost/changemailresult.html"
     },
 
     auth_session_cookie :{
