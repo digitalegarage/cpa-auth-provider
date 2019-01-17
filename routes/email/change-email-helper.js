@@ -129,13 +129,19 @@ function change_email(req, res) {
     var newUsername = req.body.new_email;
     var password = req.body.password;
     var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
+    let oldMail = 'unknown';
 
     if (!oldUser) {
-        logger.debug('[POST /email/change][FAIL][user_id ][from ][to', newUsername, ' where old user is ', oldUser, ']');
+        logger.debug('[POST /email/change][FAIL][user_id][from][to', newUsername, ' where old user is ', oldUser, ']');
         return res.status(401).json({success: false, reason: 'Unauthorized'});
     }
 
-    logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldUser.email, '][to', newUsername, ']');
+    if (oldUser && oldUser.email)
+        oldMail = oldUser.email;
+    else if (oldUser && oldUser.LocalLogin && oldUser.LocalLogin.login)
+        oldMail = oldUser.LocalLogin.login;
+
+    logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldMail, '][to', newUsername, ']');
 
     return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
         if (localLogin) {
