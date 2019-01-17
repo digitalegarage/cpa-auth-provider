@@ -76,8 +76,7 @@ describe('POST /email/change', function () {
         });
 
         it('should report a success', function () {
-            expect(this.res.statusCode).equal(200);
-            expect(this.res.body.success).equal(true);
+            expect(this.res.statusCode).equal(204);
         });
 
         it('should have generated a token', function (done) {
@@ -116,7 +115,6 @@ describe('POST /email/change', function () {
 
         it('should report a failure forbidden', function () {
             expect(this.res.statusCode).equal(403);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('WRONG_PASSWORD');
         });
 
@@ -155,7 +153,6 @@ describe('POST /email/change', function () {
 
         it('should report a failure email token', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
         });
 
@@ -194,7 +191,6 @@ describe('POST /email/change', function () {
 
         it('should report a failure email token', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
         });
 
@@ -222,8 +218,7 @@ describe('POST /email/change', function () {
         before(requestNewEmail('n5@five.org'));
 
         it('should report a success', function () {
-            expect(this.res.statusCode).equal(200);
-            expect(this.res.body.success).equal(true);
+            expect(this.res.statusCode).equal(204);
         });
 
         it('should have five tokens', function (done) {
@@ -253,7 +248,6 @@ describe('POST /email/change', function () {
 
         it('should report a failure', function () {
             expect(this.res.statusCode).equal(429);
-            expect(this.res.body.success).equal(false);
         });
 
         it('should have five tokens', function (done) {
@@ -438,8 +432,7 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should send success status', function () {
-            expect(this.res.statusCode).equal(200);
-            expect(this.res.body.success).equal(true);
+            expect(this.res.statusCode).equal(204);
         });
 
         it('should change the email', function (done) {
@@ -483,8 +476,7 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should send success status', function () {
-            expect(this.res.statusCode).equal(200);
-            expect(this.res.body.success).equal(true);
+            expect(this.res.statusCode).equal(204);
         });
 
         it('should have changed the email', function (done) {
@@ -533,7 +525,6 @@ describe('GET /email/moved/:token', function () {
 
         it('should report a failure', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.body.success).equal(false);
             expect(this.res.body.reason).equal('INVALID_TOKEN');
         });
 

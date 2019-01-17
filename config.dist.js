@@ -14,7 +14,10 @@ module.exports = {
         oauth: {
             // override the oauth validation message
             customMessage: '{client} souhaite accéder à votre compte maRTS.'
-        }
+        },
+        date_format: "dd.mm.yyyy",
+        changeEmailConfirmationPage: "http://localhost"
+
     },
 
     // Define the available identity providers

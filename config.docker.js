@@ -15,7 +15,8 @@ module.exports = {
             // override the oauth validation message
             customMessage: process.env.CUSTOM_OAUTH_MSG || ''
         },
-        date_format: process.env.DATA_FORMAT
+        date_format: process.env.DATA_FORMAT,
+        changeEmailConfirmationPage: process.env.CHANGE_EMAIL_CONFIRMATION_PAGE
     },
 
     i18n: {
