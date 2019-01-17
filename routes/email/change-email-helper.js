@@ -136,11 +136,11 @@ function change_email(req, res) {
         return res.status(401).json({success: false, reason: 'Unauthorized'});
     }
 
-    if (oldUser && oldUser.email)
+    if (oldUser && oldUser.email){
         oldMail = oldUser.email;
-    else if (oldUser && oldUser.LocalLogin && oldUser.LocalLogin.login)
+    } else if (oldUser && oldUser.LocalLogin && oldUser.LocalLogin.login){
         oldMail = oldUser.LocalLogin.login;
-
+    }
     logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldMail, '][to', newUsername, ']');
 
     return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
