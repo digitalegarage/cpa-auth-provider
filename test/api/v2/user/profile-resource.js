@@ -250,7 +250,7 @@ describe('API-V2 profile', function () {
 function oAuthGetProfile(context, done) {
     requestHelper.sendRequest(
         context,
-        "/api/v2/oauth2/user/profile",
+        "/api/v2/oauth/user/profile",
         {
             accessToken: context.token
         },
@@ -259,7 +259,7 @@ function oAuthGetProfile(context, done) {
 }
 
 function oAuthUpdateProfile(context, done) {
-    requestHelper.sendRequest(context, "/api/v2/oauth2/user/profile", {
+    requestHelper.sendRequest(context, "/api/v2/oauth/user/profile", {
             method: 'put',
             accessToken: context.token,
             data: {
