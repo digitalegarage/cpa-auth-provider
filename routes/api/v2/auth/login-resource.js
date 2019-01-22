@@ -72,7 +72,17 @@ module.exports = function (app, options) {
      *               type: "string"
      *               example: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6OCwiZGlzcGxheV9uYW1lIjoibWFpbEBtYWlsLm1haWwiLCJ1cGRhdGVkX2F0IjoiMjAxOC0wOS0xMFQxMTo1Nzo1OS41MTRaIiwiY3JlYXRlZF9hdCI6IjIwMTgtMDktMTBUMTE6NTc6NTkuNTE0WiJ9.grw08gCjKH36rJKDN3thhgjo9HbXTk42BMX-q1Hlv4c"
      *               description: "user session cookie value"
-     *
+     *   PasswordRecover:
+     *      type: "object"
+     *      properties:
+     *           email:
+     *               type: "string"
+     *               example: "someone@domain.org"
+     *               description: "user email"
+     *           g-recaptcha-response:
+     *               type: "string"
+     *               example: "03AF6jDqV2qwvu9iFUeXbiABG9fxCwSYB_NRewpquSl8UbQkniIB4yMSAK0hz3E29FSzxlaw78aQd18Nv9541LtYe5X6tCuZyb78_GUabMXGgDr4_VNGdP_drGR7zN4b1tIP6cTNlSNfgvSwsfYQN6BW8NC0QUlpa5wlDlNioTTn0hGLe0widNeHDqbHcLF292VvsYRDypqdR_D0nMDzKXXr9jEG_itB8c3tAkImmlbVzSeGMEUKORnbMl-ZI-NkFq6Hb_5zfZ1tAf8CcL38FAqywYmY79nrmP1RGSWN4G2xI8CcFx5b7tjtc"
+     *               description: "recaptcha response"
      *
      */
 
@@ -119,6 +129,30 @@ module.exports = function (app, options) {
     app.post('/signup', limiterHelper.verify, recaptcha.middleware.render, function (req, res, next) {
         signupHTML(req, res, handleAfterSessionHtlmLogin);
     });
+
+
+    /**
+     * @swagger
+     * /api/v2/all/password/recover:
+     *   post:
+     *     description: password recover
+     *     operationId: "passwordRecover"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "passwordRecoverData"
+     *            description: "password recover data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/PasswordRecover"
+     *     responses:
+     *          "200":
+     *            description: "a recovery email had been sent"
+     */
+    app.options('/api/v2/all/password/recover', cors);
+    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
+
 
 
     /**
@@ -413,7 +447,7 @@ module.exports = function (app, options) {
             firstname: req.query.firstname ? req.query.firstname : '',
             lastname: req.query.lastname ? req.query.lastname : '',
             login: requestHelper.getPath('/login' + redirect),
-            target: requestHelper.getPath('/api/local/password/recover' + redirect)
+            target: requestHelper.getPath('/api/v2/all/password/recover' + redirect)
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         const path = './login/broadcaster/' + broadcaster + 'forgot-password.ejs';

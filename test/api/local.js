@@ -77,7 +77,7 @@ describe('POST /api/local/password/recover', function () {
         });
 
         it('should return a success ', function () {
-            expect(this.res.statusCode).to.equal(200);
+            expect(this.res.statusCode).to.equal(204);
         });
     });
 
@@ -117,7 +117,7 @@ describe('POST /api/local/password/recover', function () {
         });
 
         it('should return a success ', function () {
-            expect(this.res.statusCode).to.equal(200);
+            expect(this.res.statusCode).to.equal(204);
         });
     });
 

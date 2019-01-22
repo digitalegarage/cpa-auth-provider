@@ -299,7 +299,7 @@ function triggerAccountChangeEmails(email, user, client, newUsername, overrideRe
                 }).then(
                 function() {
                     db.LocalLogin.findOne({where: {user_id: user.id}}).then(function(localLogin) {
-                        if (localLogin.verified) {
+                        if (localLogin && localLogin.verified) {
                             return emailHelper.send(
                                 config.mail.from,
                                 localLogin.login,
