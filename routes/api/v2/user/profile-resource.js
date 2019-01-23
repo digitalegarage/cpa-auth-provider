@@ -213,7 +213,7 @@ module.exports = function (router) {
 
     /**
      * @swagger
-     * /api/v2/oauth2/user/profile:
+     * /api/v2/oauth/user/profile:
      *   get:
      *     description: get logged (using oAuth token security) user profile
      *     parameters:
@@ -232,12 +232,12 @@ module.exports = function (router) {
      *         schema:
      *           $ref: '#/definitions/Profile'
      */
-    router.options('/api/v2/oauth2/user/profile', cors);
-    router.get('/api/v2/oauth2/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile);
+    router.options('/api/v2/oauth/user/profile', cors);
+    router.get('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile);
 
     /**
      * @swagger
-     * /api/v2/oauth2/user/profile:
+     * /api/v2/oauth/user/profile:
      *   put:
      *     description: update user profile (using oAuth token security)
      *     operationId: "updateProfile"
@@ -261,7 +261,7 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile udpated"
      */
-    router.put('/api/v2/oauth2/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile_update);
+    router.put('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile_update);
 
 
     /**

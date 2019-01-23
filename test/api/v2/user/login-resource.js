@@ -15,6 +15,7 @@ var recaptcha = require('express-recaptcha');
 // See https://developers.google.com/recaptcha/docs/faq
 const OK_RECATCHA_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 const OK_RECATCHA_SECRET = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
+const recaptchaResponse = 'a dummy recaptcha response';
 
 // The following recaptacha key should always return ko
 const KO_RECATCHA_KEY = 'ko';
@@ -28,6 +29,9 @@ const DATE_OF_BIRTH = '31.08.1978';
 
 const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
 const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
+
+const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
+const API_PASSWORD_RECOVER_USER_NOT_FOUND = 'User not found';
 
 const AFTER_LOGIN = {
     activated: true,
@@ -737,8 +741,7 @@ describe('API-V2 LOGIN', function () {
             });
         });
     });
-})
-;
+});
 
 describe('API-V2 GET JWT Token', function () {
     before(initData.resetDatabase);
@@ -771,6 +774,103 @@ describe('API-V2 GET JWT Token', function () {
             expect(ctx.res.statusCode).equal(401);
         });
     });
+});
+
+describe('API-V2 PASSWORD RECOVERY', function() {
+
+    let ctx = this;
+
+    let recoverPassword = function(email, response, done) {
+
+        requestHelper.sendRequest(ctx, '/api/v2/all/password/recover', {
+            method: 'post',
+            cookie: ctx.cookie,
+            data: {
+                email: email,
+                'g-recaptcha-response': response
+            }
+        }, done);
+    };
+
+    before(initData.resetDatabase);
+
+    before(function(done) {
+        login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+    });
+
+    context('When user try to recover password with valid email and good recaptcha', function() {
+
+        // Google reCAPTCHA
+        before(function(done) {
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
+        });
+
+
+        before(function(done) {
+            recoverPassword(AN_EMAIL, recaptchaResponse, done);
+        });
+
+        it('should return a success ', function() {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+    });
+
+    context('When user try to recover password with valid email (case insensitive) and good recaptcha', function() {
+
+
+        // Google reCAPTCHA
+        before(function(done) {
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
+        });
+
+        before(function(done) {
+            recoverPassword(AN_EMAIL.toUpperCase(), recaptchaResponse, done);
+        });
+
+        it('should return a success ', function() {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+    });
+
+    context('When user try to recover password with valid email and bad recaptcha', function() {
+
+        // Google reCAPTCHA
+        before(function(done) {
+            recaptcha.init(KO_RECATCHA_KEY, KO_RECATCHA_SECRET);
+            done();
+        });
+
+        before(function(done) {
+            recoverPassword(AN_EMAIL.toUpperCase(), 'dewdew', done);
+        });
+
+        it('should return a 400 error', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+        });
+    });
+
+    context('When user try to recover password with an invalid email and good recaptcha', function() {
+
+
+        // Google reCAPTCHA
+        before(function(done) {
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
+        });
+
+        before(function(done) {
+            recoverPassword('qsdfcewhfuwehweih@qsdf.fr', recaptchaResponse, done);
+        });
+
+        it('should return a 400 error', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
+        });
+    });
+
 });
 
 function getCookieValue(cookieStr) {

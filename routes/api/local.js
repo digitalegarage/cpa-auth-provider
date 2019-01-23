@@ -5,7 +5,6 @@ var config = require('../../config');
 
 var passport = require('passport');
 
-var jwt = require('jwt-simple');
 var JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 var cors = require('../../lib/cors');
@@ -15,10 +14,8 @@ var authHelper = require('../../lib/auth-helper');
 
 var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
+var userHelper = require ('../../lib/user-helper');
 
-var i18n = require('i18n');
-
-const Op = db.sequelize.Op;
 
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromExtractors(
@@ -47,55 +44,7 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 
 module.exports = function (app, options) {
 
-    app.post('/api/local/password/recover', cors, limiterHelper.verify, function (req, res) {
-
-        if (req.recaptcha.error) {
-            res.status(400).json({msg: req.__('API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA')});
-            return;
-        }
-
-        req.checkBody('email', req.__('API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL')).isEmail();
-
-        req.getValidationResult().then(function (result) {
-            if (!result.isEmpty()) {
-                res.status(400).json({errors: result.array()});
-                return;
-            }
-
-            db.LocalLogin.findOne({
-                where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), req.body.email.toLowerCase()),
-                include: [db.User]
-            }).then(function (localLogin) {
-                if (localLogin) {
-                    codeHelper.generatePasswordRecoveryCode(localLogin.user_id).then(function (code) {
-                        emailHelper.send(
-                            config.mail.from,
-                            localLogin.login,
-                            "password-recovery-email",
-                            {log: false},
-                            {
-                                forceLink: config.mail.host + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                host: config.mail.host,
-                                mail: encodeURIComponent(localLogin.login),
-                                code: encodeURIComponent(code)
-                            },
-                            localLogin.User.language ? localLogin.User.language : i18n.getLocale()
-                        ).then(
-                            function () {
-                            },
-                            function (err) {
-                            }
-                        );
-                        return res.status(200).send();
-                    });
-                } else {
-                    return res.status(400).json({msg: req.__('API_PASSWORD_RECOVER_USER_NOT_FOUND')});
-                }
-            }, function (error) {
-                res.status(500).json({success: false, msg: req.__('API_ERROR') + error});
-            });
-        });
-    });
+    app.post('/api/local/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
     // That following line avoid cross domain error like
