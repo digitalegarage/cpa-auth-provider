@@ -92,6 +92,7 @@ module.exports = function (app, options) {
      * /api/v2/session/signup:
      *   post:
      *     description: signup
+     *     tags: [Session]
      *     operationId: "signup"
      *     content:
      *        - application/json
@@ -160,6 +161,7 @@ module.exports = function (app, options) {
      * /api/v2/session/login:
      *   post:
      *     description: login
+     *     tags: [Session]
      *     operationId: "sessionLogin"
      *     content:
      *        - application/json
@@ -236,6 +238,7 @@ module.exports = function (app, options) {
      * /api/v2/session/logout:
      *   delete:
      *     description: disconnect
+     *     tags: [Session]
      *     operationId: "sessionDisconnect"
      *     responses:
      *          "204":
@@ -262,6 +265,7 @@ module.exports = function (app, options) {
      * /api/v2/session/cookie:
      *   get:
      *     description: login
+     *     tags: [Session]
      *     operationId: "getSessionCookie"
      *     parameters:
      *          - in: query
@@ -297,6 +301,7 @@ module.exports = function (app, options) {
      * /api/v2/jwt/signup:
      *   post:
      *     description: signup
+     *     tags: [JWT]
      *     operationId: "signup"
      *     content:
      *        - application/json
@@ -332,6 +337,7 @@ module.exports = function (app, options) {
      * /api/v2/jwt/login:
      *   post:
      *     description: login
+     *     tags: [JWT]
      *     operationId: "sessionLogin"
      *     content:
      *        - application/json
@@ -379,6 +385,7 @@ module.exports = function (app, options) {
      * /api/v2/session/jwt:
      *   get:
      *     description: login
+     *     tags: [Session]
      *     operationId: "getJWTToken"
      *     responses:
      *          "200":

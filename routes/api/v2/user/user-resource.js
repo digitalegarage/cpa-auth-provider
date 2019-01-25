@@ -309,6 +309,7 @@ module.exports = function(router) {
      * /api/v2/basicauth/user:
      *   delete:
      *     description: delete the user providing user credentials
+     *     tags: [Basic Auth]
      *     operationId: "deleteUser"
      *     content:
      *        - application/json
@@ -325,6 +326,7 @@ module.exports = function(router) {
      *            description: "user had been deleted"
      *   get:
      *     description: get a users profile by credentials
+     *     tags: [Basic Auth]
      *     operationId: "getUser"
      *     content:
      *       - application/json
@@ -350,6 +352,7 @@ module.exports = function(router) {
      * /api/v2/jwt/user:
      *   delete:
      *     description: delete the user providing user credentials
+     *     tags: [JWT]
      *     operationId: "deleteUser"
      *     content:
      *        - application/json
@@ -373,6 +376,7 @@ module.exports = function(router) {
      * /api/v2/jwt/user/id:
      *   get:
      *     description: retreive user id from jwt token (id is retrieved in jwt token not from the database)
+     *     tags: [JWT]
      *     operationId: "getUserId"
      *     content:
      *        - application/json
@@ -418,6 +422,7 @@ module.exports = function(router) {
      * /api/v2/session/user/login/create:
      *   post:
      *     description: add a local login for an user having only social logins
+     *     tags: [Session]
      *     operationId: "createPassword"
      *     content:
      *       - application/json
@@ -442,6 +447,7 @@ module.exports = function(router) {
      * /api/v2/jwt/user/login/create:
      *   post:
      *     description: add a local login for an user having only social logins
+     *     tags: [JWT]
      *     operationId: "createPassword"
      *     content:
      *       - application/json
@@ -477,6 +483,7 @@ module.exports = function(router) {
      * /api/v2/cpa/user/login/create:
      *   post:
      *     description: add a local login for an user having only social logins
+     *     tags: [CPA]
      *     operationId: "createPassword"
      *     content:
      *       - application/json
@@ -574,6 +581,7 @@ module.exports = function(router) {
      * /api/v2/session/user/email/change:
      *   post:
      *     description: add a local login for an user having only social logins
+     *     tags: [Session]
      *     operationId: "changeEmail"
      *     content:
      *       - application/json
@@ -597,6 +605,7 @@ module.exports = function(router) {
      * /api/v2/jwt/user/email/change:
      *   post:
      *     description: request email change
+     *     tags: [JWT]
      *     operationId: "requestChangeEmail"
      *     content:
      *       - application/json
@@ -626,6 +635,7 @@ module.exports = function(router) {
      * /api/v2/cpa/user/email/change:
      *   post:
      *     description: request email change
+     *     tags: [CPA]
      *     operationId: "requestChangeEmail"
      *     content:
      *       - application/json
@@ -655,6 +665,7 @@ module.exports = function(router) {
      * /api/v2/session/user/email/change:
      *   post:
      *     description: request email change
+     *     tags: [Session]
      *     operationId: "requestChangeEmail"
      *     content:
      *       - application/json
@@ -708,6 +719,7 @@ module.exports = function(router) {
      * /api/v2/session/user/profile/request_verification_email:
      *   post:
      *     description: request another validation email
+     *     tags: [Session]
      *     operationId: "requestValidationEmail"
      *     content:
      *       - application/json
@@ -731,6 +743,7 @@ module.exports = function(router) {
      * /api/v2/jwt/user/profile/request_verification_email:
      *   post:
      *     description: request another validation email
+     *     tags: [JWT]
      *     operationId: "requestValidationEmail"
      *     content:
      *       - application/json
@@ -761,6 +774,7 @@ module.exports = function(router) {
      * /api/v2/cpa/user/profile/request_verification_email:
      *   post:
      *     description: request another validation email
+     *     tags: [CPA]
      *     operationId: "requestValidationEmail"
      *     content:
      *       - application/json
@@ -791,6 +805,7 @@ module.exports = function(router) {
      * /api/v2/oauth/user/profile/request_verification_email:
      *   post:
      *     description: request another validation email
+     *     tags: [OAUTH]
      *     operationId: "requestValidationEmail"
      *     content:
      *       - application/json

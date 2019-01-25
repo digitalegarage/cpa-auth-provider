@@ -57,6 +57,7 @@ module.exports = function(app, options) {
      * /api/v2/auth/facebook/code:
      *   post:
      *     description: log user (session) using FB code
+     *     tags: [AUTH]
      *     content:
      *        - application/json
      *     parameters:
@@ -100,6 +101,7 @@ module.exports = function(app, options) {
      * /api/v2/auth/facebook/token:
      *   post:
      *     description: log user (session) using FB token
+     *     tags: [AUTH]
      *     content:
      *        - application/json
      *     parameters:
