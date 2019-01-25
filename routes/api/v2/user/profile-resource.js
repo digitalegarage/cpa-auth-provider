@@ -216,6 +216,7 @@ module.exports = function (router) {
      * /api/v2/oauth/user/profile:
      *   get:
      *     description: get logged (using oAuth token security) user profile
+     *     tags: [OAUTH]
      *     parameters:
      *          - in: header
      *            name: Authorization
@@ -240,6 +241,7 @@ module.exports = function (router) {
      * /api/v2/oauth/user/profile:
      *   put:
      *     description: update user profile (using oAuth token security)
+     *     tags: [OAUTH]
      *     operationId: "updateProfile"
      *     content:
      *        - application/json
@@ -269,6 +271,7 @@ module.exports = function (router) {
      * /api/v2/session/user/profile:
      *   get:
      *     description: get logged (using session cookie security) user profile
+     *     tags: [Session]
      *     produces:
      *       - application/json
      *     responses:
@@ -285,6 +288,7 @@ module.exports = function (router) {
      * /api/v2/session/user/profile:
      *   put:
      *     description: update user profile (using session cookie security)
+     *     tags: [Session]
      *     operationId: "updateProfile"
      *     content:
      *        - application/json
@@ -307,6 +311,7 @@ module.exports = function (router) {
      * /api/v2/jwt/user/profile:
      *   get:
      *     description: get logged (using JWT token security) user profile
+     *     tags: [JWT]
      *     parameters:
      *          - in: header
      *            name: Authorization
@@ -331,6 +336,7 @@ module.exports = function (router) {
      * /api/v2/jwt/user/profile:
      *   put:
      *     description: update user profile (using JWT token security)
+     *     tags: [JWT]
      *     content:
      *        - application/json
      *     parameters:
@@ -358,6 +364,7 @@ module.exports = function (router) {
      * /api/v2/cpa/user/profile:
      *   get:
      *     description: get logged (using CPA token security) user profile
+     *     tags: [CPA]
      *     parameters:
      *          - in: header
      *            name: Authorization
@@ -382,6 +389,7 @@ module.exports = function (router) {
      * /api/v2/cpa/user/profile:
      *   put:
      *     description: update user profile (using CPA token security)
+     *     tags: [CPA]
      *     operationId: "updateProfile"
      *     content:
      *        - application/json
