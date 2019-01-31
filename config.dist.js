@@ -16,8 +16,9 @@ module.exports = {
             customMessage: '{client} souhaite accéder à votre compte maRTS.'
         },
         date_format: "dd.mm.yyyy",
-        changeEmailConfirmationPage: "http://localhost"
-
+        changeEmailConfirmationPage: "http://localhost",
+        changeMoveEmailConfirmationPage: "http://localhost",
+        changeRecoverPasswordPage: "http://localhost"
     },
 
     // Define the available identity providers

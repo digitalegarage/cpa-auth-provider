@@ -16,9 +16,10 @@ module.exports = {
             customMessage: process.env.CUSTOM_OAUTH_MSG || ''
         },
         date_format: process.env.DATA_FORMAT,
-        changeEmailConfirmationPage: process.env.CHANGE_EMAIL_CONFIRMATION_PAGE
+        changeEmailConfirmationPage: process.env.CHANGE_EMAIL_CONFIRMATION_PAGE,
+        changeMoveEmailConfirmationPage: process.env.CHANGE_MOVE_EMAIL_CONFIRMATION_PAGE,
+        changeRecoverPasswordPage: process.env.CHANGE_RECOVER_PASSWORD_PAGE
     },
-
     i18n: {
         cookie_name: 'language',
         cookie_duration: 365 * 24 * 60 * 60 * 1000,
