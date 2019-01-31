@@ -63,9 +63,8 @@ module.exports = function (app, options) {
      */
     app.options('/api/v2/auth/google/token', cors);
     app.post('/api/v2/auth/google/token', function(req, res) {
-        if (!req.body.token){//} || !req.body.redirect_uri) {
-            // return res.status(400).json({error: 'missing code and/or redirect_uri in request body'}).send();
-            return res.status(400).json({error: 'missing code in request body'}).send();
+        if (!req.body.token) {
+            return res.status(400).json({error: 'missing token in request body'}).send();
         }
         authViaToken(req.body.token, req, res);
 
