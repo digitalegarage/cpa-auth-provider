@@ -103,6 +103,10 @@ module.exports = function (app, options) {
      */
     app.options('/api/v2/auth/google/code', cors);
     app.post('/api/v2/auth/google/code', function(req, res) {
+        // To test that endpoint you can get a code in the callback url you have when login via
+        // https://accounts.google.com/o/oauth2/auth?approval_prompt=force&client_id=<client_id&redirect_uri=<redirect_uri>&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile&state=%257Bredirect%3Dhttps%253A%252F%252Flocalhost.rts.ch%253A8443%252F,source%3Dnull%257D
+        // client_id could be 428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com (it has to be the same as the one in config.identity_providers.google.client_id)
+        // redirect_uri could be http://localhost
         if (!req.body.code || !req.body.redirect_uri) {
             return res.status(400).json({error: 'missing code and/or redirect_uri in request body'}).send();
         }

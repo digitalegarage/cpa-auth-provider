@@ -27,6 +27,9 @@ describe('API-V2 Google for AJAX', function() {
         sinon.stub(googleHelper, "verifyGoogleIdToken").returns(
             mockVerifyGoogleIdToken()
         );
+        sinon.stub(googleHelper, "getGoogleToken").returns(
+            mockGetGoogleToken()
+        );
     });
 
     after(function() {
@@ -80,6 +83,55 @@ describe('API-V2 Google for AJAX', function() {
         });
 
     });
+
+    context('Code', function() {
+
+        context('when missing body data', function() {
+            var ctx = this;
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/code', {
+                    method: 'post',
+                    data: {},
+                }, done);
+            });
+
+            it('should return a 400', function() {
+                expect(ctx.res.statusCode).to.equal(400);
+                expect(ctx.res.body.error);
+                expect(ctx.res.body.error).to.equal('missing code and/or redirect_uri in request body');
+            });
+
+        });
+
+        context('with valid google code', function() {
+            var ctx = this;
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/code', {
+                    method: 'post',
+                    data: {
+                        redirect_uri: 'http://localhost',
+                        code: 'a_valid_code',
+                    },
+                }, done);
+            });
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/session/user/profile', {
+                    cookie: ctx.cookie,
+                }, done);
+            });
+
+            it('user should be logged', function() {
+                expect(ctx.res.statusCode).to.equal(200);
+            });
+
+        });
+
+    });
+
 });
 
 function mockVerifyGoogleIdToken() {
@@ -93,6 +145,14 @@ function mockVerifyGoogleIdToken() {
             gender: USER_PROFILE.gender,
             birthday: null
         });
+    });
+}
+
+
+
+function mockGetGoogleToken() {
+    return new Promise(function (resolve, reject) {
+        resolve("a_valid_token");
     });
 }
 
