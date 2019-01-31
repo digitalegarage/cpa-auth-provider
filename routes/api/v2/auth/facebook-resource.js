@@ -3,6 +3,7 @@
 const cors = require('../../../../lib/cors');
 const config = require('../../../../config');
 const socialLoginHelper = require('../../../../lib/social-login-helper');
+const afterLoginHelper = require('../../../../lib/afterlogin-helper');
 const facebookHelper = require('../../../../lib/facebook-helper');
 const request = require('request-promise');
 const logger = require('../../../../lib/logger');
@@ -57,6 +58,7 @@ module.exports = function(app, options) {
      * /api/v2/auth/facebook/code:
      *   post:
      *     description: log user (session) using FB code
+     *     tags: [AUTH]
      *     content:
      *        - application/json
      *     parameters:
@@ -100,6 +102,7 @@ module.exports = function(app, options) {
      * /api/v2/auth/facebook/token:
      *   post:
      *     description: log user (session) using FB token
+     *     tags: [AUTH]
      *     content:
      *        - application/json
      *     parameters:
@@ -171,6 +174,7 @@ function validateTokenAndLog(accessToken, res, req) {
                         }).then(function(socialLogin) {
                             // Step 4: Log last login
                             socialLogin.logLogin(user);
+                            afterLoginHelper.afterLogin(user, profile.email, res);
 
                             // Step 5: Finally log the user
                             req.logIn(user, function() {
