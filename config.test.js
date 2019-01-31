@@ -7,7 +7,9 @@ module.exports = {
 
     broadcaster: {
         title: '',
-        changeEmailConfirmationPage: "http://localhost/changemailresult.html"
+        // changeEmailConfirmationPage: "http://localhost/changemailresult.html",
+        // changeMoveEmailConfirmationPage: "http://localhost/moveEmailConfirmation.html",
+        // changeRecoverPasswordPage: "http://localhost/recoverPassword.html"
     },
 
     auth_session_cookie :{
