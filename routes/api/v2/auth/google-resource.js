@@ -1,13 +1,14 @@
 "use strict";
 
 const cors = require('../../../../lib/cors');
-var config = require('../../../../config');
-var socialLoginHelper = require('../../../../lib/social-login-helper');
-var googleHelper = require('../../../../lib/google-helper');
+const config = require('../../../../config');
+const socialLoginHelper = require('../../../../lib/social-login-helper');
+const googleHelper = require('../../../../lib/google-helper');
 const afterLoginHelper = require('../../../../lib/afterlogin-helper');
-var db = require('../../../../models/index');
+const db = require('../../../../models/index');
+const logger = require('../../../../lib/logger');
 
-var passport = require('passport');
+const passport = require('passport');
 
 
 const GOOGLE_STRATEGY_NAME = 'googleRedirect';
@@ -96,6 +97,7 @@ module.exports = function (app, options) {
                         }).then(function(socialLogin) {
                             // Step 3: Log last login
                             socialLogin.logLogin(user);
+                            afterLoginHelper.afterLogin(user, gmailUser.email, res);
 
                             // Step 4: Finally log the user
                             req.logIn(user, function() {
