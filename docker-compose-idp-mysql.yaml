@@ -6,6 +6,7 @@ services:
       - 3000:3000
     environment:
       - MAIL_FROM=no-reply@rts.ch
+      - BASE_URL=http://localhost:3000
       - IDP_HOST=http://localhost:3000
       - IDP_RECAPCHA_SITEKEY=6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI
       - IDP_RECAPCHA_SECRETKEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
@@ -20,6 +21,12 @@ services:
       - TRACKING_COOKIE=true
       - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
       - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
+      - FACEBOOK_LOGIN_ENABLED=false
+      - FACEBOOK_LOGIN_ID=fake
+      - FACEBOOK_LOGIN_SECRET=bad
+      - GOOGLE_LOGIN_ENABLED=false
+      - GOOGLE_LOGIN_ID=fake
+      - GOOGLE_LOGIN_SECRET=bad
     depends_on:
     - mysql
   mysql:
