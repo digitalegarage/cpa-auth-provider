@@ -38,7 +38,16 @@ module.exports = function (app, options) {
     });
 
     app.get('/password/edit', function (req, res) {
-        res.render('password-edit.ejs', {email: req.query.email, code: req.query.code});
+        if (config.broadcaster.changeRecoverPasswordPage) {
+            var queryString = 'email='+req.query.email+'&code='+req.query.code;
+            if (config.broadcaster.changeRecoverPasswordPage.indexOf('?') >= 0) {
+                return res.redirect(config.broadcaster.changeRecoverPasswordPage + '&'+ queryString);
+            } else {
+                return res.redirect(config.broadcaster.changeRecoverPasswordPage + '?' + queryString);
+            }
+        } else {
+            res.render('password-edit.ejs', {email: req.query.email, code: req.query.code});
+        }
     });
 
     // For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
@@ -60,12 +69,28 @@ module.exports = function (app, options) {
             if (localLogin) {
                 codeHelper.verifyEmail(localLogin, req.query.code).then(function (success) {
                         if (success) {
-                            res.render('./verify-mail.ejs', {
-                                verified: localLogin.verified,
-                                userId: localLogin.user_id
-                            });
+                            if (config.broadcaster.changeEmailConfirmationPage) {
+                                if (config.broadcaster.changeEmailConfirmationPage.indexOf('?') >= 0) {
+                                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '&success=true');
+                                } else {
+                                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '?success=true');
+                                }
+                            } else {
+                                    res.render('./verify-mail.ejs', {
+                                        verified: localLogin.verified,
+                                        userId: localLogin.user_id
+                                    });
+                            }
                         } else {
-                            res.render('./verify-mail.ejs', {verified: false});
+                            if (config.broadcaster.changeEmailConfirmationPage) {
+                                if (config.broadcaster.changeEmailConfirmationPage.indexOf('?') >= 0) {
+                                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '&success=false');
+                                } else {
+                                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '?success=false');
+                                }
+                            } else {
+                                res.render('./verify-mail.ejs', {verified: false});
+                            }
                         }
                     }
                 );

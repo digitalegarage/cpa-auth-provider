@@ -5,6 +5,7 @@ const requestHelper = require('../../../request-helper');
 const initData = require('../setup/init-data');
 const login = require('../setup/login');
 const finder = require('../../../../lib/finder');
+const config = require('../../../../config');
 
 describe('API V2 POST change email', function() {
 
@@ -32,17 +33,7 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     const send_valid_change_token = function(done) {
         requestHelper.sendRequest(
             this,
-            URL.replace(/{token}/, VALID_TOKEN) + '?use_custom_redirect=false',
-            {
-                method: 'get'
-            },
-            done
-        );
-    };
-    const send_valid_change_token_with_redirect = function(done) {
-        requestHelper.sendRequest(
-            this,
-            URL.replace(/{token}/, VALID_TOKEN) + '?use_custom_redirect=true',
+            URL.replace(/{token}/, VALID_TOKEN),
             {
                 method: 'get'
             },
@@ -89,11 +80,21 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     });
 
     context('with redirect', function() {
+        var back = config.broadcaster.changeMoveEmailConfirmationPage;
+        before(function(done){
+            config.broadcaster.changeMoveEmailConfirmationPage =  'http://localhost/changemailresult.html';
+            done();
+        });
+        after(function(done){
+            config.broadcaster.changeMoveEmailConfirmationPage =  back;
+            done();
+        });
+
         before(initData.resetDatabase);
         before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
-        before(send_valid_change_token_with_redirect);
+        before(send_valid_change_token);
 
-        it('should send success status', function() {
+        it('should redirect', function() {
             expect(this.res.statusCode).equal(302);
             expect(this.res.header.location).to.equal('http://localhost/changemailresult.html?success=true');
 
@@ -138,12 +139,21 @@ describe('API V2 GET /api/v2/all/user/email/move/:token', function() {
     });
 
     context('using the wrong token and redirect', function() {
+        var back = config.broadcaster.changeMoveEmailConfirmationPage;
+        before(function(done){
+            config.broadcaster.changeMoveEmailConfirmationPage =  'http://localhost/changemailresult.html';
+            done();
+        });
+        after(function(done){
+            config.broadcaster.changeMoveEmailConfirmationPage =  back;
+            done();
+        });
         before(initData.resetDatabase);
         before(createToken(VALID_TOKEN, NEW_EMAIL, initData.USER_1));
 
         before(send_wrong_token_with_redirect);
 
-        it('should report a failure', function() {
+        it('should redirect and indicate a failure', function() {
             expect(this.res.statusCode).equal(302);
             expect(this.res.header.location).to.equal('http://localhost/changemailresult.html?success=false');
         });

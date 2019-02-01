@@ -90,11 +90,11 @@ function move_email(req, res) {
             return token.consume();
         }).then(
         function() {
-            if (req.query.use_custom_redirect && req.query.use_custom_redirect + '' === 'true' && config.broadcaster.changeEmailConfirmationPage) {
-                if (config.broadcaster.changeEmailConfirmationPage.indexOf('?') >= 0) {
-                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '&success=true');
+            if (config.broadcaster.changeMoveEmailConfirmationPage) {
+                if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=true');
                 } else {
-                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '?success=true');
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=true');
                 }
             } else {
                 return renderLandingPage(true, undefined);
@@ -102,11 +102,11 @@ function move_email(req, res) {
         }).catch(
         function(err) {
             logger.error('[GET /email/move/:token][FAIL][old', oldEmail, '][new', newUsername, '][err', err, ']');
-            if (req.query.use_custom_redirect && req.query.use_custom_redirect + '' === 'true' && config.broadcaster.changeEmailConfirmationPage) {
-                if (config.broadcaster.changeEmailConfirmationPage.indexOf('?') >= 0) {
-                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '&success=' + (err.message === 'ALREADY_USED'));
+            if (config.broadcaster.changeMoveEmailConfirmationPage) {
+                if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=' + (err.message === 'ALREADY_USED'));
                 } else {
-                    return res.redirect(config.broadcaster.changeEmailConfirmationPage + '?success=' + (err.message === 'ALREADY_USED'));
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=' + (err.message === 'ALREADY_USED'));
                 }
             } else {
                 return renderLandingPage(err.data && err.data.success, err.message);
