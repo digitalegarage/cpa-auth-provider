@@ -190,6 +190,7 @@
 	"ADMIN_USER_EXPORT_MODALE_SUBMIT": "Confirm",// TODO PETER :)))))
 
 	"PROFILE_JS_ERROR_DELETE_ACCOUNT": "An error occurred while requesting data export.",// TODO PETER :)))))
+	"PROFILE_JS_SUCCESS_EXPORT_ACCOUNT": "Your data export request is in progress",// TODO PETER :)))))
 
 
 	"PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD": "Fehlendes Passwort",
