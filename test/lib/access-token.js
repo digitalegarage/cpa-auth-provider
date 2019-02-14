@@ -8,6 +8,6 @@ describe('generate.accessToken', function() {
 
         // b64token    = 1*( ALPHA / DIGIT /
         //       "-" / "." / "_" / "~" / "+" / "/" ) *"="
-        expect(accessToken).to.match(/^[A-Za-z0-9\-._~+/]+=*$/);
+        expect(accessToken).to.match(/^[A-Za-z0-9\-._~+\/]+=*$/);
     });
 });
