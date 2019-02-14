@@ -133,6 +133,15 @@
     "ADMIN_USER_DELETE_MODALE_CLOSE": "Cancel",
     "ADMIN_USER_DELETE_MODALE_SUBMIT": "Confirm",
 
+    "ADMIN_USER_EXPORT_MODALE_TITLE": "Export your data account",
+    "ADMIN_USER_EXPORT_MODALE_TEXT": "Data export could takes hours.",
+    "ADMIN_USER_EXPORT_MODALE_TEXT_PASSWORD": "To export your data you need to fill in your password below",
+    "ADMIN_USER_EXPORT_MODALE_FORM_PASSWORD_LABEL": "Password",
+    "ADMIN_USER_EXPORT_MODALE_CLOSE": "Cancel",
+    "ADMIN_USER_EXPORT_MODALE_SUBMIT": "Confirm",
+
+    "PROFILE_JS_ERROR_DELETE_ACCOUNT": "An error occurred while requesting data export.",
+
     "ALERT_LANGUAGE_1": "Your default language is different from the one in your profile.",
     "ALERT_LANGUAGE_2": "Click here to update your default language to {{ default_language_of_the_idp }}",
     "ALERT_LANGUAGE_3": "or",
@@ -194,6 +203,8 @@
     "PROFILE_RESEND_VALIDATION_EMAIL_LINK": "Resend",
     "PROFILE_DELETE_YOUR_ACCOUNT_LABEL": "Click the button below to delete your account",
     "PROFILE_DELETE_YOUR_ACCOUNT_LINK": "Delete account",
+    "PROFILE_EXPORT_YOUR_ACCOUNT_LABEL": "Click the button below to export all your data",
+    "PROFILE_EXPORT_YOUR_ACCOUNT_LINK": "Export",
     "PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD": "Missing password",
     "PROFILE_API_DELETE_YOUR_ACCOUNT_WRONG_PASSWORD": "Wrong password",
     "PROFILE_ERROR_MSG": "Please verify that the fields below are filled in and valid before submitting the form",

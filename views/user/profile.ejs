@@ -373,13 +373,22 @@
             <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#deleteUserModal">
                 <span class="button-label"><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LINK') %></span>
             </button>
-        </div>
+
+            <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL ){ %>
+
+            <p><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LABEL') %></p>
+            <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#exportUserModal">
+                <span class="button-label"><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LINK') %></span>
+            </button>
+            <% }%>
+            </div>
 
     </div>
 
     <!-- Add client Modal -->
     <% include ./modales/email-change.ejs %>
     <% include ./modales/user-delete.ejs %>
+    <% include ./modales/user-export.ejs %>
 
     <% if (config.password.quality_check == 'owasp'){ %>
     <% include ../util/password-owasp-support %>
@@ -402,7 +411,9 @@
             var $btnContainer = $('#btn-container');
             var $btnVerificationLink = $('#btn-send-verification-link');
             var $btnDeleteAccount = $('#delete-user');
+            var $btnExportAccount = $('#export-user');
             var $deleteUserModal = $('#deleteUserModal');
+            var $exportUserModal = $('#exportUserModal');
 
             var $firstname = $("#firstname");
             var $lastname = $("#lastname");
@@ -579,6 +590,10 @@
                 $deleteUserModal.removeClass('fade');
             })
 
+            $exportUserModal.on('show.bs.modal', function () {
+                $exportUserModal.removeClass('fade');
+            })
+
             $('#user-pass').keypress(function (event) {
                 //On pressing enter key
                 if (event.which === 13) {
@@ -712,10 +727,12 @@
                     }
                 }
 
-                <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL && profile.hasPassword){ %>
+
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerDeleteWithURL && profile.hasPassword){ %>
                 // Using GDPR manager with local account
                 $.ajax({
-                    url: '<%= config.gdprManager.useGDPRManagerWithURL %>',
+                    url: '<%= config.gdprManager.useGDPRManagerDeleteWithURL %>',
                     type: 'DELETE',
                     headers: {
                         "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
@@ -724,14 +741,14 @@
                     error: deleteFail
                 });
                 <% } %>
-                <% if (config.gdprManager && config.gdprManager.useGDPRManagerWithURL && !profile.hasPassword){ %>
+                 <% if (config.gdprManager && config.gdprManager.useGDPRManagerDeleteWithURL && !profile.hasPassword){ %>
                 // Using GDPR manager without local account
                 $.ajax({
                     url: '<%= link('/api/v2/session/jwt')%>',
                     type: 'GET',
                     success: function (result) {
                         $.ajax({
-                            url: '<%= config.gdprManager.useGDPRManagerWithURL %>',
+                            url: '<%= config.gdprManager.useGDPRManagerDeleteWithURL %>',
                             type: 'DELETE',
                             headers: {
                                 "Authorization": result.token
@@ -745,7 +762,7 @@
 
                 <% } %>
 
-                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerWithURL){ %>
+                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerDeleteWithURL){ %>
                 // Not using GDPR manager
 
                 $.ajax({
@@ -757,6 +774,144 @@
                     },
                     success: deleteSuccess,
                     error: deleteFail
+                });
+                <% } %>
+
+
+            });
+
+
+
+            $btnExportAccount.on('click', function (e) {
+                e.preventDefault();
+                var $label = $btnExportAccount.find(".button-label").first();
+                var $spinner = $btnExportAccount.find(".spinner").first();
+                var $deleteError = $("#delete-error");
+                var $password = $('#export-user-pass');
+                var $deleteUserForm = $("#exportUserForm");
+                var isFacebookAccount = '<%= profile.facebook %>';
+                var isGoogleAccount = '<%= profile.google %>';
+                var $passwordError = $('#export-password-error');
+
+                $deleteError.hide();
+                $label.hide();
+                $spinner.show();
+                $deleteUserForm.first('div.form-group').removeClass('has-error');
+                $passwordError.hide();
+                $passwordError.html("");
+
+                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true") {
+                    $passwordError.html("<%= __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>"); //TODO
+                    $deleteUserForm.first('div.form-group').addClass('has-error');
+                    $spinner.hide()
+                    $label.show();
+                    $passwordError.show();
+                    return;
+                }
+
+                var exportSuccess = function (result) {
+                    // TODO
+                    console.log('success: ', result);
+                };
+
+                var exportFail = function (error) {
+                    if (error.responseJSON && error.responseJSON.msg) {
+                        $passwordError.html(error.responseJSON.msg);
+                        $deleteUserForm.first('div.form-group').addClass('has-error');
+                        $spinner.hide()
+                        $label.show();
+                        $passwordError.show();
+                    } else {
+                        $deleteUserModal.modal('toggle');
+                        $('.modal-backdrop').remove();
+                        $deleteError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>");
+                        $spinner.hide();
+                        $label.show();
+                        $deleteError.show();
+                    }
+                }
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL && profile.hasPassword){ %>
+                // Using GDPR manager with local account
+                $.ajax({
+                    url: '<%= config.gdprManager.useGDPRManagerExporteWithURL %>',
+                    type: 'GET',
+                    headers: {
+                        "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
+                    },
+                    success: exportSuccess,
+                    error: exportFail
+                });
+                <% } %>
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL && !profile.hasPassword){ %>
+                // Using GDPR manager without local account
+                $.ajax({
+                    url: '<%= link('/api/v2/session/jwt')%>',
+                    type: 'GET',
+                    success: function (result) {
+                        $.ajax({
+                            url: '<%= config.gdprManager.useGDPRManagerExporteWithURL %>',
+                            type: 'GET',
+                            headers: {
+                                "Authorization": result.token
+                            },
+                            success: exportSuccess,
+                            error: exportFail
+                        });
+                    },
+                    error: exportFail
+                });
+
+                <% } %>
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExportWithURL && profile.hasPassword){ %>
+                // Using GDPR manager with local account
+                $.ajax({
+                    url: '<%= config.gdprManager.useGDPRManagerExportWithURL %>',
+                    type: 'GET',
+                    headers: {
+                        "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
+                    },
+                    success: exportSuccess,
+                    error: exportFail
+                });
+                <% } %>
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExportWithURL && !profile.hasPassword){ %>
+                // Using GDPR manager without local account
+                $.ajax({
+                    url: '<%= link('/api/v2/session/jwt')%>',
+                    type: 'GET',
+                    success: function (result) {
+                        $.ajax({
+                            url: '<%= config.gdprManager.useGDPRManagerExportWithURL %>',
+                            type: 'GET',
+                            headers: {
+                                "Authorization": result.token
+                            },
+                            success: exportSuccess,
+                            error: exportFail
+                        });
+                    },
+                    error: exportFail
+                });
+
+                <% } %>
+
+
+
+
+                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerExporteWithURL){ %>
+                // Not using GDPR manager
+
+                $.ajax({
+
+                    url: "<%= link('/user') %>",
+                    type: 'POST',
+                    data: {
+                        password: $password.val()
+                    },
+                    success: exportSuccess,
+                    error: exportFail
                 });
                 <% } %>
 
