@@ -58,7 +58,8 @@ module.exports = {
     },
 
     gdprManager: {
-        useGDPRManagerWithURL: process.env.USE_GDPR_MANAGER_WITH_URL,
+        useGDPRManagerDeleteWithURL: process.env.USE_GDPR_MANAGER_DELETE_WITH_URL,
+        useGDPRManagerExporteWithURL: process.env.USE_GDPR_MANAGER_EXPORT_WITH_URL,
     },
 
     userProfiles: {
