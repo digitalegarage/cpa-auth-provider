@@ -364,28 +364,35 @@
         </div>
 
         <div class="col-sm-9 col" id="delete-div">
-                <span id="error-feed-back" class="text-danger">
-                    <span class="glyphicon glyphicon-remove"></span>
-                    <span class="text"></span>
-                </span>
+            <span id="error-feed-back" class="text-danger">
+                <span class="text"></span>
+            </span>
 
-                <span id="success-feed-back" class="text-green">
-                    <span class="text"></span>
-                </span>
-
-            <p><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LABEL') %></p>
-            <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#deleteUserModal">
-                <span class="button-label"><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LINK') %></span>
-            </button>
-
-            <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL ){ %>
-
-            <p><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LABEL') %></p>
-            <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#exportUserModal">
-                <span class="button-label"><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LINK') %></span>
-            </button>
-            <% }%>
+            <span id="success-feed-back" class="text-green">
+                <span class="text"></span>
+            </span>
+            
+                <p><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LABEL') %></p>
+                <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#deleteUserModal">
+                    <span class="button-label"><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LINK') %></span>
+                </button>
             </div>
+            <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL ){ %>
+                <div class="col-sm-9 col col-sm-offset-3" id="export-div">
+                    <span id="export-error-feed-back" class="text-danger">
+                        <span class="text"></span>
+                    </span>
+        
+                    <span id="export-success-feed-back" class="text-green">
+                        <span class="text"></span>
+                    </span>
+                <p><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LABEL') %></p>
+                <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#exportUserModal">
+                    <span class="button-label"><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LINK') %></span>
+                </button>
+            </div>
+            <% }%>
+            
 
     </div>
 
@@ -724,6 +731,7 @@
                     } else {
                         $deleteUserModal.modal('toggle');
                         $('.modal-backdrop').remove();
+                        $.notify({message:  "<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>"},{type: 'danger'});
                         $deleteError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>");
                         $spinner.hide();
                         $label.show();
@@ -790,8 +798,8 @@
                 e.preventDefault();
                 var $label = $btnExportAccount.find(".button-label").first();
                 var $spinner = $btnExportAccount.find(".spinner").first();
-                var $exportError = $("#error-feed-back");
-                var $exportSuccess = $("#success-feed-back");
+                var $exportError = $("#export-error-feed-back");
+                var $exportSuccess = $("#export-success-feed-back");
                 var $password = $('#export-user-pass');
                 var $exportUserForm = $("#exportUserForm");
                 var isFacebookAccount = '<%= profile.facebook %>';
@@ -817,10 +825,12 @@
                 var exportSuccess = function (result) {
                     $exportUserModal.modal('toggle');
                     $('.modal-backdrop').remove();
+                    $.notify("<%= __('PROFILE_JS_SUCCESS_EXPORT_ACCOUNT') %>");
                     $exportSuccess.find(".text").first().text("<%= __('PROFILE_JS_SUCCESS_EXPORT_ACCOUNT') %>");
                     $spinner.hide();
                     $label.show();
                     $exportSuccess.show();
+
                 };
 
                 var exportFail = function (error) {
@@ -833,6 +843,7 @@
                     } else {
                         $exportUserModal.modal('toggle');
                         $('.modal-backdrop').remove();
+                        $.notify({message:  "<%= __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>"},{type: 'danger'});
                         $exportError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>");
                         $spinner.hide();
                         $label.show();

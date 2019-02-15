@@ -127,7 +127,7 @@
 	"ADMIN_USER_EXPORT_MODALE_FORM_PASSWORD_LABEL": "Mot de passe",
 	"ADMIN_USER_EXPORT_MODALE_CLOSE": "Annuler",
 	"ADMIN_USER_EXPORT_MODALE_SUBMIT": "Confirmer",
-	"PROFILE_JS_ERROR_DELETE_ACCOUNT": "Une erreur est survenue lors de la demande d'export de vos données.",
+	"PROFILE_JS_ERROR_EXPORT_ACCOUNT": "Une erreur est survenue lors de la demande d'export de vos données.",
 	"PROFILE_JS_SUCCESS_EXPORT_ACCOUNT": "Votre demande d'export de données est en cours",
 
 	"ALERT_LANGUAGE_1": "Votre langue par défaut est différente de celle de votre profil.",
