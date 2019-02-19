@@ -73,7 +73,7 @@ const delete_user_with_credentials = function(req, res) {
     }
 };
 
-const get_user_id = function(req, res) {
+const get_user_id_from_jwt = function(req, res) {
     var auth = req.headers.authorization;
     if (!auth) {
         return res.status(401).send({error: 'missing header Authorization'});
@@ -324,6 +324,10 @@ module.exports = function(router) {
      *     responses:
      *          "204":
      *            description: "user had been deleted"
+     *          "400":
+     *            description: "missing credentials"
+     *          "401":
+     *            description: "wrong login or password"
      *   get:
      *     description: get a users profile by credentials
      *     tags: [Basic Auth]
@@ -351,7 +355,7 @@ module.exports = function(router) {
      * @swagger
      * /api/v2/jwt/user:
      *   delete:
-     *     description: delete the user providing user credentials
+     *     description: delete the user providing a jwt token
      *     tags: [JWT]
      *     operationId: "deleteUser"
      *     content:
@@ -392,11 +396,13 @@ module.exports = function(router) {
      *          "200":
      *            description: "user had been deleted"
      *            schema:
-     *              type: string
-     *              example: 42b
+     *              type: integer
+     *              example: 42
+     *          "401":
+     *            description: "Bad authentication header format or bad jwt token"
      */
     router.options('/api/v2/jwt/user/id', cors);
-    router.get('/api/v2/jwt/user/id', cors, get_user_id);
+    router.get('/api/v2/jwt/user/id', cors, get_user_id_from_jwt);
 
     /**
      * @swagger
@@ -435,8 +441,12 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/AddLocalLogin"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/session/user/login/create', cors);
@@ -467,8 +477,12 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/AddLocalLogin"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/jwt/user/login/create', cors);
@@ -503,8 +517,12 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/AddLocalLogin"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/cpa/user/login/create', cors);
@@ -537,7 +555,7 @@ module.exports = function(router) {
      * @swagger
      * /api/v2/all/user/password:
      *   post:
-     *     description: add a local login for an user having only social logins
+     *     description: change user password
      *     operationId: "createPassword"
      *     content:
      *       - application/json
@@ -550,8 +568,14 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
      *     responses:
-     *        "200":
-     *          description: "Password had been updated"
+     *        "204":
+     *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "401":
+     *          description: "wrong previous password and or login"
+     *        "500":
+     *          description: "unexpected error"
      */
     router.options('/api/v2/all/user/password', cors);
     router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
