@@ -620,6 +620,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.options('/api/v2/session/user/email/change', cors);
     router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
@@ -651,6 +657,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
 
@@ -681,6 +693,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
 
@@ -704,6 +722,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
 
@@ -756,8 +780,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
     router.options('/api/v2/session/user/profile/request_verification_email', cors);
     router.post('/api/v2/session/user/profile/request_verification_email', [authHelper.ensureAuthenticated, limiterHelper.verify], resend_validation_email);
@@ -787,8 +813,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
 
     router.post('/api/v2/jwt/user/profile/request_verification_email', [ passport.authenticate('jwt', {session: false}), limiterHelper.verify], resend_validation_email);
@@ -818,8 +846,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
 
     router.post('/api/v2/cpa/user/profile/request_verification_email', [authHelper.ensureCpaAuthenticated, limiterHelper.verify], resend_validation_email);
@@ -849,8 +879,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
 
     router.post('/api/v2/oauth/user/profile/request_verification_email', [passport.authenticate('bearer', {session: false}), limiterHelper.verify], resend_validation_email);
