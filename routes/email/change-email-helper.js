@@ -133,7 +133,7 @@ function change_email(req, res) {
 
     if (!oldUser) {
         logger.debug('[POST /email/change][FAIL][user_id][from][to', newUsername, ' where old user is ', oldUser, ']');
-        return res.status(401).json({success: false, reason: 'Unauthorized'});
+        return res.status(401).json({reason: 'Unauthorized'});
     }
 
     if (oldUser && oldUser.email){
