@@ -76,7 +76,7 @@ const delete_user_with_credentials = function(req, res) {
 const get_user_id_from_jwt = function(req, res) {
     var auth = req.headers.authorization;
     if (!auth) {
-        return res.status(401).send({error: 'missing header Authorization'});
+        return res.status(400).send({error: 'missing header Authorization'});
     } else {
         if (auth.indexOf('Bearer ') == 0) {
             var token = auth.substring('Bearer '.length);
@@ -87,7 +87,7 @@ const get_user_id_from_jwt = function(req, res) {
                 return res.status(401).send({error: 'Cannot parse JWT token'});
             }
         } else {
-            return res.status(401).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
+            return res.status(400).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
         }
     }
 
@@ -398,8 +398,10 @@ module.exports = function(router) {
      *            schema:
      *              type: integer
      *              example: 42
+     *          "400":
+     *            description: "bad jwt token or missing header Authorization"
      *          "401":
-     *            description: "Bad authentication header format or bad jwt token"
+     *            description: "Invalid JWT token"
      */
     router.options('/api/v2/jwt/user/id', cors);
     router.get('/api/v2/jwt/user/id', cors, get_user_id_from_jwt);
