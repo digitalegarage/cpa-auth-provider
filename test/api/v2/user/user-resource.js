@@ -323,37 +323,37 @@ describe('API-V2 add local login', function() {
             });
         });
 
-        context('with correct data', function() {
+        // context('with correct data', function() {
 
-            before(function(done) {
+        //     before(function(done) {
 
-                requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
-                    method: 'post',
-                    accessToken: initData.USER_1_CPA_TOKEN,
-                    data: {
-                        email: EMAIL,
-                        password: PASSWORD,
-                        confirm_password: PASSWORD,
-                    },
-                }, done);
-            });
-            context('response', function() {
+        //         requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
+        //             method: 'post',
+        //             accessToken: initData.USER_1_CPA_TOKEN,
+        //             data: {
+        //                 email: EMAIL,
+        //                 password: PASSWORD,
+        //                 confirm_password: PASSWORD,
+        //             },
+        //         }, done);
+        //     });
+        //     context('response', function() {
 
-                it(' should be 200', function() {
-                    expect(ctx.res.statusCode).to.equal(204);
-                });
-            });
-            context('User can login using new credentials', function() {
+        //         it(' should be 200', function() {
+        //             expect(ctx.res.statusCode).to.equal(204);
+        //         });
+        //     });
+        //     context('User can login using new credentials', function() {
 
-                before(function(done) {
-                    loginWithNewLocalLogin(ctx, done);
-                });
+        //         before(function(done) {
+        //             loginWithNewLocalLogin(ctx, done);
+        //         });
 
-                it('user should be able to log', function() {
-                    expect(ctx.res.statusCode).to.equal(204);
-                });
-            });
-        });
+        //         it('user should be able to log', function() {
+        //             expect(ctx.res.statusCode).to.equal(204);
+        //         });
+        //     });
+        // });
     });
 
     context('using oAuth', function() {
