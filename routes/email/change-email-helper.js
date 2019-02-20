@@ -260,7 +260,7 @@ function email_moved(req, res) {
         function(err) {
 
             if (err.message === STATES.ALREADY_SUCCEED) {
-                return res.sendStatus(204);
+                return res.sendStatus(304);
             }
 
             logger.error('[GET /email/moved/:token][FAIL][old', oldEmail, '][new', newUsername, '][user.id', user ? user.id : null, '][err', err, ']');
