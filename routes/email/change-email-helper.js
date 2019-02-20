@@ -12,6 +12,7 @@ var STATES = {
     INVALID_TOKEN: 'INVALID_TOKEN',
     MISMATCHED_CLIENT_ID: 'MISMATCHED_CLIENT_ID',
     ALREADY_USED: 'ALREADY_USED',
+    ALREADY_SUCCEED: 'ALREADY_SUCCEED',
     EMAIL_ALREADY_TAKEN: 'EMAIL_ALREADY_TAKEN',
     WRONG_PASSWORD: 'WRONG_PASSWORD',
     TOO_MANY_REQUESTS: 'TOO_MANY_REQUESTS'
@@ -225,9 +226,12 @@ function email_moved(req, res) {
             newUsername = token.type.split('$')[1];
 
             if (!token.isAvailable()) {
-                var err = new Error(STATES.ALREADY_USED);
-                err.data = {success: oldEmail === newUsername};
-                throw err;
+                if (oldEmail === newUsername){
+                    // It seems that user has reopended the validation link. => no error
+                    throw new Error(STATES.ALREADY_SUCCEED);
+                } else {
+                    throw new Error(STATES.ALREADY_USED);
+                }
             }
 
             return finder.findUserByLocalAccountEmail(newUsername);
@@ -254,12 +258,20 @@ function email_moved(req, res) {
             return res.sendStatus(204);
         }).catch(
         function(err) {
-            logger.error('[GET /email/moved/:token][FAIL][old', oldEmail, '][new', newUsername, '][user.id', user ? user.id : null, '][err', err, ']');
-            if (err.data && err.data.success) {
+
+            if (err.message === STATES.ALREADY_SUCCEED) {
                 return res.sendStatus(204);
-            } else {
-                return res.status(400).json({reason: err.message});
             }
+
+            logger.error('[GET /email/moved/:token][FAIL][old', oldEmail, '][new', newUsername, '][user.id', user ? user.id : null, '][err', err, ']');
+
+            let status;
+            if (err.message === STATES.EMAIL_ALREADY_TAKEN || STATES.MISMATCHED_CLIENT_ID) {
+                status = 400;
+            } else if (err.message === STATES.ALREADY_USED || err.message === STATES.INVALID_TOKEN) {
+                status = 403;
+            }
+            return res.status(status).json({reason: err.message});
         });
 }
 
