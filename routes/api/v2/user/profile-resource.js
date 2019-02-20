@@ -444,7 +444,7 @@ module.exports = function (router) {
      *        "404":
      *          description: "user not found"
      *        "409":
-     *          description: "dervice disabled by configuration"
+     *          description: "service disabled by configuration"
      *        "500":
      *          description: "error fetching user name by public id"
      */
