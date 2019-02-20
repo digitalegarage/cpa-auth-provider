@@ -163,7 +163,7 @@ const create_local_login = function(req, res) {
                         } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
                             return res.status(400).json({
                                 msg: req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')
-                            })  
+                            });
                         } else {
                             logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
                             res.status(500).json({
