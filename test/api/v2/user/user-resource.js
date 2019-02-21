@@ -302,6 +302,12 @@ describe('API-V2 add local login', function() {
                 },
             }, done);
         });
+        context('response', function() {
+
+            it(' should be 200', function() {
+                expect(ctx.res.statusCode).to.equal(204);
+            });
+        });
 
         context('with incorrect data', function() {
 
@@ -323,37 +329,45 @@ describe('API-V2 add local login', function() {
             });
         });
 
-        // context('with correct data', function() {
+        context('with correct data', function() {
+            before(initData.resetDatabase);
 
-        //     before(function(done) {
+            before(function(done){
+                db.LocalLogin.destroy({where: {id: initData.USER_1_ID}}).then(() => {
+                    done();
+                });
+            });
 
-        //         requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
-        //             method: 'post',
-        //             accessToken: initData.USER_1_CPA_TOKEN,
-        //             data: {
-        //                 email: EMAIL,
-        //                 password: PASSWORD,
-        //                 confirm_password: PASSWORD,
-        //             },
-        //         }, done);
-        //     });
-        //     context('response', function() {
+            before(function(done) {
+                console.log('<<<<<<<<< start')
+                requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
+                    method: 'post',
+                    accessToken: initData.USER_1_CPA_TOKEN,
+                    data: {
+                        email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: PASSWORD,
+                    },
+                }, done);
+            });
+            context('response', function() {
 
-        //         it(' should be 200', function() {
-        //             expect(ctx.res.statusCode).to.equal(204);
-        //         });
-        //     });
-        //     context('User can login using new credentials', function() {
+                it(' should be 200', function() {
+                    console.log('<<<<<<<<<<<<<', ctx.res.error);
+                    expect(ctx.res.statusCode).to.equal(204);
+                });
+            });
+            context('User can login using new credentials', function() {
 
-        //         before(function(done) {
-        //             loginWithNewLocalLogin(ctx, done);
-        //         });
+                before(function(done) {
+                    loginWithNewLocalLogin(ctx, done);
+                });
 
-        //         it('user should be able to log', function() {
-        //             expect(ctx.res.statusCode).to.equal(204);
-        //         });
-        //     });
-        // });
+                it('user should be able to log', function() {
+                    expect(ctx.res.statusCode).to.equal(204);
+                });
+            });
+        });
     });
 
     context('using oAuth', function() {

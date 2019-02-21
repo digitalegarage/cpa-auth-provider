@@ -133,7 +133,6 @@ const create_local_login = function(req, res) {
     req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
     req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
-
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
             res.status(400).json({errors: result.array()});
