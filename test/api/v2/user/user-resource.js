@@ -333,13 +333,12 @@ describe('API-V2 add local login', function() {
             before(initData.resetDatabase);
 
             before(function(done){
-                db.LocalLogin.destroy({where: {id: initData.USER_1_ID}}).then(() => {
+                db.LocalLogin.destroy({where: {user_id: initData.USER_1_ID}}).then(() => {
                     done();
                 });
             });
 
             before(function(done) {
-                console.log('<<<<<<<<< start')
                 requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
                     method: 'post',
                     accessToken: initData.USER_1_CPA_TOKEN,
@@ -353,7 +352,6 @@ describe('API-V2 add local login', function() {
             context('response', function() {
 
                 it(' should be 200', function() {
-                    console.log('<<<<<<<<<<<<<', ctx.res.error);
                     expect(ctx.res.statusCode).to.equal(204);
                 });
             });
