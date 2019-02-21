@@ -179,6 +179,20 @@
 	"PROFILE_RESEND_VALIDATION_EMAIL_LINK": "Erneut senden",
 	"PROFILE_DELETE_YOUR_ACCOUNT_LABEL": "Klicken Sie auf die Schaltfläche unten, um Ihr Konto zu löschen",
 	"PROFILE_DELETE_YOUR_ACCOUNT_LINK": "Konto löschen",
+	"PROFILE_EXPORT_YOUR_ACCOUNT_LABEL": "Click the button below to export all your data", // FIXME PETER Check that please
+	"PROFILE_EXPORT_YOUR_ACCOUNT_LINK": "Export", // FIXME PETER Check that please
+
+	"ADMIN_USER_EXPORT_MODALE_TITLE": "Export your data account", // TODO PETER :)))))
+	"ADMIN_USER_EXPORT_MODALE_TEXT": "Data export could takes hours.", // TODO PETER :)))))
+	"ADMIN_USER_EXPORT_MODALE_TEXT_PASSWORD": "To export your data you need to fill in your password below", // TODO PETER :)))))
+	"ADMIN_USER_EXPORT_MODALE_FORM_PASSWORD_LABEL": "Password", // TODO PETER :)))))
+	"ADMIN_USER_EXPORT_MODALE_CLOSE": "Cancel", // TODO PETER :)))))
+	"ADMIN_USER_EXPORT_MODALE_SUBMIT": "Confirm",// TODO PETER :)))))
+
+	"PROFILE_JS_ERROR_EXPORT_ACCOUNT": "An error occurred while requesting data export.",// TODO PETER :)))))
+	"PROFILE_JS_SUCCESS_EXPORT_ACCOUNT": "Your data export request is in progress",// TODO PETER :)))))
+
+
 	"PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD": "Fehlendes Passwort",
 	"PROFILE_API_DELETE_YOUR_ACCOUNT_WRONG_PASSWORD": "Falsches Passwort",
 	"PROFILE_ERROR_MSG": "Bitte überprüfen Sie, ob die untenstehenden Felder ausgefüllt und gültig sind, bevor Sie das Formular ausfüllen",

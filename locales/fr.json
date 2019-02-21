@@ -120,6 +120,16 @@
 	"ADMIN_USER_DELETE_MODALE_FORM_PASSWORD_LABEL": "Mot de passe",
 	"ADMIN_USER_DELETE_MODALE_CLOSE": "Annuler",
 	"ADMIN_USER_DELETE_MODALE_SUBMIT": "Confirmer",
+
+	"ADMIN_USER_EXPORT_MODALE_TITLE": "Export de vos données du compte",
+	"ADMIN_USER_EXPORT_MODALE_TEXT": "L'export de vos données peut prendre plusieurs heures.",
+	"ADMIN_USER_EXPORT_MODALE_TEXT_PASSWORD": "Pour lancer l'export de vos donner vous devez renseigner votre mot de passe ci-dessous",
+	"ADMIN_USER_EXPORT_MODALE_FORM_PASSWORD_LABEL": "Mot de passe",
+	"ADMIN_USER_EXPORT_MODALE_CLOSE": "Annuler",
+	"ADMIN_USER_EXPORT_MODALE_SUBMIT": "Confirmer",
+	"PROFILE_JS_ERROR_EXPORT_ACCOUNT": "Une erreur est survenue lors de la demande d'export de vos données.",
+	"PROFILE_JS_SUCCESS_EXPORT_ACCOUNT": "Votre demande d'export de données est en cours",
+
 	"ALERT_LANGUAGE_1": "Votre langue par défaut est différente de celle de votre profil.",
 	"ALERT_LANGUAGE_2": "Cliquez ici pour définir {{ default_language_of_the_idp }} en langue de profil par défaut",
 	"ALERT_LANGUAGE_3": "ou",
@@ -179,6 +189,8 @@
 	"PROFILE_RESEND_VALIDATION_EMAIL_LINK": "Renvoyer",
 	"PROFILE_DELETE_YOUR_ACCOUNT_LABEL": "Cliquer sur le bouton ci-dessous pour supprimer votre compte",
 	"PROFILE_DELETE_YOUR_ACCOUNT_LINK": "Supprimer votre compte",
+	"PROFILE_EXPORT_YOUR_ACCOUNT_LABEL": "Cliquer sur le bouton ci-dessous pour exporter toutes vos données",
+	"PROFILE_EXPORT_YOUR_ACCOUNT_LINK": "Exporter",
 	"PROFILE_ERROR_MSG": "Merci de vérifier que les champs ci-dessous soient remplis et valides avant de valider le formulaire",
 	"PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD": "Mot de passe manquant",
 	"PROFILE_API_DELETE_YOUR_ACCOUNT_WRONG_PASSWORD": "Mot de passe incorrect",
@@ -356,5 +368,6 @@
 	" souhaite accéder à votre compte maRTS.": " souhaite accéder à votre compte maRTS.",
 	"MALFORMED_DATE_OF_BIRTH": "la date de naissance n'a pas le bon format",
 	"EMAIL_TAKEN": "Cette adresse email est déjà utilisée",
-	"PASSWORD_WEAK": "Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux."
+	"PASSWORD_WEAK": "Mots de passe trop simple. Pensez à utiliser des nombres, des lettres majuscules ou minuscules ainsi que des caractères spéciaux.",
+	"MISSING_FIELDS": "MISSING_FIELDS"
 }

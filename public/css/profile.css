@@ -120,7 +120,7 @@
 #profile #verification-link-form .recaptcha-wrapper {
     margin: 10px 0;
 }
-#profile #delete-div {
+#profile #delete-div, #profile #export-div {
     margin-top: 20px;
 }
 

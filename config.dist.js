@@ -57,7 +57,7 @@ module.exports = {
 
 
     gdprManager: {
-        // useGDPRManagerWithURL: 'https://gdprmanager.org',
+        // useGDPRManagerDeleteWithURL: 'https://gdprmanager.org',
     },
 
     // configuration for password using local identity provider
