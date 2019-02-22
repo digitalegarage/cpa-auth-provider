@@ -76,8 +76,8 @@ describe('API-V2 JWT get user id', function() {
             jwtGeUserId(ctx, done);
         });
 
-        it('should return 401', function() {
-            expect(ctx.res.statusCode).equal(401);
+        it('should return 400', function() {
+            expect(ctx.res.statusCode).equal(400);
             expect(ctx.res.text).equal('{"error":"missing header Authorization"}');
         });
 

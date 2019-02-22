@@ -50,7 +50,7 @@ var user_profile = function(req, res) {
             });
         });
     } else {
-        res.status(400).send();
+        res.status(401).send();
     }
 };
 
@@ -261,7 +261,9 @@ module.exports = function (router) {
      *            required: true
      *     responses:
      *          "204":
-     *            description: "profile udpated"
+     *            description: "profile updated"
+     *          "400":
+     *            description: "bad update data"
      */
     router.put('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile_update);
 
@@ -302,7 +304,9 @@ module.exports = function (router) {
      *              $ref: "#/definitions/ProfileUpdate"
      *     responses:
      *          "204":
-     *            description: "profile udpated"
+     *            description: "profile updated"
+     *          "400":
+     *            description: "bad update data"
      */
     router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile_update);
 
@@ -355,7 +359,9 @@ module.exports = function (router) {
      *            required: true
      *     responses:
      *          "204":
-     *            description: "profile udpated"
+     *            description: "profile updated"
+     *          "400":
+     *            description: "bad update data"
      */
     router.put('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), user_profile_update);
 
@@ -409,7 +415,9 @@ module.exports = function (router) {
      *            required: true
      *     responses:
      *          "204":
-     *            description: "profile udpated"
+     *            description: "profile updated"
+     *          "400":
+     *            description: "bad update data"
      */
     router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile_update);
 
@@ -431,6 +439,14 @@ module.exports = function (router) {
      *     responses:
      *        "200":
      *          description: "anonymous object containing first- and lastname"
+     *        "400":
+     *          description: "not valid UUIDv4!"
+     *        "404":
+     *          description: "user not found"
+     *        "409":
+     *          description: "service disabled by configuration"
+     *        "500":
+     *          description: "error fetching user name by public id"
      */
     router.get('/api/v2/all/nameByUid/:puid', cors, user_nameByPublicUid);
 };

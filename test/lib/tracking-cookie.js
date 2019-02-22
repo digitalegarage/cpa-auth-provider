@@ -14,7 +14,7 @@ var resetDatabase = function (done) {
     });
 };
 
-describe('GET /auth - for tracking cookie', function () {
+describe('GET /login - for tracking cookie', function () {
     before(function (done) {
         requestHelper.sendRequest(this, '/login', null, done);
     });
@@ -25,10 +25,10 @@ describe('GET /auth - for tracking cookie', function () {
     });
 });
 
-describe('GET /auth - for tracking cookie', function () {
+describe('GET /login - for tracking cookie', function () {
     before(function (done) {
         config.trackingCookie.enabled = false;
-        requestHelper.sendRequest(this, '/auth', null, done);
+        requestHelper.sendRequest(this, '/login', null, done);
     });
 
     it('should not set a cookie if config.trackingCookie.enabled is false', function () {
