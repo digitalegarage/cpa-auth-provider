@@ -324,6 +324,96 @@ describe('API-V2 LOGIN', function () {
                         expect("1978-08-31").equal(ctx.user.date_of_birth_ymd);
                     });
                 });
+
+                context('When unauthenticated user cookieSignup with locale in request headers and no fields are required', function () {
+                    var ctx = this;
+
+                    var preFields;
+
+                    before(function () {
+                        preFields = config.userProfiles.requiredFields;
+                        config.userProfiles.requiredFields = [];
+                        userHelper.reloadConfig();
+                    });
+                    after(function () {
+                        config.userProfiles.requiredFields = preFields;
+                        userHelper.reloadConfig();
+                    });
+
+                    before(function (done) {
+
+                        var data = {
+                            email: AN_EMAIL,
+                            password: STRONG_PASSWORD,
+                            'g-recaptcha-response': 'a dummy recaptcha response'
+                        };
+
+                        var uri = '/api/v2/session/signup';
+
+                        requestHelper.sendRequest(ctx, uri, {
+                            method: 'post',
+                            type: 'form',
+                            data: data,
+                            locale: 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7'
+                        }, done);
+
+                    });
+
+                    before(function (done) {
+                        db.User.findOne().then(function (profile) {
+                            ctx.user = profile;
+                        }).then(done);
+                    });
+
+                    it('language should be set', function () {
+                        expect('fr').equal(ctx.user.language);
+                    });
+                });
+                context('When unauthenticated user cookieSignup with unsupported locale in request headers and no fields are required', function () {
+                    var ctx = this;
+
+                    var preFields;
+
+                    before(function () {
+                        preFields = config.userProfiles.requiredFields;
+                        config.userProfiles.requiredFields = [];
+                        userHelper.reloadConfig();
+                    });
+                    after(function () {
+                        config.userProfiles.requiredFields = preFields;
+                        userHelper.reloadConfig();
+                    });
+
+                    before(function (done) {
+
+                        var data = {
+                            email: AN_EMAIL,
+                            password: STRONG_PASSWORD,
+                            'g-recaptcha-response': 'a dummy recaptcha response'
+                        };
+
+                        var uri = '/api/v2/session/signup';
+
+                        requestHelper.sendRequest(ctx, uri, {
+                            method: 'post',
+                            type: 'form',
+                            data: data,
+                            locale: 'cn-cn'
+                        }, done);
+
+                    });
+
+                    before(function (done) {
+                        db.User.findOne().then(function (profile) {
+                            ctx.user = profile;
+                        }).then(done);
+                    });
+
+                    it('language should be set', function () {
+                        expect(null).equal(ctx.user.language);
+                    });
+                });
+
             });
             context('after signup', function () {
 

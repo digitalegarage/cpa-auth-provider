@@ -11,10 +11,9 @@ const errors = require('./errors');
 const isDateFormat = require('is-date-format');
 const dateFormat = config.broadcaster && config.broadcaster.date_format ? config.broadcaster.date_format : "dd.mm.yyyy";
 const dateAndTime = require('date-and-time')
-const Op = db.sequelize.Op;
 const afterLoginHelper = require('../lib/afterlogin-helper');
 const uuid = require('uuid');
-
+const parser = require('accept-language-parser');
 
 module.exports = {
     checkSignupData: checkSignupData,
@@ -110,7 +109,7 @@ function checkSignupData(req) {
     });
 }
 
-function signup(userAttributes, email, password, res) {
+function signup(userAttributes, email, password, req, res) {
 
     //use XSS filters to prevent users storing malicious data/code that could be interpreted then
     for (var k in userAttributes) {
@@ -124,6 +123,18 @@ function signup(userAttributes, email, password, res) {
 
     if(!userAttributes.hasOwnProperty('public_uid')){
         userAttributes.public_uid = uuid.v4();
+    }
+
+    if (req.headers["accept-language"]){
+        let languages = parser.parse(req.headers["accept-language"]);
+        if (languages){
+            for (let i = 0; i < languages.length; i++) {
+                if(languages[i].code === "fr" || languages[i].code === "en" || languages[i].code === "de"){ //TODO have a constant somewhere for that
+                    userAttributes.language = languages[i].code;
+                    break;
+                }
+            }
+        }
     }
 
     var localLogin;

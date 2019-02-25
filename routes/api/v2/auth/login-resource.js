@@ -473,7 +473,7 @@ module.exports = function (app, options) {
 function signupREST(req, res, handleAfterLogin) {
     loginService.checkSignupData(req)
         .then(function (userAttributes) {
-            return loginService.signup(userAttributes, req.body.email, req.body.password, res);
+            return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
         })
         .then(function (user) {
             // force renew cookie so a cookie value couldn't point at different time to different user
@@ -495,7 +495,7 @@ function signupREST(req, res, handleAfterLogin) {
 function signupHTML(req, res, handleAfterLogin) {
     loginService.checkSignupData(req)
         .then(function (userAttributes) {
-            return loginService.signup(userAttributes, req.body.email, req.body.password, res);
+            return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
         })
         .then(function (user) {
             // force renew cookie so a cookie value couldn't point at different time to different user
