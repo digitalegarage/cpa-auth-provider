@@ -410,7 +410,7 @@ describe('API-V2 LOGIN', function () {
                     });
 
                     it('language should be set', function () {
-                        expect(null).equal(ctx.user.language);
+                        expect('cn').equal(ctx.user.language);
                     });
                 });
 
