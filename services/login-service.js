@@ -127,13 +127,8 @@ function signup(userAttributes, email, password, req, res) {
 
     if (req.headers["accept-language"]){
         let languages = parser.parse(req.headers["accept-language"]);
-        if (languages){
-            for (let i = 0; i < languages.length; i++) {
-                if(languages[i].code === "fr" || languages[i].code === "en" || languages[i].code === "de"){ //TODO have a constant somewhere for that
-                    userAttributes.language = languages[i].code;
-                    break;
-                }
-            }
+        if (languages && languages.length){
+            userAttributes.language = languages[0].code;
         }
     }
 
