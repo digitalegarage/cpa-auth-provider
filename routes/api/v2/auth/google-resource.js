@@ -71,6 +71,10 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "login succeed"
+     *          "400":
+     *            description: "missing token in request body"
+     *          "401":
+     *            description: "cannot authenticate with provided code"
      */
     app.options('/api/v2/auth/google/token', cors);
     app.post('/api/v2/auth/google/token', function(req, res) {
@@ -100,6 +104,10 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "login succeed"
+     *          "400":
+     *            description: "missing code and/or redirect_uri in request body"
+     *          "401":
+     *            description: "cannot authenticate with provided code"
      */
     app.options('/api/v2/auth/google/code', cors);
     app.post('/api/v2/auth/google/code', function(req, res) {

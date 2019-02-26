@@ -476,7 +476,7 @@ describe('GET /email/moved/:token', function () {
         });
 
         it('should send success status', function () {
-            expect(this.res.statusCode).equal(204);
+            expect(this.res.statusCode).equal(304);
         });
 
         it('should have changed the email', function (done) {

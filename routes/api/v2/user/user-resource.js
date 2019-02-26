@@ -73,10 +73,10 @@ const delete_user_with_credentials = function(req, res) {
     }
 };
 
-const get_user_id = function(req, res) {
+const get_user_id_from_jwt = function(req, res) {
     var auth = req.headers.authorization;
     if (!auth) {
-        return res.status(401).send({error: 'missing header Authorization'});
+        return res.status(400).send({error: 'missing header Authorization'});
     } else {
         if (auth.indexOf('Bearer ') == 0) {
             var token = auth.substring('Bearer '.length);
@@ -87,7 +87,7 @@ const get_user_id = function(req, res) {
                 return res.status(401).send({error: 'Cannot parse JWT token'});
             }
         } else {
-            return res.status(401).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
+            return res.status(400).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
         }
     }
 
@@ -324,6 +324,10 @@ module.exports = function(router) {
      *     responses:
      *          "204":
      *            description: "user had been deleted"
+     *          "400":
+     *            description: "missing credentials"
+     *          "401":
+     *            description: "wrong login or password"
      *   get:
      *     description: get a users profile by credentials
      *     tags: [Basic Auth]
@@ -351,7 +355,7 @@ module.exports = function(router) {
      * @swagger
      * /api/v2/jwt/user:
      *   delete:
-     *     description: delete the user providing user credentials
+     *     description: delete the user providing a jwt token
      *     tags: [JWT]
      *     operationId: "deleteUser"
      *     content:
@@ -392,11 +396,15 @@ module.exports = function(router) {
      *          "200":
      *            description: "user had been deleted"
      *            schema:
-     *              type: string
-     *              example: 42b
+     *              type: integer
+     *              example: 42
+     *          "400":
+     *            description: "bad jwt token or missing header Authorization"
+     *          "401":
+     *            description: "Invalid JWT token"
      */
     router.options('/api/v2/jwt/user/id', cors);
-    router.get('/api/v2/jwt/user/id', cors, get_user_id);
+    router.get('/api/v2/jwt/user/id', cors, get_user_id_from_jwt);
 
     /**
      * @swagger
@@ -435,8 +443,12 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/AddLocalLogin"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/session/user/login/create', cors);
@@ -467,8 +479,12 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/AddLocalLogin"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/jwt/user/login/create', cors);
@@ -503,8 +519,12 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/AddLocalLogin"
      *     responses:
-     *        "200":
+     *        "204":
      *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/cpa/user/login/create', cors);
@@ -537,7 +557,7 @@ module.exports = function(router) {
      * @swagger
      * /api/v2/all/user/password:
      *   post:
-     *     description: add a local login for an user having only social logins
+     *     description: change user password
      *     operationId: "createPassword"
      *     content:
      *       - application/json
@@ -550,8 +570,14 @@ module.exports = function(router) {
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
      *     responses:
-     *        "200":
-     *          description: "Password had been updated"
+     *        "204":
+     *          description: "local login had been created"
+     *        "400":
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "401":
+     *          description: "wrong previous password and or login"
+     *        "500":
+     *          description: "unexpected error"
      */
     router.options('/api/v2/all/user/password', cors);
     router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
@@ -596,6 +622,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.options('/api/v2/session/user/email/change', cors);
     router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
@@ -627,6 +659,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
 
@@ -657,6 +695,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
 
@@ -680,6 +724,12 @@ module.exports = function(router) {
      *     responses:
      *        "204":
      *          description: "Change email request had been done"
+     *        "401":
+     *          description: "Unauthorized"
+     *        "403":
+     *          description: "Wrong password"
+     *        "429":
+     *          description: "Too many request"
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
 
@@ -732,8 +782,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
     router.options('/api/v2/session/user/profile/request_verification_email', cors);
     router.post('/api/v2/session/user/profile/request_verification_email', [authHelper.ensureAuthenticated, limiterHelper.verify], resend_validation_email);
@@ -763,8 +815,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
 
     router.post('/api/v2/jwt/user/profile/request_verification_email', [ passport.authenticate('jwt', {session: false}), limiterHelper.verify], resend_validation_email);
@@ -794,8 +848,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
 
     router.post('/api/v2/cpa/user/profile/request_verification_email', [authHelper.ensureCpaAuthenticated, limiterHelper.verify], resend_validation_email);
@@ -825,8 +881,10 @@ module.exports = function(router) {
      *              type: string
      *              example: 03AF6jDqXLGOZaeru76ARh5oz5qUj8QPoTygDbK_cnM6TGyqIHhZSBlYqs2T5K7H9oVKRP-ZEdO0N1rAcBTBKe8RpCtSHpwYRuevIcs7WHD9_ixzCLNiP3NJWeASnFkzTA1nlu0Pp5vmFyEfWgIZ-k0bkoGa7Ep5xVwpqPXCQorprVWpQJmDgKkhM8uhWZVZU2ayrIVCoT8DI6sxO5ct11aUZhdYFYH12gniuxIOTdgURetCulOtVzh3lyq6RmeTuQneV94UeaMWAze0S1z3WDfBhhGILeWrsUw187a6Y8B1Mi6BazG79_M8A
      *     responses:
-     *        "200":
+     *        "204":
      *          description: another validation email had been sent
+     *        "400":
+     *          description: bad recaptcha (if apply)
      */
 
     router.post('/api/v2/oauth/user/profile/request_verification_email', [passport.authenticate('bearer', {session: false}), limiterHelper.verify], resend_validation_email);
