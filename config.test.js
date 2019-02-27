@@ -1,12 +1,35 @@
 "use strict";
 
 module.exports = {
-    recaptcha: {
-        enabled: true,
-        site_key: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-        secret_key: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+    allow_name_access_by_puid: true,
+
+    baseUrl: 'http://localhost',
+
+    broadcaster: {
+        title: '',
+        // changeEmailConfirmationPage: "http://localhost/changemailresult.html",
+        // changeMoveEmailConfirmationPage: "http://localhost/moveEmailConfirmation.html",
+        // changeRecoverPasswordPage: "http://localhost/recoverPassword.html"
     },
 
+    auth_session_cookie :{
+        name: 'connect.sid'
+    },
+
+    limiter: {
+        type: 'recaptcha', // 'no' || 'rate' || 'recaptcha-optional' || 'recaptcha'
+        parameters: {
+            recaptcha: {
+                site_key: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
+                secret_key: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+            },
+            rate: {
+                windowMs: 10 * 60 * 1000,
+                delayAfter: 1,
+                delayMs: 1000
+            }
+        }
+    },
 
     jwtSecret: 'bigsecret',
     jwt: {
@@ -22,12 +45,22 @@ module.exports = {
 
     identity_providers: {
         facebook: {
-            enabled: false
+            enabled: true,
+            client_id: 'abc',
+            client_secret: '123'
         },
         github: {
             enabled: false
         },
         ebu: {
+            enabled: false
+        },
+        google: {
+            enabled: true,
+            client_id: 'abc',
+            client_secret: '123'
+        },
+        twitter: {
             enabled: false
         },
         local: {
@@ -40,6 +73,7 @@ module.exports = {
     },
 
     mail: {
+        test_mode: true,
         sending: {transport: 'test'},
         from: 'no-reply@rts.ch',
         locale: 'ch_fr',
@@ -50,10 +84,18 @@ module.exports = {
         // in sec
         recovery_code_validity_duration: 1800,
         // a new recovery code will be generated only if the current one has less that TTL
-        keep_recovery_code_until: 900
+        keep_recovery_code_until: 900,
+        // additional endpoint for password setting (/user/password)
+        additional_endpoint: true,
     },
 
-    auto_idp_redirect: 'local',
+    afterLogin: {
+        // White list of possible redirect URI (comma separated values) after login when token will be passed as a get parameter
+        allowedRedirectUris:'http://whitelistedredirecturl.com'
+    },
+
+    // enable trusting of X-Forwarded-For headers
+    trust_proxy: true,
 
     db: {
         // The database type, 'mysql', 'sqlite', etc.
@@ -68,6 +110,9 @@ module.exports = {
 
     // Session cookie is signed with this secret to prevent tampering
     session_secret: 'LKASDMjnr234n90lasndfsadf',
+    quality_check: {
+        enabled: true
+    },
 
     // Name of the session cookie. Must be something different than 'connect.sid'
     sid_cookie_name: 'identity.provider.sid',
@@ -76,14 +121,33 @@ module.exports = {
 
     displayUsersInfos: true,
 
+    displayMenuBar: false,
+
     // Cross-origin resource sharing
     cors: {
         enabled: true,
         allowed_domains: [
             'http://localhost.rts.ch:8080'
+        ],
+        wildcard_domains: [
+          '.rts.ch', '.br.de'
         ]
     },
 
+    // iframe options
+    iframes: {
+      option: 'allow-from', // DENY|SAMEORIGIN|ALLOW-FROM
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
+    },
+
+    // use more secure header settings
+    use_secure_headers: true,
+    content_security_policy:{
+        additional_scripts_src: 'https://broadcarster.org',
+        additional_fonts_src: 'https://broadcarster.org',
+        additional_frames_src: 'https://broadcarster.org',
+        additional_styles_src:'https://broadcarster.org'
+    },
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '/ap',
 
@@ -135,9 +199,27 @@ module.exports = {
     // in seconds.
     max_poll_interval: 5,
 
+    deletion: {
+        // enable automatic deletion
+        automatic_deletion_activated: true,
+        // allow DELETE /oauth2/me
+        endpoint_enabled: true,
+        // how long before a deletion request is processed
+        delay_in_days: process.env.DELETION_DELAY_IN_DAYS || 7,
+        // check to delete in seconds
+        delete_interval: process.env.DELETE_INTERVAL || 6 * 60 * 60, // 6 hours
+        // how long before a verification is considered failed, in seconds
+        verification_time: process.env.VERIFICATION_TIME || 7 * 24 * 60 * 60 // 7 days
+    },
+
     server_clients: [],
 
     oauth2: {
-        refresh_tokens_enabled: true
-    }
+        refresh_tokens_enabled: true,
+        access_token_duration: 10 * 60 * 60 * 1000,
+    },
+
+    monitoring: {
+        enabled: false,
+    },
 };

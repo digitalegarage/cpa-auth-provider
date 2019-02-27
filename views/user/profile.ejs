@@ -1,15 +1,22 @@
 <%- include ../layout/header %>
 
 <div id="profile">
+
     <div class="row">
         <div class="col-sm-12">
-            <h2>
+            <h1>
                 <%= __('PROFILE_MAIN_TITLE') %>
-            </h2>
-
+            </h1>
         </div>
     </div>
+    <% if (flash.message && ['danger', 'warning', 'info', 'success'].indexOf(flash.type) !== -1) { %>
+    <div class="alert alert-<%= flash.type %>">
+        <strong><%= flash.message %></strong>
+    </div>
+    <% } %>
+
     <hr/>
+
     <div class="row">
         <div class="col-sm-3">
             <h4 class="hidden-xs"><%= __('PROFILE_PERSONAL_DATA_TITLE') %></h4>
@@ -19,7 +26,8 @@
         </div>
         <div class="col-sm-9">
 
-            <div id="form-personnal-data-errors" class="alert alert-danger alert-dismissible error-block" role="alert">
+            <div id="form-personnal-data-errors" class="alert alert-danger alert-dismissible error-block"
+                 role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
                 <span class="title"><%= __('PROFILE_ERROR_MSG') %></span>
@@ -28,8 +36,13 @@
 
             <div id="personnal-data">
                 <form id="form-personnal-data">
-                    <div class="panel">
-                        <h4><%= __('PROFILE_FIRST_NAME_LABEL') %></h4>
+                    <div class="panel <% if (!profile.firstname) { %> hidden <% } %>">
+                        <h4>
+                            <%= __('PROFILE_FIRST_NAME_LABEL') %>
+                            <% if (config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.indexOf('firstname') !== -1) { %>
+                            <span class="text-danger required-asterisk">*</span>
+                            <% } %>
+                        </h4>
                         <% if (profile.firstname) { %>
                         <span class="data-value"><%= profile.firstname %></span>
                         <% } else { %>
@@ -38,8 +51,13 @@
                         <input id="firstname" name="firstname" class="form-control personnal-data-input"
                                placeholder="<%= __('PROFILE_PLACE_FIRSTNAME_HOLDER') %>"/>
                     </div>
-                    <div class="panel">
-                        <h4><%= __('PROFILE_LAST_NAME_LABEL') %></h4>
+                    <div class="panel <% if (!profile.lastname) { %> hidden <% } %>">
+                        <h4>
+                            <%= __('PROFILE_LAST_NAME_LABEL') %>
+                            <% if (config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.indexOf('lastname') !== -1) { %>
+                            <span class="text-danger required-asterisk">*</span>
+                            <% } %>
+                        </h4>
                         <% if (profile.lastname) { %>
                         <span class="data-value"><%= profile.lastname %></span>
                         <% } else { %>
@@ -48,35 +66,50 @@
                         <input id="lastname" name="lastname" class="form-control personnal-data-input"
                                placeholder="<%= __('PROFILE_PLACE_LASTNAME_HOLDER') %>"/>
                     </div>
-                    <div class="panel">
-                        <h4><%= __('PROFILE_BIRTHDATE_LABEL') %></h4>
+                    <div class="panel <% if (!profile.date_of_birth) { %> hidden <% } %>">
+                        <h4>
+                            <%= __('PROFILE_DATE_OF_BIRTH_LABEL') %>
+                            <% if (config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.indexOf('date_of_birth') !== -1) { %>
+                            <span class="text-danger required-asterisk">*</span>
+                            <% } %>
+                        </h4>
                         <span class="data-value"></span>
-                        <div class="input-group date personnal-data-input" data-provide="datepicker" data-language="en">
+                        <div class="input-group date personnal-data-input" data-provide="datepicker"
+                             data-language="en">
                             <input id="birthday" name="birthday" class="form-control" type="text">
                             <div class="input-group-addon">
                                 <span class="glyphicon glyphicon-calendar"></span>
                             </div>
                         </div>
                     </div>
-                    <div class="panel">
-                        <h4><%= __('PROFILE_SEXE_LABEL') %></h4>
+                    <div class="panel <% if (!profile.gender) { %> hidden <% } %>">
+                        <h4>
+                            <%= __('PROFILE_SEX_LABEL') %>
+                            <% if (config.userProfiles && config.userProfiles.requiredFields && config.userProfiles.requiredFields.indexOf('gender') !== -1) { %>
+                            <span class="text-danger required-asterisk">*</span>
+                            <% } %>
+                        </h4>
                         <% if (profile.gender) { %>
                         <% if (profile.gender === "female") { %>
                         <span class="data-value"
-                              data-selected="<%= profile.gender %>"><%= __('PROFILE_WOMAN_SEXE_FORM_OPTION') %></span>
+                              data-selected="<%= profile.gender %>"><%= __('PROFILE_WOMAN_SEX_FORM_OPTION') %></span>
+                        <% } else if (profile.gender === "male"){ %>
+                        <span class="data-value"
+                              data-selected="<%= profile.gender %>"><%= __('PROFILE_MAN_SEX_FORM_OPTION') %></span>
                         <% } else { %>
                         <span class="data-value"
-                              data-selected="<%= profile.gender %>"><%= __('PROFILE_MAN_SEXE_FORM_OPTION') %></span>
+                              data-selected="<%= profile.gender %>"><%= __('PROFILE_OTHER_SEX_FORM_OPTION') %></span>
                         <% } %>
                         <% } else { %>
-                        <span class="data-value" data-selected="male"></span>
+                        <span class="data-value" data-selected="other"></span>
                         <% } %>
                         <select id="gender" name="gender" class="form-control personnal-data-input">
-                            <option value="male"><%= __('PROFILE_MAN_SEXE_FORM_OPTION') %></option>
-                            <option value="female"><%= __('PROFILE_WOMAN_SEXE_FORM_OPTION') %></option>
+                            <option value="male"><%= __('PROFILE_MAN_SEX_FORM_OPTION') %></option>
+                            <option value="female"><%= __('PROFILE_WOMAN_SEX_FORM_OPTION') %></option>
+                            <option value="other"><%= __('PROFILE_OTHER_SEX_FORM_OPTION') %></option>
                         </select>
                     </div>
-                    <div class="panel">
+                    <div class="panel <% if (!profile.language) { %> hidden <% } %>">
                         <h4><%= __('PROFILE_LANGUAGE_LABEL') %></h4>
                         <% if (profile.language) { %>
                         <% if (profile.language === "fr") { %>
@@ -99,19 +132,13 @@
                             <option value="de"><%= __('PROFILE_LANGUAGE_DE_FORM_OPTION') %></option>
                         </select>
                     </div>
-                    <div class="panel">
-                        <h4><%= __('PROFILE_EMAIL_LABEL') %></h4>
-                        <% if (profile.email !== null) { %>
-                        <span><%= profile.email %></span>
-                        <% } else { %>
-                        <span></span>
-                        <% } %>
-                    </div>
+
                     <div id="btn-container">
                         <button id="btn-save-data" type="submit"
-                                class="btn btn-primary"><%= __('PROFILE_SAVE_BUTTON') %></button>
+                                class="btn btn-primary btn-large-submit"><%= __('PROFILE_SAVE_BUTTON') %></button>
                         <button id="btn-cancel-save" type="submit"
                                 class="btn btn-link"><%= __('PROFILE_CANCEL_BUTTON') %></button>
+                        <span class="pull-right text-danger">* <%= __('PROFILE_REQUIRED_FIELDS_CAPTION') %></span>
                     </div>
                 </form>
             </div>
@@ -127,34 +154,103 @@
         </div>
         <div class="col-sm-9">
 
-            <div id="form-security-errors" class="alert alert-danger alert-dismissible error-block" role="alert">
+            <div class="hasPassword">
+                <h4><%= __('PROFILE_EMAIL_LABEL') %></h4>
+                <div id="form-change-email-success" class="alert alert-success alert-dismissible error-block"
+                     role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                                aria-hidden="true">&times;</span></button>
+                    <span id="change-email-success" class="content"><%= __('PROFILE_CHANGE_EMAIL_SUCCESS') %></span>
+                </div>
+                <div class="data-value" id="display-email-span"><%= profile.email %></div>
+                <span class="data-value">
+                        <button class="btn btn-link" type="button" data-toggle="modal" data-target="#changeEmailModal">
+                            <i class='glyphicon glyphicon-pencil'></i>
+                            <span class="button-label"><%= __('PROFILE_CHANGE_EMAIL_LINK') %></span>
+                        </button>
+                        </span>
+            </div>
+
+            <div id="form-security-errors" class="alert alert-danger alert-dismissible error-block"
+                 role="alert">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
                 <span id="security-errors" class="content"></span>
             </div>
 
+            <div id="form-security-success" class="alert alert-success alert-dismissible error-block" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                <span id="security-success" class="content"><%= __('PROFILE_PASSWORD_CHANGE_SUCCESS') %></span>
+            </div>
+
+            <div id="form-new-mail-success" class="alert alert-success alert-dismissible error-block" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                <span id="security-success" class="content"><%= __('PROFILE_NEW_EMAIL_CHANGE_SUCCESS') %></span>
+            </div>
+
             <h4><%= __('PROFILE_PASSWORD_TITLE') %></h4>
-            <button id="btn-modify-password" type="button"
-                    class="btn btn-link"><%= __('PROFILE_EDIT_YOUR_PASSWORD_LINK') %></button>
+            <div id="fake-password-display">******</div>
+            <button id="btn-modify-password" type="button" class="btn btn-link">
+                <span id="hasPasswordButtonLabel" class="hasPassword">
+                    <i class='glyphicon glyphicon-pencil'></i>
+                    <%= __('PROFILE_EDIT_YOUR_PASSWORD_LINK') %>
+                </span>
+                <span id="hasNoPasswordButtonLabel" class="hasNoPassword">
+                    <%= __('PROFILE_CREATE_LOCAL_LOGIN_LINK') %>
+                </span>
+            </button>
             <form id="form-modify-pass">
-                <div class="form-group">
-                    <label for="old-password"><%= __('PROFILE_PREVIOUS_PASSWORD_LABEL') %></label>
-                    <input type="password" class="form-control" id="previous-password"
-                           placeholder="<%= __('PROFILE_PREVIOUS_PASSWORD_PLACEHOLDER') %>">
+                <div class="hasNoPassword">
+                    <div class="form-group">
+                        <label for="new-mail"><%= __('PROFILE_NEW_EMAIL_LABEL') %></label>
+                        <input type="email" class="form-control" id="new-email"
+                               placeholder="<%= __('PROFILE_NEW_EMAIL_LABEL_PLACEHOLDER') %>"
+                               value="<%= profile.socialEmail %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password"><%= __('PROFILE_NEW_PASSWORD_LABEL') %></label>
+                        <input type="password" class="form-control password-test" id="new-password"
+                               placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
+                        <p id="password-error-label" class="password-error error-message text-danger"></p>
+                        <div id="password-bar">
+                            <div id="id-password-progress"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-new-password"><%= __('PROFILE_CONFIRM_PASSWORD_LABEL') %></label>
+                        <input type="password" class="form-control" id="confirm-new-password"
+                               placeholder="<%= __('PROFILE_CONFIRM_PASSWORD_PLACEHOLDER') %>">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="new-password"><%= __('PROFILE_NEW_PASSWORD_LABEL') %></label>
-                    <input type="password" class="form-control" id="password"
-                           placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
+
+                <div id="update-password-form" class="hasPassword">
+                    <div class="form-group">
+                        <label for="old-password"><%= __('PROFILE_PREVIOUS_PASSWORD_LABEL') %></label>
+                        <input type="password" class="form-control" id="previous-password"
+                               placeholder="<%= __('PROFILE_PREVIOUS_PASSWORD_PLACEHOLDER') %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password"><%= __('PROFILE_NEW_PASSWORD_LABEL') %></label>
+                        <input type="password" class="form-control password-test" id="password"
+                               placeholder="<%= __('PROFILE_NEW_PASSWORD_PLACEHOLDER') %>">
+                        <p id="password-error-label" class="password-error error-message text-danger"></p>
+                        <div id="password-bar">
+                            <div id="id-password-progress"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password"><%= __('PROFILE_CONFIRM_PASSWORD_LABEL') %></label>
+                        <input type="password" class="form-control" id="confirm-password"
+                               placeholder="<%= __('PROFILE_CONFIRM_PASSWORD_PLACEHOLDER') %>">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="confirm-password"><%= __('PROFILE_CONFIRM_PASSWORD_LABEL') %></label>
-                    <input type="password" class="form-control" id="confirm-password"
-                           placeholder="<%= __('PROFILE_CONFIRM_PASSWORD_PLACEHOLDER') %>">
-                </div>
+
                 <div>
-                    <button id="btn-save-password" type="submit"
-                            class="btn btn-primary"><%= __('PROFILE_SAVE_PASSWORD_BUTTON') %></button>
+                    <button id="btn-save-password" type="submit" class="btn btn-primary btn-large-submit">
+                        <%= __('PROFILE_SAVE_PASSWORD_BUTTON') %>
+                    </button>
                     <button id="btn-cancel-password"
                             class="btn btn-link"><%= __('PROFILE_CANCEL_PASSWORD_BUTTON') %></button>
                 </div>
@@ -162,62 +258,155 @@
         </div>
 
     </div>
+
+    <% if (profile.facebook || profile.twitter || profile.google) { %>
+
     <hr/>
+
     <div class="row">
+
         <div class="col-sm-3">
             <h4 class="account-title">
-                <%= __('PROFILE_ACCOUNT_TITLE') %>
+                <%= __('PROFILE_ACCOUNT_LINKED_TITLE') %>
             </h4>
-
-            <% if (profile.verified) { %>
-            <span class="text-success status">
-            <span class="glyphicon glyphicon-ok"></span> <%= __('PROFILE_VERIFIED_LABEL') %>
-        </span>
-            <% } else { %>
-            <span class="text-danger status">
-            <span class="glyphicon glyphicon-remove"></span> <%= __('PROFILE_NOT_VERIFIED_LABEL') %>
-        </span>
-            <% } %>
-
-            <hr class="visible-xs-block hidden-sm"/>
-
         </div>
-        <% if (!profile.verified) { %>
+
         <div class="col-sm-9">
-            <div class="verification-link-container">
-                <p><%= __('PROFILE_FILL_VERIFICATION_LABEL') %></p>
-                <form id="verification-link-form" action='<%= link('/user/profile/request_verification_email') %>'
-                      method="post">
-                    <div class="form-group">
-                        <div class="g-recaptcha" data-sitekey="<%= config.recaptcha.site_key %>"></div>
-                    </div>
-                    <button id="btn-send-verification-link" type="submit" class="btn btn-primary"><span
-                                class="button-label"><%= __('PROFILE_RESEND_VALIDATION_EMAIL_LINK') %></span>
-                        <div class="spinner">
-                            <div class="bounce1"></div>
-                            <div class="bounce2"></div>
-                            <div class="bounce3"></div>
-                        </div>
-                    </button>
-                    <span id="verification-success" class="text-success"><span
-                                class="glyphicon glyphicon-ok"></span> <span class="text"></span> </span>
-                    <span id="verification-error" class="text-danger"><span
-                                class="glyphicon glyphicon-remove"></span> <span class="text"></span></span>
-                </form>
+            <% if (profile.facebook) { %>
+            <div class="providers-container first">
+                <span class="facebook-text"><i class="fa fa-facebook-official" aria-hidden="true"></i></span>
+                <span><%= __('PROFILE_ACCOUNT_LINKED_PROVIDER_FACEBOOK') %></span>
             </div>
-        </div>
-        <% } %>
-        <div class="col-sm-9 <% if (!profile.verified) { %> col-sm-offset-3 <% } %>">
-            <div class="delete-container">
-                <p><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LABEL') %></p>
-                <a class="btn btn-danger" disabled="disabled"><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LINK') %></a>
+            <% } %>
+            <% if (profile.twitter) { %>
+            <div class="providers-container first">
+                <span class="twitter-text"><i class="fa fa-twitter-square" aria-hidden="true"></i></span>
+                <span><%= __('PROFILE_ACCOUNT_LINKED_PROVIDER_TWITTER') %></span>
             </div>
+            <% } %>
+            <% if (profile.google) { %>
+            <div class="providers-container first">
+                <span class="google-text"><i class="fa fa-google-plus-square" aria-hidden="true"></i></span>
+                <span><%= __('PROFILE_ACCOUNT_LINKED_PROVIDER_GOOGLEPLUS') %></span>
+            </div>
+            <% } %>
         </div>
-
 
     </div>
 
-    <!-- TODO move it to an appropriate file -->
+    <% } %>
+
+    <hr/>
+
+    <div class="row">
+
+        <div class="col-sm-3 accountVerified">
+            <h4 class="account-title">
+                <%= __('PROFILE_ACCOUNT_TITLE') %>
+                <span class="glyphicon glyphicon-info-sign status-info" data-toggle="tooltip" data-placement="right"
+                      title="<%= __('PROFILE_VERIFIED_MORE_INFO') %>"></span>
+            </h4>
+            <span class="text-success status">
+                <span class="glyphicon glyphicon-ok"></span>
+                <%= __('PROFILE_VERIFIED_LABEL') %>
+            </span>
+            <hr class="visible-xs-block hidden-sm"/>
+        </div>
+
+        <div class="col-sm-3 accountNotVerified">
+            <h4 class="account-title">
+                <%= __('PROFILE_ACCOUNT_TITLE') %>
+
+                <span class="glyphicon glyphicon-info-sign status-info" data-toggle="tooltip" data-placement="right"
+                      title="<%= __('PROFILE_NOT_VERIFIED_MORE_INFO') %>"></span>
+            </h4>
+            <span class="text-danger status">
+                <span class="glyphicon glyphicon-remove"></span> <%= __('PROFILE_NOT_VERIFIED_LABEL') %>
+            </span>
+            <hr class="visible-xs-block hidden-sm"/>
+        </div>
+
+        <div class="col-sm-9 accountNotVerified">
+            <p><%= __('PROFILE_FILL_VERIFICATION_LABEL') %></p>
+            <form id="verification-link-form"
+                  action='<%= link('/api/v2/session/user/profile/request_verification_email') %>'
+                  method="post">
+                <div class="form-group">
+                    <% if(config.limiter.type === 'recaptcha' || config.limiter.type === 'recaptcha-optional') { %>
+                    <div class="recaptcha-wrapper">
+                        <%- captcha %>
+                        <div class="rc-anchor-checkbox-label"><%= __('SIGNUP_RECAPTCHA_NOT_A_ROBOT') %></div>
+                        <div class="recaptcha-info"></div>
+                        <div class="rc-anchor-logo-text">reCAPTCHA</div>
+                        <div class="rc-anchor-pt">
+                            <a href="https://www.google.com/intl/en/policies/privacy/"
+                               target="_blank"><%= __('SIGNUP_RECAPTCHA_PRIVACY') %></a>
+                            <span aria-hidden="true" role="presentation"> - </span>
+                            <a href="https://www.google.com/intl/en/policies/terms/"
+                               target="_blank"><%= __('SIGNUP_RECAPTCHA_TERMS') %></a>
+                        </div>
+                    </div>
+                    <% } %>
+                </div>
+                <button id="btn-send-verification-link" type="submit" class="btn btn-primary btn-large-submit"><span
+                            class="button-label"><%= __('PROFILE_RESEND_VALIDATION_EMAIL_LINK') %></span>
+                    <div class="spinner">
+                        <div class="bounce1"></div>
+                        <div class="bounce2"></div>
+                        <div class="bounce3"></div>
+                    </div>
+                </button>
+                <span id="verification-success" class="text-success"><span
+                            class="glyphicon glyphicon-ok"></span> <span class="text"></span> </span>
+                <span id="verification-error" class="text-danger"><span
+                            class="glyphicon glyphicon-remove"></span> <span class="text"></span></span>
+            </form>
+        </div>
+
+        <div class="col-sm-9 col" id="delete-div">
+            <span id="error-feed-back" class="text-danger">
+                <span class="text"></span>
+            </span>
+
+            <span id="success-feed-back" class="text-green">
+                <span class="text"></span>
+            </span>
+            
+                <p><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LABEL') %></p>
+                <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#deleteUserModal">
+                    <span class="button-label"><%= __('PROFILE_DELETE_YOUR_ACCOUNT_LINK') %></span>
+                </button>
+            </div>
+            <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL ){ %>
+                <div class="col-sm-9 col col-sm-offset-3" id="export-div">
+                    <span id="export-error-feed-back" class="text-danger">
+                        <span class="text"></span>
+                    </span>
+        
+                    <span id="export-success-feed-back" class="text-green">
+                        <span class="text"></span>
+                    </span>
+                <p><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LABEL') %></p>
+                <button class="btn btn-primary btn-large-submit" data-toggle="modal" data-target="#exportUserModal">
+                    <span class="button-label"><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LINK') %></span>
+                </button>
+            </div>
+            <% }%>
+            
+
+    </div>
+
+    <!-- Add client Modal -->
+    <% include ./modales/email-change.ejs %>
+    <% include ./modales/user-delete.ejs %>
+    <% include ./modales/user-export.ejs %>
+
+    <% if (config.password.quality_check == 'owasp'){ %>
+    <% include ../util/password-owasp-support %>
+    <% } else if (config.password.quality_check == 'simple'){ %>
+    <% include ../util/password-simple-support %>
+    <% } %>
+
     <script type="text/javascript">
         (function () {
 
@@ -228,25 +417,63 @@
             var $savePasswordBtn = $('#btn-save-password');
             var $cancelPasswordBtn = $('#btn-cancel-password');
             var $modifyPassBtn = $('#btn-modify-password');
+            var $fakePasswordDisplay = $('#fake-password-display');
             var $formModifyPass = $('#form-modify-pass');
             var $btnContainer = $('#btn-container');
             var $btnVerificationLink = $('#btn-send-verification-link');
+            var $btnDeleteAccount = $('#delete-user');
+            var $btnExportAccount = $('#export-user');
+            var $deleteUserModal = $('#deleteUserModal');
+            var $exportUserModal = $('#exportUserModal');
 
             var $firstname = $("#firstname");
             var $lastname = $("#lastname");
             var $gender = $("#gender");
             var $language = $("#language");
             var $previousPassword = $("#previous-password");
+            var $newEmail = $("#new-email");
             var $password = $("#password");
+            var $newPassword = $('#new-password');
             var $confirmPassword = $("#confirm-password");
+            var $newConfirmPassword = $("#confirm-new-password");
             var $birthday = $("#birthday");
             var $inputs = $('.personnal-data-input');
             var $datepicker = $(".input-group.date");
+            var $deleteDiv = $("#delete-div")
+
+            var $elementsWithPassword = $(".hasPassword");
+            var $elementsWithoutPassword = $(".hasNoPassword");
+            var $elementsAccountVerified = $(".accountVerified");
+            var $elementsAccountNotVerified = $(".accountNotVerified");
+
+            var $passwordStrengthProgress = $("#id-password-progress");
+            var hasPassword = '<%= profile.hasPassword %>';
             var date = "";
+            var verified = '<%= profile.verified %>';
+
+            if (hasPassword !== "true") {
+                $elementsWithPassword.hide();
+                $elementsWithoutPassword.show();
+            } else {
+                $elementsWithPassword.show();
+                $elementsWithoutPassword.hide();
+            }
+
+            if (verified != 'true') {
+                $elementsAccountNotVerified.show();
+                $elementsAccountVerified.hide();
+                $deleteDiv.addClass('col-sm-offset-3');
+            } else {
+                $elementsAccountNotVerified.hide();
+                $elementsAccountVerified.show();
+            }
 
             //Little css trick so that date input render correctly but does not appear quickly at loading
             $inputs.hide();
             $inputs.css('visibility', 'visible');
+
+            //Initialize all tootips
+            $('[data-toggle="tooltip"]').tooltip();
 
             // LOCAL FUNCTIONS
             var closeEditMode = function () {
@@ -254,8 +481,14 @@
                     var $element = $(element);
                     var $dataField = $element.find(".data-value").first();
                     var $inputField = $element.find('.personnal-data-input').first();
+                    var $asterisks = $element.find('.required-asterisk').first();
+
+                    if (!$dataField.text()) {
+                        $element.addClass('hidden');
+                    }
 
                     //Show labels and hide fields
+                    $asterisks.hide();
                     $inputField.hide();
                     $btnContainer.hide();
                     $dataField.show();
@@ -271,18 +504,18 @@
             };
 
             var createDate = function (sDate) {
-                var date = sDate.substr(6, 4) + "/" + sDate.substr(3, 2) + "/" + sDate.substr(0, 2);
-                return new Date(date);
+                var date = sDate.substr(6, 4) + "-" + sDate.substr(3, 2) + "-" + sDate.substr(0, 2);
+                return date;
             };
 
-            var resetErrors = function (formClass, errorsClass) {
+            var resetMessages = function (formClass, errorsClass) {
                 $("#" + formClass).hide("fast");
                 $("#" + errorsClass).empty();
             };
 
             //Init date field and datepicker
-            if ("<%= profile.birthdate %>" && "<%= profile.birthdate %>" != "null" && "<%= profile.birthdate %>" !== null && "<%= profile.birthdate %>" != "undefined") {
-                date = new Date(parseInt("<%= profile.birthdate %>"));
+            if ("<%= profile.date_of_birth %>" && "<%= profile.date_of_birth %>" != "null" && "<%= profile.date_of_birth %>" !== null && "<%= profile.date_of_birth %>" != "undefined") {
+                date = new Date("<%= profile.date_of_birth %>");
                 $datepicker.prev(".data-value").text(formatDate(date));
             }
 
@@ -307,6 +540,9 @@
                     var $dataField = $element.find(".data-value").first();
                     var value = String($dataField.text());
                     var $inputField = $element.find('.personnal-data-input').first();
+                    var $asterisks = $element.find('.required-asterisk').first();
+
+                    $element.removeClass('hidden');
 
                     //If it is date field, update it correctly
                     if ($inputField.hasClass("date")) {
@@ -319,6 +555,7 @@
 
                     //Show fields and hide labels with data values
                     $dataField.hide();
+                    $asterisks.css('display', 'inline-block');
                     $inputField.show();
                 });
 
@@ -355,22 +592,369 @@
                 });
             });
 
-            $saveDataBtn.on('click', function (e) {
-                e.preventDefault();
-                resetErrors("form-personnal-data-errors", "personnal-data-errors");
+            $('#changeEmailModal').on('show.bs.modal', function () {
+                this.classList.remove('fade');
+                $("#change-email-password").val('');
+            });
 
-                var userId = "<%= user.id %>";
-                var date = createDate($birthday.val()).getTime();
+            $deleteUserModal.on('show.bs.modal', function () {
+                $deleteUserModal.removeClass('fade');
+            })
+
+            $exportUserModal.on('show.bs.modal', function () {
+                $exportUserModal.removeClass('fade');
+            })
+
+            $('#user-pass').keypress(function (event) {
+                //On pressing enter key
+                if (event.which === 13) {
+                    //Do not close the popup
+                    event.preventDefault();
+                    //But call delete account function
+                    $('#delete-user').click();
+                    return false;
+                }
+            });
+
+            $('button#change-email').on('click', function (e) {
+                e.preventDefault();
+                var $btn = $(e.target);
+                var label = $btn.find('.button-label').first();
+                var spinner = $btn.find(".spinner").first();
+                var $changeEmailError = $("#change-email-error");
+                var $changeEmailNew = $("#change-email-new");
+                var $changeEmailPassword = $("#change-email-password");
+                var $changeEmailForm = $("#changeEmailForm");
+                var $formChangeEmailSuccess = $('#form-change-email-success');
+                $formChangeEmailSuccess.hide();
+
+                spinner.show();
+                label.hide();
+
+                $changeEmailError.hide();
+                $changeEmailError.html("");
+                $changeEmailForm.first('div.form-group').removeClass('has-error');
+
+                if (!$changeEmailNew.val()) {
+                    $changeEmailError.html("<%= __('PROFILE_CHANGE_EMAIL_NO_EMAIL') %>");
+                    $changeEmailForm.first('div.form-group').addClass('has-error');
+                    $changeEmailError.show();
+                    spinner.hide();
+                    label.show();
+                    return;
+                }
+
+                $.ajax(
+                    {
+                        url: '<%= link('/api/v2/session/user/email/change') %>',
+                        contentType: "application/json; charset=utf-8",
+                        type: 'POST',
+                        data: JSON.stringify({
+                            new_email: $changeEmailNew.val(),
+                            password: $changeEmailPassword.val(),
+                        }),
+                        success: function (result) {
+                            $("#changeEmailModal").modal('toggle');
+                            $changeEmailPassword.val('');
+                            spinner.hide();
+                            label.show();
+                            $formChangeEmailSuccess.show();
+                        },
+                        error: function (error) {
+                            $changeEmailPassword.val('');
+                            if (error.responseJSON && error.responseJSON.msg) {
+                                $changeEmailError.html(error.responseJSON.msg);
+                                $changeEmailForm.first('div.form-group').addClass('has-error');
+                                $changeEmailError.show();
+                                spinner.hide()
+                                label.show();
+                            } else {
+                                try {
+                                    console.log("Error: ", error);
+                                }
+                                catch (err) {
+                                }
+                                $changeEmailError.html("<%= __('PROFILE_CHANGE_EMAIL_ERROR') %>");
+                                $changeEmailForm.first('div.form-group').addClass('has-error');
+                                $changeEmailError.show();
+                                spinner.hide();
+                                label.show();
+                            }
+                        }
+                    }
+                )
+            });
+
+            $btnDeleteAccount.on('click', function (e) {
+                e.preventDefault();
+                var $label = $btnDeleteAccount.find(".button-label").first();
+                var $spinner = $btnDeleteAccount.find(".spinner").first();
+                var $deleteError = $("#error-feed-back");
+                var $password = $('#user-pass');
+                var $deleteUserForm = $("#deleteUserForm");
+                var isFacebookAccount = '<%= profile.facebook %>';
+                var isGoogleAccount = '<%= profile.google %>';
+                var $passwordError = $('#password-error');
+
+                $deleteError.hide();
+                $label.hide();
+                $spinner.show();
+                $deleteUserForm.first('div.form-group').removeClass('has-error');
+                $passwordError.hide();
+                $passwordError.html("");
+
+                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true") {
+                    $passwordError.html("<%= __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>");
+                    $deleteUserForm.first('div.form-group').addClass('has-error');
+                    $spinner.hide()
+                    $label.show();
+                    $passwordError.show();
+                    return;
+                }
+
+                var deleteSuccess = function (result) {
+                    //set success message in storage to get it back on login page and LOGOUT
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('loginMessage', "<%= __('PROFILE_JS_SUCCESS_DELETE_ACCOUNT') %>");
+                    }
+                    window.location = "<%= link('/logout') %>";
+                };
+
+                var deleteFail = function (error) {
+                    console.log('error: ', error);
+                    if (error.responseJSON && error.responseJSON.msg) {
+                        $passwordError.html(error.responseJSON.msg);
+                        $deleteUserForm.first('div.form-group').addClass('has-error');
+                        $spinner.hide()
+                        $label.show();
+                        $passwordError.show();
+                    } else {
+                        $deleteUserModal.modal('toggle');
+                        $('.modal-backdrop').remove();
+                        $.notify({message:  "<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>"},{type: 'danger'});
+                        $deleteError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_DELETE_ACCOUNT') %>");
+                        $spinner.hide();
+                        $label.show();
+                        $deleteError.show();
+                    }
+                }
+
+
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerDeleteWithURL && profile.hasPassword){ %>
+                // Using GDPR manager with local account
+                $.ajax({
+                    url: '<%= config.gdprManager.useGDPRManagerDeleteWithURL %>',
+                    type: 'DELETE',
+                    headers: {
+                        "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
+                    },
+                    success: deleteSuccess,
+                    error: deleteFail
+                });
+                <% } %>
+                 <% if (config.gdprManager && config.gdprManager.useGDPRManagerDeleteWithURL && !profile.hasPassword){ %>
+                // Using GDPR manager without local account
+                $.ajax({
+                    url: '<%= link('/api/v2/session/jwt')%>',
+                    type: 'GET',
+                    success: function (result) {
+                        $.ajax({
+                            url: '<%= config.gdprManager.useGDPRManagerDeleteWithURL %>',
+                            type: 'DELETE',
+                            headers: {
+                                "Authorization": result.token
+                            },
+                            success: deleteSuccess,
+                            error: deleteFail
+                        });
+                    },
+                    error: deleteFail
+                });
+
+                <% } %>
+
+                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerDeleteWithURL){ %>
+                // Not using GDPR manager
 
                 $.ajax({
-                    url: "<%= link('/user/profile/') %>",
+
+                    url: "<%= link('/user') %>",
+                    type: 'POST',
                     data: {
+                        password: $password.val()
+                    },
+                    success: deleteSuccess,
+                    error: deleteFail
+                });
+                <% } %>
+
+
+            });
+
+
+
+            $btnExportAccount.on('click', function (e) {
+                e.preventDefault();
+                var $label = $btnExportAccount.find(".button-label").first();
+                var $spinner = $btnExportAccount.find(".spinner").first();
+                var $exportError = $("#export-error-feed-back");
+                var $exportSuccess = $("#export-success-feed-back");
+                var $password = $('#export-user-pass');
+                var $exportUserForm = $("#exportUserForm");
+                var isFacebookAccount = '<%= profile.facebook %>';
+                var isGoogleAccount = '<%= profile.google %>';
+                var $passwordError = $('#export-password-error');
+
+                $exportError.hide();
+                $label.hide();
+                $spinner.show();
+                $exportUserForm.first('div.form-group').removeClass('has-error');
+                $passwordError.hide();
+                $passwordError.html("");
+
+                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true") {
+                    $passwordError.html("<%= __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>"); //TODO
+                    $exportUserForm.first('div.form-group').addClass('has-error');
+                    $spinner.hide()
+                    $label.show();
+                    $passwordError.show();
+                    return;
+                }
+
+                var exportSuccess = function (result) {
+                    $exportUserModal.modal('toggle');
+                    $('.modal-backdrop').remove();
+                    $.notify("<%= __('PROFILE_JS_SUCCESS_EXPORT_ACCOUNT') %>");
+                    $exportSuccess.find(".text").first().text("<%= __('PROFILE_JS_SUCCESS_EXPORT_ACCOUNT') %>");
+                    $spinner.hide();
+                    $label.show();
+                    $exportSuccess.show();
+
+                };
+
+                var exportFail = function (error) {
+                    if (error.responseJSON && error.responseJSON.msg) {
+                        $passwordError.html(error.responseJSON.msg);
+                        $exportUserForm.first('div.form-group').addClass('has-error');
+                        $spinner.hide()
+                        $label.show();
+                        $passwordError.show();
+                    } else {
+                        $exportUserModal.modal('toggle');
+                        $('.modal-backdrop').remove();
+                        $.notify({message:  "<%= __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>"},{type: 'danger'});
+                        $exportError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>");
+                        $spinner.hide();
+                        $label.show();
+                        $exportError.show();
+                    }
+                }
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL && profile.hasPassword){ %>
+                // Using GDPR manager with local account
+                $.ajax({
+                    url: '<%= config.gdprManager.useGDPRManagerExporteWithURL %>',
+                    type: 'GET',
+                    headers: {
+                        "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
+                    },
+                    success: exportSuccess,
+                    error: exportFail
+                });
+                <% } %>
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExporteWithURL && !profile.hasPassword){ %>
+                // Using GDPR manager without local account
+                $.ajax({
+                    url: '<%= link('/api/v2/session/jwt')%>',
+                    type: 'GET',
+                    success: function (result) {
+                        $.ajax({
+                            url: '<%= config.gdprManager.useGDPRManagerExporteWithURL %>',
+                            type: 'GET',
+                            headers: {
+                                "Authorization": result.token
+                            },
+                            success: exportSuccess,
+                            error: exportFail
+                        });
+                    },
+                    error: exportFail
+                });
+
+                <% } %>
+
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExportWithURL && profile.hasPassword){ %>
+                // Using GDPR manager with local account
+                $.ajax({
+                    url: '<%= config.gdprManager.useGDPRManagerExportWithURL %>',
+                    type: 'GET',
+                    headers: {
+                        "Authorization": "Basic " + btoa("<%= profile.login %>:" + $password.val())
+                    },
+                    success: exportSuccess,
+                    error: exportFail
+                });
+                <% } %>
+                <% if (config.gdprManager && config.gdprManager.useGDPRManagerExportWithURL && !profile.hasPassword){ %>
+                // Using GDPR manager without local account
+                $.ajax({
+                    url: '<%= link('/api/v2/session/jwt')%>',
+                    type: 'GET',
+                    success: function (result) {
+                        $.ajax({
+                            url: '<%= config.gdprManager.useGDPRManagerExportWithURL %>',
+                            type: 'GET',
+                            headers: {
+                                "Authorization": result.token
+                            },
+                            success: exportSuccess,
+                            error: exportFail
+                        });
+                    },
+                    error: exportFail
+                });
+
+                <% } %>
+
+
+
+
+                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerExporteWithURL){ %>
+                // Not using GDPR manager
+
+                $.ajax({
+
+                    url: "<%= link('/user') %>",
+                    type: 'POST',
+                    data: {
+                        password: $password.val()
+                    },
+                    success: exportSuccess,
+                    error: exportFail
+                });
+                <% } %>
+
+
+            });
+
+            $saveDataBtn.on('click', function (e) {
+                e.preventDefault();
+                resetMessages("form-personnal-data-errors", "personnal-data-errors");
+
+                var dab = $birthday.val();
+                var dab_str = dab ? createDate(dab) : '';
+
+                $.ajax({
+                    url: "<%= link('/api/v2/session/user/profile') %>",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({
                         firstname: $firstname.val(),
                         lastname: $lastname.val(),
                         gender: $gender.val(),
                         language: $language.val(),
-                        birthdate: date
-                    },
+                        date_of_birth: dab_str
+                    }),
                     type: 'PUT',
                     success: function (result) {
                         $firstname.prev(".data-value").text($firstname.val());
@@ -402,41 +986,77 @@
 
             $cancelBtn.on('click', function (e) {
                 e.preventDefault();
-                resetErrors("form-personnal-data-errors", "personnal-data-errors");
+                resetMessages("form-personnal-data-errors", "personnal-data-errors");
                 closeEditMode();
             });
 
             $modifyPassBtn.on('click', function (e) {
                 e.preventDefault();
                 $formModifyPass.show();
+                $fakePasswordDisplay.hide();
                 $modifyPassBtn.hide();
             });
 
             $savePasswordBtn.on('click', function (e) {
                 e.preventDefault();
 
-                resetErrors("form-security-errors", "security-errors");
+                resetMessages("form-security-errors", "security-errors");
+                $("#form-security-success").hide();
+                $("#form-new-email-success").hide();
 
-                var userId = "<%= user.id %>";
+                var url = "<%= link('/api/v2/all/user/password')%>";
+                var data = {}
+                if (hasPassword !== "true") {
+                    url = "<%= link('/api/v2/session/user/login/create')%>";
+                    data["email"] = $newEmail.val();
+                    data["password"] = $newPassword.val();
+                    data["confirm_password"] = $newConfirmPassword.val();
+                } else {
+                    password: $password.val();
+                    data["email"] = "<%= profile.login %>";
+                    data["new_password"] = $password.val();
+                    data["previous_password"] = $previousPassword.val();
+                    data["confirm_password"] = $confirmPassword.val();
+                }
 
                 $.ajax({
-                    url: "<%= link('/user/') %>" + userId + "/password",
-                    data: {
-                        previous_password: $previousPassword.val(),
-                        password: $password.val(),
-                        confirm_password: $confirmPassword.val()
-                    },
+                    url: url,
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
                     type: 'POST',
                     success: function (result) {
+                        // Password stuff
+                        if (hasPassword !== "true") {
+                            $("#form-new-email-success").show('fast');
+                        } else {
+                            $("#form-security-success").show('fast');
+                        }
+                        $('#display-email-span').append($newEmail.val());
+                        hasPassword = "true";
+                        $elementsWithPassword.show();
+                        $elementsWithoutPassword.hide();
+
+                        // Verified stuff
+                        $elementsAccountNotVerified.show();
+                        $elementsAccountVerified.hide();
+                        $deleteDiv.addClass('col-sm-offset-3');
+
                         $previousPassword.val("");
+                        $passwordStrengthProgress.width(0);
                         $password.val("");
                         $confirmPassword.val("");
+
+                        // password change form close
                         $formModifyPass.hide();
+                        $fakePasswordDisplay.show();
                         $modifyPassBtn.show();
+                        $('html, body').animate({
+                            scrollTop: $("#security-success").offset().top
+                        }, 500);
                     },
                     error: function (result) {
                         $.each(result.responseJSON.errors, function (index, error) {
-                            $("#security-errors").append($('<p>').text(error.msg));
+                            $("#security-errors").append($('<p>').html(error.msg));
                         });
                         $("#form-security-errors").show("fast");
                         $('html, body').animate({
@@ -448,11 +1068,13 @@
 
             $cancelPasswordBtn.on('click', function (e) {
                 e.preventDefault();
-                resetErrors("form-security-errors", "security-errors");
+                resetMessages("form-security-errors", "security-errors");
+                // password change form close
                 $formModifyPass.hide();
+                //TODO check if there is a password else do not show the fake password display
+                $fakePasswordDisplay.show();
                 $modifyPassBtn.show();
             });
-
         })();
     </script>
 

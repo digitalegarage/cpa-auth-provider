@@ -2,6 +2,25 @@
 
 module.exports = {
 
+    allow_name_access_by_puid: false,
+    
+    broadcaster: {
+        // Name of the Broadcaster
+        name: 'rts',
+        // Name of the Broadcaster specific layout. Use '' for default one.
+        layout: 'rts',
+        // override the HTML default title value
+        title: '',
+        oauth: {
+            // override the oauth validation message
+            customMessage: '{client} souhaite accéder à votre compte maRTS.'
+        },
+        date_format: "dd.mm.yyyy",
+        changeEmailConfirmationPage: "http://localhost",
+        changeMoveEmailConfirmationPage: "http://localhost",
+        changeRecoverPasswordPage: "http://localhost"
+    },
+
     // Define the available identity providers
     identity_providers: {
         // Details : http://passportjs.org/guide/facebook/
@@ -9,6 +28,17 @@ module.exports = {
             enabled: false,
             client_id: '',
             client_secret: '',
+            callback_url: ''
+        },
+        google: {
+            enabled: false,
+            client_id: '',
+            client_secret: ''
+        },
+        twitter: {
+            enabled: false,
+            consumer_key: '',
+            consumer_secret: '',
             callback_url: ''
         },
         github: {
@@ -25,12 +55,21 @@ module.exports = {
         }
     },
 
+
+    gdprManager: {
+        // useGDPRManagerDeleteWithURL: 'https://gdprmanager.org',
+    },
+
     // configuration for password using local identity provider
     password: {
+        // one of [no,simple,owasp] - defaults to owasp
+        quality_check: '',
         // in sec
         recovery_code_validity_duration: 1800,
         // a new recovery code will be generated only if the current one has less that TTL
-        keep_recovery_code_until: 900
+        keep_recovery_code_until: 900,
+        // additional endpoint for password setting (/user/password)
+        additional_endpoint: true,
     },
 
     // define the name of the cookie used to store user locale
@@ -63,21 +102,50 @@ module.exports = {
         duration: 10 * 365 * 24 * 60 * 60 * 1000 // 10 years
     },
 
-    // google recaptcha keys
-    recaptcha: {
-        // test keys
-        // site_key: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-        // secret_key: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
-        site_key: '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI',
-        secret_key: '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+    limiter: {
+        type: 'recaptcha', // 'no' || 'rate' || 'recaptcha-optional' || 'recaptcha'
+        parameters: {
+            recaptcha: {
+                site_key: '6Lc6NCYUAAAAAPiyvFO2jig6jXGtYEhgZWtWFzml',
+                secret_key: '6Lc6NCYUAAAAALCXdWXUsZgDBl7fn9XA_ecVpu7m'
+            },
+            rate: {
+                windowMs: 10 * 60 * 1000,
+                delayAfter: 1,
+                delayMs: 1000
+            }
+        }
     },
 
-    // When accessing the home page, if defined, users are automatically
-    // redirected to the specified identity_providers (ie: 'github')
-    auto_idp_redirect: '',
+    use_landing_page: false,
+
+    afterLogin: {
+        // Store information in a custom cookie in json format
+        storeUserInfoInCookie: {
+            // true indicate that additional information will be stored
+            activated: true,
+            // name of the cookie
+            cookieName: 'peach_infos',
+            // cookie domain
+            domain: '.broadcaster.com',
+            duration: 999999999,
+            // if true cookie will contain userId as json property
+            storeUserId: true,
+            // if true cookie will contain displayName as json property
+            storeUserDisplayName: false
+        },
+        // White list of possible redirect URI (comma separated values) after login when token will be passed as a get parameter
+        allowedRedirectUris:'http://localhost:3000,http://localhost'
+    },
+
+    // enable trusting of X-Forwarded-For headers
+    trust_proxy: true,
 
     // if false the list of user is not accessible in the admin
     displayUsersInfos: true,
+
+    //if false the idp menu bar is hidden
+    displayMenuBar: true,
 
     // Database configuration
     db: {
@@ -98,10 +166,21 @@ module.exports = {
     },
 
     // Session cookie is signed with this secret to prevent tampering
-    session_secret: 'LKASDMjnr234n90lasndfsadf',
+    session_secret: 'putYourSessionSecretHere',
 
-    // Name of the session cookie. Must be something different than 'connect.sid'
-    sid_cookie_name: 'identity.provider.sid',
+    auth_session_cookie: {
+        // Name of the session cookie. Must be something different than 'connect.sid'
+        name: 'identity.provider.sid',
+        duration: 365 * 24 * 60 * 60 * 1000,
+        // set js_accessible to true to turn off http only for session cookie
+        js_accessible: false,
+        // set accessible_over_non_https to true to send cookie via HTTP (not S) too
+        accessible_over_non_https: true, // Use true for local test if you don't have https stuff
+        //domain: .rts.ch
+    },
+
+    // Can be use to use an authorization header instead of a cookie in mobile app for instance.
+    session_authorization_header_qualifier : 'sessionToken',
 
     // Cross-origin resource sharing
     cors: {
@@ -109,13 +188,33 @@ module.exports = {
         allowed_domains: [
             "http://cpa-client.ebu.io"
         ]
+        // possible other options, will extend allowed_domains:
+        // wildcard_domains: ['.ebu.io','.kornherr.net'] // (no stars or so, just a string for .endsWith())
+    },
+
+    // iframe options
+    iframes: {
+      option: 'SAMEORIGIN', // DENY|SAMEORIGIN|ALLOW-FROM|UNSET
+      allow_from_domain: 'https://www.br.de' // only in use when option is allow-from
+    },
+
+    // use more secure header settings
+    use_secure_headers: true,
+    content_security_policy:{
+        // allow script loading from
+        additional_scripts_src: 'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // allow font loading from
+        additional_fonts_src: 'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // allow iframe loading from
+        additional_frames_src: 'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // allow css loading from
+        additional_styles_src:'https://some-trusted-domain.org https://another-trusted-domain.org',
+        // Unless you have to load font using AJAX and set it directly as B64 in a font HTML tag, it's not recommended to enable allow_fonts_data
+        //allow_fonts_data: true,
     },
 
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
-
-    // Name of the Broadcaster specific layout. Use '' for default one.
-    broadcasterLayout: '',
 
     // CPA
 
@@ -186,27 +285,46 @@ module.exports = {
         }
     ],
 
-    // users: [
-    //   {
+    // admin: {
     //     id:           1,
-    //     email:        "admin@admin.com",
+    //     login:        "admin@admin.com",
     //     display_name: "Admin",
     //     verified:     true,
     //     permission_id:1
-    //   }
-    // ],
+    //   },
 
-    oauth2_clients: [
-        {
-            id: 1,
-            client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
-            client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-            name: "OAuth 2.0 Client"
-        }
-    ],
+    // Init dev environment purpose (RTS sample)
+    // oauth2_clients: [
+    //     {
+    //         id: 1,
+    //         client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
+    //         client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
+    //         user_template: "boutique-rts",
+    //         name: "La boutique RTS"
+    //     }
+    // ],
 
     oauth2: {
         refresh_tokens_enabled: true
-    }
+    },
+
+    deletion: {
+        // enable automatic deletion
+        automatic_deletion_activated: false,
+        // allow DELETE /oauth2/me
+        endpoint_enabled: false,
+        // how long before a deletion request is processed
+        delay_in_days: 7,
+        // check to delete in seconds
+        delete_interval: 6 * 60 * 60, // 6 hours
+        // how long before a verification is considered failed, in seconds, set to 0- to disable
+        verification_time: 7 * 24 * 60 * 60 // 7 days
+    },
+
+    monitoring: {
+        enabled: true,
+    },
+
+    access_log_format: '[ACCESS-LOG] url=":url" method=":method" statusCode=":statusCode" delta=":delta"'
 
 };

@@ -4,7 +4,6 @@ var config = require('../config');
 var cors = require('../lib/cors');
 var db = require('../models');
 var generate = require('../lib/generate');
-var logger = require('../lib/logger');
 
 var schema = {
     id: "/associate",

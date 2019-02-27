@@ -13,10 +13,6 @@ module.exports = {
         }
     },
 
-    // When accessing the home page, if defined, users are automatically
-    // redirected to the specified identity_providers (ie: 'github')
-    auto_idp_redirect: '',
-
     db: {
         // The database type, 'mysql', 'sqlite', etc.
         type: 'sqlite',
@@ -29,6 +25,6 @@ module.exports = {
     },
 
     // Session cookie is signed with this secret to prevent tampering
-    session_secret: 'LKASDMjnr234n90lasndfsadf'
+    session_secret: 'thisIsNotABigSecretThisIsJustDemoClient'
 
 };

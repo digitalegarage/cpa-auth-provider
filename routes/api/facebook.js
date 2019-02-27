@@ -1,101 +1,77 @@
 "use strict";
 
 var db = require('../../models');
-var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
+var socialLoginHelper = require('../../lib/social-login-helper');
 var request = require('request');
-var jwt = require('jwt-simple');
 var cors = require('../../lib/cors');
+var facebookHelper = require('../../lib/facebook-helper');
 
+module.exports = function (app, options) {
+
+    app.post('/oauth/facebook/signup', cors, function (req, res) {
+        if (!req.body.client_id) {
+            res.status(400).json({error: "Missing client id"});
+        } else {
+            facebookSignup(req, res);
+        }
+    });
+
+    app.post('/api/facebook/signup', cors, function (req, res) {
+        facebookSignup(req, res);
+    });
+};
 
 function verifyFacebookUserAccessToken(token, done) {
-    var path = 'https://graph.facebook.com/me?fields=id,name,picture&access_token=' + token;
+    var path = 'https://graph.facebook.com/me?fields=id,email,name,first_name,last_name,gender,birthday&access_token=' + token;
     request(path, function (error, response, body) {
-
         var data = JSON.parse(body);
-        if (!error && response && response.statusCode && response.statusCode == 200) {
-            var photo_url = (data.picture) ? data.picture.data.url : null;
-            var user = {
-                provider_uid: data.id,
-                display_name: data.name,
-                photo_url: photo_url
-            };
-            done(null, user);
-        }
-        else {
-            console.log(data.error);
+        if (!error && response && response.statusCode && response.statusCode === 200) {
+            var remoteProfile = socialLoginHelper.buildRemoteProfile(facebookHelper.buildFBId(data.id), data.name, data.email, data.first_name, data.last_name, data.gender, facebookHelper.fbDateOfBirthToTimestamp(data.birthday));
+            done(null, remoteProfile);
+        } else {
             done({code: response.statusCode, message: data.error.message}, null);
         }
     });
 }
 
-function buildResponse(user) {
-    var token = jwt.encode(user, config.jwtSecret);
-    return {
-        success: true,
-        user: user,
-        token: 'JWT ' + token
-    };
-}
+function facebookSignup(req, res) {
+    var facebookAccessToken = req.body.fbToken;
+    if (facebookAccessToken && facebookAccessToken.length > 0) {
+        // Get back user object from Facebook
+        verifyFacebookUserAccessToken(facebookAccessToken, function (err, remoteProfile) {
+            if (remoteProfile) {
+                // If the user already exists and his account is not validated
+                // i.e.: there is a user in the database with the same id and this user email is not validated
+                db.LocalLogin.find({
+                    where: {
+                        login: remoteProfile.email
+                    }
+                }).then(function (localLoginInDb) {
+                    if (localLoginInDb && !localLoginInDb.verified) {
+                        res.status(400).json({error: req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB")});
+                    } else {
+                        socialLoginHelper.performLogin(remoteProfile, socialLoginHelper.FB, req.body.client_id, function (error, response) {
 
-function performFacebookLogin(appName, profile, fbAccessToken, done) {
-
-    if (appName && profile && fbAccessToken) {
-        db.User.findOrCreate({
-            where: {
-                provider_uid: profile.provider_uid,
-                display_name: profile.display_name,
-                photo_url: profile.photo_url
-            }
-        }).spread(function (user) {
-            if (user.hasChanged(profile.display_name, profile.photo_url)) {
-                user.updateAttributes({
-                    display_name: profile.display_name,
-                    photo_url: profile.photo_url
-                }).then(function () {
-                    return done(null, buildResponse(user));
-                }).catch(function (error) {
-                    return done(error, null);
+                            if (response) {
+                                res.status(200).json(response);
+                            } else {
+                                res.status(500).json({error: error.message});
+                            }
+                        });
+                    }
                 });
+
             } else {
-                return done(null, buildResponse(user));
+                res.status(401).json({error: "No valid facebook profile found"});
             }
-        }).catch(function (err) {
-            return done(err, null);
+
         });
     }
+    else {
+        // 400 BAD REQUEST
+        console.log('error', 'Bad login request from ' +
+            req.connection.remoteAddress + '. Reason: facebook access token and application name are required.');
+        res.status(400);
+    }
 }
-
-module.exports = function (app, options) {
-    app.post('/api/facebook/signup', cors, function (req, res) {
-        var facebookAccessToken = req.body.fbToken;
-        var applicationName = req.body.appName;
-        if (facebookAccessToken && facebookAccessToken.length > 0 && applicationName && applicationName.length > 0) {
-            // Get back user object from Facebook
-            verifyFacebookUserAccessToken(facebookAccessToken, function (err, user) {
-                if (user) {
-                    performFacebookLogin(applicationName, user, facebookAccessToken, function (error, response) {
-                        if (response) {
-                            res.status(200).json(response);
-                        } else {
-                            console.log(error);
-                            res.status(500).json({error: error.message});
-                        }
-                    });
-                } else {
-                    console.log(err);
-                    res.status(500).json({error: err.message});
-                }
-
-            });
-        }
-        else {
-            // 400 BAD REQUEST
-            console.log('error', 'Bad login request from ' +
-                req.connection.remoteAddress + '. Reason: facebook access token and application name are required.');
-            res.status(400);
-        }
-    });
-};
-
 

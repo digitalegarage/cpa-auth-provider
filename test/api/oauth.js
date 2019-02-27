@@ -1,7 +1,6 @@
 "use strict";
 
 var generate = require('../../lib/generate');
-var messages = require('../../lib/messages');
 var db = require('../../models');
 var jwtHelper = require('../../lib/jwt-helper');
 
@@ -9,6 +8,8 @@ var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 
 var config = require('../../config');
+
+var bcrypt = require('bcrypt');
 
 var CLIENT = {
     id: 1,
@@ -20,6 +21,7 @@ var CLIENT = {
 var USER = {
     id: 123,
     email: 'test@test.com',
+    verified: true,
     account_uid: 'RandomUid',
     password: 'a'
 };
@@ -35,9 +37,14 @@ var URL_PREFIX = config.urlPrefix;
 
 function createOAuth2Client(done) {
     db.OAuth2Client.create(CLIENT).then(
+        function (client) {
+            return client.updateAttributes({client_secret: bcrypt.hashSync(CLIENT.client_secret, 5)});
+        }
+    ).then(
         function () {
-            return done();
-        },
+            done();
+        }
+    ).catch(
         function (err) {
             return done(err);
         }
@@ -45,8 +52,17 @@ function createOAuth2Client(done) {
 }
 
 function createUser(userTemplate) {
-    return db.User.create(userTemplate).then(function (user) {
-        return user.setPassword(userTemplate.password);
+    return db.User.create(userTemplate).then(
+        function (user) {
+            return db.LocalLogin.create(
+                {
+                    user_id: user.id,
+                    login: userTemplate.email,
+                    verified: userTemplate.verified,
+                });
+        }
+    ).then(function (localLogin) {
+        return localLogin.setPassword(userTemplate.password);
     });
 }
 
@@ -54,7 +70,8 @@ function createFakeUser(done) {
     createUser(USER).then(
         function () {
             return createUser(USER2);
-        }).then(
+        }
+    ).then(
         function () {
             return done();
         }
@@ -144,12 +161,17 @@ describe('POST /oauth2/token', function () {
         });
 
         it('should have proper access token', function () {
-            var decoded = jwtHelper.decode(this.res.body.access_token);
+            var decoded = jwtHelper.decode(this.res.body.access_token, CLIENT.jwt_code);
             expect(decoded.iss).equal('cpa');
             expect(decoded.aud).equal('cpa');
             expect(decoded.exp).match(/[0-9]+/);
             expect(decoded.cli).equal(CLIENT.id);
             expect(decoded.sub).equal(USER.id);
+            expect(decoded.vfy).equal('1');
+        });
+
+        it('should have expires_in set correctly', function () {
+            expect(this.res.body.expires_in).equal(36000);
         });
 
         it('should have token type Bearer', function () {
@@ -185,12 +207,17 @@ describe('POST /oauth2/token', function () {
         });
 
         it('should have proper access token', function () {
-            var decoded = jwtHelper.decode(this.res.body.access_token);
+            var decoded = jwtHelper.decode(this.res.body.access_token, CLIENT.jwt_code);
             expect(decoded.iss).equal('cpa');
             expect(decoded.aud).equal('cpa');
             expect(decoded.exp).match(/[0-9]+/);
             expect(decoded.cli).equal(CLIENT.id);
             expect(decoded.sub).equal(USER2.id);
+            expect(decoded.vfy).equal('0');
+        });
+
+        it('should have proper expires_in set', function () {
+            expect(this.res.body.expires_in).equal(36000);
         });
 
         it('should have token type Bearer', function () {
@@ -228,7 +255,7 @@ describe('POST /oauth2/token', function () {
             });
 
             it('should reject with bad request', function () {
-                expect(this.res.statusCode).equal(500);
+                expect(this.res.statusCode).equal(400);
             });
         }
     );
@@ -290,10 +317,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-            });
-
-            it('should redirect to login page', function () {
-                expect(this.res.headers.location).equal(URL_PREFIX + '/auth');
+                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=code&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
             });
         });
     });
@@ -353,10 +377,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-            });
-
-            it('should redirect to login page', function () {
-                expect(this.res.headers.location).equal(URL_PREFIX + '/auth');
+                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=token&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
             });
         });
     });
@@ -372,22 +393,7 @@ describe('OAuth2 Implicit Flow', function () {
         before(createFakeUser);
 
         before(function (done) {
-            requestHelper.sendRequest(this, url, {}, done);
-        });
-        before(function (done) {
-            requestHelper.sendRequest(
-                this,
-                '/login',
-                {
-                    method: 'post',
-                    cookie: this.cookie,
-                    type: 'form',
-                    data: {
-                        email: USER.email,
-                        password: USER.password
-                    }
-                },
-                done);
+            requestHelper.loginUser(this, USER.email, USER.password, done);
         });
 
         before(function (done) {
@@ -424,20 +430,19 @@ describe('OAuth2 Implicit Flow', function () {
         });
 
         it('should have access_token in location', function () {
-            expect(this.res.headers.location).match(new RegExp(CLIENT.redirect_uri + '/#access_token=[a-zA-Z0-9\\._]+&token_type=Bearer&state=a'));
+            expect(this.res.headers.location).match(new RegExp(CLIENT.redirect_uri + '/#access_token=[a-zA-Z0-9\\._-]+&expires_in=36000&token_type=Bearer&state=a'));
         });
 
         it('should have proper access_token content', function () {
-            var match = new RegExp(CLIENT.redirect_uri + '/#access_token=([a-zA-Z0-9\\._]+)&token_type=Bearer&state=a').exec(this.res.headers.location);
+            var match = new RegExp(CLIENT.redirect_uri + '/#access_token=([a-zA-Z0-9\\._-]+)&expires_in=36000&token_type=Bearer&state=a').exec(this.res.headers.location);
             var access_token = decodeURIComponent(match[1]);
-            var decoded = jwtHelper.decode(access_token);
+            var decoded = jwtHelper.decode(access_token, CLIENT.jwt_code);
             expect(decoded.iss).equal('cpa');
             expect(decoded.aud).equal('cpa');
             expect(decoded.exp).match(/[0-9]+/);
             expect(decoded.cli).equal(CLIENT.id);
             expect(decoded.sub).equal(USER.id);
         });
-
     });
 });
 
@@ -454,19 +459,7 @@ describe('OAuth2 Authorization Code Flow', function () {
             requestHelper.sendRequest(this, url, {}, done);
         });
         before(function (done) {
-            requestHelper.sendRequest(
-                this,
-                '/login',
-                {
-                    method: 'post',
-                    cookie: this.cookie,
-                    type: 'form',
-                    data: {
-                        email: USER.email,
-                        password: USER.password
-                    }
-                },
-                done);
+            requestHelper.loginUser(this, USER.email, USER.password, done);
         });
 
         before(function (done) {
@@ -519,12 +512,16 @@ describe('OAuth2 Authorization Code Flow', function () {
         });
 
         it('should have proper access token', function () {
-            var decoded = jwtHelper.decode(this.res.body.access_token);
+            var decoded = jwtHelper.decode(this.res.body.access_token, CLIENT.jwt_code);
             expect(decoded.iss).equal('cpa');
             expect(decoded.aud).equal('cpa');
             expect(decoded.exp).match(/[0-9]+/);
             expect(decoded.cli).equal(CLIENT.id);
             expect(decoded.sub).equal(USER.id);
+        });
+
+        it('should have expires_in set properly', function () {
+            expect(this.res.body.expires_in).equal(36000);
         });
 
         it('should have token type Bearer', function () {
@@ -536,3 +533,210 @@ describe('OAuth2 Authorization Code Flow', function () {
         });
     });
 });
+
+describe('OAuth2 requests from cross domain with access token', function () {
+
+    before(resetDatabase);
+    before(createFakeUser);
+
+    before(function (done) {
+        requestHelper.sendRequest(this, '/oauth2/login', {
+            method: 'post',
+            data: {
+                grant_type: 'password',
+                username: USER.email,
+                password: USER.password,
+                client_id: CLIENT.client_id
+            }
+        }, done);
+    });
+
+    before(function (done) {
+        var self = this;
+        self.cookie = null;
+        requestHelper.sendRequest(this, '/oauth2/session/cookie/request', {
+            method: 'post',
+            data: {
+                token: self.res.body.access_token
+            }
+        }, done);
+    });
+
+    before(function (done) {
+        var self = this;
+        requestHelper.sendRequest(this, '/user/profile/menu', {
+            method: 'get',
+            cookie: self.cookie
+        }, done);
+    });
+
+    it('should return a success with appropriate display name and number of menu items', function () {
+        expect(this.res.statusCode).equal(200);
+        expect(this.res.body.display_name).to.equal('test@test.com');
+        expect(this.res.body.menu.length).to.equal(2);
+        expect(this.res.body.user_id).to.equal(USER.id);
+    });
+
+});
+
+function searchCookie(res) {
+    var found = false;
+    var setcookie = res.headers["set-cookie"];
+    if (setcookie) {
+        setcookie.forEach(
+            function (cookiestr) {
+                if (cookiestr.indexOf('peach_infos') == 0) {
+                    found = true;
+                }
+            }
+        );
+    }
+    return found;
+}
+
+function searchCookieString(res) {
+    var found;
+    var setcookie = res.headers["set-cookie"];
+    if (setcookie) {
+        setcookie.forEach(
+            function (cookiestr) {
+                if (cookiestr.indexOf('peach_infos') == 0) {
+                    found = cookiestr;
+                }
+            }
+        );
+    }
+    return found;
+}
+
+describe('OAuth2 requests from cross domain with access token ', function () {
+
+    before(resetDatabase);
+    before(createFakeUser);
+
+    before(function (done) {
+        requestHelper.sendRequest(this, '/oauth2/login', {
+            method: 'post',
+            data: {
+                grant_type: 'password',
+                username: USER.email,
+                password: USER.password,
+                client_id: CLIENT.client_id
+            }
+        }, done);
+    });
+
+
+    describe('when config is set to set info cookie', function () {
+
+        before(function (done) {
+            config.afterLogin = {
+                storeUserInfoInCookie: {
+                    activated: true,
+                    cookieName: 'peach_infos',
+                    domain: 'toto.com',
+                    duration: 999999999,
+                    storeUserId: true,
+                    storeUserDisplayName: true
+                },
+                allowedRedirectUris: config.afterLogin.allowedRedirectUris
+            }
+            done();
+        });
+
+        after(function (done) {
+            config = require('../../config');
+            done();
+        });
+
+        before(function (done) {
+            var self = this;
+            self.cookie = null;
+            requestHelper.sendRequest(this, '/oauth2/session/cookie/request', {
+                method: 'post',
+                data: {
+                    token: self.res.body.access_token
+                }
+            }, done);
+        });
+        describe('when user login', function () {
+
+            it('should return a success with appropriate data in cookie peach_infos', function () {
+                var foundCookie = searchCookie.call(this, this.res);
+                expect(foundCookie).to.be.true;
+                expect(this.res.statusCode).equal(200);
+            });
+        });
+
+    });
+    describe('when config is set to not set info cookie', function () {
+
+        before(function (done) {
+            config.afterLogin = {
+                storeUserInfoInCookie: {
+                    activated: false
+                },
+                allowedRedirectUris: config.afterLogin.allowedRedirectUris
+            }
+            done();
+        });
+
+        after(function (done) {
+            config = require('../../config');
+            done();
+        });
+
+        before(function (done) {
+            var self = this;
+            self.cookie = null;
+            requestHelper.sendRequest(this, '/oauth2/session/cookie/request', {
+                method: 'post',
+                data: {
+                    token: self.res.body.access_token
+                }
+            }, done);
+        });
+
+        it('should return a success without cookie peach_infos', function () {
+            var foundCookie = searchCookie.call(this, this.res);
+            expect(foundCookie).to.be.false;
+            expect(this.res.statusCode).equal(200);
+        });
+    });
+
+});
+
+describe('OAuth2 requests from cross domain without access token', function () {
+
+    before(resetDatabase);
+    before(createFakeUser);
+
+    before(function (done) {
+        requestHelper.sendRequest(this, '/oauth2/login', {
+            method: 'post',
+            data: {
+                grant_type: 'password',
+                username: USER.email,
+                password: USER.password,
+                client_id: CLIENT.client_id
+            }
+        }, done);
+    });
+
+    before(function (done) {
+        var self = this;
+        requestHelper.sendRequest(this, '/oauth2/session/cookie/request', {
+            method: 'post',
+            data: {
+                token: ''
+            }
+        }, done);
+    });
+
+    it('should return an error', function () {
+        expect(this.res.statusCode).to.be.within(400, 401);
+    });
+
+});
+
+

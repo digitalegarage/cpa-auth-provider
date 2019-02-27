@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <%- include ../../../layout/rts/head %>
+    <title>Connexion - MaRTS - rts.ch</title>
+</head>
+<body class="rts-body web">
+
+<main class="container">
+
+    <div id="login" class="rts-form-container">
+
+        <div class="top-image">
+            <img src="<%= link('/img/logo_marts-black.svg')%>">
+        </div>
+
+        <h1 class="rts-form-title">Me connecter</h1>
+
+        <p>Pas encore membre ? <a href="<%= signup %>">Créer un compte</a></p>
+
+        <% if (message.length > 0) { %>
+            <div class="text-danger"><%= message %></div>
+        <% } %>
+
+        <form class="rts-form" method="post" action="<%= target %>">
+
+            <div class="form-group">
+                <input id="login_email" type="email" name="email" class="form-control" value="<%= email %>" placeholder="Email">
+            </div>
+
+            <div class="form-group">
+                <input id="login_password" type="password" name="password" class="form-control" placeholder="Mot de passe">
+            </div>
+
+
+            <input class="btn btn-rts" type="submit" value="Continuer">
+        </form>
+
+        <div class="rts-form-links">
+            <a href="<%= forgotPassword %>">Mot de passe oublié ?</a>
+        </div>
+
+
+        <% include ../../../alternative-logins.ejs %>
+
+        <p>
+            Créer un compte maRTS m'offre la possibilité de classer mes médias dans des
+            listes et les consommer plus tard, d'accéder à mon historique de
+            consommation média, ainsi que la gestion de mon profil personnel
+        </p>
+
+    </div>
+</main>
+
+
+</body>
+</html>

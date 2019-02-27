@@ -1,67 +1,76 @@
 "use strict";
-
-var Promise = require('bluebird');
-var bcrypt = Promise.promisifyAll(require('bcrypt'));
-var config = require('../config');
-
+var dateFormat = require('dateformat');
 
 module.exports = function (sequelize, DataTypes) {
-
     var User = sequelize.define('User', {
         id: {type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true},
         tracking_uid: DataTypes.STRING,
-        provider_uid: DataTypes.STRING,
-        email: {type: DataTypes.STRING, unique: true},
-        password: DataTypes.STRING,
         enable_sso: DataTypes.BOOLEAN,
         display_name: DataTypes.STRING,
         photo_url: DataTypes.STRING,
-        verified: DataTypes.BOOLEAN,
-        password_changed_at: DataTypes.BIGINT,
-        last_login_at: DataTypes.BIGINT
+        firstname: DataTypes.STRING,
+        lastname: DataTypes.STRING,
+        gender: DataTypes.STRING,
+        /*
+        @deprecated use date_of_birth_ymd
+         */
+        date_of_birth: DataTypes.BIGINT,
+        date_of_birth_ymd: DataTypes.DATEONLY,
+        language: DataTypes.STRING,
+        last_seen: DataTypes.BIGINT,
+        scheduled_for_deletion_at: DataTypes.DATE,
+        public_uid: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4
+        }
+
     }, {
         underscored: true,
-        instanceMethods: {
-            logLogin: function (transaction) {
-                var self = this;
-                return self.updateAttributes({last_login_at: Date.now()}, {transaction: transaction});
-            },
-            setPassword: function (password) {
-                var self = this;
-                return new Promise(
-                    function (resolve, reject) {
-                        bcrypt.hash(
-                            password,
-                            10,
-                            function (err, hash) {
-                                if (err) {
-                                    return reject(err);
-                                } else {
-                                    return self.updateAttributes(
-                                        {password: hash, password_changed_at: Date.now()}
-                                    ).then(resolve, reject);
-                                }
-                            }
-                        );
-                    }
-                );
-            },
-            verifyPassword: function (password) {
-                return bcrypt.compareAsync(password, this.password);
-            },
-            hasChanged: function (displayName, photoUrl) {
-                return (this.display_name !== displayName || this.photo_url !== photoUrl);
-            }
-        },
+
         associate: function (models) {
             User.hasMany(models.Client);
             User.hasMany(models.AccessToken);
             User.hasMany(models.ValidationCode);
+            User.hasMany(models.SocialLogin);
+            User.hasOne(models.LocalLogin);
             User.belongsTo(models.IdentityProvider);
             User.belongsTo(models.Permission);
-            User.hasOne(models.UserProfile);
         }
     });
+
+
+    User.prototype.getDisplayName = function (policy, defaultDisplayName) {
+        if (defaultDisplayName && defaultDisplayName.match(/^\s*$/)) {
+            return (this.LocalLogin && this.LocalLogin.login) ? this.LocalLogin.login : '';
+        }
+        if (!policy) {
+            return defaultDisplayName;
+        }
+        if (policy === "FIRSTNAME") {
+            if (this.firstname) {
+                return this.firstname;
+            }
+        }
+        if (policy === "LASTNAME") {
+            if (this.lastname) {
+                return this.lastname;
+            }
+        }
+        if (policy === "FIRSTNAME_LASTNAME") {
+            if (this.firstname && this.lastname) {
+                return this.firstname + ' ' + this.lastname;
+            }
+        }
+        return defaultDisplayName;
+    };
+
+    User.prototype.logLastSeen = function (transaction) {
+        return this.updateAttributes({last_seen: Date.now()}, {transaction: transaction});
+    };
+
+    User.prototype.isScheduledForDeletion = function () {
+        return !!this.scheduled_for_deletion_at;
+    };
 
     return User;
 };

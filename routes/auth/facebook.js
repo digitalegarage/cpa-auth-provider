@@ -1,51 +1,34 @@
 "use strict";
 
-var db = require('../../models');
 var config = require('../../config');
 var requestHelper = require('../../lib/request-helper');
+var facebookHelper = require('../../lib/facebook-helper');
 
 var passport = require('passport');
-var FacebookStrategy = require('passport-facebook').Strategy;
 
-passport.use(new FacebookStrategy({
-        clientID: config.identity_providers.facebook.client_id,
-        clientSecret: config.identity_providers.facebook.client_secret,
-        callbackURL: config.identity_providers.facebook.callback_url,
-        profileFields: ['id', 'displayName', 'photos']
-    },
-    function (accessToken, refreshToken, profile, done) {
-        var photo_url = (profile.photos.length > 0) ? profile.photos[0].value : null;
-        db.User.findOrCreate({
-            where: {
-                provider_uid: profile.id,
-                display_name: profile.displayName,
-                photo_url: photo_url
-            }
-        }).spread(function (user) {
-            user.logLogin().then(function () {
-            }, function () {
-            });
-            return done(null, user);
-        }).catch(function (err) {
-            done(err, null);
-        });
-    }
-));
+var REQUESTED_PERMISSIONS = ['email'];
+
+passport.use(facebookHelper.getFacebookStrategy('/auth/facebook/callback'));
 
 module.exports = function (app, options) {
-    app.get('/auth/facebook', passport.authenticate('facebook'));
+    app.get('/auth/facebook', passport.authenticate('facebook', {scope: REQUESTED_PERMISSIONS}));
 
-    app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-        failureRedirect: '/?error=login_failed'
-    }), function (req, res, next) {
+    app.get('/auth/facebook/callback',
+        passport.authenticate('facebook', {failureRedirect: config.urlPrefix + '/auth?error=LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB'}),
+        function (req, res) {
 
-        var redirectUri = req.session.auth_origin;
-        delete req.session.auth_origin;
+            var redirectUri = req.session.auth_origin;
+            delete req.session.auth_origin;
 
-        if (redirectUri) {
-            return res.redirect(redirectUri);
-        }
+            req.session.save(
+                function () {
+                    if (redirectUri) {
+                        return res.redirect(redirectUri);
+                    }
+                    // Successful authentication, redirect home.
+                    requestHelper.redirect(res, '/');
+                }
+            );
 
-        requestHelper.redirect(res, '/');
-    });
+        });
 };

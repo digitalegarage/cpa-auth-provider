@@ -1,13 +1,32 @@
-image: node:7
+variables:
+  GIT_SUBMODULE_STRATEGY: normal
+  DOCKER_DRIVER: overlay2
 
 stages:
   - test
+  - docker-publish
 
 npm_test:
+  image: node:9.1
   stage: test
   script: 
     - npm install --silent -g jshint istanbul
     - npm --silent install
     - make all
-    - make coverage
 #  coverage: /Lines\s+: \d+(\.\d*)?%.*/
+
+
+docker_push:
+  stage: docker-publish
+  image: docker:stable
+  services:
+    - docker:dind
+  script:
+    - docker build -t identity-provider .
+    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
+    - docker tag identity-provider $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  tags:
+    - dind
+
+

@@ -1,10 +1,22 @@
 #profile .panel {
-    height: 75px;
+    padding-bottom: 0.5em;
     border-bottom: 1px solid #eee;
     box-shadow: none;
 }
 
+#profile .panel:not(.hidden) {
+    margin-top: 0;
+}
+
+#profile .panel.hidden {
+    display: none;
+}
+
 #profile #btn-container, #profile #form-modify-pass {
+    display: none;
+}
+
+#profile .required-asterisk {
     display: none;
 }
 
@@ -28,6 +40,10 @@
     display: inline-block;
 }
 
+#profile .status-info {
+    font-size: 1.2rem;
+}
+
 #profile .btn.btn-link {
     padding: 0;
 }
@@ -38,21 +54,77 @@
     border: none;
 }
 
+#profile #hasNoPasswordButtonLabel {
+    display: none;
+}
+
 #profile #btn-send-verification-link {
     min-width: 80px;
 }
 
-#profile #verification-success, #profile #verification-error {
+#profile #verification-success, #profile #verification-error, #profile #delete-error {
     display: none;
 }
 
+#profile #delete-error {
+    margin-bottom: 10px;
+}
+
 #profile .verification-link-container {
+    margin-top: 10px;
+}
+
+#profile .verification-link-container .recaptcha-wrapper {
+    max-width: 300px;
+    margin: 20px 0;
+}
+
+#profile .col-sm-9 .delete-container, #profile .col-sm-9 .providers-container {
+    margin-top: 10px;
+}
+
+#profile .col-sm-9 .first.providers-container {
+    margin-top: 5px;
+}
+
+#profile .providers-container .facebook-text {
+    display: inline-block;
+    font-size: 18px;
+    color: #4267b2;
+}
+
+#profile .providers-container .google-text {
+    display: inline-block;
+    font-size: 18px;
+    color: #e42c11;
+}
+
+#profile .providers-container .facebook-text + span,
+#profile .providers-container .google-text + span,
+#profile .providers-container .twitter-text + span{
+    padding-left: 10px;
+}
+
+#profile .col-sm-9.col-sm-offset-3 .delete-container {
+    margin-top: 25px;
+}
+
+#profile .col-sm-3 .delete-container {
+    margin-top: 25px;
+}
+
+#profile #password-error {
+    display: none;
+}
+
+#profile #verification-link-form .recaptcha-wrapper {
+    margin: 10px 0;
+}
+#profile #delete-div, #profile #export-div {
     margin-top: 20px;
 }
 
-#profile .delete-container {
-    margin-top: 10px;
-}
+
 
 @media (max-width: 767px) {
     #profile .h4, #profile h4 {

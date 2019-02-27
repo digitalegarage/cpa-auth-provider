@@ -1,8 +1,9 @@
 node_modules/*
 .nodemonignore
-.idea
+.idea/*
 
 npm-debug.log
+yarn.lock
 
 config.local.js
 
@@ -16,3 +17,5 @@ sessions.db
 data/cpa-auth-provider.sqlite
 
 *.swp
+db.db
+sessions

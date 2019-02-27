@@ -1,0 +1,44 @@
+# run using: docker-compose -f docker-compose-rts.yaml up
+version: '2'
+services:
+  identity-provider:
+    restart: always
+    build: .
+    ports:
+    - 3000:3000
+    environment:
+    - BASE_URL=https://localhost.ebu.io
+    - MAIL_FROM=no-reply@rts.ch
+    - IDP_HOST=https://localhost.ebu.io
+    - IDP_RECAPCHA_SITEKEY=6Lc6NCYUAAAAAPiyvFO2jig6jXGtYEhgZWtWFzml
+    - IDP_RECAPCHA_SECRETKEY=6Lc6NCYUAAAAALCXdWXUsZgDBl7fn9XA_ecVpu7m
+    - DEFAULT_LOCALE=fr
+    - OPEN_AM_ENABLED=true
+    - OPEN_AM_SERVICE_URL=https://sso.rts.ch/
+    - MAIL_TRANSPORT_TYPE=test
+    - MAIL_USER_NAME=username
+    - MAIL_PASSWORD=password
+    - TRACKING_COOKIE=true
+    - IDP_CLIENT_URL=http://hummingbird-sandbox-marts.rts.ch
+    - BROADCASTER_LAYOUT=rts
+    - MAIL_DEFAULT_TEMPLATE_CLASS=rts
+    - DISPLAY_MENU_BAR=
+    - IDP_TITLE=Radio Télévision Suisse - Fournisseur d'identité
+    - FACEBOOK_LOGIN_ENABLED=true
+    - FACEBOOK_LOGIN_ID=891996817656903
+    - FACEBOOK_LOGIN_SECRET=7403833d32749e3da3ce552c8d82e733
+    - GOOGLE_LOGIN_ENABLED=true
+    - GOOGLE_LOGIN_ID=621117323323-j048lcbv5khh6lhr1lok4vv17mekijvm.apps.googleusercontent.com
+    - GOOGLE_LOGIN_SECRET=rw1KMzemV5Mhtjq1iOAI4H8A
+    - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
+    # Needed since we are using a self signed certificate => browser doesn't trust the cert => auth cookie won't be sent.
+    - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
+  nginx:
+    image: nginx
+    restart: always
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - ./nginx/conf:/etc/nginx/:ro
+    - ./nginx/ssl:/etc/ssl/certs:ro

@@ -1,10 +1,8 @@
 "use strict";
 
-var messages = require('../../lib/messages');
-var db = require('../../models');
-
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
+var finder = require ('../../lib/finder');
 
 var resetDatabase = function (done) {
     dbHelper.clearDatabase(function (err) {
@@ -14,8 +12,9 @@ var resetDatabase = function (done) {
 
 
 var TEST_EMAIL_0 = 'qsdf@qsdf.fr';
-var OLD_PASSWORD = '1234567890';
-var NEW_PASSWORD = 'abcdefghijklmn';
+var OLD_PASSWORD = 'correct horse battery staple';
+var NEW_PASSWORD = 'correct horse battery staple 42';
+var recaptchaResponse = 'a dummy recaptcha response';
 
 // Test authenticate
 
@@ -23,7 +22,7 @@ describe('user profile timestamps', function () {
     context('account creation', function () {
         before(function (done) {
             var time = new Date("Wed Jan 29 2017 05:17:00 GMT+0000").getTime();
-            this.clock = sinon.useFakeTimers(time, "Date");
+            this.clock = sinon.useFakeTimers(time);
 
             this.start_at = Date.now();
             done();
@@ -37,7 +36,7 @@ describe('user profile timestamps', function () {
         before(function (done) {
             requestHelper.sendRequest(
                 this,
-                '/api/local/signup',
+                '/api/v2/session/signup',
                 {
                     method: 'post',
                     cookie: this.cookie,
@@ -45,7 +44,7 @@ describe('user profile timestamps', function () {
                     data: {
                         email: TEST_EMAIL_0,
                         password: OLD_PASSWORD,
-                        'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                        'g-recaptcha-response': recaptchaResponse
                     }
                 },
                 done);
@@ -54,11 +53,11 @@ describe('user profile timestamps', function () {
         before(function (done) {
             var self = this;
             this.clock.restore();
-            this.clock = sinon.useFakeTimers(new Date("Wed Feb 01 2017 11:42:00 GMT+0000").getTime(), "Date");
+            this.clock = sinon.useFakeTimers(new Date("Wed Feb 01 2017 11:42:00 GMT+0000").getTime());
             this.login_at = Date.now();
             requestHelper.sendRequest(
                 self,
-                '/login',
+                '/api/v2/session/login',
                 {
                     method: 'post',
                     cookie: self.cookie,
@@ -75,11 +74,11 @@ describe('user profile timestamps', function () {
         before(function (done) {
             var self = this;
             this.clock.restore();
-            this.clock = sinon.useFakeTimers(new Date("Wed Feb 08 2017 15:37:00 GMT+0000").getTime(), "Date");
+            this.clock = sinon.useFakeTimers(new Date("Wed Feb 08 2017 15:37:00 GMT+0000").getTime());
             this.change_at = Date.now();
-            db.User.findOne({where: {email: TEST_EMAIL_0}}).then(
-                function (user) {
-                    user.setPassword(NEW_PASSWORD).then(
+            finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
+                function (localLogin) {
+                    localLogin.setPassword(NEW_PASSWORD).then(
                         function () {
                             done();
                         },
@@ -90,11 +89,15 @@ describe('user profile timestamps', function () {
             );
         });
 
+        after(function () {
+            this.clock.restore();
+        });
+
         before(function (done) {
             var self = this;
             requestHelper.sendRequest(
                 self,
-                '/login',
+                '/api/v2/session/login',
                 {
                     method: 'post',
                     cookie: self.cookie,
@@ -111,10 +114,10 @@ describe('user profile timestamps', function () {
 
         it('should be set to proper time', function (done) {
             var self = this;
-            db.User.findOne({where: {email: TEST_EMAIL_0}}).then(
-                function (user) {
+            finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
+                function (localLogin) {
                     try {
-                        expect(user.created_at.getTime()).equal(self.start_at);
+                        expect(localLogin.created_at.getTime()).equal(self.start_at);
                     } catch (e) {
                         return done(e);
                     }
@@ -126,10 +129,10 @@ describe('user profile timestamps', function () {
 
         it('should have proper password set time', function (done) {
             var self = this;
-            db.User.findOne({where: {email: TEST_EMAIL_0}}).then(
-                function (user) {
+            finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
+                function (localLogin) {
                     try {
-                        expect(user.password_changed_at).equal(self.change_at);
+                        expect(localLogin.password_changed_at).equal(self.change_at);
                     } catch (e) {
                         return done(e);
                     }
@@ -141,10 +144,10 @@ describe('user profile timestamps', function () {
 
         it('should have proper last login time', function (done) {
             var self = this;
-            db.User.findOne({where: {email: TEST_EMAIL_0}}).then(
-                function (user) {
+            finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
+                function (localLogin) {
                     try {
-                        expect(user.last_login_at).equal(self.login_at);
+                        expect(localLogin.last_login_at).equal(self.login_at);
                     } catch (e) {
                         return done(e);
                     }

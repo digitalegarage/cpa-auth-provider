@@ -1,11 +1,17 @@
 "use strict";
 
 var generate = require('../../lib/generate');
-var messages = require('../../lib/messages');
 var db = require('../../models');
 
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
+
+var i18n4test = require("i18n");
+
+i18n4test.configure({
+    locales: ['en'],
+    directory: __dirname + '/../../locales'
+});
 
 var initDatabase = function (opts, done) {
     db.Client
@@ -24,15 +30,21 @@ var initDatabase = function (opts, done) {
                 enable_sso: true
             });
         })
+        .then(function (user) {
+            return db.LocalLogin.create({user_id: user.id, login: 'testuser3'}).then(function (localLogin) {
+                return localLogin.setPassword('testpassword');
+            });
+        })
         .then(function () {
             return db.User.create({
                 id: 5,
-                email: 'testuser',
                 provider_uid: 'testuser'
             });
         })
         .then(function (user) {
-            return user.setPassword('testpassword');
+            return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
+                return localLogin.setPassword('testpassword');
+            });
         })
         .then(function () {
             return db.Domain.create({
@@ -91,7 +103,7 @@ describe('GET /verify', function () {
                 });
 
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURI('example://cpa_callback'), {
+                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURIComponent('example://cpa_callback'), {
                         cookie: this.cookie,
                         parseDOM: true
                     }, done);
@@ -108,13 +120,13 @@ describe('GET /verify', function () {
 
             context('and the user is not authenticated', function () {
                 before(function (done) {
-                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURI('example://cpa_callback'), null, done);
+                    requestHelper.sendRequest(this, '/verify?user_code=1234&redirect_uri=' + encodeURIComponent('example://cpa_callback'), null, done);
                 });
 
                 it('should redirect to the login page', function () {
                     var urlPrefix = requestHelper.urlPrefix;
                     expect(this.res.statusCode).to.equal(302);
-                    expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
+                    expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/verify?user_code=1234&redirect_uri=" + encodeURIComponent("example://cpa_callback")));
                     // TODO: check redirect location and page to return to after login
                 });
             });
@@ -157,7 +169,7 @@ describe('GET /verify', function () {
                 it('should redirect to the login page', function () {
                     var urlPrefix = requestHelper.urlPrefix;
                     expect(this.res.statusCode).to.equal(302);
-                    expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
+                    expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/verify"));
                     // TODO: check redirect location and page to return to after login
                 });
             });
@@ -168,7 +180,7 @@ describe('GET /verify', function () {
 describe('POST /verify', function () {
     before(function () {
         var time = new Date("Wed Apr 09 2014 11:00:00 GMT+0100").getTime();
-        this.clock = sinon.useFakeTimers(time, "Date");
+        this.clock = sinon.useFakeTimers(time);
     });
 
     after(function () {
@@ -192,7 +204,7 @@ describe('POST /verify', function () {
                     before(function () {
                         // Ensure pairing code has not expired
                         var time = new Date("Wed Apr 09 2014 11:30:00 GMT+0100").getTime();
-                        this.clock = sinon.useFakeTimers(time, "Date");
+                        this.clock = sinon.useFakeTimers(time);
                     });
 
                     after(function () {
@@ -293,7 +305,7 @@ describe('POST /verify', function () {
                     before(function () {
                         // Ensure pairing code has not expired
                         var time = new Date("Wed Apr 09 2014 11:30:00 GMT+0100").getTime();
-                        this.clock = sinon.useFakeTimers(time, "Date");
+                        this.clock = sinon.useFakeTimers(time);
                     });
 
                     after(function () {
@@ -397,7 +409,7 @@ describe('POST /verify', function () {
                     before(function () {
                         // Ensure pairing code has not expired
                         var time = new Date("Wed Apr 09 2014 11:30:00 GMT+0100").getTime();
-                        this.clock = sinon.useFakeTimers(time, "Date");
+                        this.clock = sinon.useFakeTimers(time);
                     });
 
                     after(function () {
@@ -422,8 +434,8 @@ describe('POST /verify', function () {
                     });
 
                     describe('the response body', function () {
-                        it('should contain the message SUCCESSFUL_PAIRING: ' + messages.SUCCESSFUL_PAIRING, function () {
-                            expect(this.res.text).to.contain(messages.SUCCESSFUL_PAIRING);
+                        it('should contain the message SUCCESSFUL_PAIRING: ' + i18n4test.__('VERIFY_BACK_SUCCESSFUL_PAIRING'), function () {
+                            expect(this.res.text).to.contain(i18n4test.__('VERIFY_BACK_SUCCESSFUL_PAIRING'));
                         });
                     });
 
@@ -539,8 +551,8 @@ describe('POST /verify', function () {
                 });
 
                 describe('the response body', function () {
-                    it('should contain the message UNKNOWN_VERIFICATION_TYPE: ' + messages.UNKNOWN_VERIFICATION_TYPE, function () {
-                        expect(this.res.text).to.contain(messages.UNKNOWN_VERIFICATION_TYPE);
+                    it('should contain the message UNKNOWN_VERIFICATION_TYPE: ' + i18n4test.__('VERIFY_BACK_UNKNOWN_VERIFICATION_TYPE'), function () {
+                        expect(this.res.text).to.contain(i18n4test.__('VERIFY_BACK_UNKNOWN_VERIFICATION_TYPE'));
                     });
                 });
             });
@@ -566,8 +578,8 @@ describe('POST /verify', function () {
                 });
 
                 describe('the response body', function () {
-                    it('should contain the message INVALID_USERCODE: ' + messages.INVALID_USERCODE, function () {
-                        expect(this.res.text).to.contain(messages.INVALID_USERCODE);
+                    it('should contain the message INVALID_USERCODE: ' + i18n4test.__('VERIFY_BACK_INVALID_USER_CODE'), function () {
+                        expect(this.res.text).to.contain(i18n4test.__('VERIFY_BACK_INVALID_USER_CODE'));
                     });
                 });
             });
@@ -593,8 +605,8 @@ describe('POST /verify', function () {
                 });
 
                 describe('the response body', function () {
-                    it('should contain the error message INVALID_USERCODE: ' + messages.INVALID_USERCODE, function () {
-                        expect(this.res.text).to.contain(messages.INVALID_USERCODE);
+                    it('should contain the error message INVALID_USERCODE: ' + i18n4test.__('VERIFY_BACK_INVALID_USER_CODE'), function () {
+                        expect(this.res.text).to.contain(i18n4test.__('VERIFY_BACK_INVALID_USER_CODE'));
                     });
                 });
             });
@@ -622,8 +634,8 @@ describe('POST /verify', function () {
                 });
 
                 describe('the response body', function () {
-                    it('should contain the message OBSOLETE_USERCODE: ' + messages.OBSOLETE_USERCODE, function () {
-                        expect(this.res.text).to.contain(messages.OBSOLETE_USERCODE);
+                    it('should contain the message OBSOLETE_USERCODE: ' + i18n4test.__('VERIFY_BACK_CODE_USED'), function () {
+                        expect(this.res.text).to.contain(i18n4test.__('VERIFY_BACK_CODE_USED'));
                     });
                 });
             });
@@ -634,13 +646,14 @@ describe('POST /verify', function () {
 
                     // Set creation time of the pairing code
                     var time = new Date("Wed Apr 09 2014 11:00:00 GMT+0100").getTime();
-                    this.clock = sinon.useFakeTimers(time, "Date");
+                    this.clock = sinon.useFakeTimers(time);
 
                     resetDatabase(function () {
                         self.clock.restore();
                         // The pairing code should expire one hour after it was created
                         var time = new Date("Wed Apr 09 2014 12:00:00 GMT+0100").getTime();
-                        self.clock = sinon.useFakeTimers(time, "Date");
+                        self.clock.restore();
+                        self.clock = sinon.useFakeTimers(time);
 
                         done();
                     });
@@ -668,8 +681,8 @@ describe('POST /verify', function () {
                 });
 
                 describe('the response body', function () {
-                    it('should contain the message EXPIRED_USERCODE: ' + messages.EXPIRED_USERCODE, function () {
-                        expect(this.res.text).to.contain(messages.EXPIRED_USERCODE);
+                    it('should contain the message EXPIRED_USERCODE: ' + i18n4test.__('VERIFY_BACK_CODE_EXPIRED'), function () {
+                        expect(this.res.text).to.contain(i18n4test.__('VERIFY_BACK_CODE_EXPIRED'));
                     });
                 });
             });

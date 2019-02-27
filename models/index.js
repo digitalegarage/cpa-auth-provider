@@ -9,10 +9,12 @@ var config = require('../config');
 
 var sequelize = new Sequelize(config.db.database, config.db.user, config.db.password, {
     dialect: config.db.type,
+    dialectOptions: config.db.dialectOptions,
     host: config.db.host,
     port: config.db.port,
     storage: config.db.filename,
-    logging: config.db.debug ? console.log : false
+    logging: config.db.debug ? console.log : false,
+    operatorsAliases: false
 });
 
 fs.readdirSync(__dirname).filter(function (file) {

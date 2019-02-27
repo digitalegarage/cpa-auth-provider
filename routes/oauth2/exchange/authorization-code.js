@@ -1,10 +1,9 @@
 "use strict";
 
 var db = require('../../../models');
-var generate = require('../../../lib/generate');
-var jwtHelper = require('../../../lib/jwt-helper');
 var logger = require('../../../lib/logger');
 var oauthTokenHelper = require('../../../lib/oauth2-token');
+var userDeletion = require('../../../lib/user-deletion');
 
 // Exchange authorization codes for access tokens.  The callback accepts the
 // `client`, which is exchanging `code` and any `redirectURI` from the
@@ -33,7 +32,19 @@ exports.authorization_code = function (client, code, redirectURI, done) {
             logger.debug('[AuthorizationCode][Exchange][redirectURI', redirectURI, '][expected', authorizationCode.redirect_uri, ']');
             return done(null, false);
         }
-        return provideAccessToken(client, authorizationCode.User, '', done);
+
+        db.User.find({where: {id: authorizationCode.user_id}}).then(
+            function (user) {
+                if (user) {
+                    return provideAccessToken(client, user, '*', done);
+                } else {
+                    return done('user not found');
+                }
+            },
+            function (e) {
+                return done(e);
+            }
+        ).catch(done);
         // var token = generate.accessToken();
         // db.AccessToken.create({
         //
@@ -52,7 +63,7 @@ exports.authorization_code = function (client, code, redirectURI, done) {
 
 function provideAccessToken(client, user, scope, done) {
     try {
-        var accessToken, refreshToken;
+        var accessToken, refreshToken, extras;
 
         oauthTokenHelper.generateAccessToken(client, user).then(
             function (_accessToken) {
@@ -66,7 +77,15 @@ function provideAccessToken(client, user, scope, done) {
             }
         ).then(
             function (_extras) {
-                return done(null, accessToken, refreshToken, _extras);
+                extras = _extras;
+                return userDeletion.cancelDeletion(user, client);
+            }
+        ).then(
+            function (deletionCancelled) {
+                if (deletionCancelled) {
+                    extras.deletion_cancelled = true;
+                }
+                return done(null, accessToken, refreshToken, extras);
             }
         ).catch(
             function (err) {

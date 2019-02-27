@@ -3,10 +3,8 @@
 var db = require('../models');
 var config = require('../config');
 var authHelper = require('../lib/auth-helper');
-var messages = require('../lib/messages');
 var requestHelper = require('../lib/request-helper');
 var urlHelper = require('../lib/url-helper');
-var i18n = require('i18n');
 
 
 var async = require('async');
@@ -48,19 +46,19 @@ var routes = function (router) {
                 .findOne({where: {'user_code': userCode}, include: [db.Client, db.Domain]})
                 .then(function (pairingCode) {
                     if (!pairingCode) {
-                        renderVerificationPage(req, res, messages.INVALID_USERCODE);
+                        renderVerificationPage(req, res, req.__('VERIFY_BACK_INVALID_USER_CODE'));
                         return;
                     }
 
                     if (pairingCode.state === 'verified') {
                         res.status(400);
-                        renderVerificationInfo(res, messages.OBSOLETE_USERCODE, 'warning');
+                        renderVerificationInfo(res, req.__('VERIFY_BACK_CODE_USED'), 'warning');
                         return;
                     }
 
                     if (pairingCode.hasExpired()) {
                         res.status(400);
-                        renderVerificationInfo(res, messages.EXPIRED_USERCODE, 'warning');
+                        renderVerificationInfo(res, req.__('VERIFY_BACK_CODE_EXPIRED'), 'warning');
                         return;
                     }
 
@@ -122,6 +120,7 @@ var routes = function (router) {
 
     /**
      * Set the state of a Pairing Code identified by userCode to denied. And it associates the user who denies the Pairing Code.
+     * @param req
      * @param userCode
      * @param userId
      * @param done = function(err, errorMessage, result)
@@ -129,38 +128,40 @@ var routes = function (router) {
      *               errorMessage is the message displayed to the user
      *               result is included when redirecting after an user_code prefilled process.
      */
-    var denyUserCode = function (userCode, userId, done) {
+    var denyUserCode = function (req, userCode, userId, done) {
         db.PairingCode
             .findOne({where: {'user_code': userCode}, include: [db.Client]})
             .then(function (pairingCode) {
                 if (!pairingCode) {
-                    done(null, messages.INVALID_USERCODE, 'cancelled');
+                    done(null, req.__('VERIFY_BACK_INVALID_USER_CODE'), 'cancelled');
                     return;
                 }
 
                 if (pairingCode.state === 'verified') {
-                    done(null, messages.OBSOLETE_USERCODE, 'cancelled');
+                    done(null, req.__('VERIFY_BACK_CODE_USED'), 'cancelled');
                     return;
                 }
 
                 if (pairingCode.hasExpired()) {
-                    done(null, messages.EXPIRED_USERCODE, 'cancelled');
+                    done(null, req.__('VERIFY_BACK_CODE_EXPIRED'), 'cancelled');
                     return;
                 }
 
-                // TODO: check transaction
-                return pairingCode
-                    .updateAttributes({user_id: userId, state: 'denied'})
-                    .then(function () {
-                        pairingCode.Client.user_id = userId;
-                        pairingCode.Client.save();
-                    })
-                    .then(function () {
-                            done(null, null, 'cancelled');
-                        },
-                        function (err) {
-                            done(err);
-                        });
+                return db.sequelize.transaction(function (transaction) {
+                    return pairingCode
+                        .updateAttributes({user_id: userId, state: 'denied'}, transaction)
+                        .then(function () {
+                            pairingCode.Client.user_id = userId;
+                            pairingCode.Client.save(transaction);
+                        })
+                        .then(function () {
+                                done(null, null, 'cancelled');
+                            },
+                            function (err) {
+                                done(err);
+                            });
+                });
+
             }, function (err) {
                 done(err);
             });
@@ -168,6 +169,7 @@ var routes = function (router) {
 
     /**
      * Associate a pairing code with a user. It sets the state to verified.
+     * @param req
      * @param userCode
      * @param userId
      * @param done = function(err, errorMessage, result)
@@ -175,38 +177,39 @@ var routes = function (router) {
      *               errorMessage is the message displayed to the user
      *               result is included when redirecting after an user_code prefilled process.
      */
-    var associateUserCodeWithUser = function (userCode, userId, done) {
+    var associateUserCodeWithUser = function (req, userCode, userId, done) {
         db.PairingCode
             .findOne({where: {'user_code': userCode}, include: [db.Client]})
             .then(function (pairingCode) {
                 if (!pairingCode) {
-                    done(null, messages.INVALID_USERCODE, 'cancelled');
+                    done(null, req.__('VERIFY_BACK_INVALID_USER_CODE'), 'cancelled');
                     return;
                 }
 
                 if (pairingCode.state === 'verified') {
-                    done(null, messages.OBSOLETE_USERCODE, 'cancelled');
+                    done(null, req.__('VERIFY_BACK_CODE_USED'), 'cancelled');
                     return;
                 }
 
                 if (pairingCode.hasExpired()) {
-                    done(null, messages.EXPIRED_USERCODE, 'cancelled');
+                    done(null, req.__('VERIFY_BACK_CODE_EXPIRED'), 'cancelled');
                     return;
                 }
 
-                // TODO: check transaction
-                return pairingCode
-                    .updateAttributes({user_id: userId, state: 'verified'})
-                    .then(function () {
-                        pairingCode.Client.user_id = userId;
-                        pairingCode.Client.save();
-                    })
-                    .then(function () {
-                            done(null, null, 'success');
-                        },
-                        function (err) {
-                            done(err);
-                        });
+                return db.sequelize.transaction(function (transaction) {
+                    return pairingCode
+                        .updateAttributes({user_id: userId, state: 'verified'}, transaction)
+                        .then(function () {
+                            pairingCode.Client.user_id = userId;
+                            pairingCode.Client.save();
+                        })
+                        .then(function () {
+                                done(null, null, 'success');
+                            },
+                            function (err) {
+                                done(err);
+                            });
+                });
             }, function (err) {
                 done(err);
             });
@@ -255,11 +258,11 @@ var routes = function (router) {
     var verifyUserCode = function (req, res, next) {
         var userCode = req.body.user_code;
         if (!userCode) {
-            renderVerificationPage(req, res, messages.INVALID_USERCODE);
+            renderVerificationPage(req, res, req.__('VERIFY_BACK_INVALID_USER_CODE'));
             return;
         }
 
-        associateUserCodeWithUser(userCode, req.user.id, function (err, errorMessage, result) {
+        associateUserCodeWithUser(req, userCode, req.user.id, function (err, errorMessage, result) {
             if (err) {
                 next(err);
                 return;
@@ -271,7 +274,7 @@ var routes = function (router) {
                 return;
             }
 
-            renderVerificationInfo(res, messages.SUCCESSFUL_PAIRING, 'success');
+            renderVerificationInfo(res, req.__('VERIFY_BACK_SUCCESSFUL_PAIRING'), 'success');
         });
     };
 
@@ -294,7 +297,7 @@ var routes = function (router) {
 
             default:
                 res.statusCode = 400;
-                renderVerificationInfo(res, messages.UNKNOWN_VERIFICATION_TYPE, 'danger');
+                renderVerificationInfo(res, req.__('VERIFY_BACK_UNKNOWN_VERIFICATION_TYPE'), 'danger');
                 return;
         }
     });
@@ -316,12 +319,13 @@ var routes = function (router) {
 
         var userCode = req.body.user_code;
         if (!userCode) {
-            renderVerificationPage(req, res, messages.INVALID_USERCODE);
+            renderVerificationPage(req, res, req.__('VERIFY_BACK_INVALID_USER_CODE'));
             return;
         }
 
-        associateUserCodeWithUser(userCode, req.user.id, function (err, errorMessage, result) {
+        associateUserCodeWithUser(req, userCode, req.user.id, function (err, errorMessage, result) {
             var redirectUri = urlHelper.addQueryParameters(req.body.redirect_uri, {result: result});
+            req.session.flashMessage = req.__('VERIFY_AUTH_GRANTED');
             res.redirect(redirectUri);
         });
     });
@@ -343,12 +347,13 @@ var routes = function (router) {
 
         var userCode = req.body.user_code;
         if (!userCode) {
-            renderVerificationPage(req, res, messages.INVALID_USERCODE);
+            renderVerificationPage(req, res, req.__('VERIFY_BACK_INVALID_USER_CODE'));
             return;
         }
 
-        denyUserCode(userCode, req.user.id, function (err, errorMessage, result) {
+        denyUserCode(req, userCode, req.user.id, function (err, errorMessage, result) {
             var redirectUri = urlHelper.addQueryParameters(req.body.redirect_uri, {result: result});
+            req.session.flashMessage = req.__('VERIFY_AUTH_DENIED');
             res.redirect(redirectUri);
         });
     });

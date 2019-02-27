@@ -1,19 +1,20 @@
 "use strict";
 
 var generate = require('../../lib/generate');
-var messages = require('../../lib/messages');
 var db = require('../../models');
-
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 
 var resetDatabase = function (done) {
-    dbHelper.clearDatabase(function (err) {
-        done(err);
+    return dbHelper.clearDatabase(function (err) {
+        return dbHelper.createFakeUser({id: 1337, email: USER_EMAIL, password: STRONG_PASSWORD}, done);
     });
 };
 
 // Test get profile after account creation
+var recaptchaResponse = 'a dummy recaptcha response';
+var USER_EMAIL = 'test@somewhe.re';
+var STRONG_PASSWORD = 'correct horse battery staple';
 
 describe('GET /api/local/profile', function () {
 
@@ -25,39 +26,39 @@ describe('GET /api/local/profile', function () {
         // That should detect possible bug if a developer return the first item of the table instead of the user by it's key.
         // That's happen when "where" is missing in db.user.find({where: {id: <id>}})...
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'test@db.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
-                    password: 'qsdf'
+                    password: STRONG_PASSWORD
                 }
             }, done);
         });
@@ -77,14 +78,13 @@ describe('GET /api/local/profile', function () {
         });
 
         it('should return a success ', function () {
-            //console.log('success:' + this.res.body.success);
-            //console.log('status:' + this.res.statusCode);
             expect(this.res.statusCode).to.equal(200);
             expect(this.res.body.success).to.equal(true);
-            expect(this.res.body.user_profile.firstname).to.be.undefined;
-            expect(this.res.body.user_profile.lastname).to.be.undefined;
-            expect(this.res.body.user_profile.gender).to.be.undefined;
-            expect(this.res.body.user_profile.birthdate).to.be.undefined;
+            expect(this.res.body.user_profile.id >= 0).to.equal(true);
+            expect(this.res.body.user_profile.firstname).null;
+            expect(this.res.body.user_profile.lastname).null;
+            expect(this.res.body.user_profile.gender).null;
+            expect(this.res.body.user_profile.date_of_birth).null;
             expect(this.res.body.user_profile.email).to.equals('qsdf@qsdf.fr');
             expect(this.res.body.user_profile.display_name).to.equals('qsdf@qsdf.fr');
         });
@@ -105,10 +105,10 @@ describe('GET /api/local/profile', function () {
                     method: 'put',
                     type: 'json',
                     data: {
-                        firstname: 'firstname',
-                        lastname: 'lastname',
-                        gender: 'female',
-                        birthdate: birth
+                        firstname: 'emile',
+                        lastname: 'zola',
+                        gender: 'male',
+                        date_of_birth: birth
                     },
                     accessToken: accessToken,
                     tokenType: 'JWT'
@@ -123,16 +123,26 @@ describe('GET /api/local/profile', function () {
             expect(this.res.statusCode).to.equal(200);
             expect(this.res.body.success).to.equal(true);
         });
+    });
 
+    context('When user checks the fields', function () {
+        var accessToken;
 
-        // Partial update :
+        cleanDbAndRegisterUser();
+
+        var birth = new Date(Date.UTC(2012, 11, 31, 0, 0, 0)).getTime();
+
         before(function (done) {
+            accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+
             requestHelper.sendRequest(this, '/api/local/profile', {
                     method: 'put',
                     type: 'json',
                     data: {
-                        firstname: 'firstname2',
+                        firstname: 'emile',
+                        lastname: 'zola',
                         gender: 'male',
+                        date_of_birth: birth
                     },
                     accessToken: accessToken,
                     tokenType: 'JWT'
@@ -142,10 +152,6 @@ describe('GET /api/local/profile', function () {
 
 
         before(function (done) {
-            //var accessToken = this.res.body.token;
-
-            //console.log('accessToken : ' + accessToken);
-
             requestHelper.sendRequest(this, '/api/local/profile?policy=FIRSTNAME_LASTNAME', {
                 method: 'get',
                 accessToken: accessToken,
@@ -154,16 +160,15 @@ describe('GET /api/local/profile', function () {
         });
 
         it('get profile should return a success ', function () {
-            //console.log('get profile success:' + this.res.body.success);
-            //console.log('get profile status:' + this.res.statusCode);
             expect(this.res.statusCode).to.equal(200);
             expect(this.res.body.success).to.equal(true);
-            expect(this.res.body.user_profile.firstname).to.equal('firstname2');
-            expect(this.res.body.user_profile.lastname).to.equal('lastname');
+            expect(this.res.body.user_profile.firstname).to.equal('emile');
+            expect(this.res.body.user_profile.lastname).to.equal('zola');
             expect(this.res.body.user_profile.gender).to.equal('male');
-            expect(this.res.body.user_profile.birthdate).to.equals(birth);
+            expect(this.res.body.user_profile.date_of_birth).to.equals(birth);
+            expect(this.res.body.user_profile.date_of_birth_ymd).to.equals('2012-12-31');
             expect(this.res.body.user_profile.email).to.equals('qsdf@qsdf.fr');
-            expect(this.res.body.user_profile.display_name).to.equals('firstname2 lastname');
+            expect(this.res.body.user_profile.display_name).to.equals('emile zola');
         });
 
     });
@@ -193,7 +198,7 @@ describe('GET /api/local/profile', function () {
             });
         });
 
-        context('Bad birthdate (not a number)', function () {
+        context('Bad date_of_birth (not a number)', function () {
 
             cleanDbAndRegisterUser();
 
@@ -202,7 +207,7 @@ describe('GET /api/local/profile', function () {
                 requestHelper.sendRequest(this, '/api/local/profile', {
                         method: 'put',
                         type: 'json',
-                        data: {birthdate: 'not a number'},
+                        data: {date_of_birth: 'not a number'},
                         accessToken: accessToken,
                         tokenType: 'JWT'
                     }, done
@@ -224,7 +229,7 @@ describe('GET /api/local/profile', function () {
                 requestHelper.sendRequest(this, '/api/local/profile', {
                         method: 'put',
                         type: 'json',
-                        data: {firstname: 42},
+                        data: {firstname: '42'},
                         accessToken: accessToken,
                         tokenType: 'JWT'
                     }, done
@@ -260,7 +265,464 @@ describe('GET /api/local/profile', function () {
             });
         });
 
+        context('a complex name is set (successfully)', function () {
+            before(resetDatabase);
+
+            before(function (done) {
+                requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                    method: 'post',
+                    cookie: this.cookie,
+                    type: 'form',
+                    data: {
+                        email: USER_EMAIL,
+                        password: STRONG_PASSWORD
+                    }
+                }, done);
+            });
+
+            before(function (done) {
+                var accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                requestHelper.sendRequest(this, '/api/local/profile', {
+                        method: 'put',
+                        type: 'json',
+                        data: {
+                            firstname: 'Adélè-Cëçilä',
+                            lastname: "von Höheñlohé",
+                            gender: 'other',
+                            date_of_birth: 249782400000
+                        },
+                        accessToken: accessToken,
+                        tokenType: 'Bearer'
+                    }, done
+                );
+            });
+
+            it('should accept the change', function () {
+                expect(this.res.statusCode).equal(200);
+                expect(this.res.body.success).equal(true);
+            });
+        });
+    });
+
+    context('When user request tries to save a profile', function () {
+        var userHelper = require('../../lib/user-helper');
+        var config = require('../../config');
+
+        context('while gender and date of birth are required', function () {
+            var preFields;
+            before(function () {
+                preFields = config.userProfiles.requiredFields;
+                config.userProfiles.requiredFields = ['date_of_birth', 'gender'];
+                userHelper.reloadConfig();
+            });
+            after(function () {
+                config.userProfiles.requiredFields = preFields;
+                userHelper.reloadConfig();
+            });
+
+            context('everything is correctly set at once (female)', function () {
+                before(resetDatabase);
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                        method: 'post',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            email: USER_EMAIL,
+                            password: STRONG_PASSWORD
+                        }
+                    }, done);
+                });
+
+                before(function (done) {
+                    var accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {gender: 'female', date_of_birth: 249782400000},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                it('should accept the change', function () {
+                    expect(this.res.statusCode).equal(200);
+                    expect(this.res.body.success).equal(true);
+                });
+            });
+
+            context('everything is correctly set at once (male)', function () {
+                before(resetDatabase);
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                        method: 'post',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            email: USER_EMAIL,
+                            password: STRONG_PASSWORD
+                        }
+                    }, done);
+                });
+
+                before(function (done) {
+                    var accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {gender: 'male', date_of_birth: 249782400000},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                it('should accept the change', function () {
+                    expect(this.res.statusCode).equal(200);
+                    expect(this.res.body.success).equal(true);
+                });
+            });
+
+            context('everything is correctly set at once (gender other)', function () {
+                before(resetDatabase);
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                        method: 'post',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            email: USER_EMAIL,
+                            password: STRONG_PASSWORD
+                        }
+                    }, done);
+                });
+
+                before(function (done) {
+                    var accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {gender: 'other', date_of_birth: 249782400000},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                it('should accept the change', function () {
+                    expect(this.res.statusCode).equal(200);
+                    expect(this.res.body.success).equal(true);
+                });
+            });
+
+            context('a field is updated after required fields are set', function () {
+                var accessToken;
+                before(resetDatabase);
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                        method: 'post',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            email: USER_EMAIL,
+                            password: STRONG_PASSWORD
+                        }
+                    }, done);
+                });
+
+                before(function (done) {
+                    accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {gender: 'female', date_of_birth: '249782400000'},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {gender: 'male'},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                it('should accept the change', function () {
+                    expect(this.res.statusCode).equal(200);
+                    expect(this.res.body.success).equal(true);
+                });
+            });
+
+            context('missing gender', function () {
+                before(resetDatabase);
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                        method: 'post',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            email: USER_EMAIL,
+                            password: STRONG_PASSWORD
+                        }
+                    }, done);
+                });
+
+                before(function (done) {
+                    var accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {date_of_birth: 249782400000, firstname: 'benedict'},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                it('should return bad parameters ', function () {
+                    expect(this.res.statusCode).equal(400);
+                    expect(this.res.body.success).equal(false);
+                });
+
+                it('should properly describe the missing field', function () {
+                    expect(this.res.body.missingFields).members(['gender']);
+                });
+            });
+
+            context('after first setting it badly, it can still be set properly', function () {
+                var accessToken;
+                before(resetDatabase);
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                        method: 'post',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            email: USER_EMAIL,
+                            password: STRONG_PASSWORD
+                        }
+                    }, done);
+                });
+
+                before(function (done) {
+                    accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {date_of_birth: 'not a number'},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                before(function (done) {
+                    requestHelper.sendRequest(this, '/api/local/profile', {
+                            method: 'put',
+                            type: 'json',
+                            data: {gender: 'female', date_of_birth: '249782400000'},
+                            accessToken: accessToken,
+                            tokenType: 'Bearer'
+                        }, done
+                    );
+                });
+
+                it('should accept the second change', function () {
+                    expect(this.res.statusCode).equal(200);
+                    expect(this.res.body.success).equal(true);
+                });
+            });
+        });
+    });
+});
+
+describe('GET /api/local/profile/required-config', function () {
+    var URL = '/api/local/profile/required-config';
+    var userHelper = require('../../lib/user-helper');
+    var config = require('../../config');
+
+    context('for no required fields', function () {
+        context('normal request', function () {
+            before(doGet(URL));
+
+            it('should return json object with all possible fields', function () {
+                expect(this.res.statusCode).equal(200);
+                expect(this.res.body).eql(
+                    {
+                        fields: {
+                            "gender": false,
+                            "date_of_birth": false,
+                            "firstname": false,
+                            "lastname": false,
+                            "language": false
+                        },
+                        providers: [
+                            "facebook",
+                            "google",
+                            "local"
+                        ]
+                    }
+                );
+            });
+        });
+
+        context('array request', function () {
+            before(doGet(URL + '?array'));
+
+            it('should return an empty json list', function () {
+                expect(this.res.statusCode).equal(200);
+                expect(this.res.body).empty;
+            });
+        });
+    });
+
+    context('for gender and date of birth as required fields', function () {
+        var preReq;
+        before(function () {
+            preReq = config.userProfiles.requiredFields;
+            config.userProfiles.requiredFields = ['date_of_birth', 'gender'];
+            userHelper.reloadConfig();
+        });
+        after(function () {
+            config.userProfiles.requiredFields = preReq;
+            userHelper.reloadConfig();
+        });
+        context('normal request', function () {
+            before(doGet(URL));
+
+            it('should return json object with the fields gender and date_of_birth true', function () {
+                expect(this.res.statusCode).equal(200);
+                expect(this.res.body).eql(
+                    {
+                        fields: {
+                            "gender": true,
+                            "date_of_birth": true,
+                            "firstname": false,
+                            "lastname": false,
+                            "language": false
+                        },
+                        providers: [
+                            "facebook",
+                            "google",
+                            "local"
+                        ]
+                    }
+                );
+            });
+        });
+
+        context('array request', function () {
+            before(doGet(URL + '?array'));
+
+            it('should return an empty json list', function () {
+                expect(this.res.statusCode).equal(200);
+                expect(this.res.body).members(['date_of_birth', 'gender']);
+            });
+        });
     });
 
 
+    function doGet(url) {
+        return function (done) {
+            requestHelper.sendRequest(this, url, {method: 'get'}, done);
+        }
+    }
+});
+
+describe('PUT /user/profile', function () {
+    var URL = '/user/profile';
+    var userHelper = require('../../lib/user-helper');
+    var config = require('../../config');
+
+    context('for required fields date_of_birth,firstname', function () {
+        var preReq;
+        before(function () {
+            preReq = config.userProfiles.requiredFields;
+            config.userProfiles.requiredFields = ['date_of_birth', 'gender'];
+            userHelper.reloadConfig();
+        });
+        after(function () {
+            config.userProfiles.requiredFields = preReq;
+            userHelper.reloadConfig();
+        });
+
+        context('doing everything correctly', function () {
+            before(resetDatabase);
+            before(function (done) {
+                requestHelper.loginCustom(USER_EMAIL, STRONG_PASSWORD, this, done);
+            });
+
+            before(function (done) {
+                requestHelper.sendRequest(
+                    this,
+                    URL,
+                    {
+                        method: 'put',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            date_of_birth: '12345',
+                            gender: 'other',
+                            firstname: 'Trûdì',
+                        }
+                    },
+                    done
+                );
+            });
+
+            it('should return a success', function () {
+                expect(this.res.statusCode).equal(200);
+                expect(this.res.body.msg).equal('Profile updated.');
+            });
+        });
+
+        context('empty date_of_birth', function () {
+            before(resetDatabase);
+            before(function (done) {
+                requestHelper.loginCustom(USER_EMAIL, STRONG_PASSWORD, this, done)
+            });
+
+            before(function (done) {
+                requestHelper.sendRequest(
+                    this,
+                    URL,
+                    {
+                        method: 'put',
+                        cookie: this.cookie,
+                        type: 'form',
+                        data: {
+                            date_of_birth: '',
+                            gender: 'other',
+                            firstname: 'Trûdì',
+                        }
+                    },
+                    done
+                );
+            });
+
+            it('should fail with one error message', function () {
+                expect(this.res.statusCode).equal(400);
+                expect(this.res.body.errors).a('array');
+                expect(this.res.body.errors.length).equal(1);
+                expect(this.res.body.errors[0]).eql({
+                    param: 'date_of_birth',
+                    msg: '\'Date of birth\' is empty or invalid',
+                    value: ''
+                });
+            });
+        });
+    });
 });

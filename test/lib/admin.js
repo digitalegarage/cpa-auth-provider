@@ -2,7 +2,6 @@
 "use strict";
 
 var generate = require('../../lib/generate');
-var messages = require('../../lib/messages');
 var db = require('../../models');
 var config = require('../../config');
 
@@ -13,59 +12,77 @@ var chaiHttp = require('chai-http');
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 
-var initDatabase = function (done) {
+var PASSWORD = 'UnbreakablePassword01!';
 
-    db.Permission
-        .create({
-                id: 1,
-                label: "admin"
-            }
-        ).then(function () {
-        db.Permission
-            .create({
-                    id: 2,
-                    label: "other"
-                }
-            ).then(function () {
-            db.User.create({
-                id: 5,
-                email: 'testuser',
-                provider_uid: 'testuser'
-            })
-                .then(function (user) {
-                    return user.setPassword('testpassword');
-                })
-                .then(function (user) {
-                    return user.updateAttributes({permission_id: 1});
-                })
-                .then(function (user) {
-                    return db.Domain.create({
-                        id: 5,
-                        name: 'example-service.bbc.co.uk',
-                        display_name: 'BBC',
-                        access_token: '70fc2cbe54a749c38da34b6a02e8dfbd'
-                    });
-                })
-                .then(
-                    function () {
-                        done();
-                    },
-                    function (error) {
-                        done(new Error(error));
-                    });
-        });
-    });
+var USER = {
+    provider_uid: 'testuser',
+    firstname: 'Scott',
+    lastname: 'Tiger'
+};
+var USER_EMAIL = 'user@user.ch';
+var ADMIN = {
+    provider_uid: 'testuser',
+    permission_id: 1,
+    firstname: 'John',
+    lastname: 'Doe'
+};
+var ADMIN_EMAIL = 'admin@admin.ch';
 
-
+var ADMIN_PERMISSION = {
+    id: 1,
+    label: "admin"
 };
 
+var USER_PERMISSION = {
+    id: 2,
+    label: "other"
+};
+
+var adminId;
+var userId;
+
+
+var initDatabase = function (done) {
+    return db.Permission.create(ADMIN_PERMISSION).then(function () {
+        return db.Permission.create(USER_PERMISSION);
+    }).then(function () {
+        return db.User.create(USER);
+    }).then(function (user) {
+        userId = user.id;
+        return db.LocalLogin.create({user_id: user.id, login: USER_EMAIL});
+    }).then(function (localLogin) {
+        return localLogin.setPassword(PASSWORD);
+    }).then(function () {
+        return db.User.create(ADMIN);
+    }).then(function (user) {
+        adminId = user.id;
+        return db.LocalLogin.create({user_id: user.id, login: ADMIN_EMAIL});
+    }).then(function (localLogin) {
+        return localLogin.setPassword(PASSWORD);
+    }).then(function () {
+        return db.Domain.create({
+            id: 5,
+            name: 'example-service.bbc.co.uk',
+            display_name: 'BBC',
+            access_token: '70fc2cbe54a749c38da34b6a02e8dfbd'
+        });
+    }).then(
+        function () {
+            done();
+        },
+        function (error) {
+            done(new Error(error));
+        });
+};
+
+
 var resetDatabase = function (done) {
-    dbHelper.clearDatabase(function (err) {
+    return dbHelper.clearDatabase(function (err) {
         if (err) {
-            done(err);
+            return done(err);
         }
         else {
-            initDatabase(done);
+            return initDatabase(done);
         }
     });
 };
@@ -79,14 +96,8 @@ describe('GET /admin', function () {
         before(resetDatabase);
 
         before(function (done) {
-            db.User.findOne({where: {id: 5}}).then(function (user) {
-                user.updateAttributes({permission_id: 2}).then(done());
-            });
-        });
-
-        before(function (done) {
             // Login with a non admin login
-            requestHelper.login(self, done);
+            requestHelper.loginCustom(USER_EMAIL, PASSWORD, self, done);
         });
 
         before(function (done) {
@@ -108,24 +119,10 @@ describe('GET /admin', function () {
         before(resetDatabase);
 
         before(function (done) {
-            db.User.create({
-                id: 100,
-                email: 'monadmin@ebu.fr',
-                username: 'admin',
-                permission_id: 1
-            }).then(function (user) {
-                user.setPassword('admin').then(function () {
-                    done();
-                });
-            });
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, self, done);
         });
 
         before(function (done) {
-            requestHelper.loginCustom('monadmin@ebu.fr', 'admin', self, done);
-        });
-
-        before(function (done) {
-            // console.log("the cookie", self.cookie);
             requestHelper.sendRequest(this, '/admin', {
                 cookie: self.cookie,
                 parseDOM: true
@@ -148,25 +145,11 @@ describe('GET /admin', function () {
         before(resetDatabase);
 
         before(function (done) {
-            db.User.create({
-                id: 100,
-                email: 'monadmin@ebu.fr',
-                username: 'admin',
-                permission_id: 1
-            }).then(function (user) {
-                user.setPassword('admin').then(function () {
-                    done();
-                });
-            });
-        });
-
-        before(function (done) {
-            requestHelper.loginCustom('monadmin@ebu.fr', 'admin', self, done);
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, self, done);
         });
 
         before(function (done) {
             config.displayUsersInfos = false;
-            // console.log("the cookie", self.cookie);
             requestHelper.sendRequest(this, '/admin', {
                 cookie: self.cookie,
                 parseDOM: true
@@ -174,7 +157,7 @@ describe('GET /admin', function () {
         });
 
         it('should hide Users link', function () {
-            expect(this.$('#users-link')).to.be.hidden;
+            expect(this.$('#users-link').length).to.equal(0);
         });
 
     });
@@ -186,25 +169,11 @@ describe('GET /admin', function () {
         before(resetDatabase);
 
         before(function (done) {
-            db.User.create({
-                id: 100,
-                email: 'monadmin@ebu.fr',
-                username: 'admin',
-                permission_id: 1
-            }).then(function (user) {
-                user.setPassword('admin').then(function () {
-                    done();
-                });
-            });
-        });
-
-        before(function (done) {
-            requestHelper.loginCustom('monadmin@ebu.fr', 'admin', self, done);
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, self, done);
         });
 
         before(function (done) {
             config.displayUsersInfos = true;
-            // console.log("the cookie", self.cookie);
             requestHelper.sendRequest(this, '/admin', {
                 cookie: self.cookie,
                 parseDOM: true
@@ -212,7 +181,7 @@ describe('GET /admin', function () {
         });
 
         it('should show Users link', function () {
-            expect(this.$('#users-link')).to.be.visible;
+            expect(this.$('#users-link').length).to.equal(1);
         });
 
     });
@@ -230,8 +199,7 @@ describe('GET /admin', function () {
         it('should redirect to the login page', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(self.res.statusCode).to.equal(302);
-            expect(self.res.headers.location).to.equal(urlPrefix + "/auth");
-            // TODO: check redirect location and page to return to after login
+            expect(self.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/admin"));
         });
     });
 });
@@ -242,7 +210,7 @@ describe('GET /admin/domains', function () {
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.login(this, done);
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, this, done);
         });
 
         before(function (done) {
@@ -288,8 +256,7 @@ describe('GET /admin/domains', function () {
         it('should redirect to the login page', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
-            expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
-            // TODO: check redirect location and page to return to after login
+            expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/admin/domains"));
         });
     });
 });
@@ -299,7 +266,7 @@ describe('GET /admin/domains/add', function () {
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.login(this, done);
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, this, done);
         });
 
         before(function (done) {
@@ -336,8 +303,7 @@ describe('GET /admin/domains/add', function () {
         it('should redirect to the login page', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
-            expect(this.res.headers.location).to.equal(urlPrefix + "/auth");
-            // TODO: check redirect location and page to return to after login
+            expect(this.res.headers.location).to.equal(urlPrefix + "/login?redirect=" + encodeURIComponent("/ap/admin/domains/add"));
         });
     });
 });
@@ -355,7 +321,7 @@ describe('POST /admin/domains', function () {
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.login(this, done);
+            requestHelper.loginCustom(ADMIN_EMAIL, PASSWORD, this, done);
         });
 
         before(function (done) {
@@ -371,7 +337,6 @@ describe('POST /admin/domains', function () {
             var urlPrefix = requestHelper.urlPrefix;
             expect(this.res.statusCode).to.equal(302);
             expect(this.res.headers.location).to.equal(urlPrefix + "/admin/domains");
-            // TODO: check redirect location and page to return to after login
         });
 
         describe("the database", function () {

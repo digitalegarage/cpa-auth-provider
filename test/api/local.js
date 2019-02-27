@@ -1,165 +1,214 @@
 "use strict";
 
 var generate = require('../../lib/generate');
-var messages = require('../../lib/messages');
 var db = require('../../models');
+var config = require('../../config');
+var userHelper = require('../../lib/user-helper');
 
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
 
+// Google reCAPTCHA
+var recaptcha = require('express-recaptcha');
+
 var resetDatabase = function (done) {
-    dbHelper.clearDatabase(function (err) {
-        done(err);
+    return dbHelper.clearDatabase(function (err) {
+        return done(err);
     });
 };
 
 var INCORRECT_LOGIN_OR_PASS = 'The username or password is incorrect';
+var API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
+var API_PASSWORD_RECOVER_USER_NOT_FOUND = 'User not found';
 
-// Test signup
+var recaptchaResponse = 'a dummy recaptcha response';
 
-describe('POST /api/local/signup', function () {
+// The following recaptcha key should always return ok
+// See https://developers.google.com/recaptcha/docs/faq
+var OK_RECATCHA_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
+var OK_RECATCHA_SECRET = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe';
 
-    context('When unauthenticated user signup with bad recaptcha', function () {
+// The following recaptacha key should always return ko
+var KO_RECATCHA_KEY = 'ko';
+var KO_RECATCHA_SECRET = 'ko';
 
-        before(resetDatabase);
+var LONG_MAIL = 'thisis@nemailthatisvery.cool';
 
-        before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
-                method: 'post',
-                cookie: this.cookie,
-                type: 'form',
-                data: {email: 'qsdf@qsdf.fr', password: 'qsdf', 'g-recaptcha-response': 'qsdf'}
-            }, done);
-        });
+var STRONG_PASSWORD = 'correct horse battery staple';
+var WEAK_PASSWORD = 'weak';
 
-        it('should return a success false', function () {
-            //console.log('msg:' + this.res.body.msg);
-            //console.log('success:' + this.res.body.success);
-            expect(this.res.statusCode).to.equal(200);
-            expect(this.res.body.success).to.equal(false);
-            expect(this.res.body.msg).to.equal("Something went wrong with the reCAPTCHA");
-        });
+// Test password recovery
 
-    });
+describe('POST /api/local/password/recover', function () {
 
-    context('When unauthenticated user signup with good recaptcha', function () {
+    context('When user try to recover password with valid email and good recaptcha', function () {
 
         before(resetDatabase);
 
+        // Google reCAPTCHA
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
-                method: 'post',
-                cookie: this.cookie,
-                type: 'form',
-                data: {
-                    email: 'qsdf2@qsdf.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
-                }
-            }, done);
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
         });
-
-        it('should return a success false', function () {
-            //console.log('msg:' + this.res.body.msg);
-            //console.log('success:' + this.res.body.success);
-            expect(this.res.statusCode).to.equal(200);
-            expect(this.res.body.success).to.equal(true);
-            expect(this.res.body.msg).to.equal("Successfully created new user.");
-            expect(this.res.body.token).to.not.equal('');
-        });
-
-    });
-
-    context('When unauthenticated user signup without password', function () {
-
-        before(resetDatabase);
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
-                method: 'post',
-                cookie: this.cookie,
-                type: 'form',
-                data: {
-                    email: 'qsdf2@qsdf.fr',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
-                }
-            }, done);
-        });
-
-        it('should return a success false', function () {
-            //console.log('msg:' + this.res.body.msg);
-            //console.log('success:' + this.res.body.success);
-            expect(this.res.statusCode).to.equal(200);
-            expect(this.res.body.success).to.equal(false);
-            expect(this.res.body.msg).to.equal("Please pass email and password.");
-        });
-
-    });
-
-    context('When unauthenticated user signup without mail', function () {
-
-        before(resetDatabase);
-
-        before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
-                method: 'post',
-                cookie: this.cookie,
-                type: 'form',
-                data: {
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
-                }
-            }, done);
-        });
-
-        it('should return a success false', function () {
-            //console.log('msg:' + this.res.body.msg);
-            //console.log('success:' + this.res.body.success);
-            expect(this.res.statusCode).to.equal(200);
-            expect(this.res.body.success).to.equal(false);
-            expect(this.res.body.msg).to.equal("Please pass email and password.");
-        });
-
-    });
-
-    context('When 2 users register with same mail', function () {
-
-        before(resetDatabase);
-
-        before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/local/password/recover', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success ', function () {
+            expect(this.res.statusCode).to.equal(204);
+        });
+    });
+
+    context('When user try to recover password with valid email (case insensitive) and good recaptcha', function () {
+
+        before(resetDatabase);
+
+        // Google reCAPTCHA
+        before(function (done) {
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/password/recover', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr'.toUpperCase(),
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success ', function () {
+            expect(this.res.statusCode).to.equal(204);
+        });
+    });
+
+    context('When user try to recover password with valid email and bad recaptcha', function () {
+        before(resetDatabase);
+
+        // Google reCAPTCHA
+        before(function (done) {
+            recaptcha.init(KO_RECATCHA_KEY, KO_RECATCHA_SECRET);
+            done();
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
         });
 
         it('should return a success false', function () {
-            //console.log('msg:' + this.res.body.msg);
-            //console.log('success:' + this.res.body.success);
+            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/password/recover', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    'g-recaptcha-response': 'dewdew'
+                }
+            }, done);
+        });
+
+        it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.body.success).to.equal(false);
-            expect(this.res.body.msg).to.equal("email already exists.");
+            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+        });
+    });
+
+    context('When user try to recover password with valid email and bad recaptcha', function () {
+        before(resetDatabase);
+
+        // Google reCAPTCHA
+        before(function (done) {
+            recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+            done();
         });
 
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success false', function () {
+            // if Test fail  here google should have change the recaptcha algorithm
+            // => update recaptchaResponse by getting the value post as parameter g-recaptcha-response in signup query using a browser
+            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/local/password/recover', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdfcewhfuwehweih@qsdf.fr',
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a 400 error', function () {
+            expect(this.res.statusCode).to.equal(400);
+            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
+        });
     });
 
 });
@@ -167,42 +216,35 @@ describe('POST /api/local/signup', function () {
 
 // Test authenticate
 
-describe('POST /api/local/authenticate', function () {
+describe('POST /api/v2/jwt/login', function () {
 
     context('When unauthenticated user signup with correct credential', function () {
 
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
                     email: 'qsdf@qsdf.fr',
-                    password: 'qsdf'
+                    password: STRONG_PASSWORD
                 }
             }, done);
-        });
-
-        it('should return a success ', function () {
-            // console.log('success:' + this.res.body.success);
-            // console.log('token:' + this.res.body.token);
-            expect(this.res.statusCode).to.equal(200);
-            expect(this.res.body.success).to.equal(true);
         });
 
         // Test get user info
@@ -217,6 +259,56 @@ describe('POST /api/local/authenticate', function () {
         });
 
         it('/api/local/info should return a success ', function () {
+            expect(this.accessToken.length).to.be.greaterThan(0);
+            expect(this.res.statusCode).to.equal(200);
+            expect(this.res.body.success).to.equal(true);
+            expect(this.res.body.user.email).to.equal('qsdf@qsdf.fr');
+            expect(this.res.body.user.display_name).to.equal('qsdf@qsdf.fr');
+
+        });
+    });
+    context('When unauthenticated user signup with correct credential (case insensitive)', function () {
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr'.toUpperCase(),
+                    password: STRONG_PASSWORD
+                }
+            }, done);
+        });
+
+        // Test get user info
+        before(function (done) {
+            this.accessToken = this.res.body.token.substring(4, this.res.body.token.size);
+            requestHelper.sendRequest(this, '/api/local/info', {
+                    method: 'get',
+                    accessToken: this.accessToken,
+                    tokenType: 'JWT'
+                }, done
+            );
+        });
+
+        it('/api/local/info should return a success ', function () {
+            expect(this.accessToken.length).to.be.greaterThan(0);
             expect(this.res.statusCode).to.equal(200);
             expect(this.res.body.success).to.equal(true);
             expect(this.res.body.user.email).to.equal('qsdf@qsdf.fr');
@@ -225,25 +317,117 @@ describe('POST /api/local/authenticate', function () {
         });
     });
 
-    context('When unauthenticated user signup with bad credential', function () {
+    context('When unauthenticated user signup with email "like" another user email', function () {
 
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/signup', {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
                 data: {
-                    email: 'qsdf@qsdf.fr',
-                    password: 'qsdf',
-                    'g-recaptcha-response': '03AHJ_VuumGMJjbAPsRZf8KVVS_KR3uNwheBf3XefbSN9RmY1wnFvpTUYM5SHAoDeodK4a8cqBElvDA3rJPEu-z18r7ZlmMF1BUbDKnZsGvJqlnv7pwFofpoSyz9ltPWgH95Opovv8Yxw1yRwWnqgpw3242sR3q-EQkoqdJIZJBOziKRrtcgHOs8cMzKnvPlO5_LCT1Xf5e3AxsHsbbPSilME2WygfMELGrbq30Kb3rOL65RVg_gsuTMqxArOa9AQHxpGTx-IzYoWpjMmmCG5S1jna73xtkIB0dQuuv-J0on7U5yspn0UBNpaVslp5xa7PEjJSAQxU6yY4D8EnC2DsqnZT6bvxLNVRVJiX6HCjYnX7BvF1PRTaxrmJrZSd5yUjLxAG_QNroSwOF_hQhBprtQkSOIdEL1FlxG9PKy4wUttq3xRpgvBewOUiVMSa-m8Zr74CpsKnmU3aANqjPjDS15LjZ4zUY-qIYVQbRcw0FjBsOFwO7nqtlBfQC4ebKSgOfh31S2qXIcEY7mCxdj9MIxyqdalLwrFogrBzrQvH9CCkNizmTno0gWtWbE-obpB_EXgQ87du2FRADpHOhGmq-ic0yPZfs27an5xJrcuCOcTLOnED_RYzLETpyJ6ckYvlRsOGyGUbr-60wiLKb8ipeQkidPtMQqwd3c7bmDtk6BcIBEdm80tj_D-1YVxUdDtVmJw99RofQyVOoP2JVun0fquw4ylp_XimetVlvfjONpbmjRiRpaPUcosu0aQwZw20VTd10WFBfqIA3LUR2bKdG_JM2ODxPUg7FMVRMHIOOL0zUwxXdHSJeH8ek-vpOhJuh3vLeG3norWT1AEBOHpdHoFvlPB08u98b0cwzgJElpETn4rAdz7ad6vJL7Gee5wR0jJcqZPIdmCMZjBC4U7REletboN5JeYvK6ZMlG43o5uNAN4GH8h5VPQ'
+                    email: 'first-email@mail.com',
+                    password: 'first-password',
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'email@mail.com',
+                    password: 'second-password',
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/login', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'email@mail.com',
+                    password: 'first-password'
+                }
+            }, done);
+        });
+
+
+        it('should 401', function () {
+            expect(this.res.statusCode).to.equal(401);
+        });
+    });
+
+    // Check that the like SQL function has no side effect
+    context('When unauthenticated user tries to login with email that is a sub part of another login', function () {
+
+        var aLogin = 'qsdf@qsdf.fr';
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: aLogin,
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
         });
 
         before(function (done) {
-            requestHelper.sendRequest(this, '/api/local/authenticate', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'a' + aLogin + 'a',
+                    password: STRONG_PASSWORD
+                }
+            }, done);
+        });
+
+        it('/api/local/info should return a 401 ', function () {
+            expect(this.token).to.be.undefined;
+            expect(this.res.statusCode).to.equal(401);
+            expect(this.res.body.error);
+            expect(this.res.body.error.code).to.equal("L1");
+            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
+            expect(this.res.body.error.message).to.equal("incorrect login or password");
+        });
+    });
+
+    context('When unauthenticated user signup with bad credential', function () {
+
+        before(resetDatabase);
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/jwt/login', {
                 method: 'post',
                 cookie: this.cookie,
                 type: 'form',
@@ -255,10 +439,12 @@ describe('POST /api/local/authenticate', function () {
         });
 
         it('should return a 401 ', function () {
-            //console.log('success:' + this.res.body.success);
+            expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.body.success).to.equal(false);
-            expect(this.res.body.msg).to.equal(INCORRECT_LOGIN_OR_PASS);
+            expect(this.res.body.error);
+            expect(this.res.body.error.code).to.equal("L1");
+            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
+            expect(this.res.body.error.message).to.equal("incorrect login or password");
         });
     });
 

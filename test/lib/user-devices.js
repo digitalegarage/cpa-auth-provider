@@ -1,7 +1,6 @@
 "use strict";
 
 var generate = require('../../lib/generate');
-var messages = require('../../lib/messages');
 var db = require('../../models');
 
 var requestHelper = require('../request-helper');
@@ -18,25 +17,26 @@ var initDatabase = function (opts, done) {
         db.User
             .create({
                 id: 3,
-                email: 'testuser',
                 provider_uid: 'testuser',
-                display_name: 'Test User',
-                permission_id: 1
+                display_name: 'Test User'
             })
             .then(function (user) {
-                return user.setPassword('testpassword');
+                return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
+                    return localLogin.setPassword('testpassword');
+                });
             })
             .then(function () {
                 return db.User.create({
                     id: 2,
-                    email: '2testuser2',
                     provider_uid: '2testuser2',
                     display_name: '2 Test User 2',
                     permission_id: 1
                 });
             })
             .then(function (user) {
-                return user.setPassword('otherpassword');
+                return db.LocalLogin.create({user_id: user.id, login: '2testuser2'}).then(function (localLogin) {
+                    return localLogin.setPassword('testpassword');
+                });
             })
             .then(function () {
                 return db.Client.create({
@@ -187,7 +187,7 @@ describe('GET /user/devices', function () {
             describe('the response body', function () {
                 it('should display a title containing the number of devices', function () {
                     expect(this.$('h1').length).to.equal(1);
-                    expect(this.$('h1').text()).to.equal('Devices\n    (3)\n');
+                    expect(this.$('h1').text()).to.contain('(3)');
                 });
 
                 it('should contain a table with 3 elements (+ header)', function () {
@@ -195,28 +195,17 @@ describe('GET /user/devices', function () {
                 });
 
                 describe('the devices in the table', function () {
-                    it('should have the correct id numbers', function () {
-                        expect(this.$('tr').eq(1).children('td').eq(0).text()).to.equal('100');
-                        expect(this.$('tr').eq(2).children('td').eq(0).text()).to.equal('101');
-                        expect(this.$('tr').eq(3).children('td').eq(0).text()).to.equal('102');
-                    });
 
                     it('should have the correct names', function () {
-                        expect(this.$('tr').eq(1).children('td').eq(1).text()).to.equal('Test client 1');
-                        expect(this.$('tr').eq(2).children('td').eq(1).text()).to.equal('Test client 2');
-                        expect(this.$('tr').eq(3).children('td').eq(1).text()).to.equal('Test client 3');
-                    });
-
-                    it('should belong to the correct user', function () {
-                        expect(this.$('tr').eq(1).children('td').eq(2).text()).to.equal('Test User');
-                        expect(this.$('tr').eq(2).children('td').eq(2).text()).to.equal('Test User');
-                        expect(this.$('tr').eq(3).children('td').eq(2).text()).to.equal('Test User');
+                        expect(this.$('tr').eq(1).children('td').eq(0).text()).to.equal('Test client 1');
+                        expect(this.$('tr').eq(2).children('td').eq(0).text()).to.equal('Test client 2');
+                        expect(this.$('tr').eq(3).children('td').eq(0).text()).to.equal('Test client 3');
                     });
 
                     it('should be authorized on the correct domain', function () {
-                        expect(this.$('tr').eq(1).children('td').eq(3).text()).to.contain('another-example-service.com');
-                        expect(this.$('tr').eq(2).children('td').eq(3).text()).to.contain('example-service.ebu.io');
-                        expect(this.$('tr').eq(3).children('td').eq(3).text()).to.contain('example-service.ebu.io');
+                        expect(this.$('tr').eq(1).children('td').eq(1).text()).to.contain('another-example-service.com');
+                        expect(this.$('tr').eq(2).children('td').eq(1).text()).to.contain('example-service.ebu.io');
+                        expect(this.$('tr').eq(3).children('td').eq(1).text()).to.contain('example-service.ebu.io');
                     });
                 });
             });
@@ -227,8 +216,8 @@ describe('GET /user/devices', function () {
                 requestHelper.sendRequest(this, '/user/devices', null, done);
             });
 
-            it('should deny access', function () {
-                expect(this.res.statusCode).to.equal(401);
+            it('should deny access (redirect to login)', function () {
+                expect(this.res.statusCode).to.equal(302);
             });
         });
     });

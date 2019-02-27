@@ -52,6 +52,14 @@ module.exports = {
             req.set('Authorization', tokenType + ' ' + opts.accessToken);
         }
 
+        if (opts.locale){
+            req.set('accept-language', opts.locale);
+        }
+
+        if (opts.basicAuth) {
+            req.set('Authorization', 'Basic' + ' ' + Buffer.from(opts.basicAuth.login + ':' + opts.basicAuth.password).toString('base64'));
+        }
+
         if (opts.data) {
             // If 'form', sets Content-Type: application/x-www-form-urlencoded.
             var type = opts.type || 'json';
@@ -61,6 +69,10 @@ module.exports = {
         }
 
         req.end(function (err, res) {
+            if (res && res.headers['set-cookie']) {
+                context.cookie = res.headers['set-cookie'];
+            }
+
             context.res = res;
 
             if (opts.parseDOM) {
@@ -76,12 +88,25 @@ module.exports = {
     },
 
     loginCustom: function (email, password, context, done) {
-        var loginUrl = this.urlPrefix + '/login';
+        var loginUrl = this.urlPrefix + '/api/v2/session/login';
 
         request
             .post(loginUrl)
             .type('form')
             .send({email: email, password: password})
+            .end(function (err, res) {
+                context.cookie = res.headers['set-cookie'];
+                done(err);
+            });
+    },
+
+    loginUser: function (context, username, password, done) {
+        var loginUrl = this.urlPrefix + '/api/v2/session/login';
+
+        request
+            .post(loginUrl)
+            .type('form')
+            .send({email: username, username: username, password: password})
             .end(function (err, res) {
                 context.cookie = res.headers['set-cookie'];
                 done(err);
