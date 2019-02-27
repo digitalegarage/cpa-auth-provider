@@ -18,8 +18,7 @@ var initDatabase = function (opts, done) {
             .create({
                 id: 3,
                 provider_uid: 'testuser',
-                display_name: 'Test User',
-                permission_id: 1
+                display_name: 'Test User'
             })
             .then(function (user) {
                 return db.LocalLogin.create({user_id: user.id, login: 'testuser'}).then(function (localLogin) {
