@@ -198,7 +198,7 @@ describe('API-V2 add local login', function() {
             });
             context('response', function() {
 
-                it(' should be 200', function() {
+                it(' should be 204', function() {
                     expect(ctx.res.statusCode).to.equal(204);
                 });
             });
