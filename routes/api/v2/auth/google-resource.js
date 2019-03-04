@@ -163,7 +163,7 @@ module.exports = function (app, options) {
                         });
                     });
                 } else {
-                    return res.status(401).json({error: 'An error occurred while validating the token'}).send();
+                    return res.status(412).json({error: req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE")}).send();
                 }
             }).catch(function(err) {
                 logger.info('An error occurred while saving user in IDP db', err);

@@ -3,7 +3,8 @@
 const requestHelper = require('../../../request-helper'),
       initData = require('../setup/init-data'),
       nock = require('nock'),
-      googleHelper = require('../../../../lib/google-helper');
+      googleHelper = require('../../../../lib/google-helper'),
+      login = require('../setup/login');
 
 
 const VALID_ACCESS_TOKEN = 'AccessTokenA';
@@ -82,6 +83,28 @@ describe('API-V2 Google for AJAX', function() {
 
         });
 
+        context('when a not verified account already exists with this gmail account', function() {
+
+            var ctx = this;
+
+            before(function(done) {
+                login.cookieSignup(ctx, GOOGLE_EMAIL, "ACrazyPasswordThatNo1wouldChallenge. Ever!", null, null, done);
+            });
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/token?defaultLanguage=fr', {
+                    method: 'post',
+                    data: {
+                        token: VALID_ACCESS_TOKEN,
+                    },
+                }, done);
+            });
+           it('user should returns 412', function() {
+               expect(ctx.res.statusCode).to.equal(412);
+               expect(ctx.res.body.error).to.equal("Vous devez valider votre email avant de vous connecter avec Google");
+            });
+        });
+
     });
 
     context('Code', function() {
@@ -128,6 +151,28 @@ describe('API-V2 Google for AJAX', function() {
                 expect(ctx.res.statusCode).to.equal(200);
             });
 
+        });
+        context('when a not verified account already exists with this gmail account', function() {
+
+            var ctx = this;
+
+            before(function(done) {
+                login.cookieSignup(ctx, GOOGLE_EMAIL, "ACrazyPasswordThatNo1wouldChallenge. Ever!", null, null, done);
+            });
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/code?defaultLanguage=fr', {
+                    method: 'post',
+                    data: {
+                        redirect_uri: 'http://localhost',
+                        code: 'a_valid_code',
+                    },
+                }, done);
+            });
+            it('user should returns 412', function() {
+                expect(ctx.res.statusCode).to.equal(412);
+                expect(ctx.res.body.error).to.equal("Vous devez valider votre email avant de vous connecter avec Google");
+            });
         });
 
     });
