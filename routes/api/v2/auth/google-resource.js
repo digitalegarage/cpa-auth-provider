@@ -171,7 +171,7 @@ module.exports = function (app, options) {
     function authViaCode(code, redirectUri, req, res) {
         googleHelper.getGoogleToken(code, redirectUri).then(function(token) {
             if (!token) {
-                return res.status(401).json({error: 'Cannot authenticate with google'}).send();
+                return res.status(401).json(errorHelper.buildError("UNEXPECTED_ERROR", "Cannot authenticate with google")).send();
             } else {
                 authViaToken(token, req, res);
             }
