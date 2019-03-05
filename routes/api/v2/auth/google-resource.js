@@ -7,6 +7,7 @@ const googleHelper = require('../../../../lib/google-helper');
 const afterLoginHelper = require('../../../../lib/afterlogin-helper');
 const db = require('../../../../models/index');
 const logger = require('../../../../lib/logger');
+const errorHelper = require('../../../../lib/error-helper');
 
 const passport = require('passport');
 
@@ -27,6 +28,44 @@ module.exports = function (app, options) {
         socialLoginHelper.afterSocialLoginSucceed(req, res);
 
     });
+
+    /**
+     * @swagger
+     * definitions:
+     *  error:
+     *      properties:
+     *          error:
+     *              type: object
+     *              properties:
+     *                  code:
+     *                      type: string
+     *                      example: INVALID_SIGNUP_DATA
+     *                      description: error code
+     *                      required: true
+     *                  hint:
+     *                      type: string
+     *                      example: signup process requires that user choose a untaken email
+     *                      description: an optional hint given to the developer. THIS IS NOT SUPPOSED TO BE RETURNED TO END USER!
+     *                  traceId:
+     *                      type: string
+     *                      example: https://error-tracking.ebu.io/broadcaster/prod/issues/1234/
+     *                      description: an optional trace id to get more information in error tracking system
+     *                  causes:
+     *                      type: array
+     *                      description: list of possible causes when applicable
+     *                      items:
+     *                          type: object
+     *                          properties:
+     *                              code:
+     *                                  type: string
+     *                                  example: INVALID_SIGNUP_DATA
+     *                                  description: error code
+     *                                  required: true
+     *                              hint:
+     *                                  type: string
+     *                                  example: signup process requires that user choose a untaken email
+     *                                  description: an optional hint given to the developer. THIS IS NOT SUPPOSED TO BE RETURNED TO END USER!
+     */
 
     /**
      * @swagger
@@ -73,13 +112,17 @@ module.exports = function (app, options) {
      *            description: "login succeed"
      *          "400":
      *            description: "missing token in request body"
+     *            schema:
+     *              $ref: '#/definitions/error'
      *          "401":
      *            description: "cannot authenticate with provided code"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/google/token', cors);
     app.post('/api/v2/auth/google/token', function(req, res) {
         if (!req.body.token) {
-            return res.status(400).json({error: 'missing token in request body'}).send();
+            return res.status(400).json(errorHelper.buildError("TOKEN_MISSING", "missing token in request body")).send();
         }
         authViaToken(req.body.token, req, res);
 
@@ -163,7 +206,8 @@ module.exports = function (app, options) {
                         });
                     });
                 } else {
-                    return res.status(412).json({error: req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE")}).send();
+                    return res.status(412).json(errorHelper.buildError("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
+                        "It's not allowed to login with a gmail account on an account using the same email as local login if the local login is not validated.")).send();
                 }
             }).catch(function(err) {
                 logger.info('An error occurred while saving user in IDP db', err);
