@@ -92,7 +92,7 @@ describe('API-V2 Google for AJAX', function() {
             });
 
             before(function(done) {
-                requestHelper.sendRequest(ctx, '/api/v2/auth/google/token?defaultLanguage=fr', {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/token?defaultLanguage=en', {
                     method: 'post',
                     data: {
                         token: VALID_ACCESS_TOKEN,
@@ -101,7 +101,7 @@ describe('API-V2 Google for AJAX', function() {
             });
            it('user should returns 412', function() {
                expect(ctx.res.statusCode).to.equal(412);
-               expect(ctx.res.body.error).to.equal("Vous devez valider votre email avant de vous connecter avec Google");
+               expect(ctx.res.body.error).to.equal("You must validate your email before connecting with Google");
             });
         });
 
@@ -161,7 +161,7 @@ describe('API-V2 Google for AJAX', function() {
             });
 
             before(function(done) {
-                requestHelper.sendRequest(ctx, '/api/v2/auth/google/code?defaultLanguage=fr', {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/code?defaultLanguage=en', {
                     method: 'post',
                     data: {
                         redirect_uri: 'http://localhost',
@@ -171,7 +171,7 @@ describe('API-V2 Google for AJAX', function() {
             });
             it('user should returns 412', function() {
                 expect(ctx.res.statusCode).to.equal(412);
-                expect(ctx.res.body.error).to.equal("Vous devez valider votre email avant de vous connecter avec Google");
+                expect(ctx.res.body.error).to.equal("You must validate your email before connecting with Google");
             });
         });
 
