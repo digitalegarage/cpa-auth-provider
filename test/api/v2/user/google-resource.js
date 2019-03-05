@@ -121,8 +121,7 @@ describe('API-V2 Google for AJAX', function() {
 
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.body.error);
-                expect(ctx.res.body.error).to.equal('missing code and/or redirect_uri in request body');
+                expect(ctx.res.body.error.code).to.equal('CODE_MISSING');
             });
 
         });

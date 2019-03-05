@@ -96,7 +96,7 @@ module.exports = function (app, options) {
      * @swagger
      * /api/v2/auth/google/token:
      *   post:
-     *     description: log user (session) using Google code
+     *     description: "log user (session) using Google code. Possible errors are: TOKEN_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
      *     tags: [AUTH]
      *     content:
      *        - application/json
@@ -133,7 +133,7 @@ module.exports = function (app, options) {
      * @swagger
      * /api/v2/auth/google/code:
      *   post:
-     *     description: log user (session) using Google code
+     *     description: "log user (session) using Google code. Possible errors are: CODE_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
      *     tags: [AUTH]
      *     content:
      *        - application/json
@@ -148,9 +148,13 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing code and/or redirect_uri in request body"
+     *            description: "missing token in request body"
+     *            schema:
+     *              $ref: '#/definitions/error'
      *          "401":
      *            description: "cannot authenticate with provided code"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/google/code', cors);
     app.post('/api/v2/auth/google/code', function(req, res) {
@@ -159,7 +163,7 @@ module.exports = function (app, options) {
         // client_id could be 428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com (it has to be the same as the one in config.identity_providers.google.client_id)
         // redirect_uri could be http://localhost
         if (!req.body.code || !req.body.redirect_uri) {
-            return res.status(400).json({error: 'missing code and/or redirect_uri in request body'}).send();
+            return res.status(400).json(errorHelper.buildError("CODE_MISSING", "missing code in request body")).send();
         }
         authViaCode(req.body.code, req.body.redirect_uri, req, res);
     });
@@ -211,12 +215,12 @@ module.exports = function (app, options) {
                 }
             }).catch(function(err) {
                 logger.info('An error occurred while saving user in IDP db', err);
-                return res.status(401).json({error: 'An error occurred while saving user in IDP db'}).send();
+                return res.status(401).json(errorHelper.buildError("UNEXPECTED_ERROR", "An error occurred while saving user in IDP db")).send();
 
             });
         }).catch(function(err) {
             logger.info('An error occurred while verifying google token', err);
-            return res.status(401).json({error: 'An error occurred while verifying google token'}).send();
+            return res.status(401).json(errorHelper.buildError("UNEXPECTED_ERROR", "An error occurred while verifying google token")).send();
         });
     }
 
