@@ -58,7 +58,7 @@ module.exports = function (app, options) {
      *                          properties:
      *                              code:
      *                                  type: string
-     *                                  example: INVALID_SIGNUP_DATA
+     *                                  example: EMAIL_ALREADY_TAKEN
      *                                  description: error code
      *                                  required: true
      *                              hint:
