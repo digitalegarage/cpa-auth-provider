@@ -16,6 +16,8 @@ const USER_PROFILE = {
     birthday: '08/31/1978',
     birthday_ts: 273369600000,
 };
+const db = require('../../../../models');
+
 
 describe('API-V2 Facebook for AJAX', function() {
 
@@ -125,6 +127,62 @@ describe('API-V2 Facebook for AJAX', function() {
     });
 });
 
+describe('Test delete social account by session', function() {
+    beforeEach(initData.resetEmptyDatabase);
+
+    before(function() {
+        mockFBForOneCallSequence();
+    });
+
+    after(function() {
+        nock.cleanAll();
+    });
+
+
+
+    context('when user doesn\'t have a local login', function() {
+        var ctx = this;
+
+        before(function (done) {
+            db.User.count({}).then(function (count) {
+                ctx.countBefore = count;
+                done();
+            });
+        });
+
+        before(function(done) {
+            requestHelper.sendRequest(ctx, '/api/v2/auth/facebook/code', {
+                method: 'post',
+                data: {
+                    redirect_uri: REDIRECT_URI,
+                    code: VALID_FB_CODE,
+                },
+            }, done);
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(ctx, '/api/v2/session/user', {method: 'delete', cookie: ctx.cookie}, done);
+        });
+
+        before(function (done) {
+            db.User.count({}).then(function (count) {
+                ctx.count = count;
+                done();
+            });
+        });
+
+        it('user should not be deleted', function () {
+            expect(ctx.countBefore).to.equal(ctx.count);
+        });
+
+        it('should return a 204', function () {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+
+    });
+
+
+});
 function mockFBForOneCallSequence() {
 
     nock('https://graph.facebook.com').persist().get('/v3.2/oauth/access_token?' +

@@ -779,7 +779,7 @@
 
                 $.ajax({
 
-                    url: "<%= link('/user') %>",
+                    url: "<%= link('/api/v2/session/user') %>",
                     type: 'POST',
                     data: {
                         password: $password.val()
@@ -916,25 +916,6 @@
                 });
 
                 <% } %>
-
-
-
-
-                <% if (!config.gdprManager || !config.gdprManager.useGDPRManagerExporteWithURL){ %>
-                // Not using GDPR manager
-
-                $.ajax({
-
-                    url: "<%= link('/user') %>",
-                    type: 'POST',
-                    data: {
-                        password: $password.val()
-                    },
-                    success: exportSuccess,
-                    error: exportFail
-                });
-                <% } %>
-
 
             });
 

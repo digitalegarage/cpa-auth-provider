@@ -680,7 +680,31 @@ describe('API-V2 LOGIN', function () {
                 expect(ctx.res.statusCode).to.equal(204);
             });
         });
+        context('using session (with local login)', function () {
+            before(function (done) {
+                login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+            });
+            before(function (done) {
+                requestHelper.sendRequest(ctx, '/api/v2/session/user', {method: 'delete', cookie: ctx.cookie}, done);
+            });
 
+            before(function (done) {
+                db.User.count({}).then(function (count) {
+                    ctx.count = count;
+                    done();
+                });
+            });
+
+            it('user should not be deleted', function () {
+                expect(ctx.countBefore + 1).to.equal(ctx.count);
+            });
+
+            it('should return a 412', function () {
+                expect(ctx.res.statusCode).to.equal(412);
+                expect(ctx.res.body.error.code).to.equal("USER_HAS_LOCAL_LOGIN");
+            });
+
+        });
 
     });
     context('retrieve session token', function () {
