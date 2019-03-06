@@ -198,7 +198,7 @@ describe('API-V2 add local login', function() {
             });
             context('response', function() {
 
-                it(' should be 200', function() {
+                it(' should be 204', function() {
                     expect(ctx.res.statusCode).to.equal(204);
                 });
             });
@@ -302,6 +302,12 @@ describe('API-V2 add local login', function() {
                 },
             }, done);
         });
+        context('response', function() {
+
+            it(' should be 200', function() {
+                expect(ctx.res.statusCode).to.equal(204);
+            });
+        });
 
         context('with incorrect data', function() {
 
@@ -324,9 +330,15 @@ describe('API-V2 add local login', function() {
         });
 
         context('with correct data', function() {
+            before(initData.resetDatabase);
+
+            before(function(done){
+                db.LocalLogin.destroy({where: {user_id: initData.USER_1_ID}}).then(() => {
+                    done();
+                });
+            });
 
             before(function(done) {
-
                 requestHelper.sendRequest(ctx, '/api/v2/cpa/user/login/create', {
                     method: 'post',
                     accessToken: initData.USER_1_CPA_TOKEN,

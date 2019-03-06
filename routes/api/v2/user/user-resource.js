@@ -133,7 +133,6 @@ const create_local_login = function(req, res) {
     req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
     req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
-
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
             res.status(400).json({errors: result.array()});
@@ -159,6 +158,10 @@ const create_local_login = function(req, res) {
                                 msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
                                 password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
                                 errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}]
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
+                            return res.status(400).json({
+                                msg: req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')
                             });
                         } else {
                             logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');

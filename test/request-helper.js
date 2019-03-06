@@ -52,6 +52,10 @@ module.exports = {
             req.set('Authorization', tokenType + ' ' + opts.accessToken);
         }
 
+        if (opts.locale){
+            req.set('accept-language', opts.locale);
+        }
+
         if (opts.basicAuth) {
             req.set('Authorization', 'Basic' + ' ' + Buffer.from(opts.basicAuth.login + ':' + opts.basicAuth.password).toString('base64'));
         }

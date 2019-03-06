@@ -12,15 +12,18 @@ authorization server = localhost:3000
 
 client server = localhost:3001
 
+OAuth 2.0 is defined in the
+[RFC 6749](https://tools.ietf.org/html/rfc6749). 
+
 ### Authorization Code (RFC 6749, 4.1)
 Authorization Code provides a safe way to communicate between
 the authorization server and the client server. The access
 token will only be revealed to the client server.
 
-When requesting an identity, the user is redirected to the
+When requesting an identity, the users are redirected to the
 authorization server. There they have to authenticate with an
 existing account or create a new one. After they are logged
-into a valid account, the user is redirected back to the client
+into a valid account, the users are redirected back to the client
 server with the authorization code in the redirection url.
 
 The authorization code is transmitted to the client server.
@@ -35,10 +38,10 @@ Implicit client flow puts the access token directly in the
 url of last redirect. The access token can be read by javascript
 on the page.
 
-When requesting an identity, the user is redirected to the
+When requesting an identity, the user are redirected to the
 authorization server. There they have to authenticate with an
 existing account or create a new one. After they are logged
-into a valid account, the user is redirected back to the client
+into a valid account, the users are redirected back to the client
 server with the access token in the redirection url.
 
 The access token is directly available to scripts on the
@@ -52,7 +55,7 @@ script. Thus it can integrate very well into an existing design.
 The access token will not be directly visible to the client
 server.
 
-The user enters their username and password into fields and
+The users enter their username and password into fields and
 those are transmitted to the authorization server. The browser
 receives the reply directly containing the access token.
 
