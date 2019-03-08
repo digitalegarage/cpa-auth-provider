@@ -29,43 +29,6 @@ module.exports = function (app, options) {
 
     });
 
-    /**
-     * @swagger
-     * definitions:
-     *  error:
-     *      properties:
-     *          error:
-     *              type: object
-     *              properties:
-     *                  code:
-     *                      type: string
-     *                      example: INVALID_SIGNUP_DATA
-     *                      description: error code
-     *                      required: true
-     *                  hint:
-     *                      type: string
-     *                      example: signup process requires that user choose a untaken email
-     *                      description: an optional hint given to the developer. THIS IS NOT SUPPOSED TO BE RETURNED TO END USER!
-     *                  traceId:
-     *                      type: string
-     *                      example: https://error-tracking.ebu.io/broadcaster/prod/issues/1234/
-     *                      description: an optional trace id to get more information in error tracking system
-     *                  causes:
-     *                      type: array
-     *                      description: list of possible causes when applicable
-     *                      items:
-     *                          type: object
-     *                          properties:
-     *                              code:
-     *                                  type: string
-     *                                  example: EMAIL_ALREADY_TAKEN
-     *                                  description: error code
-     *                                  required: true
-     *                              hint:
-     *                                  type: string
-     *                                  example: signup process requires that user choose a untaken email
-     *                                  description: an optional hint given to the developer. THIS IS NOT SUPPOSED TO BE RETURNED TO END USER!
-     */
 
     /**
      * @swagger

@@ -40,8 +40,8 @@ var user_profile = function(req, res) {
                         has_google_login: logins.indexOf(socialLoginHelper.GOOGLE) > -1,
                         has_social_login: logins.length > 0,
                         has_local_login: user.LocalLogin && user.LocalLogin.login != null,
-                    },
-                    captcha: req.recaptcha,
+                    }//,
+                   // captcha: req.recaptcha,
                 };
                 if (req.authInfo && req.authInfo.scope) {
                     data.score = req.authInfo.scope;
