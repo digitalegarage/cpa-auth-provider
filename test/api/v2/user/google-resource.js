@@ -50,7 +50,7 @@ describe('API-V2 Google for AJAX', function() {
 
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.body.error.code).to.equal('TOKEN_MISSING');
+                expect(ctx.res.body.error.key).to.equal('TOKEN_MISSING');
             });
 
         });
@@ -100,8 +100,8 @@ describe('API-V2 Google for AJAX', function() {
             });
            it('user should returns 412', function() {
                expect(ctx.res.statusCode).to.equal(412);
-               expect(ctx.res.body.error.code).to.equal("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL");
-               expect(ctx.res.body.error.causes.length).to.equal(0);
+               expect(ctx.res.body.error.key).to.equal("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL");
+               expect(ctx.res.body.error.errors.length).to.equal(0);
             });
         });
 
@@ -121,7 +121,7 @@ describe('API-V2 Google for AJAX', function() {
 
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.body.error.code).to.equal('CODE_MISSING');
+                expect(ctx.res.body.error.key).to.equal('CODE_MISSING');
             });
 
         });
@@ -170,8 +170,8 @@ describe('API-V2 Google for AJAX', function() {
             });
             it('user should returns 412', function() {
                 expect(ctx.res.statusCode).to.equal(412);
-                expect(ctx.res.body.error.code).to.equal("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL");
-                expect(ctx.res.body.error.causes.length).to.equal(0);
+                expect(ctx.res.body.error.key).to.equal("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL");
+                expect(ctx.res.body.error.errors.length).to.equal(0);
             });
         });
 
