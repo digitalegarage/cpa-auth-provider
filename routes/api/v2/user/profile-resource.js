@@ -12,42 +12,13 @@ const socialLoginHelper = require('../../../../lib/social-login-helper');
 var user_profile = function(req, res) {
     logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
     if (req.user) {
-        let user = req.user;
-        socialLoginHelper.getSocialEmails(user).then(function(emails) {
-            var socialEmails = [];
-            if (emails && emails.length > 0) {
-                socialEmails = emails;
-            }
-            // var socialEmail = (emails && emails.length > 0) ? emails[0] : "";
-            socialLoginHelper.getSocialLogins(user).then(function(logins) {
-                var email = user.LocalLogin ? user.LocalLogin.login : undefined;
-                var data = {
-                    user: {
-                        id: user.id,
-                        email: email,
-                        email_verified: !user.LocalLogin || user.LocalLogin.verified,
-                        display_name: user.getDisplayName("FIRSTNAME_LASTNAME", email),
-                        firstname: user.firstname,
-                        lastname: user.lastname,
-                        gender: user.gender,
-                        date_of_birth: user.date_of_birth_ymd ? user.date_of_birth_ymd : null,
-                        public_uid: user.public_uid,
-                        language: user.language,
-                        social_emails: socialEmails,
-                        login: email,
-                        has_password: user.LocalLogin && !!user.LocalLogin.password,
-                        has_facebook_login: logins.indexOf(socialLoginHelper.FB) > -1,
-                        has_google_login: logins.indexOf(socialLoginHelper.GOOGLE) > -1,
-                        has_social_login: logins.length > 0,
-                        has_local_login: user.LocalLogin && user.LocalLogin.login != null,
-                    },
-                    captcha: req.recaptcha,
-                };
-                if (req.authInfo && req.authInfo.scope) {
-                    data.score = req.authInfo.scope;
-                }
-                res.json(data);
-            });
+        userHelper.getProfileByReq(req)
+        .then(profile => {
+            res.json(profile);
+        })
+        .catch(e => {
+            console.log(e);
+            res.sendStatus(400);
         });
     } else {
         res.status(401).send();
