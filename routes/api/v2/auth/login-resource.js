@@ -1,16 +1,18 @@
 "use strict";
 
-const cors = require('../../../../lib/cors');
-const config = require('../../../../config');
-const logger = require('../../../../lib/logger');
-const requestHelper = require('../../../../lib/request-helper');
-const userHelper = require('../../../../lib/user-helper');
-const limiterHelper = require('../../../../lib/limiter-helper');
-const authHelper = require('../../../../lib/auth-helper');
-const afterLogoutHelper = require('../../../../lib/afterlogout-helper');
-const jwt = require('jwt-simple');
-const loginService = require('../../../../services/login-service');
-const errors = require('../../../../services/errors');
+const cors = require('../../../../lib/cors'),
+    config = require('../../../../config'),
+    logger = require('../../../../lib/logger'),
+    requestHelper = require('../../../../lib/request-helper'),
+    userHelper = require('../../../../lib/user-helper'),
+    limiterHelper = require('../../../../lib/limiter-helper'),
+    authHelper = require('../../../../lib/auth-helper'),
+    afterLogoutHelper = require('../../../../lib/afterlogout-helper'),
+    jwt = require('jwt-simple'),
+    loginService = require('../../../../services/login-service'),
+    errors = require('../../../../services/errors'),
+    _ = require('underscore');
+
 var trackingCookie = require('../../../../lib/tracking-cookie');
 var recaptcha = require('express-recaptcha');
 var fs = require('fs');
@@ -559,22 +561,30 @@ function handleAfterSessionHtlmLogin(user, req, res) {
 
 
 function handleAfterJWTRestLogin(user, req, res) {
-    const token = jwt.encode(user, config.jwtSecret);
-    const REDIRECT_URI = req.query.redirect;
-    if (REDIRECT_URI) {
-        if (req.query.withcode) {
-            var allowed = isAllowedRedirectUri(REDIRECT_URI);
-            if (allowed) {
-                res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+    userHelper.getProfileByReq(req,user)
+    .then(profile => {
+        // This merges the objects, so we don't loose data for services that rely on them
+        const token = jwt.encode(_.extend({}, user.dataValues, profile.user), config.jwtSecret);
+        const REDIRECT_URI = req.query.redirect;
+        if (REDIRECT_URI) {
+            if (req.query.withcode) {
+                var allowed = isAllowedRedirectUri(REDIRECT_URI);
+                if (allowed) {
+                    res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+                } else {
+                    res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+                }
             } else {
-                res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+                res.redirect(REDIRECT_URI);
             }
         } else {
-            res.redirect(REDIRECT_URI);
+            res.json({token: 'JWT ' + token});
         }
-    } else {
-        res.json({token: 'JWT ' + token});
-    }
+    })
+    .catch(e => {
+        logger.error(e);
+        res.sendStatus(400); // 500 may be better, but I like the client to think *he* did wrong, not *us* :)
+    });
 }
 
 /////////////////////
