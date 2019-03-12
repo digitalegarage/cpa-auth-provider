@@ -45,7 +45,7 @@ describe('API-V2 Facebook for AJAX', function() {
 
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.body.error.key).to.equal('CODE_MISSING');
+                expect(ctx.res.body.error.code).to.equal('CODE_MISSING');
             });
 
         });
@@ -92,7 +92,7 @@ describe('API-V2 Facebook for AJAX', function() {
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
                 expect(ctx.res.body.error);
-                expect(ctx.res.body.error.key).to.equal('TOKEN_MISSING');
+                expect(ctx.res.body.error.code).to.equal('TOKEN_MISSING');
             });
 
         });

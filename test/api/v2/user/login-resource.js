@@ -701,7 +701,7 @@ describe('API-V2 LOGIN', function () {
 
             it('should return a 412', function () {
                 expect(ctx.res.statusCode).to.equal(412);
-                expect(ctx.res.body.error.key).to.equal("USER_HAS_LOCAL_LOGIN");
+                expect(ctx.res.body.error.code).to.equal("USER_HAS_LOCAL_LOGIN");
             });
 
         });
