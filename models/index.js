@@ -14,7 +14,13 @@ var sequelize = new Sequelize(config.db.database, config.db.user, config.db.pass
     port: config.db.port,
     storage: config.db.filename,
     logging: config.db.debug ? console.log : false,
-    operatorsAliases: false
+    operatorsAliases: false,
+    pool: {
+       max: 50,
+       min: 10,
+       acquire: 30000,
+       idle: 10000
+    }
 });
 
 fs.readdirSync(__dirname).filter(function (file) {
