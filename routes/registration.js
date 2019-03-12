@@ -4,6 +4,7 @@ var config = require('../config');
 var cors = require('../lib/cors');
 var db = require('../models');
 var generate = require('../lib/generate');
+var logger = require('../lib/logger');
 
 var async = require('async');
 
@@ -86,6 +87,7 @@ module.exports = function (router) {
                 ],
                 function (error) {
                     if (error) {
+                        logger.warn('An error has occurred', error);
                         transaction.rollback().then(function () {
                             // TODO: distinguish between invalid input parameters and other
                             // failure conditions
