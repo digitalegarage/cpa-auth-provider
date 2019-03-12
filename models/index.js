@@ -16,10 +16,10 @@ var sequelize = new Sequelize(config.db.database, config.db.user, config.db.pass
     logging: config.db.debug ? console.log : false,
     operatorsAliases: false,
     pool: {
-       max: 50,
-       min: 10,
-       acquire: 30000,
-       idle: 10000
+        max: 50,
+        min: 5,
+        acquire: 30000,
+        idle: 10000
     }
 });
 
