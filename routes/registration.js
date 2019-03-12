@@ -38,6 +38,9 @@ module.exports = function (router) {
      */
 
     var getClientIpAddress = function (req) {
+        logger.debug('x-forwarded-for header value is ' + req.headers['x-forwarded-for']);
+        logger.debug('req.connection.remoteAddress value is ' + req.connection.remoteAddress);
+
         return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     };
 
@@ -52,6 +55,8 @@ module.exports = function (router) {
             async.waterfall([
                     function (callback) {
                         var clientIp = getClientIpAddress(req);
+                        logger.debug('client ip is ' + clientIp);
+
                         var clientSecret = generate.clientSecret(clientIp);
 
                         // TODO: Check mandatory fields.
