@@ -87,7 +87,7 @@ module.exports = function (router) {
                 ],
                 function (error) {
                     if (error) {
-                        logger.warn('An error has occurred', error);
+                        logger.warn('An error has occurred' + error, error);
                         transaction.rollback().then(function () {
                             // TODO: distinguish between invalid input parameters and other
                             // failure conditions
