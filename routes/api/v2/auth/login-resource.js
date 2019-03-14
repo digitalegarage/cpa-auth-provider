@@ -198,7 +198,7 @@ module.exports = function (app, options) {
      *            description: "Password"
      */
     app.options('/api/v2/all/password/update', cors);
-    app.post('/api/v2/all/password/update', userHelper.password_update);
+    app.post('/api/v2/all/password/update', cors, userHelper.password_update);
 
 
     /**
