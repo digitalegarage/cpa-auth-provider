@@ -1,8 +1,7 @@
 FROM node:10.15.3-slim
 
 # Install dependencies
-RUN apt-get update -y
-RUN apt-get install sqlite3
+RUN apt-get update -yq && apt-get install -yq bcrypt
 
 RUN npm install -g sequelize-cli
 RUN npm install -g node-gyp
@@ -11,7 +10,6 @@ COPY package.json package-lock.json /src/
 
 # Install Node.js dependencies
 WORKDIR /src
-RUN apt-get install -y bcrypt
 
 COPY .sequelizerc /src/.sequelizerc
 COPY migrate /src/migrate
