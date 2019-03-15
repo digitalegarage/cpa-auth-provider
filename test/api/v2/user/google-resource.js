@@ -3,7 +3,8 @@
 const requestHelper = require('../../../request-helper'),
       initData = require('../setup/init-data'),
       nock = require('nock'),
-      googleHelper = require('../../../../lib/google-helper');
+      googleHelper = require('../../../../lib/google-helper'),
+      login = require('../setup/login');
 
 
 const VALID_ACCESS_TOKEN = 'AccessTokenA';
@@ -49,8 +50,7 @@ describe('API-V2 Google for AJAX', function() {
 
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.body.error);
-                expect(ctx.res.body.error).to.equal('missing token in request body');
+                expect(ctx.res.body.error.code).to.equal('TOKEN_MISSING');
             });
 
         });
@@ -82,6 +82,29 @@ describe('API-V2 Google for AJAX', function() {
 
         });
 
+        context('when a not verified account already exists with this gmail account', function() {
+
+            var ctx = this;
+
+            before(function(done) {
+                login.cookieSignup(ctx, GOOGLE_EMAIL, "ACrazyPasswordThatNo1wouldChallenge. Ever!", null, null, done);
+            });
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/token?defaultLanguage=en', {
+                    method: 'post',
+                    data: {
+                        token: VALID_ACCESS_TOKEN,
+                    },
+                }, done);
+            });
+           it('user should returns 412', function() {
+               expect(ctx.res.statusCode).to.equal(412);
+               expect(ctx.res.body.error.code).to.equal("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL");
+               expect(ctx.res.body.error.errors.length).to.equal(0);
+            });
+        });
+
     });
 
     context('Code', function() {
@@ -98,8 +121,7 @@ describe('API-V2 Google for AJAX', function() {
 
             it('should return a 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.body.error);
-                expect(ctx.res.body.error).to.equal('missing code and/or redirect_uri in request body');
+                expect(ctx.res.body.error.code).to.equal('CODE_MISSING');
             });
 
         });
@@ -128,6 +150,29 @@ describe('API-V2 Google for AJAX', function() {
                 expect(ctx.res.statusCode).to.equal(200);
             });
 
+        });
+        context('when a not verified account already exists with this gmail account', function() {
+
+            var ctx = this;
+
+            before(function(done) {
+                login.cookieSignup(ctx, GOOGLE_EMAIL, "ACrazyPasswordThatNo1wouldChallenge. Ever!", null, null, done);
+            });
+
+            before(function(done) {
+                requestHelper.sendRequest(ctx, '/api/v2/auth/google/code?defaultLanguage=en', {
+                    method: 'post',
+                    data: {
+                        redirect_uri: 'http://localhost',
+                        code: 'a_valid_code',
+                    },
+                }, done);
+            });
+            it('user should returns 412', function() {
+                expect(ctx.res.statusCode).to.equal(412);
+                expect(ctx.res.body.error.code).to.equal("AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL");
+                expect(ctx.res.body.error.errors.length).to.equal(0);
+            });
         });
 
     });

@@ -8,6 +8,7 @@ const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
 const passwordHelper = require('../../../../lib/password-helper');
 const authHelper = require('../../../../lib/auth-helper');
+const errorHelper = require('../../../../lib/error-helper');
 const appHelper = require('../../../../lib/app-helper');
 const userHelper = require('../../../../lib/user-helper');
 const changeEmailHelper = require('../../../email/change-email-helper');
@@ -71,6 +72,19 @@ const delete_user_with_credentials = function(req, res) {
             }
         });
     }
+};
+
+const delete_user_without_credentials = function(req, res) {
+    logger.debug('[API-V2][User][DELETE]');
+
+    db.LocalLogin.findOne({where: {user_id: req.user.id}}).then(function(localLogin) {
+        if (!localLogin) {
+            delete_user_by_id(req.user.id, res);
+        } else {
+            return res.status(412).json(errorHelper.buildError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user")).send();
+        }
+    });
+
 };
 
 const get_user_id_from_jwt = function(req, res) {
@@ -377,6 +391,26 @@ module.exports = function(router) {
      */
 
     router.delete('/api/v2/jwt/user', cors, passport.authenticate('jwt', {session: false}), delete_user);
+
+    /**
+     * @swagger
+     * /api/v2/session/user:
+     *   delete:
+     *     description: delete the session (cookie) logged user
+     *     tags: [Session]
+     *     operationId: "deleteUserWithoutCredentials"
+     *     content:
+     *        - application/json
+     *     responses:
+     *          "204":
+     *            description: "user had been deleted"
+     *          "412":
+     *            description: "User has a local login and should use /api/v2/basicauth/user endpoint"
+     *            schema:
+     *              $ref: '#/definitions/error'
+     */
+
+    router.delete('/api/v2/session/user', cors, authHelper.ensureAuthenticated, delete_user_without_credentials);
 
     /**
      * @swagger
