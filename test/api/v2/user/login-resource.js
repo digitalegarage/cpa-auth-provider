@@ -6,6 +6,7 @@ var config = require('../../../../config');
 var login = require('../setup/login');
 var userHelper = require('../../../../lib/user-helper');
 var db = require('../../../../models');
+var codeHelper = require('../../../../lib/code-helper');
 
 
 // Google reCAPTCHA
@@ -986,6 +987,136 @@ describe('API-V2 PASSWORD RECOVERY', function() {
     });
 
 });
+
+
+describe('API-V2 PASSWORD UPDATE', function() {
+
+    let ctx = this;
+
+    let validCode;
+
+    let updatePassword = function(email, newPassword, code, done) {
+        let data = {}
+        if (email){
+            data.email = email;
+        }
+        if (newPassword){
+            data.password = newPassword;
+        }
+        if (code){
+            data.code = code;
+        }
+        requestHelper.sendRequest(ctx, '/api/v2/all/password/update', {
+            method: 'post',
+            cookie: ctx.cookie,
+            data: data
+        }, done);
+    };
+
+
+    before(initData.resetDatabase);
+
+    before(function(done) {
+        codeHelper.generatePasswordRecoveryCode(initData.USER_1_ID).then(function (code) {
+            validCode = code;
+            done();
+        });
+    });
+
+    context('When user try to update his password with wrong code', function() {
+
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, "WrongCode", done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.error.status).to.equal(400);
+            expect(ctx.res.body.error.code).to.equal("WRONG_RECOVERY_CODE");
+            expect(ctx.res.body.error.hint).to.equal("Recovery code for that user is wrong or doesn\'t exists");
+            expect(ctx.res.body.error.message).to.equal("Wrong recovery code.");
+            expect(ctx.res.body.error.errors.length).to.equal(0);
+        });
+    });
+
+    context('When user try to update his password without code', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, undefined, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.error.status).to.equal(400);
+            expect(ctx.res.body.error.code).to.equal("DATA_VALIDATION_ERROR");
+            expect(ctx.res.body.error.hint).to.equal("They might be several causes see errors array");
+            expect(ctx.res.body.error.errors.length).to.equal(1);
+            expect(ctx.res.body.error.errors[0].code).to.equal("CODE_MISSING");
+        });
+    });
+
+    context('When user try to update his password with an unexisting email', function() {
+
+        before(function(done) {
+            updatePassword("unexisting@unexisting.ebu.io", STRONG_PASSWORD, validCode, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.error.status).to.equal(400);
+            expect(ctx.res.body.error.code).to.equal("NO_USER_FOR_THIS_MAIL");
+            expect(ctx.res.body.error.hint).to.equal("No user found for the following email 'unexisting@unexisting.ebu.io'");
+            expect(ctx.res.body.error.message).to.equal("User not found.");
+            expect(ctx.res.body.error.errors.length).to.equal(0);
+        });
+    });
+
+    context('When user try to update his password with correct data', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, validCode, done);
+        });
+
+        it('should return a 204', function() {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+    });
+
+    context('When user try to update his password with correct data and tries to login', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, validCode, done);
+        });
+
+        before(function(done) {
+            login.cookieLoginWithCustomCrendentials(ctx, initData.USER_1.email, STRONG_PASSWORD, done);
+        });
+
+        it('should return a 204', function() {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+
+    });
+
+    context('When user try to update his password with correct data and tries to login with previous password', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, validCode, done);
+        });
+
+        before(function(done) {
+            login.cookieLoginWithCustomCrendentials(ctx, initData.USER_1.email, initData.USER_1.password, done);
+        });
+
+        it('should return a 401', function() {
+            expect(ctx.res.statusCode).to.equal(401);
+        });
+
+    });
+
+});
+
 
 function getCookieValue(cookieStr) {
     //cookie format: connect.sid=s%3A0Xf6JiMbGdO9XJ_EUOY7kJnV832uLd9m.GNjQavwpwWIM6sqaDjxVQNxVIdYSzzSUS3%2Bjo%2BhD4RY; Path=/; HttpOnly

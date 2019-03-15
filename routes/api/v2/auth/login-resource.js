@@ -182,7 +182,7 @@ module.exports = function (app, options) {
      * @swagger
      * /api/v2/all/password/update:
      *   post:
-     *     description: "password update errors could be DATA_VALIDATION_ERROR with following causes: DATA_VALIDATION_ERROR, WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL"
+     *     description: "password update errors could be WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL OR DATA_VALIDATION_ERROR (with following causes: PWD_EMPTY OR CODE_MISSING)"
      *     operationId: "passwordUpdate"
      *     content:
      *        - application/json
