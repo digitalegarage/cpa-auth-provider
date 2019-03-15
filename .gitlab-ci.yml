@@ -7,7 +7,7 @@ stages:
   - docker-publish
 
 npm_test:
-  image: node:9.1
+  image: node:10.15.3
   stage: test
   script: 
     - npm install --silent -g jshint istanbul
