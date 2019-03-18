@@ -74,7 +74,7 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing token in request body"
+     *            description: "Possible errors are: TOKEN_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "401":
@@ -102,7 +102,7 @@ module.exports = function (app, options) {
      * @swagger
      * /api/v2/auth/google/code:
      *   post:
-     *     description: "log user (session) using Google code. Possible errors are: CODE_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
+     *     description: "log user (session) using Google code."
      *     tags: [AUTH]
      *     content:
      *        - application/json
@@ -117,7 +117,7 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing token in request body"
+     *            description: "Possible errors are: CODE_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "401":
