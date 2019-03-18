@@ -83,12 +83,18 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/google/token', cors);
-    app.post('/api/v2/auth/google/token', function(req, res) {
+    app.post('/api/v2/auth/google/token', function(req, res, next) {
         if (!req.body.token) {
-            apiErrorHelper.throwError(400, "TOKEN_MISSING", "missing token in request body");
+            next(apiErrorHelper.buildError(400, "TOKEN_MISSING", "missing token in request body"));
+        } else {
+            authViaToken(req.body.token, req, res)
+            .then(() => {
+                res.sendStatus(204);
+            })
+            .catch((err) => {
+                next(err);
+            });
         }
-        authViaToken(req.body.token, req, res);
-
     });
 
 
@@ -120,69 +126,88 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/google/code', cors);
-    app.post('/api/v2/auth/google/code', function(req, res) {
+    app.post('/api/v2/auth/google/code', function(req, res, next) {
         // To test that endpoint you can get a code in the callback url you have when login via
         // https://accounts.google.com/o/oauth2/auth?approval_prompt=force&client_id=<client_id&redirect_uri=<redirect_uri>&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile&state=%257Bredirect%3Dhttps%253A%252F%252Flocalhost.rts.ch%253A8443%252F,source%3Dnull%257D
         // client_id could be 428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com (it has to be the same as the one in config.identity_providers.google.client_id)
         // redirect_uri could be http://localhost
         if (!req.body.code || !req.body.redirect_uri) {
-            apiErrorHelper.throwError(400, "CODE_MISSING", "missing code in request body");
+            next(apiErrorHelper.buildError(400, "CODE_MISSING", "missing code in request body"));
+        } else {
+            authViaCode(req.body.code, req.body.redirect_uri, req, res)
+            .then(()=>{
+                res.sendStatus(204);
+            })
+            .catch((err)=> {
+                next(err);
+            });
         }
-        authViaCode(req.body.code, req.body.redirect_uri, req, res);
     });
 
     function authViaCode(code, redirectUri, req, res) {
-        googleHelper.getGoogleToken(code, redirectUri).then(function(token) {
-            if (!token) {
-                apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "Cannot authenticate with google");
-            } else {
-                authViaToken(token, req, res);
-            }
+        return new Promise((resolve, reject) => {
+            return googleHelper.getGoogleToken(code, redirectUri)
+            .then(function(token) {
+                if (!token) {
+                    reject (apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "Cannot authenticate with google"));
+                } else {
+                    authViaToken(token, req, res)
+                    .then(()=> {
+                        resolve();
+                    })
+                    .catch((err)=>{
+                        reject(err);
+                    });
+                }
+            });
         });
     }
 
 
     function authViaToken(token, req, res) {
-        // Step 1: verify token
-        return googleHelper.verifyGoogleIdToken(token).then((gmailUser) => {
+        return new Promise((resolve, reject) => {
+            // Step 1: verify token
+            return googleHelper.verifyGoogleIdToken(token).then((gmailUser) => {
 
-            // Step 2: find or create user in IDP Db
-            socialLoginHelper.findOrCreateSocialLoginUser(
-                socialLoginHelper.GOOGLE,
-                gmailUser.email,
-                gmailUser.provider_uid,
-                gmailUser.display_name,
-                null,
-                null,
-                null,
-                null).then(function(user) {
-                if (user) {
-                    db.SocialLogin.findOne({
-                        where: {
-                            user_id: user.id,
-                            name: socialLoginHelper.GOOGLE
-                        }
-                    }).then(function(socialLogin) {
-                        // Step 3: Log last login
-                        socialLogin.logLogin(user);
-                        afterLoginHelper.afterLogin(user, gmailUser.email, res);
+                // Step 2: find or create user in IDP Db
+                return socialLoginHelper.findOrCreateSocialLoginUser(
+                    socialLoginHelper.GOOGLE,
+                    gmailUser.email,
+                    gmailUser.provider_uid,
+                    gmailUser.display_name,
+                    null,
+                    null,
+                    null,
+                    null)
+                .then(function(user) {
+                    if (user) {
+                       return db.SocialLogin.findOne({
+                            where: {
+                                user_id: user.id,
+                                name: socialLoginHelper.GOOGLE
+                            }
+                        }).then(function(socialLogin) {
+                            // Step 3: Log last login
+                            socialLogin.logLogin(user);
+                            afterLoginHelper.afterLogin(user, gmailUser.email, res);
 
-                        // Step 4: Finally log the user
-                        req.logIn(user, function() {
-                            res.sendStatus(204);
+                            // Step 4: Finally log the user
+                           return req.logIn(user, function() {
+                                resolve();
+                            });
                         });
-                    });
-                } else {
-                    apiErrorHelper.throwError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
-                        "It's not allowed to login with a gmail account on an account using the same email as local login if the local login is not validated.");
-                }
+                    } else {
+                        reject(apiErrorHelper.buildError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
+                            "It's not allowed to login with a gmail account on an account using the same email as local login if the local login is not validated."));
+                    }
+                }).catch(function(err) {
+                    logger.info('An error occurred while saving user in IDP db', err);
+                    reject(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db"));
+                });
             }).catch(function(err) {
-                logger.info('An error occurred while saving user in IDP db', err);
-                apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db");
+                logger.info('An error occurred while verifying google token', err);
+                reject(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying google token"));
             });
-        }).catch(function(err) {
-            logger.info('An error occurred while verifying google token', err);
-            apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while verifying google token");
         });
     }
 
