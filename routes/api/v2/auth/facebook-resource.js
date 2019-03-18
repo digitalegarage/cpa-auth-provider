@@ -73,7 +73,7 @@ module.exports = function(app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing token in request body"
+     *            description: "Bad request. Errors could be: CODE_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, or UNEXPECTED_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "401":
@@ -104,7 +104,7 @@ module.exports = function(app, options) {
             res.sendStatus(204);
         }).catch(function(err) {
             logger.info('An error occurred while requesting the token', err);
-            next(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while requesting the token"));
+            next(err);
         });
 
     });
@@ -113,7 +113,7 @@ module.exports = function(app, options) {
      * @swagger
      * /api/v2/auth/facebook/token:
      *   post:
-     *     description: "log user (session) using FB token. Possible errors are: TOKEN_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
+     *     description: "log user (session) using FB token."
      *     tags: [AUTH]
      *     content:
      *        - application/json
@@ -128,7 +128,7 @@ module.exports = function(app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing token in request body"
+     *            description: "Bad request Possible errors are: TOKEN_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "401":
