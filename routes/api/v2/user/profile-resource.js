@@ -7,9 +7,9 @@ const logger = require('../../../../lib/logger');
 const uuidValidator = require('uuid-validate');
 const userHelper = require('../../../../lib/user-helper');
 const authHelper = require('../../../../lib/auth-helper');
-const socialLoginHelper = require('../../../../lib/social-login-helper');
+const apiErrorHelper = require('../../../../lib/api-error-helper');
 
-var user_profile = function(req, res) {
+var user_profile = function(req, res, next) {
     logger.debug('[API-V2][Profile][user_id', req.user.id, ']');
     if (req.user) {
         userHelper.getProfileByReq(req)
@@ -17,23 +17,21 @@ var user_profile = function(req, res) {
             res.json(profile);
         })
         .catch(e => {
-            console.log(e);
-            res.sendStatus(400);
+            next(e);
         });
     } else {
-        res.status(401).send();
+        apiErrorHelper.throwError(401, 'NO_USER_IN_REQUEST', 'No user in the request object.');
     }
 };
 
 
 var user_profile_update =
-    function (req, res) {
+    function (req, res, next) {
         logger.debug('[API-V2][Profile udpate][user_id', req.user.id, ']');
         userHelper.validateProfileUpdateData(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
-                res.status(400).json({errors: result.array({onlyFirstError: true})});
-                return;
+                next(apiErrorHelper.buildError(400, 'BAD_PROFILE_DATA', 'Profile data not valid.','',[], result.array({onlyFirstError: true})));
             }
             userHelper.updateProfile(req.user, req.body).then(
                 function () {
@@ -41,7 +39,7 @@ var user_profile_update =
                 },
                 function (err) {
                     logger.error('[PUT /user/profile][ERROR', err, ']');
-                    res.status(500).json({msg: req.__('BACK_PROFILE_UPDATE_FAIL') + err});
+                    next(apiErrorHelper.buildError(500, 'BACK_PROFILE_UPDATE_FAIL', 'Failed to update profile data.','', [], err));
                 }
             );
         });
@@ -54,20 +52,21 @@ var user_nameByPublicUid = function(req,res,next) {
             .then((username) => {
                 if (!username) {
                     logger.error("UUID request for non-existant user",req.params.puid);
-                    res.sendStatus(404);
+                    next(apiErrorHelper.buildError(404,'USER_WITH_UUID_NOT_FOUND','UUID request for non-existant user'));
                 }
                 else
                     res.json(username);
             })
             .catch((e) => {
                 logger.error("Error fetching user name by public id",e);
+                next(apiErrorHelper.buildError(500, 'SERVICE_ERROR','Error fetching user name by public id.', '',[], e));
                 res.status(500);
             });
         } else {
-            res.sendErrorResponse(400, "bad_request", "No valid UUIDv4!");
+            apiErrorHelper.throwError(400, 'BAD_REQUEST_INVALID_UUIDV4', "No valid UUIDv4!");
         }
     } else {
-        res.sendErrorResponse(409, "disabled", "Service disabled by configuration.");
+        apiErrorHelper.throwError(409, 'SERVICE_DISABLED_BY_CONFIGURATION', 'Service disabled by configuration.');
     }
 };
 

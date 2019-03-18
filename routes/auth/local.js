@@ -10,6 +10,7 @@ var passwordHelper = require('../../lib/password-helper');
 var finder = require('../../lib/finder');
 var limiterHelper = require('../../lib/limiter-helper');
 var afterLogoutHelper = require('../../lib/afterlogout-helper');
+var apiErrorHelper = require('../../lib/api-error-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
@@ -158,7 +159,7 @@ module.exports = function (app, options) {
 
         req.getValidationResult().then(function (result) {
             if (!result.isEmpty()) {
-                res.status(400).json({errors: result.array()});
+                next(apiErrorHelper.buildError(400, 'VALIDATION_ERROR', 'Validation error', '',[], result.array()));
                 return;
             }
 

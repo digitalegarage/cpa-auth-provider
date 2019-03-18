@@ -58,7 +58,7 @@ describe('API-V2 JWT get user id', function() {
 
         it('should return success 401', function() {
             expect(ctx.res.statusCode).equal(401);
-            expect(ctx.res.text).equal('{"error":"Cannot parse JWT token"}');
+            expect(JSON.parse(ctx.res.text).error.code).equal('INVALID_JWT_TOKEN');
         });
 
     });
@@ -78,7 +78,7 @@ describe('API-V2 JWT get user id', function() {
 
         it('should return 400', function() {
             expect(ctx.res.statusCode).equal(400);
-            expect(ctx.res.text).equal('{"error":"missing header Authorization"}');
+            expect(JSON.parse(ctx.res.text).error.code).equal('AUTHORIZATION_HEADER_MISSING');
         });
 
     });
@@ -178,6 +178,7 @@ describe('API-V2 add local login', function() {
             });
 
             it(' should be 400', function() {
+                expect(JSON.parse(ctx.res.text).error.code).equal('CREATE_LOGIN_VALIDATION_ERROR');
                 expect(ctx.res.statusCode).to.equal(400);
             });
         });
@@ -253,6 +254,7 @@ describe('API-V2 add local login', function() {
             });
 
             it(' should be 400', function() {
+                expect(JSON.parse(ctx.res.text).error.code).equal('CREATE_LOGIN_VALIDATION_ERROR');
                 expect(ctx.res.statusCode).to.equal(400);
             });
         });
@@ -325,6 +327,8 @@ describe('API-V2 add local login', function() {
             });
 
             it(' should be 400', function() {
+                expect(JSON.parse(ctx.res.text).error.code).equal('CREATE_LOGIN_VALIDATION_ERROR');
+                expect(JSON.parse(ctx.res.text).error.errors[0].code).equal('CREATE_LOGIN_VALIDATION_ERROR.PASSWORD');
                 expect(ctx.res.statusCode).to.equal(400);
             });
         });
@@ -398,6 +402,7 @@ describe('API-V2 change password', function() {
                 });
 
                 it(' should be 400', function() {
+                    expect(JSON.parse(ctx.res.text).error.code).equal('CHANGE_PASSWORD_VALIDATION_ERROR');
                     expect(ctx.res.statusCode).to.equal(400);
                 });
             });
@@ -417,6 +422,8 @@ describe('API-V2 change password', function() {
                 });
 
                 it(' should be 400', function() {
+                    // console.log('<<<<<<<<',(ctx.res.text));
+                    expect(JSON.parse(ctx.res.text).error.code).equal('CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK');
                     expect(ctx.res.statusCode).to.equal(400);
                 });
             });
@@ -436,6 +443,7 @@ describe('API-V2 change password', function() {
                 });
 
                 it(' should be 401', function() {
+                    //expect(JSON.parse(ctx.res.text).error.code).equal('AUTHORIZATION_HEADER_MISSING');
                     expect(ctx.res.statusCode).to.equal(401);
                 });
             });

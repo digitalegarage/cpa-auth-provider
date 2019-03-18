@@ -45,13 +45,13 @@ function delete_user(req, res) {
     return delete_user_by_id(req.user.id, res);
 }
 
-const delete_user_with_credentials = function(req, res) {
+const delete_user_with_credentials = function(req, res, next) {
     logger.debug('[API-V2][User][DELETE]');
 
     var user = auth(req);
 
     if (!user) {
-        return res.json({error: 'missing credentials'}).status(400).send();
+        apiErrorHelper.throwError(400, 'MISSING_CREDENTIALS', 'Missing credentials');
     } else {
         var login = user.name;
         var password = user.pass;
@@ -59,14 +59,14 @@ const delete_user_with_credentials = function(req, res) {
         db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
                 logger.info('locallogin not found');
-                return res.status(401).send();
+                next(apiErrorHelper.buildError(401,'LOCAL_LOGIN_NOT_FOUND','Local login not found.'));
             } else {
                 return localLogin.verifyPassword(password).then(function(isMatch) {
                     logger.info('isMatch', isMatch);
                     if (isMatch) {
                         return delete_user_by_id(localLogin.user_id, res);
                     } else {
-                        return res.status(401).send();
+                        next(apiErrorHelper.buildError(401,'LOCAL_LOGIN_NOT_MATCHING_PASSWORD','Local login not matching password.'));
                     }
                 });
             }
@@ -90,7 +90,7 @@ const delete_user_without_credentials = function(req, res, next) {
 const get_user_id_from_jwt = function(req, res) {
     var auth = req.headers.authorization;
     if (!auth) {
-        return res.status(400).send({error: 'missing header Authorization'});
+        apiErrorHelper.throwError(400,'AUTHORIZATION_HEADER_MISSING', 'Authorization header missing.');
     } else {
         if (auth.indexOf('Bearer ') == 0) {
             var token = auth.substring('Bearer '.length);
@@ -98,18 +98,18 @@ const get_user_id_from_jwt = function(req, res) {
                 let userId = jwtHelper.decode(token).id;
                 return res.status(200).send({id: userId});
             } catch (err) {
-                return res.status(401).send({error: 'Cannot parse JWT token'});
+                apiErrorHelper.throwError(401,'INVALID_JWT_TOKEN', 'Invalid JWT token. Not able to decode JWT token.');
             }
         } else {
-            return res.status(400).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
+            apiErrorHelper.throwError(400, 'AUTHORIZATION_TOKEN_NOT_AS_EXPECTED','Authorization doesn\'t have the expect format "Bearer [token]"');
         }
     }
 
 };
 
-const get_user = function(req, res) {
+const get_user = function(req, res, next) {
     if (!req.headers.authorization || !auth(req)) {
-        return res.status(401).send({error: 'missing or bad credential in header Authorization'});
+        apiErrorHelper.throwError(401, 'AUTHORIZATION_HEADER_MISSING', 'Missing or bad credential in authorization header.')
     } else {
         var user = auth(req);
         var login = user.name;
@@ -117,7 +117,7 @@ const get_user = function(req, res) {
         db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
                 logger.info('locallogin not found');
-                return res.status(401).send();
+                next(apiErrorHelper.buildError(401,'LOCAL_LOGIN_NOT_FOUND','Local login not found.'));
             } else {
                 return localLogin.verifyPassword(password).then(function(isMatch) {
                     logger.info('isMatch', isMatch);
@@ -130,11 +130,11 @@ const get_user = function(req, res) {
                             res.json(_.pick(user, 'id', 'display_name', 'firstname', 'lastname', 'gender', 'language', 'permission_id', 'public_uid'));
                         }).catch(function(error) {
                             logger.error(error);
-                            res.sendStatus(500);
+                            next(apiErrorHelper.buildError(500, 'UNEXPECTED_SERVER_ERROR', 'Unexpected server error.', '',[], error));
                         });
                     } else {
                         logger.debug('Authentication failed for ' + user.name);
-                        res.sendStatus(401);
+                        next(401, 'AUTHENTICATION_FAILURE', 'Authentication failed.');
                     }
                 });
             }
@@ -142,14 +142,15 @@ const get_user = function(req, res) {
     }
 };
 
-const create_local_login = function(req, res) {
+const create_local_login = function(req, res, next) {
     req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
     req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            res.status(400).json({errors: result.array()});
+            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg)});
+            next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
                 res.status(400).json({
@@ -164,9 +165,12 @@ const create_local_login = function(req, res) {
                     },
                     function(err) {
                         if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
-                            return res.status(400).json({
-                                msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')
-                            });
+                            let _errors = [];
+                            _errors.push(apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.API_SIGNUP_EMAIL_ALREADY_EXISTS', req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')));
+                            next(apiErrorHelper.buildError(400, 
+                                'CREATE_LOGIN_VALIDATION_ERROR', 
+                                'Cannot create login.', 
+                                req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS'), _errors));
                         } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
                             return res.status(400).json({
                                 msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
@@ -191,7 +195,7 @@ const create_local_login = function(req, res) {
     });
 };
 
-const change_password = function(req, res) {
+const change_password = function(req, res, next) {
     req.checkBody('email', req.__('API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL')).isEmail();
     req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();
     req.checkBody('new_password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
@@ -200,13 +204,16 @@ const change_password = function(req, res) {
 
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            res.status(400).json({errors: result.array()});
+            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CHANGE_PASSWORD_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg)});
+            next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
         } else {
             let email = req.body.email;
             let newPassword = req.body.new_password;
             if (!passwordHelper.isStrong(email, newPassword)) {
-                res.status(400).json({
-                    errors: [{msg: passwordHelper.getWeaknessesMsg(email, newPassword, req)}],
+                next(apiErrorHelper.buildError(400, 
+                    'CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK'), 
+                    'Password is not strong enough.', passwordHelper.getWeaknessesMsg(email, newPassword, req), 
+                    [], {
                     password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
                     score: passwordHelper.getQuality(email, newPassword)
                 });
