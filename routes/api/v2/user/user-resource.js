@@ -74,14 +74,14 @@ const delete_user_with_credentials = function(req, res) {
     }
 };
 
-const delete_user_without_credentials = function(req, res) {
+const delete_user_without_credentials = function(req, res, next) {
     logger.debug('[API-V2][User][DELETE]');
 
     db.LocalLogin.findOne({where: {user_id: req.user.id}}).then(function(localLogin) {
         if (!localLogin) {
             delete_user_by_id(req.user.id, res);
         } else {
-            apiErrorHelper.throwError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user");
+            next(apiErrorHelper.buildError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user"));
         }
     });
 
