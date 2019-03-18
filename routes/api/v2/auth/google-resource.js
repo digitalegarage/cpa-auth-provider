@@ -7,7 +7,7 @@ const googleHelper = require('../../../../lib/google-helper');
 const afterLoginHelper = require('../../../../lib/afterlogin-helper');
 const db = require('../../../../models/index');
 const logger = require('../../../../lib/logger');
-const errorHelper = require('../../../../lib/error-helper');
+const apiErrorHelper = require('../../../../lib/api-error-helper');
 
 const passport = require('passport');
 
@@ -85,7 +85,7 @@ module.exports = function (app, options) {
     app.options('/api/v2/auth/google/token', cors);
     app.post('/api/v2/auth/google/token', function(req, res) {
         if (!req.body.token) {
-            return res.status(400).json(errorHelper.buildError(400, "TOKEN_MISSING", "missing token in request body")).send();
+            apiErrorHelper.throwError(400, "TOKEN_MISSING", "missing token in request body");
         }
         authViaToken(req.body.token, req, res);
 
@@ -126,7 +126,7 @@ module.exports = function (app, options) {
         // client_id could be 428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com (it has to be the same as the one in config.identity_providers.google.client_id)
         // redirect_uri could be http://localhost
         if (!req.body.code || !req.body.redirect_uri) {
-            return res.status(400).json(errorHelper.buildError(400, "CODE_MISSING", "missing code in request body")).send();
+            apiErrorHelper.throwError(400, "CODE_MISSING", "missing code in request body");
         }
         authViaCode(req.body.code, req.body.redirect_uri, req, res);
     });
@@ -134,7 +134,7 @@ module.exports = function (app, options) {
     function authViaCode(code, redirectUri, req, res) {
         googleHelper.getGoogleToken(code, redirectUri).then(function(token) {
             if (!token) {
-                return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "Cannot authenticate with google")).send();
+                apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "Cannot authenticate with google");
             } else {
                 authViaToken(token, req, res);
             }
@@ -173,17 +173,16 @@ module.exports = function (app, options) {
                         });
                     });
                 } else {
-                    return res.status(412).json(errorHelper.buildError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
-                        "It's not allowed to login with a gmail account on an account using the same email as local login if the local login is not validated.")).send();
+                    apiErrorHelper.throwError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
+                        "It's not allowed to login with a gmail account on an account using the same email as local login if the local login is not validated.");
                 }
             }).catch(function(err) {
                 logger.info('An error occurred while saving user in IDP db', err);
-                return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db")).send();
-
+                apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db");
             });
         }).catch(function(err) {
             logger.info('An error occurred while verifying google token', err);
-            return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying google token")).send();
+            apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while verifying google token");
         });
     }
 

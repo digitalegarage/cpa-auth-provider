@@ -8,7 +8,7 @@ const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
 const passwordHelper = require('../../../../lib/password-helper');
 const authHelper = require('../../../../lib/auth-helper');
-const errorHelper = require('../../../../lib/error-helper');
+const apiErrorHelper = require('../../../../lib/api-error-helper');
 const appHelper = require('../../../../lib/app-helper');
 const userHelper = require('../../../../lib/user-helper');
 const changeEmailHelper = require('../../../email/change-email-helper');
@@ -81,7 +81,7 @@ const delete_user_without_credentials = function(req, res) {
         if (!localLogin) {
             delete_user_by_id(req.user.id, res);
         } else {
-            return res.status(412).json(errorHelper.buildError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user")).send();
+            apiErrorHelper.throwError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user");
         }
     });
 

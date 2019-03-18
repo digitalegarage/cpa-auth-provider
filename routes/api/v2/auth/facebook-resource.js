@@ -9,7 +9,7 @@ const request = require('request-promise');
 const logger = require('../../../../lib/logger');
 const db = require('../../../../models');
 const passport = require('passport');
-const errorHelper = require('../../../../lib/error-helper');
+const apiErrorHelper = require('../../../../lib/api-error-helper');
 
 var REQUESTED_PERMISSIONS = ['email'];
 
@@ -84,7 +84,7 @@ module.exports = function(app, options) {
     app.options('/api/v2/auth/facebook/code', cors);
     app.post('/api/v2/auth/facebook/code', function(req, res) {
         if (!req.body.code || !req.body.redirect_uri) {
-            return res.status(400).json(errorHelper.buildError(400, "CODE_MISSING", "missing code in request body")).send();
+            apiErrorHelper.buildError(400, "CODE_MISSING", "missing code in request body");
         }
 
         // Request an access token from the code
@@ -101,8 +101,7 @@ module.exports = function(app, options) {
             validateTokenAndLog(tokenJsonResponse.access_token, res, req);
         }).catch(function(err) {
             logger.info('An error occured while requesting the token', err);
-            return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while requesting the token")).send();
-
+            apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while requesting the token");
         });
 
     });
@@ -135,9 +134,9 @@ module.exports = function(app, options) {
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/facebook/token', cors);
-    app.post('/api/v2/auth/facebook/token', function(req, res) {
+    app.post('/api/v2/auth/facebook/token', function(req, res, next) {
         if (!req.body.token) {
-            return res.status(400).json(errorHelper.buildError(400, "TOKEN_MISSING", "missing token in request body")).send();
+            apiErrorHelper.throwError(400, "TOKEN_MISSING", "missing token in request body");
         }
         validateTokenAndLog(req.body.token, res, req);
 
@@ -158,7 +157,7 @@ function validateTokenAndLog(accessToken, res, req) {
     request(options).then(function(jsonResponse) {
 
         if (!jsonResponse.data || !jsonResponse.data.user_id) {
-            return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while validating the token with facebook")).send();
+            apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occured while validating the token with facebook");
         } else {
 
             // Step 2: request user profile to graph API
@@ -200,25 +199,20 @@ function validateTokenAndLog(accessToken, res, req) {
                             });
                         });
                     } else {
-                        return res.status(412).json(errorHelper.buildError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
-                            "It's not allowed to login with a facebook account on an account using the same email as local login if the local login is not validated.")).send();
-
+                        apiErrorHelper.throwError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
+                            "It's not allowed to login with a facebook account on an account using the same email as local login if the local login is not validated.");
                     }
                 }).catch(function(err) {
                     logger.info('An error occurred while saving user in IDP db', err);
-                    return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db")).send();
-
-
+                    apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db");
                 });
             }).catch(function(err) {
                 logger.info('An error occurred while retrieving user data using the token', err);
-                return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token")).send();
-
+                apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token");
             });
         }
     }).catch(function(err) {
         logger.info('An error occured while validating the token', err);
-        return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token")).send();
-
+        apiErrorHelper.throwError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token");
     });
 }

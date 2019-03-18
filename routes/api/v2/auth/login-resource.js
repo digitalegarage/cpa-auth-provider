@@ -11,11 +11,7 @@ const cors = require('../../../../lib/cors'),
     jwt = require('jwt-simple'),
     loginService = require('../../../../services/login-service'),
     errors = require('../../../../services/errors'),
-    _ = require('underscore'),
-    finder = require('../../../../lib/finder'),
-    errorHelper = require('../../../../lib/error-helper'),
-    passwordHelper = require('../../../../lib/password-helper'),
-    codeHelper = require('../../../../lib/code-helper');
+    _ = require('underscore');
 
 
 
