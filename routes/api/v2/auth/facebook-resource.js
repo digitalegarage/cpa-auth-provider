@@ -82,9 +82,9 @@ module.exports = function(app, options) {
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/facebook/code', cors);
-    app.post('/api/v2/auth/facebook/code', function(req, res) {
+    app.post('/api/v2/auth/facebook/code', function(req, res, next) {
         if (!req.body.code || !req.body.redirect_uri) {
-            apiErrorHelper.buildError(400, "CODE_MISSING", "missing code in request body");
+            next(apiErrorHelper.buildError(400, "CODE_MISSING", "missing code in request body"));
         }
 
         // Request an access token from the code
@@ -101,7 +101,7 @@ module.exports = function(app, options) {
             validateTokenAndLog(tokenJsonResponse.access_token, res, req);
         }).catch(function(err) {
             logger.info('An error occured while requesting the token', err);
-            apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while requesting the token");
+            next(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while requesting the token"));
         });
 
     });
