@@ -422,8 +422,7 @@ describe('API-V2 change password', function() {
                 });
 
                 it(' should be 400', function() {
-                    // console.log('<<<<<<<<',(ctx.res.text));
-                    expect(JSON.parse(ctx.res.text).error.code).equal('CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK');
+                    expect(JSON.parse(ctx.res.text).error.errors[0].code).equal('CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK');
                     expect(ctx.res.statusCode).to.equal(400);
                 });
             });
@@ -443,7 +442,7 @@ describe('API-V2 change password', function() {
                 });
 
                 it(' should be 401', function() {
-                    //expect(JSON.parse(ctx.res.text).error.code).equal('AUTHORIZATION_HEADER_MISSING');
+                    expect(JSON.parse(ctx.res.text).error.errors[0].code).equal('CHANGE_PASSWORD_VALIDATION_ERROR.BACK_USER_NOT_FOUND');
                     expect(ctx.res.statusCode).to.equal(401);
                 });
             });

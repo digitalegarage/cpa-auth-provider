@@ -109,7 +109,7 @@ const get_user_id_from_jwt = function(req, res) {
 
 const get_user = function(req, res, next) {
     if (!req.headers.authorization || !auth(req)) {
-        apiErrorHelper.throwError(401, 'AUTHORIZATION_HEADER_MISSING', 'Missing or bad credential in authorization header.')
+        apiErrorHelper.throwError(401, 'AUTHORIZATION_HEADER_MISSING', 'Missing or bad credential in authorization header.');
     } else {
         var user = auth(req);
         var login = user.name;
@@ -149,15 +149,21 @@ const create_local_login = function(req, res, next) {
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg)});
+            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg);});
             next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
-                res.status(400).json({
-                    errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}],
-                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
-                    score: passwordHelper.getQuality(req.body.email, req.body.password)
-                });
+                let _errors = [];
+                _errors.push(
+                    apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.PASSWORD_WEAK', 
+                    'Password is not strong enough.', 
+                    req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+                    {
+                        password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                        score: passwordHelper.getQuality(req.body.email, req.body.password)
+                    }
+                    ));
+                next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
             } else {
                 userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
                     function() {
@@ -172,20 +178,25 @@ const create_local_login = function(req, res, next) {
                                 'Cannot create login.', 
                                 req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS'), _errors));
                         } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
-                            return res.status(400).json({
-                                msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
-                                password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
-                                errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}]
-                            });
+                            let _errors = [];
+                            _errors.push(
+                                apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.PASSWORD_WEAK', 
+                                'Password is not strong enough.', 
+                                req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+                                {
+                                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                                    score: passwordHelper.getQuality(req.body.email, req.body.password)
+                                }
+                                ));
+                                    
+                            next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
                         } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
-                            return res.status(400).json({
-                                msg: req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')
-                            });
+                            let _errors = [];
+                            _errors.push(apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.API_LOCAL_LOGIN_ALREADY_EXISTS','Local login exists.', req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')));
+                            next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
                         } else {
                             logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
-                            res.status(500).json({
-                                msg: req.__('API_ERROR') + err
-                            });
+                            next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot create login. Api error.', req.__('API_ERROR'),[], err));
                         }
                     }
                 );
@@ -204,26 +215,33 @@ const change_password = function(req, res, next) {
 
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CHANGE_PASSWORD_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg)});
-            next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
+            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CHANGE_PASSWORD_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg);});
+            next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password.', '',_errors));
         } else {
             let email = req.body.email;
             let newPassword = req.body.new_password;
             if (!passwordHelper.isStrong(email, newPassword)) {
-                next(apiErrorHelper.buildError(400, 
-                    'CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK'), 
-                    'Password is not strong enough.', passwordHelper.getWeaknessesMsg(email, newPassword, req), 
-                    [], {
-                    password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
-                    score: passwordHelper.getQuality(email, newPassword)
-                });
+                let _errors = [];
+                _errors.push(apiErrorHelper.buildErrors(
+                    'CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK', 
+                    'Password is not strong enough.', 
+                    passwordHelper.getWeaknessesMsg(email, newPassword, req), 
+                    {
+                        password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
+                        score: passwordHelper.getQuality(email, newPassword)
+                    }));
+                next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password.', '',_errors));
             } else {
                 db.LocalLogin.findOne({
                     where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), email.toLowerCase()),
                     include: [db.User]
                 }).then(function(localLogin) {
                     if (!localLogin) {
-                        return res.status(401).send({errors: [{msg: req.__('BACK_USER_NOT_FOUND')}]});
+                        let _errors = [];
+                        _errors.push(apiErrorHelper.buildErrors(
+                            'CHANGE_PASSWORD_VALIDATION_ERROR.BACK_USER_NOT_FOUND', 
+                            'Local login not found.',req.__('BACK_USER_NOT_FOUND')));
+                        next(apiErrorHelper.buildError(401, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password. Unauthorized error.', '',_errors));
                     } else {
                         localLogin.verifyPassword(req.body.previous_password).then(function(isMatch) {
                             // if user is found and password is right change password
@@ -231,19 +249,23 @@ const change_password = function(req, res, next) {
                                 localLogin.setPassword(req.body.new_password).then(
                                     function() {
                                         appHelper.destroySessionsByUserId(localLogin.User.id, req.sessionID).then(function() {
-                                            return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
+                                            return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')}); // FIXME : Standard message?
                                         }).catch(function(e) {
                                             logger.error(e);
-                                            return res.sendStatus(500);
+                                            next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], e));
                                         });
                                     },
                                     function(err) {
                                         logger.error(err);
-                                        res.status(500).json({errors: [err]});
+                                        next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], err));
                                     }
                                 );
                             } else {
-                                res.status(401).json({errors: [{msg: req.__('BACK_INCORRECT_PREVIOUS_PASS')}]});
+                                let _errors = [];
+                                _errors.push(apiErrorHelper.buildErrors(
+                                    'CHANGE_PASSWORD_VALIDATION_ERROR.BACK_INCORRECT_PREVIOUS_PASS', 
+                                    'Incorrect previous pass.',req.__('BACK_INCORRECT_PREVIOUS_PASS')));
+                                next(apiErrorHelper.buildError(401, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password. Unauthorized error.', '',_errors));
                             }
                         });
                     }
@@ -255,7 +277,7 @@ const change_password = function(req, res, next) {
 
 const resend_validation_email = function(req, res) {
     if (req.recaptcha.error){
-        return res.status(400).json({msg: 'reCaptcha is empty or wrong. '});
+        apiErrorHelper.throwError(400, 'RESEND_VALIDATION_EMAIL_ERROR', 'ReCaptcha is empty or wrong.');
     }
 
     var user = req.user;
