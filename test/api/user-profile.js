@@ -194,7 +194,7 @@ describe('GET /api/local/profile', function () {
 
             it('should return bad parameters ', function () {
                 expect(this.res.statusCode).to.equal(400);
-                expect(this.res.body.success).to.equal(false);
+                expect(JSON.parse(this.res.text).error.data.success).to.equal(false);
             });
         });
 
@@ -216,7 +216,7 @@ describe('GET /api/local/profile', function () {
 
             it('should return bad parameters ', function () {
                 expect(this.res.statusCode).to.equal(400);
-                expect(this.res.body.success).to.equal(false);
+                expect(JSON.parse(this.res.text).error.data.success).to.equal(false);
             });
         });
 
@@ -238,7 +238,7 @@ describe('GET /api/local/profile', function () {
 
             it('should return bad parameters ', function () {
                 expect(this.res.statusCode).to.equal(400);
-                expect(this.res.body.success).to.equal(false);
+                expect(JSON.parse(this.res.text).error.data.success).to.equal(false);
             });
         });
 
@@ -261,7 +261,7 @@ describe('GET /api/local/profile', function () {
 
             it('should return bad parameters ', function () {
                 expect(this.res.statusCode).to.equal(400);
-                expect(this.res.body.success).to.equal(false);
+                expect(JSON.parse(this.res.text).error.data.success).to.equal(false);
             });
         });
 
@@ -493,11 +493,11 @@ describe('GET /api/local/profile', function () {
 
                 it('should return bad parameters ', function () {
                     expect(this.res.statusCode).equal(400);
-                    expect(this.res.body.success).equal(false);
+                    expect(JSON.parse(this.res.text).error.data.success).equal(false);
                 });
 
                 it('should properly describe the missing field', function () {
-                    expect(this.res.body.missingFields).members(['gender']);
+                    expect(JSON.parse(this.res.text).error.errors[0].data.missingFields).members(['gender']);
                 });
             });
 
@@ -714,6 +714,7 @@ describe('PUT /user/profile', function () {
             });
 
             it('should fail with one error message', function () {
+                console.log('<<<<<<<<<<<', this.res.text);
                 expect(this.res.statusCode).equal(400);
                 expect(this.res.body.errors).a('array');
                 expect(this.res.body.errors.length).equal(1);

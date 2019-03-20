@@ -526,6 +526,8 @@ describe('API-V2 LOGIN', function () {
                         expect(ctx.res.statusCode).to.equal(400);
                         expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"UNAUTHORIZED_REDIRECT_URI","hint":"redirect uri http://notwhitelistedredirecturl.com is not an allowed redirection","errors":[]}}');
                     });
+
+
                 });
             });
             context('Cookie', function () {
@@ -896,7 +898,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"invalid recaptcha","message":"Something went wrong with the reCAPTCHA","errors":[]}}');
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"invalid recaptcha","message":"Something went wrong with the reCAPTCHA","errors":[{"code":"API_PASSWORD_RECOVER_ERROR.RECAPTCHA","hint":"Recaptcha error.","message":"Something went wrong with the reCAPTCHA"}]}}');
         });
     });
 
@@ -915,7 +917,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[]}}');
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[{"code":"API_PASSWORD_RECOVER_ERROR.USER_NOT_FOUND","hint":"User not found.","message":"User not found"}]}}');
         });
     });
 

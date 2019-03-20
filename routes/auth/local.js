@@ -160,6 +160,7 @@ module.exports = function (app, options) {
         req.getValidationResult().then(function (result) {
             if (!result.isEmpty()) {
                 next(apiErrorHelper.buildError(400, 'VALIDATION_ERROR', 'Validation error', '',[], result.array()));
+                res.status(400).json({errors: result.array()});
                 return;
             }
 
