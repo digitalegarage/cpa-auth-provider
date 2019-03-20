@@ -642,7 +642,7 @@ function handleAfterSessionRestLogin(user, req, res) {
             if (req.query.withcode) {
                 var allowed = isAllowedRedirectUri(REDIRECT_URI);
                 if (allowed) {
-                    resolve(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI))
+                    resolve(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
                 } else {
                     reject(apiErrorHelper.buildError(400, "UNAUTHORIZED_REDIRECT_URI", 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
                 }
