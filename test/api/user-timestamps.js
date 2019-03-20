@@ -20,17 +20,9 @@ var recaptchaResponse = 'a dummy recaptcha response';
 
 describe('user profile timestamps', function () {
     context('account creation', function () {
-        before(function (done) {
-            var time = new Date("Wed Jan 29 2017 05:17:00 GMT+0000").getTime();
-            this.clock = sinon.useFakeTimers(time);
-
-            this.start_at = Date.now();
-            done();
-        });
-
-        after(function () {
-            this.clock.restore();
-        });
+        var self = this;
+        var last_login_at;
+        var start_at;
 
         before(resetDatabase);
         before(function (done) {
@@ -47,14 +39,17 @@ describe('user profile timestamps', function () {
                         'g-recaptcha-response': recaptchaResponse
                     }
                 },
-                done);
+                function(){
+                    finder.findUserByLocalAccountEmail(TEST_EMAIL_0)
+                    .then(function (localLogin) {
+                        start_at = localLogin.created_at.getTime();
+                        done();
+                    });
+                }
+            )
         });
 
         before(function (done) {
-            var self = this;
-            this.clock.restore();
-            this.clock = sinon.useFakeTimers(new Date("Wed Feb 01 2017 11:42:00 GMT+0000").getTime());
-            this.login_at = Date.now();
             requestHelper.sendRequest(
                 self,
                 '/api/v2/session/login',
@@ -67,15 +62,17 @@ describe('user profile timestamps', function () {
                         password: OLD_PASSWORD
                     }
                 },
-                done
+                function(){
+                    finder.findUserByLocalAccountEmail(TEST_EMAIL_0)
+                    .then(function (localLogin) {
+                        last_login_at = localLogin.last_login_at;
+                        done();
+                    });
+                }
             );
         });
 
         before(function (done) {
-            var self = this;
-            this.clock.restore();
-            this.clock = sinon.useFakeTimers(new Date("Wed Feb 08 2017 15:37:00 GMT+0000").getTime());
-            this.change_at = Date.now();
             finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
                 function (localLogin) {
                     localLogin.setPassword(NEW_PASSWORD).then(
@@ -89,12 +86,7 @@ describe('user profile timestamps', function () {
             );
         });
 
-        after(function () {
-            this.clock.restore();
-        });
-
         before(function (done) {
-            var self = this;
             requestHelper.sendRequest(
                 self,
                 '/api/v2/session/login',
@@ -113,11 +105,10 @@ describe('user profile timestamps', function () {
 
 
         it('should be set to proper time', function (done) {
-            var self = this;
             finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
                 function (localLogin) {
                     try {
-                        expect(localLogin.created_at.getTime()).equal(self.start_at);
+                        expect(localLogin.created_at.getTime()).not.be.above(last_login_at);
                     } catch (e) {
                         return done(e);
                     }
@@ -128,11 +119,10 @@ describe('user profile timestamps', function () {
         });
 
         it('should have proper password set time', function (done) {
-            var self = this;
             finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
                 function (localLogin) {
                     try {
-                        expect(localLogin.password_changed_at).equal(self.change_at);
+                        expect(localLogin.password_changed_at).to.be.above(start_at);
                     } catch (e) {
                         return done(e);
                     }
@@ -143,11 +133,10 @@ describe('user profile timestamps', function () {
         });
 
         it('should have proper last login time', function (done) {
-            var self = this;
             finder.findUserByLocalAccountEmail(TEST_EMAIL_0).then(
                 function (localLogin) {
                     try {
-                        expect(localLogin.last_login_at).equal(self.login_at);
+                        expect(localLogin.last_login_at).to.be.above(start_at);
                     } catch (e) {
                         return done(e);
                     }
