@@ -161,7 +161,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+            expect(JSON.parse(this.res.text).error.errors[0].message).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
         });
     });
 
@@ -207,7 +207,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
+            expect(JSON.parse(this.res.text).error.errors[0].message).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
         });
     });
 
@@ -363,6 +363,7 @@ describe('POST /api/v2/jwt/login', function () {
 
 
         it('should 401', function () {
+            console.log('<<<<<<<<<', this.res.text);
             expect(this.res.statusCode).to.equal(401);
         });
     });
@@ -400,6 +401,7 @@ describe('POST /api/v2/jwt/login', function () {
         });
 
         it('/api/local/info should return a 401 ', function () {
+            console.log('<<<<<<<<<', this.res.text);
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
             expect(this.res.body.error);
@@ -439,6 +441,7 @@ describe('POST /api/v2/jwt/login', function () {
         });
 
         it('should return a 401 ', function () {
+            console.log('<<<<<<<<<', this.res.text);
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
             expect(this.res.body.error);

@@ -963,7 +963,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+            expect(JSON.parse(ctx.res.text).error.errors[0].message).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
         });
     });
 
@@ -982,7 +982,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
+            expect(JSON.parse(ctx.res.text).error.errors[0].message).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
         });
     });
 

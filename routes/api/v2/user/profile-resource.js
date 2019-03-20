@@ -60,7 +60,6 @@ var user_nameByPublicUid = function(req,res,next) {
             .catch((e) => {
                 logger.error("Error fetching user name by public id",e);
                 next(apiErrorHelper.buildError(500, 'SERVICE_ERROR','Error fetching user name by public id.', '',[], e));
-                res.status(500);
             });
         } else {
             apiErrorHelper.throwError(400, 'BAD_REQUEST_INVALID_UUIDV4', "No valid UUIDv4!");
