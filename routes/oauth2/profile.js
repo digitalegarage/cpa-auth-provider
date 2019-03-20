@@ -93,7 +93,6 @@ var user_profile_update = [
         userHelper.validateProfileUpdateDataLegacy(req).then(function (result) {
             if (!result.isEmpty()) {
                 result.useFirstErrorOnly();
-                console.log('<<<<<<<<<<<<<', result.array({onlyFirstError: true}));
                 res.status(400).json({errors: result.array({onlyFirstError: true})});
                 return;
             }

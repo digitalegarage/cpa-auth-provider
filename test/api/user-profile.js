@@ -714,7 +714,6 @@ describe('PUT /user/profile', function () {
             });
 
             it('should fail with one error message', function () {
-                console.log('<<<<<<<<<<<', this.res.text);
                 expect(this.res.statusCode).equal(400);
                 expect(this.res.body.errors).a('array');
                 expect(this.res.body.errors.length).equal(1);
