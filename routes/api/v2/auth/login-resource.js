@@ -11,7 +11,6 @@ const cors = require('../../../../lib/cors'),
     apiErrorHelper = require('../../../../lib/api-error-helper'),
     jwt = require('jwt-simple'),
     loginService = require('../../../../services/login-service'),
-    errors = require('../../../../services/errors'),
     _ = require('underscore');
 
 
@@ -170,7 +169,14 @@ module.exports = function (app, options) {
             }
         })
         .catch((err)=> {
-            next(err);
+            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
+            const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
+            if (templateExists(path)) {
+                res.render(path, err);
+            } else {
+                res.render('./login/broadcaster/default/signup.ejs', err);
+            }
+
         });
     });
 
@@ -291,12 +297,22 @@ module.exports = function (app, options) {
         return loginService.login(req, res)
             .then(function (user) {
                 // force renew cookie so a cookie value couldn't point at different time to different user
-                req.session.regenerate(function (err) {
+                return req.session.regenerate(function (err) {
                     if (err) {
                         next(err);
                     } else {
                         return req.logIn(user, function () {
-                            return handleAfterSessionHtlmLogin(user, req, res);
+                            return handleAfterSessionHtlmLogin(user, req, res)
+                            .then((redirect)=> {
+                                if (redirect){
+                                    res.redirect(redirect);
+                                } else {
+                                    res.redirect(requestHelper.getPath('/'));
+                                }
+                            })
+                            .catch((err)=> {
+                                next(err);
+                            });
                         });
                     }
                 });
@@ -582,26 +598,35 @@ function signupREST(req, res, handleAfterLogin) {
     });
 }
 
+
+
 function signupHTML(req, res, handleAfterLogin) {
-    loginService.checkSignupData(req)
-        .then(function (userAttributes) {
-            return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
-        })
-        .then(function (user) {
-            // force renew cookie so a cookie value couldn't point at different time to different user
-            req.session.regenerate(function (err) {
-                if (err) {
-                    handleErrorForSignupHTMLCalls(req, err, res);
-                } else {
-                    req.logIn(user, function () {
-                        handleAfterLogin(user, req, res);
-                    });
-                }
+    return new Promise((resolve, reject) => {
+        return loginService.checkSignupData(req)
+            .then(function (userAttributes) {
+                return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
+            })
+            .then(function (user) {
+                // force renew cookie so a cookie value couldn't point at different time to different user
+                return req.session.regenerate(function (err) {
+                    if (err) {
+                        reject(buildErrorData(req, err));
+                    } else {
+                        return req.logIn(user, function () {
+                            return handleAfterLogin(user, req, res)
+                            .then((redirect)=>{
+                                resolve(redirect);
+                            }).catch((err)=> {
+                                reject (err);
+                            });
+                        });
+                    }
+                });
+            })
+            .catch(function (err) {
+                reject(buildErrorData(req, err));
             });
-        })
-        .catch(function (err) {
-            handleErrorForSignupHTMLCalls(req, err, res);
-        });
+    });
 }
 
 
@@ -631,7 +656,7 @@ function handleAfterSessionRestLogin(user, req, res) {
 }
 
 
-function handleAfterSessionHtlmLogin(user, req, res) {
+function handleAfterSessionHtlmLogin(user, req) {
     return new Promise((resolve, reject) => {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI) {
@@ -702,7 +727,7 @@ function handleErrorForHtmlCalls(req, res, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
+        message: err.applicationError ? err.applicationError.error.message : err.toString(),
         email: req.body.email ? req.body.email : '',
         signup: requestHelper.getPath('/signup' + redirect),
         forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
@@ -719,11 +744,11 @@ function handleErrorForHtmlCalls(req, res, err) {
     }
 }
 
-function handleErrorForSignupHTMLCalls(req, err, res) {
+function buildErrorData(req, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
+        message: err.applicationError ? err.applicationError.error.message : err.toString(),
         captcha: req.recaptcha,
         email: req.body.email ? req.body.email : '',
         date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
@@ -732,16 +757,8 @@ function handleErrorForSignupHTMLCalls(req, err, res) {
         login: requestHelper.getPath('/login' + redirect),
         target: requestHelper.getPath('/signup' + redirect)
     };
-    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-    const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
-    if (templateExists(path)) {
-        res.render(path, data);
-    } else {
-        res.render('./login/broadcaster/default/signup.ejs', data);
-    }
-
+    return data;
 }
-
 
 function templateExists(path) {
     return fs.existsSync(__dirname + '/../../../../views/' + path);

@@ -29,20 +29,24 @@ function checkSignupData(req) {
 
         var errors = [];
         if (!req.body.email) {
-            errors.push(apiErrorHelper.buildErrors('EMAIL_MISSING', 'Email is mandatory'));
+            errors.push(apiErrorHelper.buildErrors('EMAIL_MISSING', 'Email is mandatory', req.__('BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID')));
         }
         if (!req.body.password) {
-            errors.push(apiErrorHelper.buildErrors('PASSWORD_MISSING', 'Password is mandatory'));
+            errors.push(apiErrorHelper.buildErrors('PASSWORD_MISSING', 'Password is mandatory', req.__('BACK_SIGNUP_PASSWORD_MISSING')));
         }
         if (errors.length > 0) {
-            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Some fields are missing see errors arrays', null, errors));
+            var message =  req.__('BACK_SIGNUP_MISSING_FIELDS');
+            for (var i = 0; i < errors.length; i++) {
+                message += '<br/>' + '- ' + errors[i].message;
+            }
+            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Some fields are missing see errors arrays', message, errors));
         }
 
         var email = req.body.email;
         var password = req.body.password;
 
         if (!passwordHelper.isStrong(email, password)) {
-            reject(apiErrorHelper.buildError(400, 'PASSWORD_WEAK', "Password is too weak check which rule applies (could be 'no', 'simple or 'owasp'"));
+            reject(apiErrorHelper.buildError(400, 'PASSWORD_WEAK', "Password is too weak check which rule applies (could be 'no', 'simple or 'owasp'", req.__('PASSWORD_WEAK')));
         }
 
         // userAttributes is a merge of requiredAttributes and optionnalAttributes
@@ -65,7 +69,7 @@ function checkSignupData(req) {
         })
         .then((localLogin) => {
             if (localLogin) {
-                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as local login'));
+                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as local login', req.__('BACK_SIGNUP_EMAIL_TAKEN')));
             }
             return finder.findUserBySocialAccountEmail(email);
         })
@@ -74,7 +78,7 @@ function checkSignupData(req) {
                 // User exist because it has been created by a social login
                 // Since Local login doesn't exist, that mean that the account is not validated
                 // So it's impossible to signup with that email
-                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as social login'));
+                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as social login', req.__('BACK_SIGNUP_EMAIL_TAKEN')));
 
             } else {
                 resolve(userAttributes);

@@ -92,7 +92,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","message":"Password too simple. Use numbers and upper and lower case letters.","errors":[]}}');
                      });
 
                 });
@@ -106,7 +106,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","message":"Password too simple. Use numbers and upper and lower case letters.","errors":[]}}');
                      });
 
                 });
@@ -134,7 +134,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","errors":[{"code":"PASSWORD_MISSING","hint":"Password is mandatory"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"code":"PASSWORD_MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
                     });
 
                 });
@@ -148,7 +148,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","errors":[{"code":"EMAIL_MISSING","hint":"Email is mandatory"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty or invalid","errors":[{"code":"EMAIL_MISSING","hint":"Email is mandatory","message":"Email is empty or invalid"}]}}');
                     });
 
                 });
@@ -166,7 +166,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as local login","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as local login","message":"That email is already taken","errors":[]}}');
                     });
 
                 });
@@ -184,7 +184,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as local login","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as local login","message":"That email is already taken","errors":[]}}');
                     });
 
                 });
