@@ -7,7 +7,7 @@ const emailHelper = require('../lib/email-helper');
 const finder = require('../lib/finder');
 const xssFilters = require('xss-filters');
 const userHelper = require('../lib/user-helper');
-const errors = require('./errors');
+const apiErrorHelper = require('../lib/api-error-helper');
 const isDateFormat = require('is-date-format');
 const dateFormat = config.broadcaster && config.broadcaster.date_format ? config.broadcaster.date_format : "dd.mm.yyyy";
 const dateAndTime = require('date-and-time')
@@ -21,56 +21,28 @@ module.exports = {
     login: login
 };
 
-const ERRORS = {
-    // Signup
-    EMAIL_TAKEN: {key: 'EMAIL_TAKEN', message: 'Email already exists', code: 'S1'},
-    PASSWORD_WEAK: {key: 'PASSWORD_WEAK', message: 'Password is not strong enough', code: 'S2'},
-    MISSING_FIELDS: {key: 'MISSING_FIELDS', message: 'Missing required fields', code: 'S3'},
-    UNKNOWN_GENDER: {key: 'UNKNOWN_GENDER', message: 'Unknown gender', code: 'S4'},
-    MALFORMED_DATE_OF_BIRTH: {
-        key: 'MALFORMED_DATE_OF_BIRTH',
-        message: 'Malformed date of birth',
-        code: 'S5'
-    },
-    INVALID_LAST_NAME: {key: 'INVALID_LAST_NAME', message: 'Invalid lastname', code: 'S6'},
-    INVALID_FIRST_NAME: {key: 'INVALID_FIRST_NAME', message: 'Invalid firstname', code: 'S7'},
-    RECAPTCHA_ERROR: {
-        key: 'API_SIGNUP_SOMETHING_WRONG_RECAPTCHA',
-        message: 'recaptcha error',
-        code: 'S8'
-    },
-
-    // Login
-    API_INCORRECT_LOGIN_OR_PASS: {
-        key: 'API_INCORRECT_LOGIN_OR_PASS',
-        message: 'incorrect login or password',
-        code: 'L1'
-    },
-
-};
-
 function checkSignupData(req) {
     return new Promise((resolve, reject) => {
         if (req.recaptcha.error) {
-            errors.throwValidationError(ERRORS.RECAPTCHA_ERROR);
+            apiErrorHelper.throwError(400, 'RECAPTCHA_ERROR', 'Fail to validate Recaptcha', null, null, req.recaptcha.error);
         }
 
-        var missingFields = [];
+        var errors = [];
         if (!req.body.email) {
-            missingFields.push('email');
+            errors.push(apiErrorHelper.buildErrors('EMAIL_MISSING', 'Email is mandatory'));
         }
         if (!req.body.password) {
-            missingFields.push('password');
+            errors.push(apiErrorHelper.buildErrors('PASSWORD_MISSING', 'Password is mandatory'));
         }
-        if (missingFields.length > 0) {
-            errors.throwValidationError(ERRORS.MISSING_FIELDS, {missingFields: missingFields});
+        if (errors.length > 0) {
+            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Some fields are missing see errors arrays', null, errors));
         }
 
         var email = req.body.email;
         var password = req.body.password;
 
         if (!passwordHelper.isStrong(email, password)) {
-            errors.throwValidationError(ERRORS.PASSWORD_WEAK);
+            reject(apiErrorHelper.buildError(400, 'PASSWORD_WEAK', "Password is too weak check which rule applies (could be 'no', 'simple or 'owasp'"));
         }
 
         // userAttributes is a merge of requiredAttributes and optionnalAttributes
@@ -84,28 +56,33 @@ function checkSignupData(req) {
             userAttributes[oa] = optionnalAttributes[oa];
         }
 
-        validateFields(requiredAttributes);
-        validateFiledsValues(optionnalAttributes);
+        return validateFields(requiredAttributes)
+        .then(()=> {
+            return validateFieldsValues(optionnalAttributes);
+        })
+        .then(()=> {
+            return finder.findUserByLocalAccountEmail(email)
+        })
+        .then((localLogin) => {
+            if (localLogin) {
+                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as local login'));
+            }
+            return finder.findUserBySocialAccountEmail(email);
+        })
+        .then(function (socialLogin) {
+            if (socialLogin) {
+                // User exist because it has been created by a social login
+                // Since Local login doesn't exist, that mean that the account is not validated
+                // So it's impossible to signup with that email
+                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as social login'));
 
-        return finder.findUserByLocalAccountEmail(email)
-            .then(function (localLogin) {
-                if (localLogin) {
-                    errors.throwValidationError(ERRORS.EMAIL_TAKEN);
-                }
-                return finder.findUserBySocialAccountEmail(email);
-            })
-            .then(function (socialLogin) {
-                if (socialLogin) {
-                    // User exist because it has been created by a social login
-                    // Since Local login doesn't exist, that mean that the account is not validated
-                    // So it's impossible to signup with that email
-                    errors.throwValidationError(ERRORS.EMAIL_TAKEN);
-                }
+            } else {
                 resolve(userAttributes);
-            })
-            .catch(function (err) {
-                reject(err);
-            });
+            }
+        })
+        .catch(function (err) {
+            reject(err);
+        });
     });
 }
 
@@ -205,14 +182,14 @@ function login(req, res) {
                             afterLoginHelper.afterLogin(localLogin.User, req.body.email || req.query.email, res);
                             resolve(localLogin.User);
                         } else {
-                            errors.throwBadCredentialError(ERRORS.API_INCORRECT_LOGIN_OR_PASS);
+                            reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASS', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
                         }
                     })
                     .catch(function (err) {
                         reject(err);
                     });
             } else {
-                errors.throwBadCredentialError(ERRORS.API_INCORRECT_LOGIN_OR_PASS);
+                reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASS', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
             }
         }).catch(function (err) {
             reject(err);
@@ -248,44 +225,61 @@ function getOptionnalAttributes(req) {
 
 
 function validateFields(attributes) {
-    var missingFields = [];
-    config.userProfiles.requiredFields.forEach(
-        function (element) {
-            if (!attributes.hasOwnProperty(element) || !attributes[element]) {
-                missingFields.push(element);
+    return new Promise((resolve, reject) => {
+        var errors = [];
+        config.userProfiles.requiredFields.forEach(
+            function(element) {
+                if (!attributes.hasOwnProperty(element) || !attributes[element]) {
+                    errors.push(apiErrorHelper.buildErrors(element, 'field is missing'));
+                }
             }
+        );
+        if (errors.length > 0) {
+            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Missing fields', null, errors));
         }
-    );
-    if (missingFields.length > 0) {
-        errors.throwValidationError(ERRORS.MISSING_FIELDS, {missingFields: missingFields});
-    }
 
-    validateFiledsValues(attributes);
+        validateFieldsValues(attributes)
+        .then(()=> {
+            resolve()
+        })
+        .catch((err)=> {
+            reject(err);
+        });
+    });
 }
 
 var NAME_REGEX = /^[a-zA-Z\u00C0-\u017F -]*$/;
 
-function validateFiledsValues(attributes) {
-    if (attributes.hasOwnProperty('gender')) {
-        if (typeof(attributes.gender) !== 'string' || !attributes.gender.match(/(male|female|other)/)) {
-            errors.throwValidationError(ERRORS.UNKNOWN_GENDER);
-        }
-    }
+function validateFieldsValues(attributes) {
+    return new Promise((resolve, reject) => {
 
-    if (attributes.hasOwnProperty('date_of_birth')) {
-        if (typeof(attributes.date_of_birth) === 'string' && !isDateFormat(attributes.date_of_birth, dateFormat)) {
-            errors.throwValidationError(ERRORS.MALFORMED_DATE_OF_BIRTH);
+        if (attributes.hasOwnProperty('gender')) {
+            if (typeof(attributes.gender) !== 'string' || !attributes.gender.match(/(male|female|other)/)) {
+                reject(apiErrorHelper.buildError(400, 'UNKNOWN_GENDER', 'Unknown gender \'' + attributes.gender + '\' should one of the following (male|female|other)'));
+                return;
+            }
         }
-    }
 
-    if (attributes.hasOwnProperty('lastname')) {
-        if (typeof(attributes.lastname) !== 'string' || !attributes.lastname.match(NAME_REGEX)) {
-            errors.throwValidationError(ERRORS.INVALID_LAST_NAME);
+        if (attributes.hasOwnProperty('date_of_birth')) {
+            if (typeof(attributes.date_of_birth) === 'string' && !isDateFormat(attributes.date_of_birth, dateFormat)) {
+                reject(apiErrorHelper.buildError(400, 'MALFORMED_DATE_OF_BIRTH', 'Cannot parse data of birth from  \'' + attributes.date_of_birth + '\' with format ' + dateFormat));
+                return;
+            }
         }
-    }
-    if (attributes.hasOwnProperty('firstname')) {
-        if (typeof(attributes.firstname) !== 'string' || !attributes.firstname.match(NAME_REGEX)) {
-            errors.throwValidationError(ERRORS.INVALID_FIRST_NAME);
+
+        if (attributes.hasOwnProperty('lastname')) {
+            if (typeof(attributes.lastname) !== 'string' || !attributes.lastname.match(NAME_REGEX)) {
+                reject(apiErrorHelper.buildError(400, 'INVALID_LAST_NAME', 'Invalid lastname \'' + attributes.lastname + '\' not verified by following reg exp ' + NAME_REGEX));
+                return;
+            }
         }
-    }
+        if (attributes.hasOwnProperty('firstname')) {
+            if (typeof(attributes.firstname) !== 'string' || !attributes.firstname.match(NAME_REGEX)) {
+                reject(apiErrorHelper.buildError(400, 'INVALID_FIRST_NAME', 'Invalid firstname \'' + attributes.lastname + '\' not verified by following reg exp ' + NAME_REGEX));
+                return;
+            }
+        }
+
+        resolve();
+    });
 }

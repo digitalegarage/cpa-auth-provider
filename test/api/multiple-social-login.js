@@ -59,7 +59,7 @@ describe('Local login after', function () {
 
         it('should return 400 OK', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.error.text).equal('{"error":{"key":"EMAIL_TAKEN","message":"Email already exists","code":"S1"}}');
+            expect(this.res.error.text).equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social login","errors":[]}}');
         });
     });
     describe('Google API login first', function () {
@@ -85,7 +85,7 @@ describe('Local login after', function () {
 
         it('should return 400 OK', function () {
                 expect(this.res.statusCode).equal(400);
-                expect(this.res.error.text).equal('{"error":{"key":"EMAIL_TAKEN","message":"Email already exists","code":"S1"}}');
+                expect(this.res.error.text).equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social login","errors":[]}}');
             }
         );
     });

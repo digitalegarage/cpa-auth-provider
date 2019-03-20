@@ -161,7 +161,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+            expect(this.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"invalid recaptcha","message":"Something went wrong with the reCAPTCHA","errors":[]}}');
         });
     });
 
@@ -207,7 +207,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
+            expect(this.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[]}}');
         });
     });
 
@@ -328,7 +328,7 @@ describe('POST /api/v2/jwt/login', function () {
                 type: 'form',
                 data: {
                     email: 'first-email@mail.com',
-                    password: 'first-password',
+                    password: STRONG_PASSWORD,
                     'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
@@ -342,7 +342,7 @@ describe('POST /api/v2/jwt/login', function () {
                 type: 'form',
                 data: {
                     email: 'email@mail.com',
-                    password: 'second-password',
+                    password: STRONG_PASSWORD + "2",
                     'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
@@ -356,7 +356,7 @@ describe('POST /api/v2/jwt/login', function () {
                 type: 'form',
                 data: {
                     email: 'email@mail.com',
-                    password: 'first-password'
+                    password: STRONG_PASSWORD
                 }
             }, done);
         });
@@ -402,10 +402,7 @@ describe('POST /api/v2/jwt/login', function () {
         it('/api/local/info should return a 401 ', function () {
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.body.error);
-            expect(this.res.body.error.code).to.equal("L1");
-            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
-            expect(this.res.body.error.message).to.equal("incorrect login or password");
+            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASS","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
         });
     });
 
@@ -441,10 +438,7 @@ describe('POST /api/v2/jwt/login', function () {
         it('should return a 401 ', function () {
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.body.error);
-            expect(this.res.body.error.code).to.equal("L1");
-            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
-            expect(this.res.body.error.message).to.equal("incorrect login or password");
+            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASS","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
         });
     });
 
