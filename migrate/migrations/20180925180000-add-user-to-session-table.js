@@ -6,7 +6,7 @@ module.exports = {
         return new Promise((resolve,reject) => {
             if (process.env.DB_TYPE === 'sqlite')
                 resolve();
-            else {
+            else {  // FIXME: honor mysql!
                 queryInterface.sequelize.query('SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = \'Sessions\')')
                 .then((res) => {
                     if (res[0][0].exists === true) {
