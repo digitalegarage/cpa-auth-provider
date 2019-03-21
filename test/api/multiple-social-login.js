@@ -332,6 +332,7 @@ describe('Facebook', function () {
 
             it('should return 400 OK', function () {
                     expect(this.res.statusCode).equal(400);
+                    console.log('<<<<<<<<<<', this.res.error.text)
                     expect(this.res.error.text).equal('{"error":"You must validate your email before connecting with Facebook"}');
 
                 }
@@ -690,6 +691,7 @@ describe('Google', function () {
 
             it('should return 400 OK', function () {
                     expect(this.res.statusCode).equal(400);
+                    console.log('<<<<<<<<<<<', this.res.error.text);
                     expect(this.res.error.text).equal('{"error":"You must validate your email before connecting with Google"}');
                 }
             );

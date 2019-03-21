@@ -161,7 +161,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"invalid recaptcha","message":"Something went wrong with the reCAPTCHA","errors":[{"code":"API_PASSWORD_RECOVER_ERROR.RECAPTCHA","hint":"Recaptcha error.","message":"Something went wrong with the reCAPTCHA"}]}}');
+            expect(this.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"Invalid recaptcha.","message":"Something went wrong with the reCAPTCHA","errors":[]}}');
         });
     });
 
@@ -207,7 +207,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[{"code":"API_PASSWORD_RECOVER_ERROR.USER_NOT_FOUND","hint":"User not found.","message":"User not found"}]}}');
+            expect(this.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[]}}');
         });
     });
 
@@ -402,7 +402,7 @@ describe('POST /api/v2/jwt/login', function () {
         it('/api/local/info should return a 401 ', function () {
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASS","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
+            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASSWORD","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
         });
     });
 
@@ -438,7 +438,7 @@ describe('POST /api/v2/jwt/login', function () {
         it('should return a 401 ', function () {
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASS","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
+            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASSWORD","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
         });
     });
 

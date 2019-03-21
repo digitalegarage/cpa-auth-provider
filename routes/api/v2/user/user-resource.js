@@ -153,17 +153,17 @@ const create_local_login = function(req, res, next) {
             next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
-                let _errors = [];
-                _errors.push(
-                    apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.PASSWORD_WEAK', 
-                    'Password is not strong enough.', 
-                    req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
-                    {
-                        password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
-                        score: passwordHelper.getQuality(req.body.email, req.body.password)
-                    }
+                next(
+                    apiErrorHelper.buildError(400,
+                        'API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH', 
+                        'Password is not strong enough.', 
+                        req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+                        [],
+                        {
+                            password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                            score: passwordHelper.getQuality(req.body.email, req.body.password)
+                        }
                     ));
-                next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
             } else {
                 userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
                     function() {
@@ -171,17 +171,15 @@ const create_local_login = function(req, res, next) {
                     },
                     function(err) {
                         if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
-                            let _errors = [];
-                            _errors.push(apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.API_SIGNUP_EMAIL_ALREADY_EXISTS', req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')));
-                            next(apiErrorHelper.buildError(400, 
-                                'CREATE_LOGIN_VALIDATION_ERROR', 
-                                'Cannot create login.', 
-                                req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS'), _errors));
+                            next(apiErrorHelper.buildError(400,
+                                'API_SIGNUP_EMAIL_ALREADY_EXISTS', 
+                                req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')));
                         } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
-                            let _errors = [];
-                            _errors.push(
-                                apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.PASSWORD_WEAK', 
+                            next(
+                                apiErrorHelper.buildError(400,
+                                'API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH', 
                                 'Password is not strong enough.', 
+                                [],
                                 req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
                                 {
                                     password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
@@ -189,11 +187,11 @@ const create_local_login = function(req, res, next) {
                                 }
                                 ));
                                     
-                            next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
                         } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
-                            let _errors = [];
-                            _errors.push(apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.API_LOCAL_LOGIN_ALREADY_EXISTS','Local login exists.', req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')));
-                            next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
+                            next(apiErrorHelper.buildError(400,
+                                'API_LOCAL_LOGIN_ALREADY_EXISTS',
+                                'Local login exists.', 
+                                req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')));
                         } else {
                             logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
                             next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot create login. Api error.', req.__('API_ERROR'),[], err));
@@ -221,27 +219,27 @@ const change_password = function(req, res, next) {
             let email = req.body.email;
             let newPassword = req.body.new_password;
             if (!passwordHelper.isStrong(email, newPassword)) {
-                let _errors = [];
-                _errors.push(apiErrorHelper.buildErrors(
-                    'CHANGE_PASSWORD_VALIDATION_ERROR.PASSWORD_WEAK', 
+                next(apiErrorHelper.buildError(400,
+                    'PASSWORD_WEAK', 
                     'Password is not strong enough.', 
-                    passwordHelper.getWeaknessesMsg(email, newPassword, req), 
+                    passwordHelper.getWeaknessesMsg(email, newPassword, req),
+                    [],
                     {
                         password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
                         score: passwordHelper.getQuality(email, newPassword)
                     }));
-                next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password.', '',_errors));
             } else {
                 db.LocalLogin.findOne({
                     where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), email.toLowerCase()),
                     include: [db.User]
                 }).then(function(localLogin) {
                     if (!localLogin) {
-                        let _errors = [];
-                        _errors.push(apiErrorHelper.buildErrors(
-                            'CHANGE_PASSWORD_VALIDATION_ERROR.BACK_USER_NOT_FOUND', 
-                            'Local login not found.',req.__('BACK_USER_NOT_FOUND')));
-                        next(apiErrorHelper.buildError(401, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password. Unauthorized error.', '',_errors));
+                        next(apiErrorHelper.buildError(401,
+                            'USER_NOT_FOUND', 
+                            'Local login not found.',
+                            req.__('BACK_USER_NOT_FOUND'))
+                            );
+                        
                     } else {
                         localLogin.verifyPassword(req.body.previous_password).then(function(isMatch) {
                             // if user is found and password is right change password
@@ -261,11 +259,11 @@ const change_password = function(req, res, next) {
                                     }
                                 );
                             } else {
-                                let _errors = [];
-                                _errors.push(apiErrorHelper.buildErrors(
-                                    'CHANGE_PASSWORD_VALIDATION_ERROR.BACK_INCORRECT_PREVIOUS_PASS', 
-                                    'Incorrect previous pass.',req.__('BACK_INCORRECT_PREVIOUS_PASS')));
-                                next(apiErrorHelper.buildError(401, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password. Unauthorized error.', '',_errors));
+                                next(apiErrorHelper.buildError(401,
+                                    'INCORRECT_PREVIOUS_PASSWORD', 
+                                    'Incorrect previous pass.',
+                                    req.__('BACK_INCORRECT_PREVIOUS_PASS'))
+                                );
                             }
                         });
                     }

@@ -84,15 +84,11 @@ module.exports = function (app, options) {
                     let _param = _e.param ? '.' + (_e.param).toUpperCase() : '';
                     next(apiErrorHelper.buildError(
                         400,
-                        'API_PROFILE_VALIDATION_ERRORS', 
-                        'Api validation errors.', 
-                        '',
-                        [ apiErrorHelper.buildErrors(
-                            'API_PROFILE_VALIDATION_ERRORS' + _param, 
-                            'Invalid param.',
-                            req.__('API_PROFILE_VALIDATION_ERRORS')
-                            )
-                        ], {success: false})
+                        'API_PROFILE_VALIDATION_ERRORS.' + _param, 
+                        'Invalid param.',
+                        req.__('API_PROFILE_VALIDATION_ERRORS'),
+                        [], 
+                        {success: false})
                     );
                     
                 } else {
@@ -105,24 +101,16 @@ module.exports = function (app, options) {
                             res.json({success: true, msg: req.__('API_PROFILE_SUCCESS')}); // FIXME standard message
                         },
                         function (err) {
-                            let _errors = [];
                             if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
-                                _errors.push(apiErrorHelper.buildErrors(
-                                        'API_PROFILE_VALIDATION_ERRORS.API_SIGNUP_MISSING_FIELDS', 
+                                next(apiErrorHelper.buildError(400,
+                                        'API_SIGNUP_MISSING_FIELDS', 
                                         'Missing required fields.', 
                                         req.__('API_SIGNUP_MISSING_FIELDS'),
+                                        [],
                                         {
                                             missingFields: err.data.missingFields
                                         }
                                     )
-                                );
-                                next(apiErrorHelper.buildError(
-                                        400, 
-                                        'API_PROFILE_VALIDATION_ERRORS', 
-                                        'Profile api validation errors.', 
-                                        '', 
-                                        _errors,{success: false}
-                                        )
                                 );
                             } else {
                                 next(apiErrorHelper.buildError(

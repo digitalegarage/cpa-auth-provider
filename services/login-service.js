@@ -186,14 +186,14 @@ function login(req, res) {
                             afterLoginHelper.afterLogin(localLogin.User, req.body.email || req.query.email, res);
                             resolve(localLogin.User);
                         } else {
-                            reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASS', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
+                            reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASSWORD', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
                         }
                     })
                     .catch(function (err) {
                         reject(err);
                     });
             } else {
-                reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASS', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
+                reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASSWORD', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
             }
         }).catch(function (err) {
             reject(err);
