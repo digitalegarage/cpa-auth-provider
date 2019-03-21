@@ -7,12 +7,14 @@ stages:
   - docker-publish
 
 npm_test:
-  image: node:9.1
+  image: node:10.15.3
   stage: test
   script: 
     - npm install --silent -g jshint istanbul
     - npm --silent install
     - make all
+  tags:
+    - aws
 #  coverage: /Lines\s+: \d+(\.\d*)?%.*/
 
 
@@ -27,6 +29,5 @@ docker_push:
     - docker tag identity-provider $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
   tags:
+    - aws
     - dind
-
-

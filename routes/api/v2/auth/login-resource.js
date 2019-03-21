@@ -11,7 +11,13 @@ const cors = require('../../../../lib/cors'),
     jwt = require('jwt-simple'),
     loginService = require('../../../../services/login-service'),
     errors = require('../../../../services/errors'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    finder = require('../../../../lib/finder'),
+    errorHelper = require('../../../../lib/error-helper'),
+    passwordHelper = require('../../../../lib/password-helper'),
+    codeHelper = require('../../../../lib/code-helper');
+
+
 
 var trackingCookie = require('../../../../lib/tracking-cookie');
 var recaptcha = require('express-recaptcha');
@@ -86,6 +92,22 @@ module.exports = function (app, options) {
      *               example: "03AF6jDqV2qwvu9iFUeXbiABG9fxCwSYB_NRewpquSl8UbQkniIB4yMSAK0hz3E29FSzxlaw78aQd18Nv9541LtYe5X6tCuZyb78_GUabMXGgDr4_VNGdP_drGR7zN4b1tIP6cTNlSNfgvSwsfYQN6BW8NC0QUlpa5wlDlNioTTn0hGLe0widNeHDqbHcLF292VvsYRDypqdR_D0nMDzKXXr9jEG_itB8c3tAkImmlbVzSeGMEUKORnbMl-ZI-NkFq6Hb_5zfZ1tAf8CcL38FAqywYmY79nrmP1RGSWN4G2xI8CcFx5b7tjtc"
      *               description: "recaptcha response"
      *
+     *   PasswordUpdate:
+     *      type: "object"
+     *      properties:
+     *           email:
+     *               type: "string"
+     *               example: "someone@domain.org"
+     *               description: "user email"
+     *           password:
+     *               type: "string"
+     *               example: "cr@zyNewP@ssword"
+     *               description: "new password"
+     *           code:
+     *               type: "string"
+     *               example: "f5a6f93fd5bf0099e1dad955746d6d"
+     *               description: "user email"
+     *
      */
 
 
@@ -156,6 +178,27 @@ module.exports = function (app, options) {
     app.options('/api/v2/all/password/recover', cors);
     app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
 
+    /**
+     * @swagger
+     * /api/v2/all/password/update:
+     *   post:
+     *     description: "password update errors could be WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL OR DATA_VALIDATION_ERROR (with following causes: PWD_EMPTY OR CODE_MISSING)"
+     *     operationId: "passwordUpdate"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "passwordUpdateData"
+     *            description: "password update data"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/PasswordUpdate"
+     *     responses:
+     *          "204":
+     *            description: "Password"
+     */
+    app.options('/api/v2/all/password/update', cors);
+    app.post('/api/v2/all/password/update', cors, userHelper.password_update);
 
 
     /**

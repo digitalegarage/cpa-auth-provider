@@ -1,7 +1,7 @@
-FROM node:10.6.0-alpine
+FROM node:10.15.3-slim
 
 # Install dependencies
-RUN apk add --no-cache sqlite-libs
+RUN apt-get update -yq && apt-get install -yq bcrypt
 
 RUN npm install -g sequelize-cli
 RUN npm install -g node-gyp
@@ -10,8 +10,7 @@ COPY package.json package-lock.json /src/
 
 # Install Node.js dependencies
 WORKDIR /src
-RUN apk add --no-cache --virtual build python build-base && npm install && npm rebuild bcrypt --build-from-source && apk del build
-# rebuild bcrypt to fix segmentation fault - https://github.com/kelektiv/node.bcrypt.js/issues/528
+RUN npm install
 
 COPY .sequelizerc /src/.sequelizerc
 COPY migrate /src/migrate
