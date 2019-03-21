@@ -332,8 +332,7 @@ describe('Facebook', function () {
 
             it('should return 400 OK', function () {
                     expect(this.res.statusCode).equal(400);
-                    console.log('<<<<<<<<<<', this.res.error.text)
-                    expect(this.res.error.text).equal('{"error":"You must validate your email before connecting with Facebook"}');
+                    expect(this.res.error.text).equal('{"error":{"status":400,"code":"LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB","hint":"Login invalid by facebook.","message":"You must validate your email before connecting with Facebook","errors":[]}}');
 
                 }
             );
@@ -691,8 +690,7 @@ describe('Google', function () {
 
             it('should return 400 OK', function () {
                     expect(this.res.statusCode).equal(400);
-                    console.log('<<<<<<<<<<<', this.res.error.text);
-                    expect(this.res.error.text).equal('{"error":"You must validate your email before connecting with Google"}');
+                    expect(this.res.error.text).equal('{"error":{"status":400,"code":"LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE","hint":"Login invalid by google.","message":"You must validate your email before connecting with Google","errors":[]}}');
                 }
             );
         });
