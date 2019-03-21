@@ -165,32 +165,13 @@ describe('POST /api/local/password/recover', function () {
         });
     });
 
-    context('When user try to recover password with valid email and bad recaptcha', function () {
+    context('When user try to recover password with not existing email and good recaptcha', function () {
         before(resetDatabase);
 
         // Google reCAPTCHA
         before(function (done) {
             recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
             done();
-        });
-
-        before(function (done) {
-            requestHelper.sendRequest(this, '/api/v2/session/signup', {
-                method: 'post',
-                cookie: this.cookie,
-                type: 'form',
-                data: {
-                    email: 'qsdf@qsdf.fr',
-                    password: STRONG_PASSWORD,
-                    'g-recaptcha-response': recaptchaResponse
-                }
-            }, done);
-        });
-
-        it('should return a success false', function () {
-            // if Test fail  here google should have change the recaptcha algorithm
-            // => update recaptchaResponse by getting the value post as parameter g-recaptcha-response in signup query using a browser
-            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
         });
 
         before(function (done) {
