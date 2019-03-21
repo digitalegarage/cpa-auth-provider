@@ -314,9 +314,7 @@
                     $modifyPassBtn.show();
                 },
                 error: function (result) {
-                    $.each(result.responseJSON.errors, function (index, error) {
-                        $("#security-errors").append($('<p>').text(error.msg));
-                    });
+                    $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
                     $("#form-security-errors").show("fast");
                     $('html, body').animate({
                         scrollTop: $("#security-errors").offset().top
