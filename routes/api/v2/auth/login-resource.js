@@ -688,7 +688,7 @@ function handleAfterJWTRestLogin(user, req, res) {
         })
         .catch(e => {
             logger.error(e);
-            res.sendStatus(400); // 500 may be better, but I like the client to think *he* did wrong, not *us* :)
+            reject(400, 'FAIL_TO_GENERATE_JWT_TOKEN"', 'That error should not occurred... But it has... We didn\'t manage to generate a JWT token for the user...'); // 500 may be better, but I like the client to think *he* did wrong, not *us* :)
         });
     });
 
