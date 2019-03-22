@@ -577,10 +577,10 @@
                     error: function (result) {
                         $spinner.hide();
                         $label.show();
-                        if (!result.responseJSON.msg)
+                        if (!result.responseJSON.error.message)
                             $verifError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_RESEND_VALIDATION') %>");
                         else
-                            $verifError.find(".text").first().text(result.responseJSON.msg);
+                            $verifError.find(".text").first().text(result.responseJSON.error.message);
 
                         $verifError.show();
                     },
@@ -662,8 +662,8 @@
                         },
                         error: function (error) {
                             $changeEmailPassword.val('');
-                            if (error.responseJSON && error.responseJSON.msg) {
-                                $changeEmailError.html(error.responseJSON.msg);
+                            if (error.responseJSON && error.responseJSON.error.message) {
+                                $changeEmailError.html(error.responseJSON.error.message);
                                 $changeEmailForm.first('div.form-group').addClass('has-error');
                                 $changeEmailError.show();
                                 spinner.hide()
@@ -722,8 +722,8 @@
 
                 var deleteFail = function (error) {
                     console.log('error: ', error);
-                    if (error.responseJSON && error.responseJSON.msg) {
-                        $passwordError.html(error.responseJSON.msg);
+                    if (error.responseJSON && error.responseJSON.error.message) {
+                        $passwordError.html(error.responseJSON.error.message);
                         $deleteUserForm.first('div.form-group').addClass('has-error');
                         $spinner.hide()
                         $label.show();
@@ -834,8 +834,8 @@
                 };
 
                 var exportFail = function (error) {
-                    if (error.responseJSON && error.responseJSON.msg) {
-                        $passwordError.html(error.responseJSON.msg);
+                    if (error.responseJSON && error.responseJSON.error.message) {
+                        $passwordError.html(error.responseJSON.error.message);
                         $exportUserForm.first('div.form-group').addClass('has-error');
                         $spinner.hide()
                         $label.show();
