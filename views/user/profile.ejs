@@ -956,7 +956,6 @@
                         location.reload();
                     },
                     error: function (result) {
-                        $("#personnal-data-errors").append($('<p>').append(result.responseJSON.error.message));
                         if(result.responseJSON.error.errors){
                             $.each(result.responseJSON.error.errors, function (index, error) {
                                 $("#personnal-data-errors").append($('<p>').text(error.message));
