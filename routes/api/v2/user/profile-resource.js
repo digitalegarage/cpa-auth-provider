@@ -26,22 +26,29 @@ var user_profile = function(req, res, next) {
 
 
 var user_profile_update =
-    function (req, res, next) {
-        logger.debug('[API-V2][Profile udpate][user_id', req.user.id, ']');
-        userHelper.validateProfileUpdateData(req).then(function (result) {
-            if (!result.isEmpty()) {
-                result.useFirstErrorOnly();
-                next(apiErrorHelper.buildError(400, 'BAD_PROFILE_DATA', 'Profile data not valid.','',[], result.array({onlyFirstError: true})));
-            }
-            userHelper.updateProfile(req.user, req.body).then(
-                function () {
-                    res.status(204).send();
-                },
-                function (err) {
-                    logger.error('[PUT /user/profile][ERROR', err, ']');
-                    next(apiErrorHelper.buildError(500, 'BACK_PROFILE_UPDATE_FAIL', 'Failed to update profile data.','', [], err));
+    function (req) {
+        return new Promise(function(resolve,reject) {
+            logger.debug('[API-V2][Profile udpate][user_id', req.user.id, ']');
+            return userHelper.validateProfileUpdateData(req).then((result) => {
+                if (!result.isEmpty()) {
+                    var errors = result.array();
+                    var subErrors = [];
+                    var message = '';
+                    for (var i = 0; i < errors.length; i++) {
+                        message += ' - ' + errors[i].msg + '<br/>';
+                        subErrors.push(apiErrorHelper.buildErrors('FIELD_' + errors[i].param + '_IS_BAD', errors[i].msg, errors[i].msg, {value: errors[i].value}));
+                    }
+                    reject(apiErrorHelper.buildError(400, 'BAD_PROFILE_DATA', 'Profile data not valid.', message, subErrors, errors));
+                } else {
+                    return userHelper.updateProfile(req.user, req.body).then(() => {
+                        resolve();
+                    }).catch((err) => {
+                        reject(err);
+                    });
                 }
-            );
+            }).catch((err) => {
+                reject(err);
+            });
         });
     };
 
@@ -201,6 +208,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: BAD_PROFILE_DATA"
      */
     router.options('/api/v2/oauth/user/profile', cors);
     router.get('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile);
@@ -232,9 +241,15 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
-    router.put('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile_update);
+    router.put('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), function(req, res, next) {
+        user_profile_update(req).then(() => {
+            res.sendStatus(204);
+        }).catch((err) => {
+            next(err);
+        });
+    });
 
 
     /**
@@ -250,6 +265,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: NO_USER_IN_REQUEST"
      */
     router.options('/api/v2/session/user/profile', cors);
     router.get('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile);
@@ -275,9 +292,16 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
-    router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile_update);
+    router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, function(req, res, next) {
+        user_profile_update(req)
+        .then(() => {
+            res.sendStatus(204);
+        }).catch((err) => {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -300,6 +324,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: NO_USER_IN_REQUEST"
      */
     router.options('/api/v2/jwt/user/profile', cors);
     router.get('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), user_profile);
@@ -330,9 +356,15 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
-    router.put('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), user_profile_update);
+    router.put('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), function(req, res, next) {
+        user_profile_update(req).then(() => {
+            res.sendStatus(204);
+        }).catch((err) => {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -355,6 +387,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: NO_USER_IN_REQUEST"
      */
     router.options('/api/v2/cpa/user/profile', cors);
     router.get('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile);
@@ -386,9 +420,15 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
-    router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile_update);
+    router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, function(req, res, next) {
+        user_profile_update(req).then(() => {
+            res.sendStatus(204);
+        }).catch((err) => {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -409,7 +449,7 @@ module.exports = function (router) {
      *        "200":
      *          description: "anonymous object containing first- and lastname"
      *        "400":
-     *          description: "not valid UUIDv4!"
+     *            description: "Possible error are: USER_WITH_UUID_NOT_FOUND, SERVICE_ERROR, BAD_REQUEST_INVALID_UUIDV4 and SERVICE_DISABLED_BY_CONFIGURATION"
      *        "404":
      *          description: "user not found"
      *        "409":
@@ -418,4 +458,5 @@ module.exports = function (router) {
      *          description: "error fetching user name by public id"
      */
     router.get('/api/v2/all/nameByUid/:puid', cors, user_nameByPublicUid);
+
 };

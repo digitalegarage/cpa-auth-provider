@@ -139,7 +139,7 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "signup succeed"
      *          "400":
-     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI"
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION"
      *          "302":
      *            schema:
      *              $ref: '#/definitions/SessionToken'
@@ -199,6 +199,8 @@ module.exports = function (app, options) {
      *     responses:
      *          "200":
      *            description: "a recovery email had been sent"
+     *          "400":
+     *            description: "Possible error are: INVALID_RECAPTCHA, USER_NOT_FOUND"
      */
     app.options('/api/v2/all/password/recover', cors);
     app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
@@ -221,6 +223,8 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "Password"
+     *          "400":
+     *            description: "Possible error are: DATA_VALIDATION_ERROR, WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL"
      */
     app.options('/api/v2/all/password/update', cors);
     app.post('/api/v2/all/password/update', cors, userHelper.password_update);
@@ -261,6 +265,8 @@ module.exports = function (app, options) {
      *            description: "a redirect with token in body response"
      *            schema:
      *              $ref: '#/definitions/SessionToken'
+     *          "400":
+     *            description: "Possible error are: RECAPTCHA_ERROR, EMAIL_MISSING, PASSWORD_MISSING, MISSING_FIELDS, PASSWORD_WEAK, EMAIL_TAKEN and UNAUTHORIZED_REDIRECT_URI"
      */
     app.options('/api/v2/session/login', cors);
     app.post('/api/v2/session/login', cors, function (req, res, next) {
@@ -370,6 +376,8 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/Token'
      *          "302":
      *            description: "a redirect with token as a get query parameter"
+     *          "400":
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI"
      */
     app.options(SESSION_LOGIN_PATH, cors);
     app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
@@ -381,7 +389,7 @@ module.exports = function (app, options) {
                 res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
             }
         } else {
-            next(apiErrorHelper.buildErrors(400, 'INVALID_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
+            next(apiErrorHelper.buildErrors(400, 'UNAUTHORIZED_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
         }
     });
 
@@ -415,6 +423,8 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/JWTToken'
      *          "302":
      *            description: "redirect"
+     *          "400":
+     *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
      */
     app.options('/api/v2/jwt/signup', cors);
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
@@ -463,6 +473,8 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/JWTToken'
      *          "302":
      *            description: "redirect"
+     *          "400":
+     *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
      */
     app.options('/api/v2/jwt/login', cors);
     app.post('/api/v2/jwt/login', cors, function (req, res, next) {

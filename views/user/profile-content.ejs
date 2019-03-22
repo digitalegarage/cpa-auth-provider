@@ -314,9 +314,13 @@
                     $modifyPassBtn.show();
                 },
                 error: function (result) {
+<<<<<<< HEAD
                     $.each(result.responseJSON.error.errors, function (index, error) {
                         $("#security-errors").append($('<p>').text(error.message));
                     });
+=======
+                    $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
+>>>>>>> 98b061f9b4a929fa071f708ae58ab2aabef93cd0
                     $("#form-security-errors").show("fast");
                     $('html, body').animate({
                         scrollTop: $("#security-errors").offset().top
