@@ -662,8 +662,8 @@
                         },
                         error: function (error) {
                             $changeEmailPassword.val('');
-                            if (error.responseJSON && error.responseJSON.msg) {
-                                $changeEmailError.html(error.responseJSON.msg);
+                            if (error.responseJSON && error.responseJSON.error && error.responseJSON.error.message) {
+                                $changeEmailError.html(error.responseJSON.message);
                                 $changeEmailForm.first('div.form-group').addClass('has-error');
                                 $changeEmailError.show();
                                 spinner.hide()

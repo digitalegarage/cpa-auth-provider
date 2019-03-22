@@ -694,7 +694,15 @@ module.exports = function(router) {
      *          description: "Too many request"
      */
     router.options('/api/v2/session/user/email/change', cors);
-    router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
+    router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, function(req, res, next){
+        changeEmailHelper.change_email(req)
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+           next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -730,7 +738,15 @@ module.exports = function(router) {
      *        "429":
      *          description: "Too many request"
      */
-    router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
+    router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), function(req, res, next){
+        changeEmailHelper.change_email(req)
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -766,7 +782,15 @@ module.exports = function(router) {
      *        "429":
      *          description: "Too many request"
      */
-    router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
+    router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, function(req, res, next){
+        changeEmailHelper.change_email(req)
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -795,7 +819,15 @@ module.exports = function(router) {
      *        "429":
      *          description: "Too many request"
      */
-    router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
+    router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), function(req, res, next){
+        changeEmailHelper.change_email(req)
+        .then(() => {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -825,7 +857,36 @@ module.exports = function(router) {
      *        "302":
      *          description: User is to broadcaster specified redirect URI post fixed with '?success=true/false' depending on the success of email change. That happens when use_custom_redirect query parameter is set to true
      */
-    router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email);
+    router.get('/api/v2/all/user/email/move/:token', function (req, res, next) {
+        changeEmailHelper.move_email(req)
+        .then((newUsername)=>{
+            if (config.broadcaster.changeMoveEmailConfirmationPage) {
+                if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=true');
+                } else {
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=true');
+                }
+            } else {
+                res.render('./verify-mail-changed.ejs', {success: true, newMail: newUsername, redirect: null, message: null});
+            }
+        })
+        .catch((err) => {
+            if (config.broadcaster.changeMoveEmailConfirmationPage) {
+                if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=false');
+                } else {
+                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=false');
+                }
+            } else {
+                res.render('./verify-mail-changed.ejs', {
+                    success: false,
+                    message: err.message,
+                    redirect: err.redirect,
+                    newMail: err.newMail
+                });
+            }
+        });
+    });
 
 
     /**
