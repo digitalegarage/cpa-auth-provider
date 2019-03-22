@@ -208,6 +208,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: BAD_PROFILE_DATA"
      */
     router.options('/api/v2/oauth/user/profile', cors);
     router.get('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), user_profile);
@@ -239,7 +241,7 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
     router.put('/api/v2/oauth/user/profile', cors, passport.authenticate('bearer', {session: false}), function(req, res, next) {
         user_profile_update(req).then(() => {
@@ -263,6 +265,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: NO_USER_IN_REQUEST"
      */
     router.options('/api/v2/session/user/profile', cors);
     router.get('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile);
@@ -288,7 +292,7 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
     router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, function(req, res, next) {
         user_profile_update(req)
@@ -320,6 +324,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: NO_USER_IN_REQUEST"
      */
     router.options('/api/v2/jwt/user/profile', cors);
     router.get('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), user_profile);
@@ -350,7 +356,7 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
     router.put('/api/v2/jwt/user/profile', cors, passport.authenticate('jwt', {session: false}), function(req, res, next) {
         user_profile_update(req).then(() => {
@@ -381,6 +387,8 @@ module.exports = function (router) {
      *         description: Return logged user profile
      *         schema:
      *           $ref: '#/definitions/Profile'
+     *       400:
+     *         description: "Possible error are: NO_USER_IN_REQUEST"
      */
     router.options('/api/v2/cpa/user/profile', cors);
     router.get('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, user_profile);
@@ -412,7 +420,7 @@ module.exports = function (router) {
      *          "204":
      *            description: "profile updated"
      *          "400":
-     *            description: "bad update data"
+     *            description: "Possible error are: BAD_PROFILE_DATA"
      */
     router.put('/api/v2/cpa/user/profile', cors, authHelper.ensureCpaAuthenticated, function(req, res, next) {
         user_profile_update(req).then(() => {
@@ -441,7 +449,7 @@ module.exports = function (router) {
      *        "200":
      *          description: "anonymous object containing first- and lastname"
      *        "400":
-     *          description: "not valid UUIDv4!"
+     *            description: "Possible error are: USER_WITH_UUID_NOT_FOUND, SERVICE_ERROR, BAD_REQUEST_INVALID_UUIDV4 and SERVICE_DISABLED_BY_CONFIGURATION"
      *        "404":
      *          description: "user not found"
      *        "409":
@@ -450,4 +458,5 @@ module.exports = function (router) {
      *          description: "error fetching user name by public id"
      */
     router.get('/api/v2/all/nameByUid/:puid', cors, user_nameByPublicUid);
+
 };

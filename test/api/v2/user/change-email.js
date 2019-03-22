@@ -196,7 +196,7 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure forbidden', function() {
             expect(this.res.statusCode).equal(401);
-            expect(this.res.text).equal('{"error":{"status":401,"code":"WRONG_PASSWORD","hint":"wrong password","message":"CHANGE_EMAIL_API_WRONG_PASSWORD\\"","errors":[]}}');
+            expect(this.res.text).equal('{"error":{"status":401,"code":"WRONG_PASSWORD","hint":"wrong password","message":"Wrong password.","errors":[]}}');
         });
 
         it('should not have generated a token', function(done) {

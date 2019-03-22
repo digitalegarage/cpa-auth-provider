@@ -148,7 +148,7 @@ function change_email(req) {
         })
         .then((correct) => {
             if (!correct) {
-                (apiErrorHelper.throwError(401, 'WRONG_PASSWORD','wrong password', req.__('CHANGE_EMAIL_API_WRONG_PASSWORD"')));
+                (apiErrorHelper.throwError(401, 'WRONG_PASSWORD','wrong password', req.__('CHANGE_EMAIL_API_WRONG_PASSWORD')));
                 return;
             }
             const validityDate = new Date(new Date().getTime() - VALIDITY_DURATION * 1000);
@@ -156,7 +156,7 @@ function change_email(req) {
         })
         .then((tokenCount) => {
             if (tokenCount >= REQUEST_LIMIT) {
-                apiErrorHelper.throwError(429, 'TOO_MANY_REQUESTS','wrong password', req.__('CHANGE_EMAIL_API_TOO_MANY_REQUESTS"'));
+                apiErrorHelper.throwError(429, 'TOO_MANY_REQUESTS','wrong password', req.__('CHANGE_EMAIL_API_TOO_MANY_REQUESTS'));
             }
             logger.debug('[POST /api/v2/[security]/user/email/change][SUCCESS][user_id', oldUser.id, '][from', oldLocalLogin.login, '][to', newUsername, ']');
             triggerAccountChangeEmails(oldLocalLogin.login, oldUser, req.authInfo ? req.authInfo.client : null, newUsername, redirect).then(
