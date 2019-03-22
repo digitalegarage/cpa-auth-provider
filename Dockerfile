@@ -10,6 +10,7 @@ COPY package.json package-lock.json /src/
 
 # Install Node.js dependencies
 WORKDIR /src
+RUN npm install
 
 COPY .sequelizerc /src/.sequelizerc
 COPY migrate /src/migrate
