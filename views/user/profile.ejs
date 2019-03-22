@@ -662,13 +662,11 @@
                         },
                         error: function (error) {
                             $changeEmailPassword.val('');
-<<<<<<< HEAD
                             if (error.responseJSON && error.responseJSON.error.message) {
                                 $changeEmailError.html(error.responseJSON.error.message);
-=======
-                            if (error.responseJSON && error.responseJSON.error && error.responseJSON.error.message) {
-                                $changeEmailError.html(error.responseJSON.message);
->>>>>>> 98b061f9b4a929fa071f708ae58ab2aabef93cd0
+                                if (error.responseJSON && error.responseJSON.error && error.responseJSON.error.message) {
+                                    $changeEmailError.html(error.responseJSON.message);
+                                }
                                 $changeEmailForm.first('div.form-group').addClass('has-error');
                                 $changeEmailError.show();
                                 spinner.hide()
@@ -958,13 +956,12 @@
                         location.reload();
                     },
                     error: function (result) {
-<<<<<<< HEAD
-                        $.each(result.responseJSON.error.errors, function (index, error) {
-                            $("#personnal-data-errors").append($('<p>').text(error.message));
-                        });
-=======
                         $("#personnal-data-errors").append($('<p>').append(result.responseJSON.error.message));
->>>>>>> 98b061f9b4a929fa071f708ae58ab2aabef93cd0
+                        if(result.responseJSON.error.errors){
+                            $.each(result.responseJSON.error.errors, function (index, error) {
+                                $("#personnal-data-errors").append($('<p>').text(error.message));
+                            });
+                        }
                         $("#form-personnal-data-errors").show("fast");
                         $('html, body').animate({
                             scrollTop: $("#personnal-data-errors").offset().top
@@ -1045,13 +1042,13 @@
                         }, 500);
                     },
                     error: function (result) {
-<<<<<<< HEAD
-                        $.each(result.responseJSON.error.errors, function (index, error) {
-                            $("#security-errors").append($('<p>').html(error.message));
-                        });
-=======
                         $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
->>>>>>> 98b061f9b4a929fa071f708ae58ab2aabef93cd0
+                        if(result.responseJSON.error.errors){
+                            $.each(result.responseJSON.error.errors, function (index, error) {
+                                $("#security-errors").append($('<p>').html(error.message));
+                            });
+                        }
+                        
                         $("#form-security-errors").show("fast");
                         $('html, body').animate({
                             scrollTop: $("#security-errors").offset().top
