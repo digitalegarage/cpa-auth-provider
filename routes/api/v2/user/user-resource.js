@@ -18,6 +18,7 @@ const codeHelper = require('../../../../lib/code-helper');
 const limiterHelper = require('../../../../lib/limiter-helper');
 const i18n = require('i18n');
 const _ = require('underscore');
+const requestHelper = require('../../../../lib/request-helper');
 
 function delete_user_by_id(userId, res) {
 // Transactional part
@@ -260,8 +261,8 @@ const resend_validation_email = function(req, res) {
             'validation-email',
             {log: false},
             {
-                confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
-                host: config.mail.host,
+                confirmLink: requestHelper.getIdpRoot() + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
+                host: requestHelper.getIdpRoot(),
                 mail: email,
                 code: code
             },

@@ -10,6 +10,7 @@ var passwordHelper = require('../../lib/password-helper');
 var finder = require('../../lib/finder');
 var limiterHelper = require('../../lib/limiter-helper');
 var afterLogoutHelper = require('../../lib/afterlogout-helper');
+var requestHelper = require('../../lib/request-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
@@ -126,8 +127,8 @@ module.exports = function (app, options) {
                             "password-recovery-email",
                             {log: false},
                             {
-                                forceLink: config.mail.host + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                host: config.mail.host,
+                                forceLink: requestHelper.getIdpRoot() + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                host: requestHelper.getIdpRoot(),
                                 mail: encodeURIComponent(localLogin.login),
                                 code: encodeURIComponent(code)
                             },
