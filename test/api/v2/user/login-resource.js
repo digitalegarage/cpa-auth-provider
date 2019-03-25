@@ -991,6 +991,25 @@ describe('API-V2 PASSWORD UPDATE', function() {
         });
     });
 
+    context('When user try to update his password with a weak password', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, 'w', validCode, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.error.status).to.equal(400);
+            expect(ctx.res.body.error.code).to.equal("PASSWORD_WEAK");
+            expect(ctx.res.body.error.hint).to.equal("Password week, they might be several causes see errors array");
+            expect(ctx.res.body.error.errors.length).to.equal(4);
+            expect(ctx.res.body.error.errors[0].code).to.equal("OWASP_0");
+            expect(ctx.res.body.error.errors[1].code).to.equal("OWASP_4");
+            expect(ctx.res.body.error.errors[2].code).to.equal("OWASP_5");
+            expect(ctx.res.body.error.errors[3].code).to.equal("OWASP_6");
+        });
+    });
+
     context('When user try to update his password with an unexisting email', function() {
 
         before(function(done) {
