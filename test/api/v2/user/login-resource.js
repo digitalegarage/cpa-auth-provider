@@ -148,7 +148,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty or invalid","errors":[{"code":"EMAIL_MISSING","hint":"Email is mandatory","message":"Email is empty or invalid"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty or invalid<br/>- Email is empty or invalid","errors":[{"code":"BAD_EMAIL_FORMAT","hint":"Bad email format","message":"Email is empty or invalid"},{"code":"EMAIL_MISSING","hint":"Email is mandatory","message":"Email is empty or invalid"}]}}');
                     });
 
                 });

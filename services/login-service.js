@@ -28,7 +28,14 @@ function checkSignupData(req) {
         }
 
         var errors = [];
-        if (!req.body.email) {
+
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!re.test(String(req.body.email).toLowerCase())) {
+            errors.push(apiErrorHelper.buildErrors('BAD_EMAIL_FORMAT', 'Bad email format', req.__('BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID')));
+        }
+
+        if (!req.body.email){
             errors.push(apiErrorHelper.buildErrors('EMAIL_MISSING', 'Email is mandatory', req.__('BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID')));
         }
         if (!req.body.password) {

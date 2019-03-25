@@ -144,6 +144,7 @@ const get_user = function(req, res, next) {
 
 const create_local_login = function(req, res, next) {
     req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
+    req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).isEmail();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
     req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
