@@ -130,7 +130,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
-     *            name: "code"
+     *            name: "withcode"
      *            example: "true"
      *            schema:
      *              type: string
@@ -253,7 +253,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
-     *            name: "code"
+     *            name: "withcode"
      *            example: "true"
      *            schema:
      *              type: string
@@ -454,18 +454,6 @@ module.exports = function (app, options) {
      *            required: true
      *            schema:
      *              $ref: "#/definitions/Credentials"
-     *          - in: query
-     *            name: "redirect"
-     *            example: "http://somedomain.org"
-     *            schema:
-     *              type: string
-     *              description: The redirect url to send the code
-     *          - in: query
-     *            name: "code"
-     *            example: "true"
-     *            schema:
-     *              type: string
-     *              description: if present a first redirect'd be request to /api/v2/session/cookie
      *     responses:
      *          "200":
      *            description: "signup succeed"
