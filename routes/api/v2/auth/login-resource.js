@@ -389,7 +389,7 @@ module.exports = function (app, options) {
                 res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
             }
         } else {
-            next(apiErrorHelper.buildErrors(400, 'UNAUTHORIZED_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
+            next(apiErrorHelper.buildError(400, 'UNAUTHORIZED_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
         }
     });
 
