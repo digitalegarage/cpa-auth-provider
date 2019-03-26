@@ -305,6 +305,8 @@
 	"BACK_SIGNUP_RECAPTCHA_EMPTY_OR_WRONG": "Le reCaptcha est vide ou erroné.",
 	"BACK_SIGNUP_PWD_CODE_RECAPTCHA_EMPTY_OR_WRONG": "Le reCaptcha est vide ou erroné.",
 	"BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID": "Email vide ou invalide",
+	"BACK_SIGNUP_EMAIL_EMPTY": "Email vide",
+	"BACK_SIGNUP_EMAIL_INVALID": "Email invalide",
 	"BACK_SIGNUP_PASSWORD_MISSING": "Mots de passe manquant",
 	"BACK_SIGNUP_USER_NOT_FOUND": "Utilisateur inconnu.",
 	"BACK_SIGNUP_DATE_OF_BIRTH_FAIL": "Date de naissance invalide",

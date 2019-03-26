@@ -134,7 +134,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"code":"PASSWORD_MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"field":"password","type":"MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
                     });
 
                 });
@@ -148,7 +148,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty or invalid<br/>- Email is empty or invalid","errors":[{"code":"BAD_EMAIL_FORMAT","hint":"Bad email format","message":"Email is empty or invalid"},{"code":"EMAIL_MISSING","hint":"Email is mandatory","message":"Email is empty or invalid"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty","errors":[{"field":"email","type":"MISSING","hint":"\\"email\\" is not present in request body","message":"Email is empty"}]}}');
                     });
 
                 });
@@ -211,7 +211,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Missing fields","errors":[{"code":"date_of_birth","hint":"field is missing"}]}}');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Missing fields","errors":[{"field":"date_of_birth","type":"MISSING","hint":"field is missing"}]}}');
                         });
 
                     });
@@ -983,11 +983,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.error.status).to.equal(400);
-            expect(ctx.res.body.error.code).to.equal("DATA_VALIDATION_ERROR");
-            expect(ctx.res.body.error.hint).to.equal("They might be several causes see errors array");
-            expect(ctx.res.body.error.errors.length).to.equal(1);
-            expect(ctx.res.body.error.errors[0].code).to.equal("CODE_MISSING");
+            expect(ctx.res.text).to.equal("{\"error\":{\"status\":400,\"code\":\"DATA_VALIDATION_ERROR\",\"hint\":\"They might be several causes see errors array\",\"errors\":[{\"field\":\"code\",\"type\":\"BAD_FORMAT_OR_MISSING\",\"hint\":\"First validation pass error: CODE_MISSING\"}]}}");
         });
     });
 
@@ -999,14 +995,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.error.status).to.equal(400);
-            expect(ctx.res.body.error.code).to.equal("PASSWORD_WEAK");
-            expect(ctx.res.body.error.hint).to.equal("Password week, they might be several causes see errors array");
-            expect(ctx.res.body.error.errors.length).to.equal(4);
-            expect(ctx.res.body.error.errors[0].code).to.equal("OWASP_0");
-            expect(ctx.res.body.error.errors[1].code).to.equal("OWASP_4");
-            expect(ctx.res.body.error.errors[2].code).to.equal("OWASP_5");
-            expect(ctx.res.body.error.errors[3].code).to.equal("OWASP_6");
+            expect(ctx.res.text).to.equal("{\"error\":{\"status\":400,\"code\":\"PASSWORD_WEAK\",\"hint\":\"Password week, they might be several causes see errors array\",\"message\":\"Password too simple. Use numbers and upper and lower case letters.\",\"errors\":[{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_0\"},{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_4\"},{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_5\"},{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_6\"}]}}");
         });
     });
 

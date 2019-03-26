@@ -334,6 +334,8 @@
     "BACK_SIGNUP_RECAPTCHA_EMPTY_OR_WRONG": "reCaptcha is empty or wrong.",
     "BACK_SIGNUP_PWD_CODE_RECAPTCHA_EMPTY_OR_WRONG": "reCaptcha is empty or wrong.",
     "BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID": "Email is empty or invalid",
+    "BACK_SIGNUP_EMAIL_EMPTY": "Email is empty",
+    "BACK_SIGNUP_EMAIL_INVALID": "Email is invalid",
     "BACK_SIGNUP_PASSWORD_MISSING": "Missing password",
     "BACK_SIGNUP_USER_NOT_FOUND": "User not found.",
     "BACK_SIGNUP_DATE_OF_BIRTH_FAIL": "Invalid date of birth",

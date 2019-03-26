@@ -150,7 +150,7 @@ const create_local_login = function(req, res, next) {
     req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CREATE_LOGIN_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg);});
+            var _errors = result.array().map(r => {return apiErrorHelper.buildFieldError(r.param, apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, r.msg);});
             next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
@@ -214,7 +214,7 @@ const change_password = function(req, res, next) {
 
     req.getValidationResult().then(function(result) {
         if (!result.isEmpty()) {
-            var _errors = result.array().map(r => {return apiErrorHelper.buildErrors('CHANGE_PASSWORD_VALIDATION_ERROR.' + r.param.toUpperCase(),r.msg);});
+            var _errors = result.array().map(r => {return apiErrorHelper.buildFieldError(r.param.toUpperCase(), apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, r.msg);});
             next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password.', '',_errors));
         } else {
             let email = req.body.email;

@@ -327,9 +327,8 @@ describe('API-V2 add local login', function() {
             });
 
             it(' should be 400', function() {
-                expect(JSON.parse(ctx.res.text).error.code).equal('CREATE_LOGIN_VALIDATION_ERROR');
-                expect(JSON.parse(ctx.res.text).error.errors[0].code).equal('CREATE_LOGIN_VALIDATION_ERROR.PASSWORD');
                 expect(ctx.res.statusCode).to.equal(400);
+                expect(ctx.res.text).to.equal("{\"error\":{\"status\":400,\"code\":\"CREATE_LOGIN_VALIDATION_ERROR\",\"hint\":\"Cannot create login.\",\"errors\":[{\"field\":\"password\",\"type\":\"BAD_FORMAT_OR_MISSING\",\"hint\":\"Passwords do not match\"}]}}");
             });
         });
 

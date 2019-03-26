@@ -31,15 +31,16 @@ function checkSignupData(req) {
 
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-        if (!re.test(String(req.body.email).toLowerCase())) {
-            errors.push(apiErrorHelper.buildErrors('BAD_EMAIL_FORMAT', 'Bad email format', req.__('BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID')));
+        if (!req.body.email){
+            errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.MISSING, null, '"email" is not present in request body', req.__('BACK_SIGNUP_EMAIL_EMPTY')));
+        } else {
+            if (!re.test(String(req.body.email).toLowerCase())) {
+                errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.BAD_FORMAT, null, 'Cannot validate email using our reg exp', req.__('BACK_SIGNUP_EMAIL_INVALID')));
+            }
         }
 
-        if (!req.body.email){
-            errors.push(apiErrorHelper.buildErrors('EMAIL_MISSING', 'Email is mandatory', req.__('BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID')));
-        }
         if (!req.body.password) {
-            errors.push(apiErrorHelper.buildErrors('PASSWORD_MISSING', 'Password is mandatory', req.__('BACK_SIGNUP_PASSWORD_MISSING')));
+            errors.push(apiErrorHelper.buildFieldError('password', apiErrorHelper.TYPE.MISSING, null, 'Password is mandatory', req.__('BACK_SIGNUP_PASSWORD_MISSING')));
         }
         if (errors.length > 0) {
             var message =  req.__('BACK_SIGNUP_MISSING_FIELDS');
@@ -241,7 +242,7 @@ function validateFields(attributes) {
         config.userProfiles.requiredFields.forEach(
             function(element) {
                 if (!attributes.hasOwnProperty(element) || !attributes[element]) {
-                    errors.push(apiErrorHelper.buildErrors(element, 'field is missing'));
+                    errors.push(apiErrorHelper.buildFieldError(element, apiErrorHelper.TYPE.MISSING, null, 'field is missing'));
                 }
             }
         );

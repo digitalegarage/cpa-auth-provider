@@ -36,7 +36,7 @@ var user_profile_update =
                     var message = '';
                     for (var i = 0; i < errors.length; i++) {
                         message += ' - ' + errors[i].msg + '<br/>';
-                        subErrors.push(apiErrorHelper.buildErrors('FIELD_' + errors[i].param + '_IS_EMPTY_OR_INVALID', errors[i].msg, errors[i].msg, {value: errors[i].value}));
+                        subErrors.push(apiErrorHelper.buildFieldError(errors[i].param, apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, errors[i].msg, errors[i].msg, {value: errors[i].value}));
                     }
                     reject(apiErrorHelper.buildError(400, 'BAD_PROFILE_DATA', 'Profile data not valid.', message, subErrors, errors));
                 } else {
