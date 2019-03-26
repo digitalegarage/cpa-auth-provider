@@ -210,7 +210,7 @@ module.exports = function (app, options) {
         })
         .catch((err)=> {
             next(err);
-        })
+        });
     });
 
     /**

@@ -39,9 +39,17 @@ function checkSignupData(req) {
             }
         }
 
+        var email = req.body.email;
+        var password = req.body.password;
+
         if (!req.body.password) {
             errors.push(apiErrorHelper.buildFieldError('password', apiErrorHelper.TYPE.MISSING, null, 'Password is mandatory', req.__('BACK_SIGNUP_PASSWORD_MISSING')));
+        } else {
+            if (!passwordHelper.isStrong(email, password)) {
+                errors.push(apiErrorHelper.buildFieldError('password', apiErrorHelper.TYPE.CUSTOM, 'PASSWORD_WEAK', 'Password is too weak', req.__('PASSWORD_WEAK')));
+            }
         }
+
         if (errors.length > 0) {
             var message =  req.__('BACK_SIGNUP_MISSING_FIELDS');
             for (var i = 0; i < errors.length; i++) {
@@ -50,12 +58,6 @@ function checkSignupData(req) {
             reject(apiErrorHelper.buildError(400, 'BAD_DATA', 'Some fields are missing or have a bad format see errors arrays', message, errors));
         }
 
-        var email = req.body.email;
-        var password = req.body.password;
-
-        if (!passwordHelper.isStrong(email, password)) {
-            reject(apiErrorHelper.buildError(400, 'PASSWORD_WEAK', "Password is too weak check which rule applies (could be 'no', 'simple or 'owasp'", req.__('PASSWORD_WEAK')));
-        }
 
         // userAttributes is a merge of requiredAttributes and optionnalAttributes
         var userAttributes = {display_name: email};

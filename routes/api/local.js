@@ -51,7 +51,7 @@ module.exports = function (app, options) {
         })
         .catch((err)=> {
             next(err);
-        })
+        });
     });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.

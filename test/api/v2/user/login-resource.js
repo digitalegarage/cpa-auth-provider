@@ -31,9 +31,6 @@ const DATE_OF_BIRTH = '31.08.1978';
 const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
 const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
 
-const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
-const API_PASSWORD_RECOVER_USER_NOT_FOUND = 'User not found';
-
 const AFTER_LOGIN = {
     activated: true,
     cookieName: 'peach_infos',
@@ -92,7 +89,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","message":"Password too simple. Use numbers and upper and lower case letters.","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is too weak","message":"Password too simple. Use numbers and upper and lower case letters."}]}}');
                      });
 
                 });
@@ -106,7 +103,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","message":"Password too simple. Use numbers and upper and lower case letters.","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is too weak","message":"Password too simple. Use numbers and upper and lower case letters."}]}}');
                      });
 
                 });
