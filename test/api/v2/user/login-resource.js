@@ -69,7 +69,7 @@ describe('API-V2 LOGIN', function () {
 
                 it('should return a success false', function () {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"RECAPTCHA_ERROR","hint":"Fail to validate Recaptcha","errors":[],"data":"invalid-input-response"}}');
+                    expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- reCaptcha is empty or wrong.","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Fail to validate Recaptcha","message":"reCaptcha is empty or wrong.","data":"invalid-input-response"}]}}');
                 });
 
             });
@@ -208,7 +208,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Missing fields","errors":[{"field":"date_of_birth","type":"MISSING","hint":"field is missing"}]}}');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- date_of_birth  is missing","errors":[{"field":"date_of_birth","type":"MISSING","hint":"field \\"date_of_birth\\" is missing","message":"date_of_birth  is missing"}]}}');
                         });
 
                     });
@@ -226,7 +226,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"UNKNOWN_GENDER","hint":"Unknown gender \'jedi\' should one of the following (male|female|other)","errors":[]}}');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- undefined","errors":[{"field":"gender","type":"BAD_FORMAT","custom_type":"Unknown gender \'jedi\' should one of the following (male|female|other)","hint":" - gender doesn\'t have the expected format"}]}}');
                         });
                     });
 

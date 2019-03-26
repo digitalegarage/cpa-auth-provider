@@ -347,6 +347,8 @@
     "API_SIGNUP_EMAIL_ALREADY_EXISTS": "Diese E-Mail wurde schon benutzt.",
     "API_LOCAL_LOGIN_ALREADY_EXISTS": "Dieser Nutzer hat bereits lokale Zugangsdaten",
 	"API_SIGNUP_MISSING_FIELDS": "Pflichtfelder fehlen",
+	"API_SIGNUP_MISSING_FIELD": "is missing",
+	"API_SIGNUP_FIELD_HAS_BAD_FORMAT": "has a bad format",
 	"API_SIGNUP_SUCCESS": "Neuer Benutzer erfolgreich erstellt.",
 	"API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA": "Etwas ging mit dem reCAPTCHA schief",
 	"API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL": "Bitte E-Mail eingeben",

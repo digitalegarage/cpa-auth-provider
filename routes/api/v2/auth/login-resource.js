@@ -49,10 +49,6 @@ module.exports = function (app, options) {
      *               type: "string"
      *               example: "myVeryStrongPassword"
      *               description: "user password"
-     *           confirm_password:
-     *               type: "string"
-     *               example: "myVeryStrongPassword"
-     *               description: "user password confirm value"
      *           gender:
      *               type: "string"
      *               enum: [other, male, female]
