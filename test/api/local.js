@@ -161,7 +161,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"Invalid recaptcha.","message":"Something went wrong with the reCAPTCHA","errors":[]}}');
+            expect(this.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","message":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}],"errors":[]}}');
         });
     });
 

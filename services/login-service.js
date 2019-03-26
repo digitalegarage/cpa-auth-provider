@@ -47,7 +47,7 @@ function checkSignupData(req) {
             for (var i = 0; i < errors.length; i++) {
                 message += '<br/>' + '- ' + errors[i].message;
             }
-            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Some fields are missing see errors arrays', message, errors));
+            reject(apiErrorHelper.buildError(400, 'BAD_DATA', 'Some fields are missing or have a bad format see errors arrays', message, errors));
         }
 
         var email = req.body.email;

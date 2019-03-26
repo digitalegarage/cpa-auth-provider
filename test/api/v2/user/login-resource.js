@@ -134,7 +134,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"field":"password","type":"MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"field":"password","type":"MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
                     });
 
                 });
@@ -148,7 +148,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty","errors":[{"field":"email","type":"MISSING","hint":"\\"email\\" is not present in request body","message":"Email is empty"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Email is empty","errors":[{"field":"email","type":"MISSING","hint":"\\"email\\" is not present in request body","message":"Email is empty"}]}}');
                     });
 
                 });
@@ -898,7 +898,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"Invalid recaptcha.","message":"Something went wrong with the reCAPTCHA","errors":[]}}');
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","message":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}],"errors":[]}}');
         });
     });
 

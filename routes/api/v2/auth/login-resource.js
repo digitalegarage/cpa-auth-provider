@@ -203,7 +203,15 @@ module.exports = function (app, options) {
      *            description: "Possible error are: INVALID_RECAPTCHA, USER_NOT_FOUND"
      */
     app.options('/api/v2/all/password/recover', cors);
-    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
+    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, function (req, res, next){
+        userHelper.password_recover(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        })
+    });
 
     /**
      * @swagger
