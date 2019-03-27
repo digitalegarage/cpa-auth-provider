@@ -134,13 +134,13 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "signup succeed"
+     *          "302":
+     *            schema:
+     *              $ref: '#/definitions/SessionToken'
      *          "400":
      *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION, BAD_DATA (with embedded errors)"
      *            schema:
      *              $ref: '#/definitions/error'
-     *          "302":
-     *            schema:
-     *              $ref: '#/definitions/SessionToken'
      */
     app.options('/api/v2/session/signup', cors);
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
@@ -198,7 +198,9 @@ module.exports = function (app, options) {
      *          "200":
      *            description: "a recovery email had been sent"
      *          "400":
-     *            description: "Possible error are: INVALID_RECAPTCHA, USER_NOT_FOUND"
+     *            description: "Possible error are: BAD_DATA, INVALID_RECAPTCHA and USER_NOT_FOUND"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/recover', cors);
     app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, function (req, res, next){
@@ -231,6 +233,8 @@ module.exports = function (app, options) {
      *            description: "Password"
      *          "400":
      *            description: "Possible error are: DATA_VALIDATION_ERROR, WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/update', cors);
     app.post('/api/v2/all/password/update', cors, userHelper.password_update);
@@ -479,6 +483,8 @@ module.exports = function (app, options) {
      *            description: "redirect"
      *          "400":
      *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/jwt/login', cors);
     app.post('/api/v2/jwt/login', cors, function (req, res, next) {
