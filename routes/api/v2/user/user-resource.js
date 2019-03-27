@@ -708,10 +708,16 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
+     *          schema:
+     *            $ref: '#/definitions/error'
      */
     router.options('/api/v2/session/user/email/change', cors);
     router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, function(req, res, next){
@@ -753,10 +759,16 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
+     *          schema:
+     *            $ref: '#/definitions/error'
      */
     router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), function(req, res, next){
         changeEmailHelper.change_email(req)
@@ -797,10 +809,16 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
+     *          schema:
+     *            $ref: '#/definitions/error'
      */
     router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, function(req, res, next){
         changeEmailHelper.change_email(req)
@@ -834,10 +852,16 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
+     *          schema:
+     *            $ref: '#/definitions/error'
      */
     router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), function(req, res, next){
         changeEmailHelper.change_email(req)

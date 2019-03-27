@@ -137,7 +137,7 @@ function change_email(req) {
 
         return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
             if (localLogin) {
-                apiErrorHelper.throwError(400, 'EMAIL_ALREADY_TAKEN',newUsername +' is already taken', req.__('CHANGE_EMAIL_API_EMAIL_ALREADY_TAKEN'));
+                apiErrorHelper.throwError(400, 'EMAIL_ALREADY_TAKEN', newUsername +' is already taken', req.__('CHANGE_EMAIL_API_EMAIL_ALREADY_TAKEN'));
                 return;
             }
             // At last check password
