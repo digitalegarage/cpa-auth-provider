@@ -232,12 +232,20 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "Password"
      *          "400":
-     *            description: "Possible error are: DATA_VALIDATION_ERROR, WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL"
+     *            description: "Possible error are: BAD_DATA, DATA_VALIDATION_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/update', cors);
-    app.post('/api/v2/all/password/update', cors, userHelper.password_update);
+    app.post('/api/v2/all/password/update', cors, function(req, res, next){
+        userHelper.password_update(req)
+        .then(()=> {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        })
+    });
 
 
     /**

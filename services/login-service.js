@@ -29,6 +29,7 @@ function checkSignupData(req) {
             errors.push(apiErrorHelper.buildFieldError('g-recaptcha-response', apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, 'Fail to validate Recaptcha', req.__('BACK_SIGNUP_RECAPTCHA_EMPTY_OR_WRONG'), req.recaptcha.error));
         }
 
+        //FIXME : duplicate
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
         if (!req.body.email){

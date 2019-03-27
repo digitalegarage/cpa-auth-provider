@@ -964,11 +964,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.error.status).to.equal(400);
-            expect(ctx.res.body.error.code).to.equal("WRONG_RECOVERY_CODE");
-            expect(ctx.res.body.error.hint).to.equal("Recovery code for that user is wrong or doesn\'t exists");
-            expect(ctx.res.body.error.message).to.equal("Wrong recovery code.");
-            expect(ctx.res.body.error.errors.length).to.equal(0);
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","message":"Wrong recovery code.","errors":[{"field":"code","type":"CUSTOM","custom_type":"WRONG_CODE","hint":"wrong code","message":"Wrong recovery code."}]}}');
         });
     });
 
@@ -980,7 +976,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal("{\"error\":{\"status\":400,\"code\":\"DATA_VALIDATION_ERROR\",\"hint\":\"They might be several causes see errors array\",\"errors\":[{\"field\":\"code\",\"type\":\"BAD_FORMAT_OR_MISSING\",\"hint\":\"First validation pass error: CODE_MISSING\"}]}}");
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","errors":[{"field":"code","type":"MISSING","hint":"\\"code\\" is not present in request body"}]}}');
         });
     });
 
@@ -992,7 +988,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal("{\"error\":{\"status\":400,\"code\":\"PASSWORD_WEAK\",\"hint\":\"Password week, they might be several causes see errors array\",\"message\":\"Password too simple. Use numbers and upper and lower case letters.\",\"errors\":[{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_0\"},{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_4\"},{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_5\"},{\"field\":\"password\",\"type\":\"CUSTOM\",\"custom_type\":\"OWASP_6\"}]}}");
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","errors":[{"field":"password","type":"CUSTOM","custom_type":"OWASP_0"},{"field":"password","type":"CUSTOM","custom_type":"OWASP_4"},{"field":"password","type":"CUSTOM","custom_type":"OWASP_5"},{"field":"password","type":"CUSTOM","custom_type":"OWASP_6"}]}}');
         });
     });
 
