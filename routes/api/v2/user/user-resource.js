@@ -58,15 +58,13 @@ const delete_user_with_credentials = function(req, res, next) {
 
         db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
-                logger.info('locallogin not found');
-                next(apiErrorHelper.buildError(401,'LOCAL_LOGIN_NOT_FOUND','Local login not found.'));
+                next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
             } else {
                 return localLogin.verifyPassword(password).then(function(isMatch) {
-                    logger.info('isMatch', isMatch);
                     if (isMatch) {
                         return delete_user_by_id(localLogin.user_id, res);
                     } else {
-                        next(apiErrorHelper.buildError(401,'LOCAL_LOGIN_NOT_MATCHING_PASSWORD','Local login not matching password.'));
+                        next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
                     }
                 });
             }
@@ -116,8 +114,7 @@ const get_user = function(req, res, next) {
         var password = user.pass;
         db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
-                logger.info('locallogin not found');
-                next(apiErrorHelper.buildError(401,'LOCAL_LOGIN_NOT_FOUND','Local login not found.'));
+                next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
             } else {
                 return localLogin.verifyPassword(password).then(function(isMatch) {
                     logger.info('isMatch', isMatch);
@@ -129,12 +126,10 @@ const get_user = function(req, res, next) {
                             // be sure about what we send? here we go.
                             res.json(_.pick(user, 'id', 'display_name', 'firstname', 'lastname', 'gender', 'language', 'permission_id', 'public_uid'));
                         }).catch(function(error) {
-                            logger.error(error);
-                            next(apiErrorHelper.buildError(500, 'UNEXPECTED_SERVER_ERROR', 'Unexpected server error.', '',[], error));
+                            next(error);
                         });
                     } else {
-                        logger.debug('Authentication failed for ' + user.name);
-                        next(401, 'AUTHENTICATION_FAILURE', 'Authentication failed.');
+                        next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
                     }
                 });
             }
@@ -378,9 +373,13 @@ module.exports = function(router) {
      *          "204":
      *            description: "user had been deleted"
      *          "400":
-     *            description: "missing credentials"
+     *            description: "Possible error are: MISSING_CREDENTIALS"
+     *            schema:
+     *              $ref: '#/definitions/error'
      *          "401":
-     *            description: "wrong login or password"
+     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
+     *            schema:
+     *              $ref: '#/definitions/error'
      *   get:
      *     description: get a users profile by credentials
      *     tags: [Basic Auth]
@@ -399,7 +398,16 @@ module.exports = function(router) {
      *          "200":
      *            description: "user profile including permissions in json body"
      *            schema:
-     *              $ref: '#/definitions/User'     */
+     *              $ref: '#/definitions/User'
+     *          "400":
+     *            description: "Possible error are: AUTHORIZATION_HEADER_MISSING"
+     *            schema:
+     *              $ref: '#/definitions/error'
+     *          "401":
+     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
+     *            schema:
+     *              $ref: '#/definitions/error'
+     */
     router.options('/api/v2/basicauth/user', cors);
     router.delete('/api/v2/basicauth/user', cors, delete_user_with_credentials);
     router.get('/api/v2/basicauth/user', cors, get_user);
@@ -916,7 +924,7 @@ module.exports = function(router) {
      *        "302":
      *          description: User is to broadcaster specified redirect URI post fixed with '?success=true/false' depending on the success of email change. That happens when use_custom_redirect query parameter is set to true
      */
-    router.get('/api/v2/all/user/email/move/:token', function (req, res, next) {
+    router.get('/api/v2/all/user/email/move/:token', function (req, res) {
         changeEmailHelper.move_email(req)
         .then((newUsername)=>{
             if (config.broadcaster.changeMoveEmailConfirmationPage) {
