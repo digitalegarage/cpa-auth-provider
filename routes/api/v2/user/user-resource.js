@@ -254,26 +254,25 @@ const change_password = function(req) {
                         localLogin.verifyPassword(req.body.previous_password).then(function(isMatch) {
                             // if user is found and password is right change password
                             if (isMatch) {
-                                localLogin.setPassword(req.body.new_password).then(
-                                    function() {
+                                localLogin.setPassword(req.body.new_password)
+                                .then(() => {
                                         appHelper.destroySessionsByUserId(localLogin.User.id, req.sessionID).then(function() {
                                             resolve();
-                                        }).catch(function(e) {
-                                            logger.error(e);
-                                            reject(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], e));
+                                        }).catch((err) => {
+                                            reject(err);
                                         });
-                                    },
-                                    function(err) {
-                                        logger.error(err);
-                                        reject(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], err));
-                                    }
-                                );
+                                }).catch((err) => {
+                                    reject(err);
+                                });
                             } else {
                                 reject(apiErrorHelper.buildError(401,
-                                    'INCORRECT_PREVIOUS_PASSWORD',
-                                    'Incorrect previous pass.',
-                                    req.__('BACK_INCORRECT_PREVIOUS_PASS'))
-                                );
+                                    apiErrorHelper.COMMON_ERROR.BAD_DATA,
+                                    'Cannot change password.',
+                                    'Some fields are missing or have a bad format see errors arrays',
+                                    null,
+                                    [
+                                        apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.CUSTOM, 'INCORRECT_PREVIOUS_PASSWORD', "Previous password is wrong", req.__('BACK_INCORRECT_PREVIOUS_PASS'))
+                                    ]));
                             }
                         });
                     }
@@ -641,10 +640,6 @@ module.exports = function(router) {
      *              type: string
      *              example: passw0rd
      *              description: the password to set
-     *          confirm_password:
-     *              type: string
-     *              example: passw0rd
-     *              description:  confirm password
      */
 
     /**
@@ -659,7 +654,7 @@ module.exports = function(router) {
      *          -
      *            name: "ChangePassword"
      *            in: "body"
-     *            description: "changing password data"
+     *            description: "changing password"
      *            required: true
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
@@ -668,10 +663,12 @@ module.exports = function(router) {
      *          description: "local login had been created"
      *        "400":
      *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *          schema:
+     *            $ref: '#/definitions/error'
      *        "401":
      *          description: "wrong previous password and or login"
-     *        "500":
-     *          description: "unexpected error"
+     *          schema:
+     *            $ref: '#/definitions/error'
      */
     router.options('/api/v2/all/user/password', cors);
     router.post('/api/v2/all/user/password', cors, function(req, res, next){
@@ -717,7 +714,7 @@ module.exports = function(router) {
      *          -
      *            name: "ChangeEmail"
      *            in: "body"
-     *            description: "changing password data"
+     *            description: "changing email"
      *            required: true
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
