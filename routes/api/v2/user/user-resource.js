@@ -142,66 +142,65 @@ const get_user = function(req, res, next) {
     }
 };
 
-const create_local_login = function(req, res, next) {
-    req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
-    req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).isEmail();
-    req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
-    req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
-    req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
-    req.getValidationResult().then(function(result) {
-        if (!result.isEmpty()) {
-            var _errors = result.array().map(r => {return apiErrorHelper.buildFieldError(r.param, apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, r.msg);});
-            next(apiErrorHelper.buildError(400, 'CREATE_LOGIN_VALIDATION_ERROR', 'Cannot create login.', '',_errors));
+const create_local_login = function(req) {
+    return new Promise(function(resolve, reject) {
+        var errors = [];
+        if (!req.body.email){
+            errors.push(apiErrorHelper.buildFieldError("email", apiErrorHelper.TYPE.MISSING, null, "email is mandatory", req.__('BACK_CHANGE_PWD_MAIL_EMPTY')));
+        } else {
+            req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).isEmail();
+        }
+        if (!req.body.password){
+            errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.MISSING, null, "email is mandatory", req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')));
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
-                next(
-                    apiErrorHelper.buildError(400,
-                        'API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH', 
-                        'Password is not strong enough.', 
-                        req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
-                        [],
-                        {
-                            password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
-                            score: passwordHelper.getQuality(req.body.email, req.body.password)
-                        }
-                    ));
-            } else {
-                userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
-                    function() {
-                        res.sendStatus(204);
-                    },
-                    function(err) {
-                        if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
-                            next(apiErrorHelper.buildError(400,
-                                'API_SIGNUP_EMAIL_ALREADY_EXISTS', 
-                                req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')));
-                        } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
-                            next(
-                                apiErrorHelper.buildError(400,
-                                'API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH', 
-                                'Password is not strong enough.', 
-                                [],
-                                req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
-                                {
-                                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
-                                    score: passwordHelper.getQuality(req.body.email, req.body.password)
-                                }
-                                ));
-                                    
-                        } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
-                            next(apiErrorHelper.buildError(400,
-                                'API_LOCAL_LOGIN_ALREADY_EXISTS',
-                                'Local login exists.', 
-                                req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')));
-                        } else {
-                            logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
-                            next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot create login. Api error.', req.__('API_ERROR'),[], err));
-                        }
-                    }
-                );
+                errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.CUSTOM, "PASSWORD_WEAK", req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'), req.__('PASSWORD_WEAK'), {
+                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                    score: passwordHelper.getQuality(req.body.email, req.body.password)
+                }));
             }
-
         }
+
+        return req.getValidationResult()
+        .then((result) => {
+            result.array().map((r) => {errors.push(apiErrorHelper.buildFieldError(r.param, apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, r.msg));});
+
+            if (errors.length > 0) {
+                var message = req.__('BACK_SIGNUP_MISSING_FIELDS');
+                for (var i = 0; i < errors.length; i++) {
+                    message += '<br/>' + '- ' + errors[i].message;
+                }
+                reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', message, errors));
+            } else {
+                userHelper.addLocalLogin(req.user, req.body.email, req.body.password)
+                .then(() => {
+                    resolve();
+                })
+                .catch((err)=> {
+                    if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
+                        reject(apiErrorHelper.buildError(400,
+                            apiErrorHelper.COMMON_ERROR.BAD_DATA,
+                            'Some fields are missing or have a bad format see errors arrays',
+                            message,
+                            [
+                                apiErrorHelper.buildFieldError("email", apiErrorHelper.TYPE.CUSTOM, 'EMAIL_TAKEN', 'Email ' + req.body.email + ' already taken as social or local login',
+                                    '<br/>' + '- ' + req.__('BACK_SIGNUP_EMAIL_TAKEN'))
+                            ]
+                        ));
+                    } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
+                        reject(apiErrorHelper.buildError(400,
+                            'LOCAL_LOGIN_ALREADY_EXISTS',
+                            'Current user already has a local login.',
+                            req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')));
+                    } else {
+                        reject(err);
+                    }
+                });
+            }
+        })
+        .catch((err)=>{
+            reject(err);
+        });
     });
 };
 
@@ -484,10 +483,6 @@ module.exports = function(router) {
      *              type: string
      *              example: passw0rd
      *              description: the password to set
-     *          confirm_password:
-     *              type: string
-     *              example: passw0rd
-     *              description:  confirm password
      */
 
     /**
@@ -511,13 +506,21 @@ module.exports = function(router) {
      *        "204":
      *          description: "local login had been created"
      *        "400":
-     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
-     *        "500":
-     *          description: "unexpected error"
+     *          description: "Possible error are: BAD_DATA (with embedded errors)"
+     *          schema:
+     *            $ref: '#/definitions/error'
      */
 
     router.options('/api/v2/session/user/login/create', cors);
-    router.post('/api/v2/session/user/login/create', cors, authHelper.ensureAuthenticated, create_local_login);
+    router.post('/api/v2/session/user/login/create', cors, authHelper.ensureAuthenticated, function (req, res, next){
+        create_local_login(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=>{
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -553,7 +556,15 @@ module.exports = function(router) {
      */
 
     router.options('/api/v2/jwt/user/login/create', cors);
-    router.post('/api/v2/jwt/user/login/create', cors, passport.authenticate('jwt', {session: false}), create_local_login);
+    router.post('/api/v2/jwt/user/login/create', cors, passport.authenticate('jwt', {session: false}), function (req, res, next){
+        create_local_login(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=>{
+            next(err);
+        });
+    });
 
     // Those endpoints are not available since there is no way in IDP to get an oAuth access token from a facebook or google login. So there is no way to have a valid oAuth access token without a local login
     // router.options('/api/v2/oauth2/user/login/create', cors);
@@ -593,7 +604,15 @@ module.exports = function(router) {
      */
 
     router.options('/api/v2/cpa/user/login/create', cors);
-    router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, create_local_login);
+    router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, function (req, res, next){
+        create_local_login(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=>{
+            next(err);
+        });
+    });
 
     /**
      * @swagger

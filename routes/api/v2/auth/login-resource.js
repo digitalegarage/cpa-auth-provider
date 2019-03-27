@@ -135,7 +135,7 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "signup succeed"
      *          "400":
-     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION, BAD_DATA (with enbeded errors)"
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION, BAD_DATA (with embedded errors)"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "302":
