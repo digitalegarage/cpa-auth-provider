@@ -390,6 +390,8 @@ module.exports = function (app, options) {
      *            description: "a redirect with token as a get query parameter"
      *          "400":
      *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options(SESSION_LOGIN_PATH, cors);
     app.get(SESSION_LOGIN_PATH, cors, authHelper.ensureAuthenticated, function (req, res, next) {
@@ -504,6 +506,10 @@ module.exports = function (app, options) {
      *            description: "return jwt token for logged user"
      *            schema:
      *              $ref: '#/definitions/JWTToken'
+     *          "401":
+     *            description: "user unauthenticated (using session)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.get('/api/v2/session/jwt', cors, authHelper.ensureAuthenticated, function (req, res) {
         res.json({token: 'JWT ' + jwt.encode(req.user, config.jwtSecret)});
