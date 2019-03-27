@@ -267,6 +267,8 @@ module.exports = function (router) {
      *           $ref: '#/definitions/Profile'
      *       400:
      *         description: "Possible error are: NO_USER_IN_REQUEST"
+     *         schema:
+     *           $ref: '#/definitions/error'
      */
     router.options('/api/v2/session/user/profile', cors);
     router.get('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile);
@@ -293,6 +295,8 @@ module.exports = function (router) {
      *            description: "profile updated"
      *          "400":
      *            description: "Possible error are: BAD_PROFILE_DATA"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, function(req, res, next) {
         user_profile_update(req)
