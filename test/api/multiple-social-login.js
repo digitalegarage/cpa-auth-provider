@@ -57,9 +57,9 @@ describe('Local login after', function () {
             localSignup.call(this, done);
         });
 
-        it('should return 400 OK', function () {
+        it('should return 400', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.error.text).equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social login","message":"That email is already taken","errors":[]}}');
+            expect(this.res.error.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
         });
     });
     describe('Google API login first', function () {
@@ -83,9 +83,9 @@ describe('Local login after', function () {
             localSignup.call(this, done);
         });
 
-        it('should return 400 OK', function () {
+        it('should return 400', function () {
                 expect(this.res.statusCode).equal(400);
-                expect(this.res.error.text).equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social login","message":"That email is already taken","errors":[]}}');
+                expect(this.res.error.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
             }
         );
     });

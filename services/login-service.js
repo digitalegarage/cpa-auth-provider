@@ -69,11 +69,13 @@ function checkSignupData(req) {
                 for (var i = 0; i < errors.length; i++) {
                     message += '<br/>' + '- ' + errors[i].message;
                 }
-                reject(apiErrorHelper.buildError(400, 'BAD_DATA', 'Some fields are missing or have a bad format see errors arrays', message, errors));
+                reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', message, errors));
             } else {
                 finder.findUserByLocalAccountEmail(email).then((localLogin) => {
                     if (localLogin) {
-                        reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email ' + email + ' already taken as local login', req.__('BACK_SIGNUP_EMAIL_TAKEN')));
+                        reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', req.__('BACK_SIGNUP_EMAIL_TAKEN'), [
+                            apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.CUSTOM, 'EMAIL_TAKEN', 'Email ' + email + ' already taken as social or local login', '<br/>' + '- ' + req.__('BACK_SIGNUP_EMAIL_TAKEN'))
+                        ]));
                     }
                     return finder.findUserBySocialAccountEmail(email);
                 }).then(function(socialLogin) {
@@ -81,7 +83,10 @@ function checkSignupData(req) {
                         // User exist because it has been created by a social login
                         // Since Local login doesn't exist, that mean that the account is not validated
                         // So it's impossible to signup with that email
-                        reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email ' + email + ' already taken as social login', req.__('BACK_SIGNUP_EMAIL_TAKEN')));
+                        reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', req.__('BACK_SIGNUP_EMAIL_TAKEN'), [
+                            apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.CUSTOM, 'EMAIL_TAKEN', 'Email ' + email + ' already taken as social or local login', '<br/>' + '- ' + req.__('BACK_SIGNUP_EMAIL_TAKEN'))
+                        ]));
+
 
                     } else {
                         resolve(userAttributes);

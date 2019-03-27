@@ -163,7 +163,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as local login","message":"That email is already taken","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
                     });
 
                 });
@@ -181,7 +181,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as local login","message":"That email is already taken","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
                     });
 
                 });
