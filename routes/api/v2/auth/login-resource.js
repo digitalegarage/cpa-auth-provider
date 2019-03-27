@@ -135,7 +135,9 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "signup succeed"
      *          "400":
-     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION"
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION, BAD_DATA (with enbeded errors)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      *          "302":
      *            schema:
      *              $ref: '#/definitions/SessionToken'
@@ -270,7 +272,9 @@ module.exports = function (app, options) {
      *            schema:
      *              $ref: '#/definitions/SessionToken'
      *          "400":
-     *            description: "Possible error are: RECAPTCHA_ERROR, EMAIL_MISSING, PASSWORD_MISSING, MISSING_FIELDS, PASSWORD_WEAK, EMAIL_TAKEN and UNAUTHORIZED_REDIRECT_URI"
+     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/login', cors);
     app.post('/api/v2/session/login', cors, function (req, res, next) {
@@ -343,6 +347,10 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "user disconnected"
+     *          "401":
+     *            description: "user is not logged (using session cookie)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/logout', cors);
     app.delete('/api/v2/session/logout', cors, authHelper.ensureAuthenticated, function (req, res, next) {
@@ -384,7 +392,7 @@ module.exports = function (app, options) {
      *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI"
      */
     app.options(SESSION_LOGIN_PATH, cors);
-    app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
+    app.get(SESSION_LOGIN_PATH, cors, authHelper.ensureAuthenticated, function (req, res, next) {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
             if (REDIRECT_URI.indexOf("?") >= 0) {
@@ -429,6 +437,8 @@ module.exports = function (app, options) {
      *            description: "redirect"
      *          "400":
      *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/jwt/signup', cors);
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
