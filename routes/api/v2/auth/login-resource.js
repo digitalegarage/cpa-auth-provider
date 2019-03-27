@@ -232,7 +232,7 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "Password"
      *          "400":
-     *            description: "Possible error are: BAD_DATA, DATA_VALIDATION_ERROR"
+     *            description: "Possible error are: BAD_DATA, NO_USER_FOR_THIS_MAIL"
      *            schema:
      *              $ref: '#/definitions/error'
      */
@@ -244,7 +244,7 @@ module.exports = function (app, options) {
         })
         .catch((err)=> {
             next(err);
-        })
+        });
     });
 
 

@@ -151,7 +151,7 @@ const create_local_login = function(req) {
             req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).isEmail();
         }
         if (!req.body.password){
-            errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.MISSING, null, "email is mandatory", req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')));
+            errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.MISSING, null, "password is mandatory", req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')));
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
                 errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.CUSTOM, "PASSWORD_WEAK", req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'), req.__('PASSWORD_WEAK'), {
@@ -204,42 +204,52 @@ const create_local_login = function(req) {
     });
 };
 
-const change_password = function(req, res, next) {
-    req.checkBody('email', req.__('API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL')).isEmail();
-    req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();
-    req.checkBody('new_password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
-    req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
-    req.checkBody('new_password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
+const change_password = function(req) {
+    return new Promise(function(resolve, reject) {
 
-    req.getValidationResult().then(function(result) {
-        if (!result.isEmpty()) {
-            var _errors = result.array().map(r => {return apiErrorHelper.buildFieldError(r.param.toUpperCase(), apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, r.msg);});
-            next(apiErrorHelper.buildError(400, 'CHANGE_PASSWORD_VALIDATION_ERROR', 'Cannot change password.', '',_errors));
+        var errors = [];
+
+        // FIXME duplicate
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+        if (!req.body.email){
+            errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.MISSING, null, '"email" is not present in request body', req.__('BACK_SIGNUP_EMAIL_EMPTY')));
+        } else {
+            if (!re.test(String(req.body.email).toLowerCase())) {
+                errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.BAD_FORMAT, null, 'Cannot validate email using our reg exp', req.__('BACK_SIGNUP_EMAIL_INVALID')));
+            }
+        }
+
+        if (!req.body.previous_password) {
+            errors.push(apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.MISSING, null, "new password is mandatory", req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')));
+        }
+
+        if (!req.body.new_password){
+            errors.push(apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.MISSING, null, "new password is mandatory", req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')));
+        } else {
+            if (!passwordHelper.isStrong(req.body.email, req.body.new_password)) {
+                errors.push(apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.CUSTOM, "PASSWORD_WEAK", req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'), req.__('PASSWORD_WEAK'), {
+                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.new_password, req),
+                    score: passwordHelper.getQuality(req.body.email, req.body.new_password)
+                }));
+            }
+        }
+        
+        if (errors.length > 0) {
+            reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Cannot change password.', 'Some fields are missing or have a bad format see errors arrays', null, errors));
         } else {
             let email = req.body.email;
-            let newPassword = req.body.new_password;
-            if (!passwordHelper.isStrong(email, newPassword)) {
-                next(apiErrorHelper.buildError(400,
-                    'PASSWORD_WEAK', 
-                    'Password is not strong enough.', 
-                    passwordHelper.getWeaknessesMsg(email, newPassword, req),
-                    [],
-                    {
-                        password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
-                        score: passwordHelper.getQuality(email, newPassword)
-                    }));
-            } else {
                 db.LocalLogin.findOne({
                     where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), email.toLowerCase()),
                     include: [db.User]
                 }).then(function(localLogin) {
                     if (!localLogin) {
-                        next(apiErrorHelper.buildError(401,
-                            'USER_NOT_FOUND', 
+                        reject(apiErrorHelper.buildError(401,
+                            'USER_NOT_FOUND',
                             'Local login not found.',
                             req.__('BACK_USER_NOT_FOUND'))
                             );
-                        
+
                     } else {
                         localLogin.verifyPassword(req.body.previous_password).then(function(isMatch) {
                             // if user is found and password is right change password
@@ -247,20 +257,20 @@ const change_password = function(req, res, next) {
                                 localLogin.setPassword(req.body.new_password).then(
                                     function() {
                                         appHelper.destroySessionsByUserId(localLogin.User.id, req.sessionID).then(function() {
-                                            return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')}); // FIXME : Standard message?
+                                            resolve();
                                         }).catch(function(e) {
                                             logger.error(e);
-                                            next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], e));
+                                            reject(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], e));
                                         });
                                     },
                                     function(err) {
                                         logger.error(err);
-                                        next(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], err));
+                                        reject(apiErrorHelper.buildError(500, 'INTERNAL_SERVER_ERROR', 'Cannot delete session for user.', '',[], err));
                                     }
                                 );
                             } else {
-                                next(apiErrorHelper.buildError(401,
-                                    'INCORRECT_PREVIOUS_PASSWORD', 
+                                reject(apiErrorHelper.buildError(401,
+                                    'INCORRECT_PREVIOUS_PASSWORD',
                                     'Incorrect previous pass.',
                                     req.__('BACK_INCORRECT_PREVIOUS_PASS'))
                                 );
@@ -268,7 +278,7 @@ const change_password = function(req, res, next) {
                         });
                     }
                 });
-            }
+            //}
         }
     });
 };
@@ -664,7 +674,15 @@ module.exports = function(router) {
      *          description: "unexpected error"
      */
     router.options('/api/v2/all/user/password', cors);
-    router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
+    router.post('/api/v2/all/user/password', cors, function(req, res, next){
+        change_password(req)
+        .then(()=> {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    }); // Password is checked in change password so security is not checked
 
     /**
      * @swagger
