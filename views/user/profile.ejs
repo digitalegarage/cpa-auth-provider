@@ -1041,11 +1041,13 @@
                         }, 500);
                     },
                     error: function (result) {
-                        $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
-                        if(result.responseJSON.error.errors){
+                        
+                        if(result.responseJSON.error.errors && result.responseJSON.error.errors.length > 0){
                             $.each(result.responseJSON.error.errors, function (index, error) {
                                 $("#security-errors").append($('<p>').html(error.message));
                             });
+                        } else {
+                            $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
                         }
                         
                         $("#form-security-errors").show("fast");
