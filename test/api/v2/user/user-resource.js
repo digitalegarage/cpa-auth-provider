@@ -396,7 +396,7 @@ describe('API-V2 change password', function() {
                 });
 
                 it(' should be 400', function() {
-                    expect(ctx.res.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Cannot change password.","message":"Some fields are missing or have a bad format see errors arrays","errors":[],"data":[{"field":"new_password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is not strong enough","message":"Password too simple. Use numbers and upper and lower case letters.","data":{"password_strength_errors":["The password must be at least 10 characters long.","The password must contain at least one uppercase letter.","The password must contain at least one number.","The password must contain at least one special character."],"score":false}}]}}');
+                    expect(ctx.res.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Cannot change password.","message":"Some fields are missing or have a bad format see errors arrays","errors":[{"field":"new_password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is not strong enough","message":"Password too simple. Use numbers and upper and lower case letters.","data":{"password_strength_errors":["The password must be at least 10 characters long.","The password must contain at least one uppercase letter.","The password must contain at least one number.","The password must contain at least one special character."],"score":false}}]}}');
                     expect(ctx.res.statusCode).to.equal(400);
                 });
             });

@@ -895,7 +895,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","message":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}],"errors":[]}}');
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}]}}');
         });
     });
 
