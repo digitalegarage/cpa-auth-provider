@@ -612,7 +612,7 @@ function signupREST(req, res, handleAfterLogin) {
             // force renew cookie so a cookie value couldn't point at different time to different user
             return req.session.regenerate(function(err) {
                 if (err) {
-                    reject(apiErrorHelper.buildError(500, "FAIL_TO_REGENERATE_SESSION", "we tried to reset session in order to change your cookie value but it fails", null, null, err));
+                    reject(err);
                 } else {
                     return req.logIn(user, function() {
                         return handleAfterLogin(user, req, res)
