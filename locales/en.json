@@ -382,8 +382,8 @@
 
     "API_SIGNUP_SOMETHING_WRONG_RECAPTCHA": "Something went wrong with the reCAPTCHA",
     "API_SIGNUP_PLEASE_PASS_EMAIL_AND_PWD": "Please pass email and password",
-    "API_SIGNUP_EMAIL_ALREADY_EXISTS": "email already exists",
-    "API_LOCAL_LOGIN_ALREADY_EXISTS": "local login data already exists",
+    "API_SIGNUP_EMAIL_ALREADY_EXISTS": "Email already exists",
+    "API_LOCAL_LOGIN_ALREADY_EXISTS": "Local user already exists",
     "API_SIGNUP_MISSING_FIELDS": "missing required fields",
     "API_SIGNUP_FIELD_HAS_BAD_FORMAT": " doesn't have the expected format",
     "API_SIGNUP_MISSING_FIELD": " is missing",
