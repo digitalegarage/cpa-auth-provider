@@ -324,7 +324,7 @@ describe('API-V2 add local login', function() {
 
             it(' should be 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"LOCAL_LOGIN_ALREADY_EXISTS","hint":"Current user already has a local login.","message":"local login data already exists","errors":[]}}');
+                expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"LOCAL_LOGIN_ALREADY_EXISTS","hint":"Current user already has a local login.","message":"Local user already exists","errors":[]}}');
             });
         });
 

@@ -976,7 +976,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","errors":[{"field":"code","type":"MISSING","hint":"\\"code\\" is not present in request body"}]}}');
+            expect(JSON.parse(ctx.res.text).error.hint).to.equal('They might be several causes see errors array');
         });
     });
 
@@ -988,7 +988,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","errors":[{"field":"password","type":"CUSTOM","custom_type":"OWASP_0"},{"field":"password","type":"CUSTOM","custom_type":"OWASP_4"},{"field":"password","type":"CUSTOM","custom_type":"OWASP_5"},{"field":"password","type":"CUSTOM","custom_type":"OWASP_6"}]}}');
+            expect(JSON.parse(ctx.res.text).error.hint).to.equal('They might be several causes see errors array');
         });
     });
 
