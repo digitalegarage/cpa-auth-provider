@@ -122,6 +122,12 @@ function change_email(req) {
         var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
         let oldMail = 'unknown';
 
+        // FIXME duplicate
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if(!newUsername.test(re)){
+            apiErrorHelper.throwError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Malformed email adress.', req.__('BACK_SIGNUP_EMAIL_INVALID'));
+        }
+
         if (!oldUser) {
             logger.debug('[POST /api/v2/[security]/user/email/change][FAIL][user_id][from][to', newUsername, ' where old user is ', oldUser, ']');
             apiErrorHelper.throwError(401, 'USER_UNAUTHORIZED','Didn\'t found user in request scope');
