@@ -216,7 +216,7 @@ const change_password = function(req) {
         }
 
         if (!req.body.previous_password) {
-            errors.push(apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.MISSING, null, "new password is mandatory", req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')));
+            errors.push(apiErrorHelper.buildFieldError("previous_password", apiErrorHelper.TYPE.MISSING, null, "previous password is mandatory", req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')));
         }
 
         if (!req.body.new_password){
@@ -231,7 +231,7 @@ const change_password = function(req) {
         }
         
         if (errors.length > 0) {
-            reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Cannot change password.', 'Some fields are missing or have a bad format see errors arrays', null, errors));
+            reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Cannot change password.', 'Some fields are missing or have a bad format see errors arrays', errors));
         } else {
             let email = req.body.email;
                 db.LocalLogin.findOne({
@@ -264,9 +264,8 @@ const change_password = function(req) {
                                     apiErrorHelper.COMMON_ERROR.BAD_DATA,
                                     'Cannot change password.',
                                     'Some fields are missing or have a bad format see errors arrays',
-                                    null,
                                     [
-                                        apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.CUSTOM, 'INCORRECT_PREVIOUS_PASSWORD', "Previous password is wrong", req.__('BACK_INCORRECT_PREVIOUS_PASS'))
+                                        apiErrorHelper.buildFieldError("previous_password", apiErrorHelper.TYPE.CUSTOM, 'INCORRECT_PREVIOUS_PASSWORD', "Previous password is wrong", req.__('BACK_INCORRECT_PREVIOUS_PASS'))
                                     ]));
                             }
                         });
