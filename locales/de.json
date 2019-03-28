@@ -322,6 +322,7 @@
 	"BACK_ADMIN_SET_USER_PERMISSION_WRONG_PERMISSION_ID": "Falsche Berechtigungs-ID",
 	"BACK_ADMIN_CLIENT_ID_ALREADY_EXISTS": "Client-ID existiert bereits",
 	"BACK_PROFILE_AUTH_FAIL": "Authentifizierung fehlgeschlagen, Benutzerprofil nicht gefunden",
+	"BACK_CHANGE_PWD_ERRORS": "Bitte korrigieren sie die folgenden Fehler",
 	"BACK_CHANGE_PWD_MAIL_EMPTY": "Das Feld 'E-Mail' ist leer",
 	"BACK_CHANGE_PWD_PREV_PASS_EMPTY": "Das Feld 'Vorheriges Passwort' ist leer",
 	"BACK_CHANGE_PWD_NEW_PASS_EMPTY": "Das Feld 'Neues Passwort' ist leer",
