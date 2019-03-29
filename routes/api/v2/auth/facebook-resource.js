@@ -9,7 +9,7 @@ const request = require('request-promise');
 const logger = require('../../../../lib/logger');
 const db = require('../../../../models');
 const passport = require('passport');
-const errorHelper = require('../../../../lib/error-helper');
+const apiErrorHelper = require('../../../../lib/api-error-helper');
 
 var REQUESTED_PERMISSIONS = ['email'];
 
@@ -73,7 +73,7 @@ module.exports = function(app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing token in request body"
+     *            description: "Bad request. Errors could be: CODE_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, or UNEXPECTED_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "401":
@@ -82,13 +82,13 @@ module.exports = function(app, options) {
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/facebook/code', cors);
-    app.post('/api/v2/auth/facebook/code', function(req, res) {
+    app.post('/api/v2/auth/facebook/code', function(req, res, next) {
         if (!req.body.code || !req.body.redirect_uri) {
-            return res.status(400).json(errorHelper.buildError(400, "CODE_MISSING", "missing code in request body")).send();
+            next(apiErrorHelper.buildError(400, "CODE_MISSING", "missing code in request body"));
         }
 
         // Request an access token from the code
-        var options = {
+        let options = {
             uri: 'https://graph.facebook.com/v3.2/oauth/access_token?' +
                 'redirect_uri=' + req.body.redirect_uri +
                 '&client_id=' + config.identity_providers.facebook.client_id +
@@ -97,12 +97,14 @@ module.exports = function(app, options) {
             json: true,
         };
 
-        return request(options).then(function(tokenJsonResponse) {
-            validateTokenAndLog(tokenJsonResponse.access_token, res, req);
+        request(options)
+        .then(function(tokenJsonResponse) {
+            return validateTokenAndLog(tokenJsonResponse.access_token, res, req);
+        }).then(()=> {
+            res.sendStatus(204);
         }).catch(function(err) {
-            logger.info('An error occured while requesting the token', err);
-            return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while requesting the token")).send();
-
+            logger.info('An error occurred while requesting the token', err);
+            next(err);
         });
 
     });
@@ -111,7 +113,7 @@ module.exports = function(app, options) {
      * @swagger
      * /api/v2/auth/facebook/token:
      *   post:
-     *     description: "log user (session) using FB token. Possible errors are: TOKEN_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
+     *     description: "log user (session) using FB token."
      *     tags: [AUTH]
      *     content:
      *        - application/json
@@ -126,7 +128,7 @@ module.exports = function(app, options) {
      *          "204":
      *            description: "login succeed"
      *          "400":
-     *            description: "missing token in request body"
+     *            description: "Bad request Possible errors are: TOKEN_MISSING, AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL, UNEXPECTED_ERROR"
      *            schema:
      *              $ref: '#/definitions/error'
      *          "401":
@@ -135,90 +137,96 @@ module.exports = function(app, options) {
      *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/auth/facebook/token', cors);
-    app.post('/api/v2/auth/facebook/token', function(req, res) {
+    app.post('/api/v2/auth/facebook/token', function(req, res, next) {
         if (!req.body.token) {
-            return res.status(400).json(errorHelper.buildError(400, "TOKEN_MISSING", "missing token in request body")).send();
+            next(apiErrorHelper.buildError(400, "TOKEN_MISSING", "missing token in request body"));
+        } else {
+            validateTokenAndLog(req.body.token, res, req)
+            .then(()=>{
+                res.sendStatus(204);
+            })
+            .catch((err)=> {
+                next (err);
+            });
         }
-        validateTokenAndLog(req.body.token, res, req);
-
     });
 
 };
 
 function validateTokenAndLog(accessToken, res, req) {
 
-    // Step 1: validate access token
+    return new Promise((resolve, reject) => {
 
-    let options = {
-        uri: 'https://graph.facebook.com/debug_token?' +
-            'input_token=' + accessToken +
-            '&access_token=' + config.identity_providers.facebook.client_id + '|' + config.identity_providers.facebook.client_secret,
-        json: true,
-    };
-    request(options).then(function(jsonResponse) {
+        // Step 1: validate access token
 
-        if (!jsonResponse.data || !jsonResponse.data.user_id) {
-            return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while validating the token with facebook")).send();
-        } else {
+        let options = {
+            uri: 'https://graph.facebook.com/debug_token?' +
+                'input_token=' + accessToken +
+                '&access_token=' + config.identity_providers.facebook.client_id + '|' + config.identity_providers.facebook.client_secret,
+            json: true,
+        };
+        return request(options).then(function(jsonResponse) {
 
-            // Step 2: request user profile to graph API
+            if (!jsonResponse.data || !jsonResponse.data.user_id) {
+                reject(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occured while validating the token with facebook"));
+            } else {
 
-            let options = {
-                uri: 'https://graph.facebook.com/v3.2/me?' +
-                    'fields=id,name,email,first_name,last_name,gender' +
-                    '&access_token=' + accessToken,
-                json: true,
-            };
-            request(options).then(function(profile) {
+                // Step 2: request user profile to graph API
 
-                // Step 3: find or create user in IDP Db
+                let options = {
+                    uri: 'https://graph.facebook.com/v3.2/me?' +
+                        'fields=id,name,email,first_name,last_name,gender' +
+                        '&access_token=' + accessToken,
+                    json: true,
+                };
+                return request(options).then(function(profile) {
 
-                socialLoginHelper.findOrCreateSocialLoginUser(
-                    socialLoginHelper.FB,
-                    profile.email,
-                    jsonResponse.data.user_id,
-                    profile.name,
-                    profile.first_name,
-                    profile.last_name,
-                    profile.gender,
-                    null) // Gender is null "The field 'birthday' is only accessible on the User object after the user grants the 'user_birthday' permission."
-                .then(function(user) {
-                    if (user) {
-                        db.SocialLogin.findOne({
-                            where: {
-                                user_id: user.id,
-                                name: socialLoginHelper.FB,
-                            },
-                        }).then(function(socialLogin) {
-                            // Step 4: Log last login
-                            socialLogin.logLogin(user);
-                            afterLoginHelper.afterLogin(user, profile.email, res);
+                    // Step 3: find or create user in IDP Db
 
-                            // Step 5: Finally log the user
-                            req.logIn(user, function() {
-                                res.sendStatus(204);
+                    return socialLoginHelper.findOrCreateSocialLoginUser(
+                        socialLoginHelper.FB,
+                        profile.email,
+                        jsonResponse.data.user_id,
+                        profile.name,
+                        profile.first_name,
+                        profile.last_name,
+                        profile.gender,
+                        null) // Gender is null "The field 'birthday' is only accessible on the User object after the user grants the 'user_birthday' permission."
+                    .then(function(user) {
+                        if (user) {
+                            return db.SocialLogin.findOne({
+                                where: {
+                                    user_id: user.id,
+                                    name: socialLoginHelper.FB,
+                                },
+                            }).then(function(socialLogin) {
+                                // Step 4: Log last login
+                                return socialLogin.logLogin(user);
+                            }).then(()=> {
+                                return afterLoginHelper.afterLogin(user, profile.email, res);
+                            }).then(()=>{
+                                // Step 5: Finally log the user
+                                return req.logIn(user, function() {
+                                    resolve();
+                                });
                             });
-                        });
-                    } else {
-                        return res.status(412).json(errorHelper.buildError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
-                            "It's not allowed to login with a facebook account on an account using the same email as local login if the local login is not validated.")).send();
-
-                    }
+                        } else {
+                            reject(apiErrorHelper.buildError(412, "AN_UNVALIDATED_ACCOUNT_EXISTS_WITH_THAT_MAIL",
+                                "It's not allowed to login with a facebook account on an account using the same email as local login if the local login is not validated."));
+                        }
+                    }).catch(function(err) {
+                        logger.info('An error occurred while saving user in IDP db', err);
+                        reject(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db"));
+                    });
                 }).catch(function(err) {
-                    logger.info('An error occurred while saving user in IDP db', err);
-                    return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while saving user in IDP db")).send();
-
-
+                    logger.info('An error occurred while retrieving user data using the token', err);
+                    reject(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token"));
                 });
-            }).catch(function(err) {
-                logger.info('An error occurred while retrieving user data using the token', err);
-                return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token")).send();
-
-            });
-        }
-    }).catch(function(err) {
-        logger.info('An error occured while validating the token', err);
-        return res.status(401).json(errorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token")).send();
-
+            }
+        }).catch(function(err) {
+            logger.info('An error occured while validating the token', err);
+            reject(apiErrorHelper.buildError(401, "UNEXPECTED_ERROR", "An error occurred while verifying facebook token"));
+        });
     });
+
 }

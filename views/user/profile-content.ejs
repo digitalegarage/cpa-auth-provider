@@ -266,8 +266,8 @@
                     closeEditMode();
                 },
                 error: function (result) {
-                    $.each(result.responseJSON.errors, function (index, error) {
-                        $("#personnal-data-errors").append($('<p>').text(error.msg));
+                    $.each(result.responseJSON.error.errors, function (index, error) {
+                        $("#personnal-data-errors").append($('<p>').text(error.message));
                     });
                     $("#form-personnal-data-errors").show("fast");
                     $('html, body').animate({
@@ -314,9 +314,17 @@
                     $modifyPassBtn.show();
                 },
                 error: function (result) {
-                    $.each(result.responseJSON.errors, function (index, error) {
-                        $("#security-errors").append($('<p>').text(error.msg));
-                    });
+                    
+                    
+                    if(result.responseJSON.error.errors && result.responseJSON.error.errors.length > 0){  
+                         $.each(result.responseJSON.error.errors, function (index, error) {
+                            $("#security-errors").append($('<p>').text(error.message));
+                        });
+                    } else {
+                        $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
+                    }
+
+                    
                     $("#form-security-errors").show("fast");
                     $('html, body').animate({
                         scrollTop: $("#security-errors").offset().top

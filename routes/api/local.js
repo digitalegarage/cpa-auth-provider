@@ -44,7 +44,15 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 
 module.exports = function (app, options) {
 
-    app.post('/api/local/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
+    app.post('/api/local/password/recover', cors, limiterHelper.verify, function (req, res, next){
+        userHelper.password_recover(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
     // That following line avoid cross domain error like

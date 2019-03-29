@@ -3,7 +3,6 @@
 var db = require('../../models/index');
 var logger = require('../../lib/logger');
 var emailHelper = require('../../lib/email-helper');
-var apiErrorHelper = require('../../lib/api-error-helper');
 var config = require('../../config');
 var uuid = require('uuid');
 var finder = require('../../lib/finder');
@@ -33,149 +32,170 @@ module.exports = {
     email_moved: email_moved
 };
 
-
-function move_email(req) {
-    return new Promise(function(resolve,reject) {
-        var localLogin, token;
-        var oldEmail, newUsername;
-        var redirect;
-        return db.UserEmailToken.findOne({
-            where: {key: req.params.token},
-            include: [db.User]
-        })
-        .then((token_) => {
-            token = token_;
-            if (!token || !token.type.startsWith('MOV')) {
-                throw new Error(STATES.INVALID_TOKEN);
-            }
-            redirect = token.redirect_uri;
-            newUsername = token.type.substring('MOV$'.length);
-            if (!token.isAvailable()) {
-                var err = new Error(STATES.ALREADY_USED);
-                err.data = {success: newUsername === oldEmail};
-                throw err;
-            }
-            return db.LocalLogin.findOne({where: {user_id: token.user_id}});
-        })
-        .then((ll) => {
-            localLogin = ll;
-            oldEmail = localLogin.login;
-            return finder.findUserByLocalAccountEmail(newUsername);
-        })
-        .then((takenLocalLogin) => {
-            if (takenLocalLogin) {
+function move_email(req, res) {
+    var localLogin, token;
+    var oldEmail, newUsername;
+    var redirect;
+    db.UserEmailToken.findOne({
+        where: {key: req.params.token},
+        include: [db.User]
+    })
+    .then((token_) => {
+        token = token_;
+        if (!token || !token.type.startsWith('MOV')) {
+            throw new Error(STATES.INVALID_TOKEN);
+        }
+        redirect = token.redirect_uri;
+        newUsername = token.type.substring('MOV$'.length);
+        if (!token.isAvailable()) {
+            var err = new Error(STATES.ALREADY_USED);
+            err.data = {success: newUsername === oldEmail};
+            throw err;
+        }
+        return db.LocalLogin.findOne({where: {user_id: token.user_id}});
+    })
+    .then((ll) => {
+        localLogin = ll;
+        oldEmail = localLogin.login;
+        return finder.findUserByLocalAccountEmail(newUsername);
+    })
+    .then((takenLocalLogin) => {
+        if (takenLocalLogin) {
+            throw new Error(STATES.EMAIL_ALREADY_TAKEN);
+        }
+        return finder.findUserByLocalAccountEmail(newUsername)
+        .then((takenLogin) => {
+            if (takenLogin) {
                 throw new Error(STATES.EMAIL_ALREADY_TAKEN);
             }
-            return finder.findUserByLocalAccountEmail(newUsername).then((takenLogin) => {
-                if (takenLogin) {
-                    throw new Error(STATES.EMAIL_ALREADY_TAKEN);
-                }
-                return db.LocalLogin.findOne({
-                    where: {user_id: token.user_id},
-                    include: [db.User]
-                }).then((localLogin) => {
-                    return db.sequelize.transaction(function(transaction) {
-                        return localLogin.updateAttributes({
-                            login: newUsername,
-                            verified: true
-                        }, {transaction: transaction}).then(function() {
-                            return localLogin.User.updateAttributes({
-                                display_name: newUsername
-                            }, {transaction: transaction});
-                        });
+            return db.LocalLogin.findOne({
+                where: {user_id: token.user_id},
+                include: [db.User]
+            })
+            .then((localLogin) => {
+                return db.sequelize.transaction(function(transaction) {
+                    return localLogin.updateAttributes({
+                        login: newUsername,
+                        verified: true
+                    }, {transaction: transaction}).then(function() {
+                        return localLogin.User.updateAttributes({
+                            display_name: newUsername
+                        }, {transaction: transaction});
                     });
                 });
             });
-        })
-        .then(() => {
-            if (req.user && req.user.id === token.user_id) {
-                req.user.display_name = newUsername;
-            }
-            return token.consume();
-        })
-        .then(() => {
-            resolve(newUsername);
-        })
-        .catch((err) => {
-            if (err.data && err.data.success){
-                resolve(newUsername);
-            } else {
-                reject({
-                    success: err.data && err.data.success,
-                    message: err.message,
-                    redirect: redirect,
-                    newMail: newUsername
-                });
-            }
-
         });
+    })
+    .then(() => {
+        if (req.user && req.user.id === token.user_id) {
+            req.user.display_name = newUsername;
+        }
+        return token.consume();
+    })
+    .then(() => {
+        if (config.broadcaster.changeMoveEmailConfirmationPage) {
+            if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
+                return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=true');
+            } else {
+                return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=true');
+            }
+        } else {
+            return renderLandingPage(true, undefined);
+        }
+    })
+    .catch((err) => {
+        logger.error('[GET /email/move/:token][FAIL][old', oldEmail, '][new', newUsername, '][err', err, ']');
+        if (config.broadcaster.changeMoveEmailConfirmationPage) {
+            if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
+                return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=' + (err.message === 'ALREADY_USED'));
+            } else {
+                return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=' + (err.message === 'ALREADY_USED'));
+            }
+        } else {
+            return renderLandingPage(err.data && err.data.success, err.message);
+        }
     });
+
+    function renderLandingPage(success, message) {
+        res.render('./verify-mail-changed.ejs', {
+            success: success,
+            message: message,
+            redirect: redirect,
+            newMail: newUsername
+        });
+    }
 }
 
-function change_email(req) {
-    return new Promise(function(resolve,reject) {
+function change_email(req, res) {
+    var oldUser = req.user;
+    var oldLocalLogin;
+    var newUsername = req.body.new_email;
+    var password = req.body.password;
+    var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
+    let oldMail = 'unknown';
 
-        var oldUser = req.user;
-        var oldLocalLogin;
-        var newUsername = req.body.new_email;
-        var password = req.body.password;
-        var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
-        let oldMail = 'unknown';
+    if (!oldUser) {
+        logger.debug('[POST /email/change][FAIL][user_id][from][to', newUsername, ' where old user is ', oldUser, ']');
+        return res.status(401).json({reason: 'Unauthorized'});
+    }
 
-        if(!emailHelper.isEmailAddress(newUsername.toLowerCase())) {
-            apiErrorHelper.throwError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Malformed email adress.', req.__('BACK_SIGNUP_EMAIL_INVALID'));
+    if (oldUser && oldUser.email){
+        oldMail = oldUser.email;
+    } else if (oldUser && oldUser.LocalLogin && oldUser.LocalLogin.login){
+        oldMail = oldUser.LocalLogin.login;
+    }
+    logger.debug('[POST /email/change][user_id', oldUser.id, '][from', oldMail, '][to', newUsername, ']');
+
+    return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
+        if (localLogin) {
+            throw new Error(STATES.EMAIL_ALREADY_TAKEN);
         }
-
-        if (!oldUser) {
-            logger.debug('[POST /api/v2/[security]/user/email/change][FAIL][user_id][from][to', newUsername, ' where old user is ', oldUser, ']');
-            apiErrorHelper.throwError(401, 'USER_UNAUTHORIZED','Didn\'t found user in request scope');
-            return;
+        // At last check password
+        return db.LocalLogin.findOne({where: {user_id: oldUser.id}}).then(function(localLogin) {
+            oldLocalLogin = localLogin;
+            return localLogin.verifyPassword(password);
+        });
+    })
+    .then((correct) => {
+        if (!correct) {
+            throw new Error(STATES.WRONG_PASSWORD);
         }
-
-        if (oldUser && oldUser.email) {
-            oldMail = oldUser.email;
-        } else if (oldUser && oldUser.LocalLogin && oldUser.LocalLogin.login) {
-            oldMail = oldUser.LocalLogin.login;
+        const validityDate = new Date(new Date().getTime() - VALIDITY_DURATION * 1000);
+        return db.UserEmailToken.count({where: {user_id: oldUser.id, created_at: {[Op.gte]: validityDate}}});
+    })
+    .then((tokenCount) => {
+        if (tokenCount >= REQUEST_LIMIT) {
+            throw new Error(STATES.TOO_MANY_REQUESTS);
         }
-        logger.debug('[POST /api/v2/[security]/user/email/change][user_id', oldUser.id, '][from', oldMail, '][to', newUsername, ']');
-
-        return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
-            if (localLogin) {
-                apiErrorHelper.throwError(400, 'EMAIL_ALREADY_TAKEN', newUsername +' is already taken', req.__('CHANGE_EMAIL_API_EMAIL_ALREADY_TAKEN'));
-                return;
-            }
-            // At last check password
-            return db.LocalLogin.findOne({where: {user_id: oldUser.id}}).then(function(localLogin) {
-                oldLocalLogin = localLogin;
-                return localLogin.verifyPassword(password);
+        logger.debug('[POST /email/change][SUCCESS][user_id', oldUser.id, '][from', oldLocalLogin.login, '][to', newUsername, ']');
+        triggerAccountChangeEmails(oldLocalLogin.login, oldUser, req.authInfo ? req.authInfo.client : null, newUsername, redirect).then(
+            function() {
+                logger.debug('[POST /email/change][EMAILS][SENT]');
+            },
+            function(e) {
+                logger.warn('[POST /email/change][EMAILS][ERROR][', e, ']');
             });
-        })
-        .then((correct) => {
-            if (!correct) {
-                (apiErrorHelper.throwError(401, 'WRONG_PASSWORD','wrong password', req.__('CHANGE_EMAIL_API_WRONG_PASSWORD')));
-                return;
+        return res.sendStatus(204);
+    })
+    .catch((err) => {
+        logger.warn('[POST /email/change][FAIL][user_id', oldUser.id, '][from',
+            oldUser.email, '][to', newUsername, '][err', err, ']');
+        var message = '';
+        for (var key in STATES) {
+            if (STATES.hasOwnProperty(key) && STATES[key] === err.message) {
+                message = req.__('CHANGE_EMAIL_API_' + err.message);
+                break;
             }
-            const validityDate = new Date(new Date().getTime() - VALIDITY_DURATION * 1000);
-            return db.UserEmailToken.count({where: {user_id: oldUser.id, created_at: {[Op.gte]: validityDate}}});
-        })
-        .then((tokenCount) => {
-            if (tokenCount >= REQUEST_LIMIT) {
-                apiErrorHelper.throwError(429, 'TOO_MANY_REQUESTS','wrong password', req.__('CHANGE_EMAIL_API_TOO_MANY_REQUESTS'));
-            }
-            logger.debug('[POST /api/v2/[security]/user/email/change][SUCCESS][user_id', oldUser.id, '][from', oldLocalLogin.login, '][to', newUsername, ']');
-            triggerAccountChangeEmails(oldLocalLogin.login, oldUser, req.authInfo ? req.authInfo.client : null, newUsername, redirect).then(
-                function() {
-                    logger.debug('[POST /api/v2/[security]/user/email/change][EMAILS][SENT]');
-                },
-                function(e) {
-                    logger.warn('[POST /api/v2/[security]/user/email/change][EMAILS][ERROR][', e, ']');
-                });
-            resolve();
-        })
-        .catch((err) => {
-            logger.warn('[POST /api/v2/[security]/user/email/change][FAIL][user_id', oldUser.id, '][from',
-                oldUser.email, '][to', newUsername, '][err', err, ']');
-            reject(err);
+        }
+        var status = 400;
+        if (err.message === STATES.WRONG_PASSWORD) {
+            status = 403;
+        } else if (err.message === STATES.TOO_MANY_REQUESTS) {
+            status = 429;
+        }
+        return res.status(status).json({
+            reason: err.message,
+            msg: message
         });
     });
 }
@@ -189,19 +209,19 @@ function email_moved(req, res) {
             include: [db.User, db.OAuth2Client]
         })
     .then((token_) => {
-        token = token_;
-        clientId = req.query.client_id;
-        if (!token || !token.type.startsWith('MOV')) {
-            throw new Error(STATES.INVALID_TOKEN);
-        }
+            token = token_;
+            clientId = req.query.client_id;
+            if (!token || !token.type.startsWith('MOV')) {
+                throw new Error(STATES.INVALID_TOKEN);
+            }
 
-        if (token.OAuth2Client.client_id !== clientId) {
-            throw new Error(STATES.MISMATCHED_CLIENT_ID);
-        }
+            if (token.OAuth2Client.client_id !== clientId) {
+                throw new Error(STATES.MISMATCHED_CLIENT_ID);
+            }
 
-        user = token.User;
-        return db.LocalLogin.findOne({where: {user_id: user.id}});
-    })
+            user = token.User;
+            return db.LocalLogin.findOne({where: {user_id: user.id}});
+        })
     .then((localLogin_) => {
         localLogin = localLogin_;
         oldEmail = localLogin.login;
