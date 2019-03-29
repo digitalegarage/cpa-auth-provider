@@ -36,7 +36,7 @@ var user_profile_update =
                     var message = '';
                     for (var i = 0; i < errors.length; i++) {
                         message += ' - ' + errors[i].msg + '<br/>';
-                        subErrors.push(apiErrorHelper.buildErrors('FIELD_' + errors[i].param + '_IS_BAD', errors[i].msg, errors[i].msg, {value: errors[i].value}));
+                        subErrors.push(apiErrorHelper.buildFieldError(errors[i].param, apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, errors[i].msg, errors[i].msg, {value: errors[i].value}));
                     }
                     reject(apiErrorHelper.buildError(400, 'BAD_PROFILE_DATA', 'Profile data not valid.', message, subErrors, errors));
                 } else {
@@ -267,6 +267,8 @@ module.exports = function (router) {
      *           $ref: '#/definitions/Profile'
      *       400:
      *         description: "Possible error are: NO_USER_IN_REQUEST"
+     *         schema:
+     *           $ref: '#/definitions/error'
      */
     router.options('/api/v2/session/user/profile', cors);
     router.get('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, user_profile);
@@ -293,6 +295,8 @@ module.exports = function (router) {
      *            description: "profile updated"
      *          "400":
      *            description: "Possible error are: BAD_PROFILE_DATA"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     router.put('/api/v2/session/user/profile', cors, authHelper.ensureAuthenticated, function(req, res, next) {
         user_profile_update(req)

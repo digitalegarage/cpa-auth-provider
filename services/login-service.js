@@ -23,30 +23,29 @@ module.exports = {
 
 function checkSignupData(req) {
     return new Promise((resolve, reject) => {
+        var errors = [];
+
         if (req.recaptcha.error) {
-            apiErrorHelper.throwError(400, 'RECAPTCHA_ERROR', 'Fail to validate Recaptcha', null, null, req.recaptcha.error);
+            errors.push(apiErrorHelper.buildFieldError('g-recaptcha-response', apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, 'Fail to validate Recaptcha', req.__('BACK_SIGNUP_RECAPTCHA_EMPTY_OR_WRONG'), req.recaptcha.error));
         }
 
-        var errors = [];
-        if (!req.body.email) {
-            errors.push(apiErrorHelper.buildErrors('EMAIL_MISSING', 'Email is mandatory', req.__('BACK_SIGNUP_EMAIL_EMPTY_OR_INVALID')));
-        }
-        if (!req.body.password) {
-            errors.push(apiErrorHelper.buildErrors('PASSWORD_MISSING', 'Password is mandatory', req.__('BACK_SIGNUP_PASSWORD_MISSING')));
-        }
-        if (errors.length > 0) {
-            var message =  req.__('BACK_SIGNUP_MISSING_FIELDS');
-            for (var i = 0; i < errors.length; i++) {
-                message += '<br/>' + '- ' + errors[i].message;
+        if (!req.body.email){
+            errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.MISSING, null, '"email" is not present in request body', req.__('BACK_SIGNUP_EMAIL_EMPTY')));
+        } else {
+            if (!emailHelper.isEmailAddress(req.body.email)) {
+                errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.BAD_FORMAT, null, 'Cannot validate email using our reg exp', req.__('BACK_SIGNUP_EMAIL_INVALID')));
             }
-            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Some fields are missing see errors arrays', message, errors));
         }
 
         var email = req.body.email;
         var password = req.body.password;
 
-        if (!passwordHelper.isStrong(email, password)) {
-            reject(apiErrorHelper.buildError(400, 'PASSWORD_WEAK', "Password is too weak check which rule applies (could be 'no', 'simple or 'owasp'", req.__('PASSWORD_WEAK')));
+        if (!req.body.password) {
+            errors.push(apiErrorHelper.buildFieldError('password', apiErrorHelper.TYPE.MISSING, null, 'Password is mandatory', req.__('BACK_SIGNUP_PASSWORD_MISSING')));
+        } else {
+            if (!passwordHelper.isStrong(email, password)) {
+                errors.push(apiErrorHelper.buildFieldError('password', apiErrorHelper.TYPE.CUSTOM, 'PASSWORD_WEAK', 'Password is too weak', req.__('PASSWORD_WEAK')));
+            }
         }
 
         // userAttributes is a merge of requiredAttributes and optionnalAttributes
@@ -60,32 +59,48 @@ function checkSignupData(req) {
             userAttributes[oa] = optionnalAttributes[oa];
         }
 
-        return validateFields(requiredAttributes)
-        .then(()=> {
-            return validateFieldsValues(optionnalAttributes);
-        })
-        .then(()=> {
-            return finder.findUserByLocalAccountEmail(email)
-        })
-        .then((localLogin) => {
-            if (localLogin) {
-                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as local login', req.__('BACK_SIGNUP_EMAIL_TAKEN')));
-            }
-            return finder.findUserBySocialAccountEmail(email);
-        })
-        .then(function (socialLogin) {
-            if (socialLogin) {
-                // User exist because it has been created by a social login
-                // Since Local login doesn't exist, that mean that the account is not validated
-                // So it's impossible to signup with that email
-                reject(apiErrorHelper.buildError(400, 'EMAIL_TAKEN', 'Email '+email+' already taken as social login', req.__('BACK_SIGNUP_EMAIL_TAKEN')));
-
+        return validateFields(req, requiredAttributes)
+        .then((validationErrors)=> {
+            errors = errors.concat(validationErrors);
+            if (errors.length > 0) {
+                var message =  req.__('BACK_SIGNUP_MISSING_FIELDS');
+                for (var i = 0; i < errors.length; i++) {
+                    message += '<br/>' + '- ' + errors[i].message;
+                }
+                reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', message, errors));
             } else {
-                resolve(userAttributes);
+                finder.findUserByLocalAccountEmail(email).then((localLogin) => {
+                    if (localLogin) {
+                        reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', req.__('BACK_SIGNUP_EMAIL_TAKEN'), [
+                            apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.CUSTOM, 'EMAIL_TAKEN', 'Email ' + email + ' already taken as social or local login', '<br/>' + '- ' + req.__('BACK_SIGNUP_EMAIL_TAKEN'))
+                        ]));
+                    }
+                    return finder.findUserBySocialAccountEmail(email);
+                }).then(function(socialLogin) {
+                    if (socialLogin) {
+                        // User exist because it has been created by a social login
+                        // Since Local login doesn't exist, that mean that the account is not validated
+                        // So it's impossible to signup with that email
+                        reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', req.__('BACK_SIGNUP_EMAIL_TAKEN'), [
+                            apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.CUSTOM, 'EMAIL_TAKEN', 'Email ' + email + ' already taken as social or local login', '<br/>' + '- ' + req.__('BACK_SIGNUP_EMAIL_TAKEN'))
+                        ]));
+
+
+                    } else {
+                        resolve(userAttributes);
+                    }
+                }).catch(function(err) {
+                    if (err.length > 0) {
+                        errors.concat(err);
+                        reject()
+                    } else {
+                        reject(err);
+                    }
+                });
             }
         })
         .catch(function (err) {
-            reject(err);
+             reject(err);
         });
     });
 }
@@ -228,62 +243,56 @@ function getOptionnalAttributes(req) {
 }
 
 
-function validateFields(attributes) {
-    return new Promise((resolve, reject) => {
+function validateFields(req, attributes) {
+    return new Promise((resolve) => {
         var errors = [];
         config.userProfiles.requiredFields.forEach(
             function(element) {
                 if (!attributes.hasOwnProperty(element) || !attributes[element]) {
-                    errors.push(apiErrorHelper.buildErrors(element, 'field is missing'));
+                    errors.push(apiErrorHelper.buildFieldError(element, apiErrorHelper.TYPE.MISSING, null, 'field "' + element + '" is missing', element + " " + req.__('API_SIGNUP_MISSING_FIELD')));
                 }
             }
         );
-        if (errors.length > 0) {
-            reject(apiErrorHelper.buildError(400, 'MISSING_FIELDS', 'Missing fields', null, errors));
-        }
 
-        validateFieldsValues(attributes)
-        .then(()=> {
-            resolve()
+        validateFieldsValues(req, attributes)
+        .then((valueErrors)=> {
+            errors = errors.concat(valueErrors);
+            resolve(errors);
         })
         .catch((err)=> {
-            reject(err);
+            resolve(err);
         });
+
     });
 }
 
 var NAME_REGEX = /^[a-zA-Z\u00C0-\u017F -]*$/;
 
-function validateFieldsValues(attributes) {
-    return new Promise((resolve, reject) => {
-
+function validateFieldsValues(req, attributes) {
+    return new Promise((resolve) => {
+        let errors = [];
         if (attributes.hasOwnProperty('gender')) {
             if (typeof(attributes.gender) !== 'string' || !attributes.gender.match(/(male|female|other)/)) {
-                reject(apiErrorHelper.buildError(400, 'UNKNOWN_GENDER', 'Unknown gender \'' + attributes.gender + '\' should one of the following (male|female|other)'));
-                return;
+                errors.push(apiErrorHelper.buildFieldError("gender", apiErrorHelper.TYPE.BAD_FORMAT, 'Unknown gender \'' + attributes.gender + '\' should one of the following (male|female|other)',  " - gender" + req.__('API_SIGNUP_FIELD_HAS_BAD_FORMAT'))); //FIXME
             }
         }
 
         if (attributes.hasOwnProperty('date_of_birth')) {
             if (typeof(attributes.date_of_birth) === 'string' && !isDateFormat(attributes.date_of_birth, dateFormat)) {
-                reject(apiErrorHelper.buildError(400, 'MALFORMED_DATE_OF_BIRTH', 'Cannot parse data of birth from  \'' + attributes.date_of_birth + '\' with format ' + dateFormat));
-                return;
+                errors.push(apiErrorHelper.buildFieldError("date_of_birth", apiErrorHelper.TYPE.BAD_FORMAT, 'Cannot parse data of birth from  \'' + attributes.date_of_birth + '\' with format ' + dateFormat, " -date_of_birth" + req.__('API_SIGNUP_FIELD_HAS_BAD_FORMAT'))); //FIXME
             }
         }
 
         if (attributes.hasOwnProperty('lastname')) {
             if (typeof(attributes.lastname) !== 'string' || !attributes.lastname.match(NAME_REGEX)) {
-                reject(apiErrorHelper.buildError(400, 'INVALID_LAST_NAME', 'Invalid lastname \'' + attributes.lastname + '\' not verified by following reg exp ' + NAME_REGEX));
-                return;
+                errors.push(apiErrorHelper.buildFieldError("lastname", apiErrorHelper.TYPE.BAD_FORMAT, 'Invalid lastname \'' + attributes.lastname + '\' not verified by following reg exp ' + NAME_REGEX, " -lastname" + req.__('API_SIGNUP_FIELD_HAS_BAD_FORMAT'))); //FIXME
             }
         }
         if (attributes.hasOwnProperty('firstname')) {
             if (typeof(attributes.firstname) !== 'string' || !attributes.firstname.match(NAME_REGEX)) {
-                reject(apiErrorHelper.buildError(400, 'INVALID_FIRST_NAME', 'Invalid firstname \'' + attributes.lastname + '\' not verified by following reg exp ' + NAME_REGEX));
-                return;
+                errors.push(apiErrorHelper.buildFieldError("firstname", apiErrorHelper.TYPE.BAD_FORMAT, 'Invalid firstname \'' + attributes.lastname + '\' not verified by following reg exp ' + NAME_REGEX, " -firstname" + req.__('API_SIGNUP_FIELD_HAS_BAD_FORMAT'))); //FIXME
             }
         }
-
-        resolve();
+        resolve(errors);
     });
 }

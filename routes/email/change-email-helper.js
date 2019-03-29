@@ -122,6 +122,10 @@ function change_email(req) {
         var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
         let oldMail = 'unknown';
 
+        if(!emailHelper.isEmailAddress(newUsername.toLowerCase())) {
+            apiErrorHelper.throwError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Malformed email adress.', req.__('BACK_SIGNUP_EMAIL_INVALID'));
+        }
+
         if (!oldUser) {
             logger.debug('[POST /api/v2/[security]/user/email/change][FAIL][user_id][from][to', newUsername, ' where old user is ', oldUser, ']');
             apiErrorHelper.throwError(401, 'USER_UNAUTHORIZED','Didn\'t found user in request scope');
@@ -137,7 +141,7 @@ function change_email(req) {
 
         return finder.findUserByLocalAccountEmail(newUsername).then(function(localLogin) {
             if (localLogin) {
-                apiErrorHelper.throwError(400, 'EMAIL_ALREADY_TAKEN',newUsername +' is already taken', req.__('CHANGE_EMAIL_API_EMAIL_ALREADY_TAKEN'));
+                apiErrorHelper.throwError(400, 'EMAIL_ALREADY_TAKEN', newUsername +' is already taken', req.__('CHANGE_EMAIL_API_EMAIL_ALREADY_TAKEN'));
                 return;
             }
             // At last check password

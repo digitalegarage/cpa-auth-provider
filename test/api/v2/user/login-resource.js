@@ -31,9 +31,6 @@ const DATE_OF_BIRTH = '31.08.1978';
 const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
 const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
 
-const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
-const API_PASSWORD_RECOVER_USER_NOT_FOUND = 'User not found';
-
 const AFTER_LOGIN = {
     activated: true,
     cookieName: 'peach_infos',
@@ -72,7 +69,7 @@ describe('API-V2 LOGIN', function () {
 
                 it('should return a success false', function () {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"RECAPTCHA_ERROR","hint":"Fail to validate Recaptcha","errors":[],"data":"invalid-input-response"}}');
+                    expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- reCaptcha is empty or wrong.","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Fail to validate Recaptcha","message":"reCaptcha is empty or wrong.","data":"invalid-input-response"}]}}');
                 });
 
             });
@@ -92,7 +89,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","message":"Password too simple. Use numbers and upper and lower case letters.","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is too weak","message":"Password too simple. Use numbers and upper and lower case letters."}]}}');
                      });
 
                 });
@@ -106,7 +103,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"PASSWORD_WEAK","hint":"Password is too weak check which rule applies (could be \'no\', \'simple or \'owasp\'","message":"Password too simple. Use numbers and upper and lower case letters.","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is too weak","message":"Password too simple. Use numbers and upper and lower case letters."}]}}');
                      });
 
                 });
@@ -134,7 +131,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"code":"PASSWORD_MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"field":"password","type":"MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
                     });
 
                 });
@@ -148,7 +145,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Some fields are missing see errors arrays","message":"You did not supply all required information<br/>- Email is empty or invalid","errors":[{"code":"EMAIL_MISSING","hint":"Email is mandatory","message":"Email is empty or invalid"}]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Email is empty","errors":[{"field":"email","type":"MISSING","hint":"\\"email\\" is not present in request body","message":"Email is empty"}]}}');
                     });
 
                 });
@@ -166,7 +163,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as local login","message":"That email is already taken","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
                     });
 
                 });
@@ -184,7 +181,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as local login","message":"That email is already taken","errors":[]}}');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
                     });
 
                 });
@@ -211,7 +208,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"MISSING_FIELDS","hint":"Missing fields","errors":[{"code":"date_of_birth","hint":"field is missing"}]}}');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- date_of_birth  is missing","errors":[{"field":"date_of_birth","type":"MISSING","hint":"field \\"date_of_birth\\" is missing","message":"date_of_birth  is missing"}]}}');
                         });
 
                     });
@@ -229,7 +226,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"UNKNOWN_GENDER","hint":"Unknown gender \'jedi\' should one of the following (male|female|other)","errors":[]}}');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- undefined","errors":[{"field":"gender","type":"BAD_FORMAT","custom_type":"Unknown gender \'jedi\' should one of the following (male|female|other)","hint":" - gender doesn\'t have the expected format"}]}}');
                         });
                     });
 
@@ -898,7 +895,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"INVALID_RECAPTCHA","hint":"Invalid recaptcha.","message":"Something went wrong with the reCAPTCHA","errors":[]}}');
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}]}}');
         });
     });
 
@@ -967,11 +964,7 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.error.status).to.equal(400);
-            expect(ctx.res.body.error.code).to.equal("WRONG_RECOVERY_CODE");
-            expect(ctx.res.body.error.hint).to.equal("Recovery code for that user is wrong or doesn\'t exists");
-            expect(ctx.res.body.error.message).to.equal("Wrong recovery code.");
-            expect(ctx.res.body.error.errors.length).to.equal(0);
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","message":"Wrong recovery code.","errors":[{"field":"code","type":"CUSTOM","custom_type":"WRONG_CODE","hint":"wrong code","message":"Wrong recovery code."}]}}');
         });
     });
 
@@ -983,11 +976,19 @@ describe('API-V2 PASSWORD UPDATE', function() {
 
         it('should return a 400 with expect standard error ', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.error.status).to.equal(400);
-            expect(ctx.res.body.error.code).to.equal("DATA_VALIDATION_ERROR");
-            expect(ctx.res.body.error.hint).to.equal("They might be several causes see errors array");
-            expect(ctx.res.body.error.errors.length).to.equal(1);
-            expect(ctx.res.body.error.errors[0].code).to.equal("CODE_MISSING");
+            expect(JSON.parse(ctx.res.text).error.hint).to.equal('They might be several causes see errors array');
+        });
+    });
+
+    context('When user try to update his password with a weak password', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, 'w', validCode, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(JSON.parse(ctx.res.text).error.hint).to.equal('They might be several causes see errors array');
         });
     });
 

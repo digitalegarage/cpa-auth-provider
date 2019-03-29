@@ -49,10 +49,6 @@ module.exports = function (app, options) {
      *               type: "string"
      *               example: "myVeryStrongPassword"
      *               description: "user password"
-     *           confirm_password:
-     *               type: "string"
-     *               example: "myVeryStrongPassword"
-     *               description: "user password confirm value"
      *           gender:
      *               type: "string"
      *               enum: [other, male, female]
@@ -130,7 +126,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
-     *            name: "code"
+     *            name: "withcode"
      *            example: "true"
      *            schema:
      *              type: string
@@ -138,11 +134,13 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "signup succeed"
-     *          "400":
-     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION"
      *          "302":
      *            schema:
      *              $ref: '#/definitions/SessionToken'
+     *          "400":
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION, BAD_DATA (with embedded errors)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/signup', cors);
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
@@ -200,10 +198,20 @@ module.exports = function (app, options) {
      *          "200":
      *            description: "a recovery email had been sent"
      *          "400":
-     *            description: "Possible error are: INVALID_RECAPTCHA, USER_NOT_FOUND"
+     *            description: "Possible error are: BAD_DATA, INVALID_RECAPTCHA and USER_NOT_FOUND"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/recover', cors);
-    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
+    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, function (req, res, next){
+        userHelper.password_recover(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -224,10 +232,20 @@ module.exports = function (app, options) {
      *          "204":
      *            description: "Password"
      *          "400":
-     *            description: "Possible error are: DATA_VALIDATION_ERROR, WRONG_RECOVERY_CODE, NO_USER_FOR_THIS_MAIL"
+     *            description: "Possible error are: BAD_DATA, NO_USER_FOR_THIS_MAIL"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/update', cors);
-    app.post('/api/v2/all/password/update', cors, userHelper.password_update);
+    app.post('/api/v2/all/password/update', cors, function(req, res, next){
+        userHelper.password_update(req)
+        .then(()=> {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
 
     /**
@@ -253,7 +271,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
-     *            name: "code"
+     *            name: "withcode"
      *            example: "true"
      *            schema:
      *              type: string
@@ -266,7 +284,9 @@ module.exports = function (app, options) {
      *            schema:
      *              $ref: '#/definitions/SessionToken'
      *          "400":
-     *            description: "Possible error are: RECAPTCHA_ERROR, EMAIL_MISSING, PASSWORD_MISSING, MISSING_FIELDS, PASSWORD_WEAK, EMAIL_TAKEN and UNAUTHORIZED_REDIRECT_URI"
+     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/login', cors);
     app.post('/api/v2/session/login', cors, function (req, res, next) {
@@ -339,6 +359,10 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "user disconnected"
+     *          "401":
+     *            description: "user is not logged (using session cookie)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/logout', cors);
     app.delete('/api/v2/session/logout', cors, authHelper.ensureAuthenticated, function (req, res, next) {
@@ -378,9 +402,11 @@ module.exports = function (app, options) {
      *            description: "a redirect with token as a get query parameter"
      *          "400":
      *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options(SESSION_LOGIN_PATH, cors);
-    app.get(SESSION_LOGIN_PATH, cors, function (req, res, next) {
+    app.get(SESSION_LOGIN_PATH, cors, authHelper.ensureAuthenticated, function (req, res, next) {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
             if (REDIRECT_URI.indexOf("?") >= 0) {
@@ -389,7 +415,7 @@ module.exports = function (app, options) {
                 res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
             }
         } else {
-            next(apiErrorHelper.buildErrors(400, 'UNAUTHORIZED_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
+            next(apiErrorHelper.buildError(400, 'UNAUTHORIZED_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
         }
     });
 
@@ -425,6 +451,8 @@ module.exports = function (app, options) {
      *            description: "redirect"
      *          "400":
      *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/jwt/signup', cors);
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
@@ -454,18 +482,6 @@ module.exports = function (app, options) {
      *            required: true
      *            schema:
      *              $ref: "#/definitions/Credentials"
-     *          - in: query
-     *            name: "redirect"
-     *            example: "http://somedomain.org"
-     *            schema:
-     *              type: string
-     *              description: The redirect url to send the code
-     *          - in: query
-     *            name: "code"
-     *            example: "true"
-     *            schema:
-     *              type: string
-     *              description: if present a first redirect'd be request to /api/v2/session/cookie
      *     responses:
      *          "200":
      *            description: "signup succeed"
@@ -475,6 +491,8 @@ module.exports = function (app, options) {
      *            description: "redirect"
      *          "400":
      *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/jwt/login', cors);
     app.post('/api/v2/jwt/login', cors, function (req, res, next) {
@@ -502,6 +520,10 @@ module.exports = function (app, options) {
      *            description: "return jwt token for logged user"
      *            schema:
      *              $ref: '#/definitions/JWTToken'
+     *          "401":
+     *            description: "user unauthenticated (using session)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.get('/api/v2/session/jwt', cors, authHelper.ensureAuthenticated, function (req, res) {
         res.json({token: 'JWT ' + jwt.encode(req.user, config.jwtSecret)});
@@ -590,7 +612,7 @@ function signupREST(req, res, handleAfterLogin) {
             // force renew cookie so a cookie value couldn't point at different time to different user
             return req.session.regenerate(function(err) {
                 if (err) {
-                    reject(apiErrorHelper.buildError(500, "FAIL_TO_REGENERATE_SESSION", "we tried to reset session in order to change your cookie value but it fails", null, null, err));
+                    reject(err);
                 } else {
                     return req.logIn(user, function() {
                         return handleAfterLogin(user, req, res)
