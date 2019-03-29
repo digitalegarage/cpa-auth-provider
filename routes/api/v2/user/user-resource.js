@@ -439,7 +439,7 @@ module.exports = function(router) {
      * @swagger
      * /api/v2/session/user:
      *   delete:
-     *     description: delete the session (cookie) logged user
+     *     description: delete the account authenticated via session (cookie)
      *     tags: [Session]
      *     operationId: "deleteUserWithoutCredentials"
      *     content:
