@@ -122,9 +122,7 @@ function change_email(req) {
         var redirect = req.body.use_custom_redirect && req.body.use_custom_redirect + '' === 'true';
         let oldMail = 'unknown';
 
-        // FIXME duplicate
-        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        if(!re.test(newUsername.toLowerCase())){
+        if(!emailHelper.isEmailAddress(newUsername.toLowerCase())) {
             apiErrorHelper.throwError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Malformed email adress.', req.__('BACK_SIGNUP_EMAIL_INVALID'));
         }
 
