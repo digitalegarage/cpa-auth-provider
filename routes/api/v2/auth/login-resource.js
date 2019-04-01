@@ -8,14 +8,10 @@ const cors = require('../../../../lib/cors'),
     limiterHelper = require('../../../../lib/limiter-helper'),
     authHelper = require('../../../../lib/auth-helper'),
     afterLogoutHelper = require('../../../../lib/afterlogout-helper'),
+    apiErrorHelper = require('../../../../lib/api-error-helper'),
     jwt = require('jwt-simple'),
     loginService = require('../../../../services/login-service'),
-    errors = require('../../../../services/errors'),
-    _ = require('underscore'),
-    finder = require('../../../../lib/finder'),
-    errorHelper = require('../../../../lib/error-helper'),
-    passwordHelper = require('../../../../lib/password-helper'),
-    codeHelper = require('../../../../lib/code-helper');
+    _ = require('underscore');
 
 
 
@@ -53,10 +49,6 @@ module.exports = function (app, options) {
      *               type: "string"
      *               example: "myVeryStrongPassword"
      *               description: "user password"
-     *           confirm_password:
-     *               type: "string"
-     *               example: "myVeryStrongPassword"
-     *               description: "user password confirm value"
      *           gender:
      *               type: "string"
      *               enum: [other, male, female]
@@ -134,7 +126,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
-     *            name: "code"
+     *            name: "withcode"
      *            example: "true"
      *            schema:
      *              type: string
@@ -145,14 +137,45 @@ module.exports = function (app, options) {
      *          "302":
      *            schema:
      *              $ref: '#/definitions/SessionToken'
+     *          "400":
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI, FAIL_TO_REGENERATE_SESSION, BAD_DATA (with embedded errors)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/signup', cors);
     app.post('/api/v2/session/signup', limiterHelper.verify, function (req, res, next) {
-        signupREST(req, res, handleAfterSessionRestLogin);
+        signupREST(req, res, handleAfterSessionRestLogin)
+        .then((redirect)=> {
+            if (redirect){
+                res.redirect(redirect);
+            } else {
+                res.sendStatus(204);
+            }
+        })
+        .catch((err)=> {
+            next(err);
+        });
     });
 
     app.post('/signup', limiterHelper.verify, recaptcha.middleware.render, function (req, res, next) {
-        signupHTML(req, res, handleAfterSessionHtlmLogin);
+        signupHTML(req, res, handleAfterSessionHtlmLogin)
+        .then((redirect)=> {
+            if (redirect){
+                res.redirect(redirect);
+            } else {
+                res.sendStatus(204);
+            }
+        })
+        .catch((err)=> {
+            let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
+            const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
+            if (templateExists(path)) {
+                res.render(path, err);
+            } else {
+                res.render('./login/broadcaster/default/signup.ejs', err);
+            }
+
+        });
     });
 
 
@@ -174,9 +197,21 @@ module.exports = function (app, options) {
      *     responses:
      *          "200":
      *            description: "a recovery email had been sent"
+     *          "400":
+     *            description: "Possible error are: BAD_DATA, INVALID_RECAPTCHA and USER_NOT_FOUND"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/recover', cors);
-    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
+    app.post('/api/v2/all/password/recover', cors, limiterHelper.verify, function (req, res, next){
+        userHelper.password_recover(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     /**
      * @swagger
@@ -196,9 +231,21 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "Password"
+     *          "400":
+     *            description: "Possible error are: BAD_DATA, NO_USER_FOR_THIS_MAIL"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/all/password/update', cors);
-    app.post('/api/v2/all/password/update', cors, userHelper.password_update);
+    app.post('/api/v2/all/password/update', cors, function(req, res, next){
+        userHelper.password_update(req)
+        .then(()=> {
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
 
     /**
@@ -224,7 +271,7 @@ module.exports = function (app, options) {
      *              type: string
      *              description: The redirect url to send the code
      *          - in: query
-     *            name: "code"
+     *            name: "withcode"
      *            example: "true"
      *            schema:
      *              type: string
@@ -236,38 +283,62 @@ module.exports = function (app, options) {
      *            description: "a redirect with token in body response"
      *            schema:
      *              $ref: '#/definitions/SessionToken'
+     *          "400":
+     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/login', cors);
     app.post('/api/v2/session/login', cors, function (req, res, next) {
 
-        loginService.login(req, res)
+        return loginService.login(req, res)
             .then(function (user) {
                 // force renew cookie so a cookie value couldn't point at different time to different user
-                req.session.regenerate(function (err) {
+                return req.session.regenerate(function (err) {
                     if (err) {
                         next(err);
                     } else {
-                        req.logIn(user, function () {
-                            handleAfterSessionRestLogin(user, req, res);
+                        return req.logIn(user, function () {
+                            handleAfterSessionRestLogin(user, req, res)
+                            .then((redirect)=> {
+                                if (redirect){
+                                    res.redirect(redirect);
+                                } else {
+                                    res.sendStatus(204);
+                                }
+                            })
+                            .catch(function (err) {
+                                next(err);
+                            });
                         });
                     }
                 });
             })
-            .catch(function (err) {
-                handleErrorForRestCalls(err, res);
+            .catch((err) => {
+                next(err);
             });
     });
     app.post('/login', cors, function (req, res, next) {
 
-        loginService.login(req, res)
+        return loginService.login(req, res)
             .then(function (user) {
                 // force renew cookie so a cookie value couldn't point at different time to different user
-                req.session.regenerate(function (err) {
+                return req.session.regenerate(function (err) {
                     if (err) {
                         next(err);
                     } else {
-                        req.logIn(user, function () {
-                            handleAfterSessionHtlmLogin(user, req, res);
+                        return req.logIn(user, function () {
+                            return handleAfterSessionHtlmLogin(user, req, res)
+                            .then((redirect)=> {
+                                if (redirect){
+                                    res.redirect(redirect);
+                                } else {
+                                    res.redirect(requestHelper.getPath('/'));
+                                }
+                            })
+                            .catch((err)=> {
+                                next(err);
+                            });
                         });
                     }
                 });
@@ -288,6 +359,10 @@ module.exports = function (app, options) {
      *     responses:
      *          "204":
      *            description: "user disconnected"
+     *          "401":
+     *            description: "user is not logged (using session cookie)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/session/logout', cors);
     app.delete('/api/v2/session/logout', cors, authHelper.ensureAuthenticated, function (req, res, next) {
@@ -325,9 +400,13 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/Token'
      *          "302":
      *            description: "a redirect with token as a get query parameter"
+     *          "400":
+     *            description: "Possible error are: UNAUTHORIZED_REDIRECT_URI"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options(SESSION_LOGIN_PATH, cors);
-    app.get(SESSION_LOGIN_PATH, cors, function (req, res) {
+    app.get(SESSION_LOGIN_PATH, cors, authHelper.ensureAuthenticated, function (req, res, next) {
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI && isAllowedRedirectUri(REDIRECT_URI)) {
             if (REDIRECT_URI.indexOf("?") >= 0) {
@@ -336,7 +415,7 @@ module.exports = function (app, options) {
                 res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
             }
         } else {
-            res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+            next(apiErrorHelper.buildError(400, 'UNAUTHORIZED_REDIRECT_URI', 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
         }
     });
 
@@ -370,10 +449,20 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/JWTToken'
      *          "302":
      *            description: "redirect"
+     *          "400":
+     *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/jwt/signup', cors);
     app.post('/api/v2/jwt/signup', limiterHelper.verify, function (req, res, next) {
-        signupREST(req, res, handleAfterJWTRestLogin);
+        signupREST(req, res, handleAfterJWTRestLogin)
+        .then((token)=> {
+            res.json({token: 'JWT ' + token});
+        })
+        .catch((err)=> {
+            next(err);
+        });
     });
 
 
@@ -393,18 +482,6 @@ module.exports = function (app, options) {
      *            required: true
      *            schema:
      *              $ref: "#/definitions/Credentials"
-     *          - in: query
-     *            name: "redirect"
-     *            example: "http://somedomain.org"
-     *            schema:
-     *              type: string
-     *              description: The redirect url to send the code
-     *          - in: query
-     *            name: "code"
-     *            example: "true"
-     *            schema:
-     *              type: string
-     *              description: if present a first redirect'd be request to /api/v2/session/cookie
      *     responses:
      *          "200":
      *            description: "signup succeed"
@@ -412,16 +489,22 @@ module.exports = function (app, options) {
      *              $ref: '#/definitions/JWTToken'
      *          "302":
      *            description: "redirect"
+     *          "400":
+     *            description: "Possible error are: FAIL_TO_GENERATE_JWT_TOKEN"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.options('/api/v2/jwt/login', cors);
-    app.post('/api/v2/jwt/login', cors, function (req, res) {
-
+    app.post('/api/v2/jwt/login', cors, function (req, res, next) {
         loginService.login(req, res)
             .then(function (user) {
-                handleAfterJWTRestLogin(user, req, res);
+                return handleAfterJWTRestLogin(user, req, res);
+            })
+            .then((token)=> {
+                res.json({token: 'JWT ' + token});
             })
             .catch(function (err) {
-                handleErrorForRestCalls(err, res);
+                next(err);
             });
     });
 
@@ -437,6 +520,10 @@ module.exports = function (app, options) {
      *            description: "return jwt token for logged user"
      *            schema:
      *              $ref: '#/definitions/JWTToken'
+     *          "401":
+     *            description: "user unauthenticated (using session)"
+     *            schema:
+     *              $ref: '#/definitions/error'
      */
     app.get('/api/v2/session/jwt', cors, authHelper.ensureAuthenticated, function (req, res) {
         res.json({token: 'JWT ' + jwt.encode(req.user, config.jwtSecret)});
@@ -516,47 +603,64 @@ module.exports = function (app, options) {
 /////////////////////
 // signup
 function signupREST(req, res, handleAfterLogin) {
-    loginService.checkSignupData(req)
-        .then(function (userAttributes) {
+    return new Promise((resolve, reject) => {
+        return loginService.checkSignupData(req)
+        .then(function(userAttributes) {
             return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
         })
-        .then(function (user) {
+        .then(function(user) {
             // force renew cookie so a cookie value couldn't point at different time to different user
-            req.session.regenerate(function (err) {
+            return req.session.regenerate(function(err) {
                 if (err) {
-                    handleErrorForRestCalls(err, res);
+                    reject(err);
                 } else {
-                    req.logIn(user, function () {
-                        handleAfterLogin(user, req, res);
+                    return req.logIn(user, function() {
+                        return handleAfterLogin(user, req, res)
+                        .then((redirect)=>{
+                            resolve(redirect);
+                        })
+                        .catch(function(err) {
+                            reject(err);
+                        });
                     });
                 }
             });
         })
-        .catch(function (err) {
-            handleErrorForRestCalls(err, res);
+        .catch(function(err) {
+            reject(err);
         });
+    });
 }
 
+
+
 function signupHTML(req, res, handleAfterLogin) {
-    loginService.checkSignupData(req)
-        .then(function (userAttributes) {
-            return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
-        })
-        .then(function (user) {
-            // force renew cookie so a cookie value couldn't point at different time to different user
-            req.session.regenerate(function (err) {
-                if (err) {
-                    handleErrorForSignupHTMLCalls(req, err, res);
-                } else {
-                    req.logIn(user, function () {
-                        handleAfterLogin(user, req, res);
-                    });
-                }
+    return new Promise((resolve, reject) => {
+        return loginService.checkSignupData(req)
+            .then(function (userAttributes) {
+                return loginService.signup(userAttributes, req.body.email, req.body.password, req, res);
+            })
+            .then(function (user) {
+                // force renew cookie so a cookie value couldn't point at different time to different user
+                return req.session.regenerate(function (err) {
+                    if (err) {
+                        reject(buildErrorData(req, err));
+                    } else {
+                        return req.logIn(user, function () {
+                            return handleAfterLogin(user, req, res)
+                            .then((redirect)=>{
+                                resolve(redirect);
+                            }).catch((err)=> {
+                                reject (err);
+                            });
+                        });
+                    }
+                });
+            })
+            .catch(function (err) {
+                reject(buildErrorData(req, err));
             });
-        })
-        .catch(function (err) {
-            handleErrorForSignupHTMLCalls(req, err, res);
-        });
+    });
 }
 
 
@@ -565,69 +669,63 @@ function signupHTML(req, res, handleAfterLogin) {
 
 
 function handleAfterSessionRestLogin(user, req, res) {
-    const REDIRECT_URI = req.query.redirect;
-    if (REDIRECT_URI) {
-        if (req.query.withcode) {
-            var allowed = isAllowedRedirectUri(REDIRECT_URI);
-            if (allowed) {
-                res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
-            } else {
-                res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
-            }
-        } else {
-            res.redirect(REDIRECT_URI);
-        }
-    } else {
-        res.sendStatus(204);
-    }
-}
+    return new Promise((resolve, reject) => {
 
-
-function handleAfterSessionHtlmLogin(user, req, res) {
-    const REDIRECT_URI = req.query.redirect;
-    if (REDIRECT_URI) {
-        if (req.query.withcode) {
-            var allowed = isAllowedRedirectUri(REDIRECT_URI);
-            if (allowed) {
-                res.redirect(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
-            } else {
-                // This is not supposed to happen => json error message is acceptable
-                res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
-            }
-        } else {
-            res.redirect(REDIRECT_URI);
-        }
-    } else {
-        res.redirect(requestHelper.getPath('/'));
-    }
-}
-
-
-function handleAfterJWTRestLogin(user, req, res) {
-    userHelper.getProfileByReq(req,user)
-    .then(profile => {
-        // This merges the objects, so we don't loose data for services that rely on them
-        const token = jwt.encode(_.extend({}, user.dataValues, profile.user), config.jwtSecret);
         const REDIRECT_URI = req.query.redirect;
         if (REDIRECT_URI) {
             if (req.query.withcode) {
                 var allowed = isAllowedRedirectUri(REDIRECT_URI);
                 if (allowed) {
-                    res.redirect(REDIRECT_URI + '?token=' + encodeURIComponent(req.cookies[config.auth_session_cookie.name]));
+                    resolve(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
                 } else {
-                    res.status(400).json({msg: 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'});
+                    reject(apiErrorHelper.buildError(400, "UNAUTHORIZED_REDIRECT_URI", 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
                 }
             } else {
-                res.redirect(REDIRECT_URI);
+                resolve(REDIRECT_URI);
             }
         } else {
-            res.json({token: 'JWT ' + token});
+            resolve();
         }
-    })
-    .catch(e => {
-        logger.error(e);
-        res.sendStatus(400); // 500 may be better, but I like the client to think *he* did wrong, not *us* :)
     });
+}
+
+
+function handleAfterSessionHtlmLogin(user, req) {
+    return new Promise((resolve, reject) => {
+        const REDIRECT_URI = req.query.redirect;
+        if (REDIRECT_URI) {
+            if (req.query.withcode) {
+                let allowed = isAllowedRedirectUri(REDIRECT_URI);
+                if (allowed) {
+                    resolve(requestHelper.getPath(SESSION_LOGIN_PATH + '?redirect=' + REDIRECT_URI));
+                } else {
+                    // This is not supposed to happen => json error message is acceptable
+                    reject(apiErrorHelper.buildError(400, "UNAUTHORIZED_REDIRECT_URI", 'redirect uri ' + REDIRECT_URI + ' is not an allowed redirection'));
+                }
+            } else {
+                resolve(REDIRECT_URI);
+            }
+        } else {
+            resolve(requestHelper.getPath('/'));
+        }
+    });
+}
+
+
+function handleAfterJWTRestLogin(user, req, res) {
+    return new Promise((resolve, reject) => {
+        userHelper.getProfileByReq(req,user)
+        .then(profile => {
+            // This merges the objects, so we don't loose data for services that rely on them
+            const token = jwt.encode(_.extend({}, user.dataValues, profile.user), config.jwtSecret);
+            resolve(token);
+        })
+        .catch(e => {
+            logger.error(e);
+            reject(400, 'FAIL_TO_GENERATE_JWT_TOKEN"', 'That error should not occurred... But it has... We didn\'t manage to generate a JWT token for the user...'); // 500 may be better, but I like the client to think *he* did wrong, not *us* :)
+        });
+    });
+
 }
 
 /////////////////////
@@ -659,23 +757,11 @@ function getRedirectParams(req) {
     return redirect;
 }
 
-
-function handleErrorForRestCalls(err, res) {
-    if (err.name === errors.VALIDATION_ERROR) {
-        res.status(400).json({error: err.errorData});
-    } else if (err.name === errors.BAD_CREDENTIAL_ERROR) {
-        res.status(401).json({error: err.errorData});
-    } else {
-        logger.warn("unexpected error.", err);
-        res.status(500).json({msg: "unexpected error."});
-    }
-}
-
 function handleErrorForHtmlCalls(req, res, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
+        message: err.applicationError ? err.applicationError.error.message : err.toString(),
         email: req.body.email ? req.body.email : '',
         signup: requestHelper.getPath('/signup' + redirect),
         forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
@@ -692,11 +778,11 @@ function handleErrorForHtmlCalls(req, res, err) {
     }
 }
 
-function handleErrorForSignupHTMLCalls(req, err, res) {
+function buildErrorData(req, err) {
     var redirect = getRedirectParams(req);
 
     var data = {
-        message: err.errorData ? req.__(err.errorData.key) : err.toString(),
+        message: err.applicationError ? err.applicationError.error.message : err.toString(),
         captcha: req.recaptcha,
         email: req.body.email ? req.body.email : '',
         date_of_birth: req.body.date_of_birth ? req.body.date_of_birth : '',
@@ -705,16 +791,8 @@ function handleErrorForSignupHTMLCalls(req, err, res) {
         login: requestHelper.getPath('/login' + redirect),
         target: requestHelper.getPath('/signup' + redirect)
     };
-    let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
-    const path = './login/broadcaster/' + broadcaster + 'signup.ejs';
-    if (templateExists(path)) {
-        res.render(path, data);
-    } else {
-        res.render('./login/broadcaster/default/signup.ejs', data);
-    }
-
+    return data;
 }
-
 
 function templateExists(path) {
     return fs.existsSync(__dirname + '/../../../../views/' + path);
