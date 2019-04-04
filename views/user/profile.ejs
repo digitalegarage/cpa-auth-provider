@@ -21,7 +21,7 @@
         <div class="col-sm-3">
             <h4 class="hidden-xs"><%= __('PROFILE_PERSONAL_DATA_TITLE') %></h4>
             <h4 class="visible-xs-inline-block hidden-sm mobile-title"><%= __('PROFILE_PERSONAL_DATA_TITLE_MOBILE') %></h4>
-            <button id="modify-data" type="button" class="btn btn-link"><%= __('PROFILE_EDIT_LINK') %></button>
+            <button id="modify-data" type="button" class="btn btn-link"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<%= __('PROFILE_EDIT_LINK') %></button>
             <hr class="visible-xs-block hidden-sm"/>
         </div>
         <div class="col-sm-9">
@@ -383,7 +383,8 @@
                         <span class="text"></span>
                     </span>
         
-                    <span id="export-success-feed-back" class="text-green">
+                    <span id="export-success-feed-back" class="text-success">
+                        <span class="glyphicon glyphicon-ok"></span>
                         <span class="text"></span>
                     </span>
                 <p><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LABEL') %></p>
