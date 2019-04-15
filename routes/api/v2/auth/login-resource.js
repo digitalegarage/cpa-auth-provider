@@ -9,6 +9,7 @@ const cors = require('../../../../lib/cors'),
     authHelper = require('../../../../lib/auth-helper'),
     afterLogoutHelper = require('../../../../lib/afterlogout-helper'),
     apiErrorHelper = require('../../../../lib/api-error-helper'),
+    socialLoginHelper = require('../../../../lib/social-login-helper'),
     jwt = require('jwt-simple'),
     loginService = require('../../../../services/login-service'),
     _ = require('underscore');
@@ -525,8 +526,12 @@ module.exports = function (app, options) {
      *            schema:
      *              $ref: '#/definitions/error'
      */
-    app.get('/api/v2/session/jwt', cors, authHelper.ensureAuthenticated, function (req, res) {
-        res.json({token: 'JWT ' + jwt.encode(req.user, config.jwtSecret)});
+    app.get('/api/v2/session/jwt', cors, authHelper.ensureAuthenticated, function (req, res, next) {
+        userHelper.buildProfileFromUser(req.user, req)
+        .then((profile) => {
+            res.json({token: 'JWT ' + jwt.encode(profile.user, config.jwtSecret)});
+        })
+        .catch((err) => next(err));        
     });
 
 
@@ -717,6 +722,7 @@ function handleAfterJWTRestLogin(user, req, res) {
         userHelper.getProfileByReq(req,user)
         .then(profile => {
             // This merges the objects, so we don't loose data for services that rely on them
+            logger.debug('JWT token in handleAfterJWTRestLogin: ', user.dataValues, profile.user);
             const token = jwt.encode(_.extend({}, user.dataValues, profile.user), config.jwtSecret);
             resolve(token);
         })

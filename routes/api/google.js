@@ -42,19 +42,19 @@ function googleSignup(req, res, next) {
                         if (response) {
                             res.status(200).json(response);
                         } else {
-                            next(500, 'INTERNAL_SERVER_ERROR.GOOGLE_LOGIN', 'Facebook login error.', '', [], error.message);
+                            next(500, 'INTERNAL_SERVER_ERROR.GOOGLE_LOGIN', 'Google login error.', '', [], error.message);
                         }
                     });
                 }
             }
         ).catch(
             function (error) {
-                next(500, 'INTERNAL_SERVER_ERROR.GOOGLE_LOGIN', 'Facebook login error.', '', [], error.message);
+                next(500, 'INTERNAL_SERVER_ERROR.GOOGLE_LOGIN', 'Google login error.', '', [], error.message);
             }
         );
     }
     else {
-        next(apiErrorHelper.buildError(401,'FACEBOOK_PROFILE_NOT_FOUND',"Missing google IDtoken to connect with Google account."));
+        next(apiErrorHelper.buildError(401,'GOOGLE_PROFILE_NOT_FOUND',"Missing google IDtoken to connect with Google account."));
     }
 }
 
