@@ -16,6 +16,8 @@ var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 var userHelper = require ('../../lib/user-helper');
 
+var requestHelper = require('../../lib/request-helper');
+
 
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromExtractors(
@@ -95,8 +97,8 @@ module.exports = function (app, options) {
                     "validation-email",
                     {log: false},
                     {
-                        confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : '') + '&code=' + encodeURIComponent(code),
-                        host: config.mail.host,
+                        confirmLink: requestHelper.getIdpRoot() + '/email_verify?email=' + encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : '') + '&code=' + encodeURIComponent(code),
+                        host: requestHelper.getIdpRoot(),
                         mail: user.LocalLogin ? user.LocalLogin.login : '',
                         code: user.verificationCode
                     },

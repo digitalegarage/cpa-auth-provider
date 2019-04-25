@@ -1,5 +1,6 @@
 const config = require('../config');
 const db = require('../models');
+const requestHelper = require('../lib/request-helper');
 const passwordHelper = require('../lib/password-helper');
 const permissionName = require('../lib/permission-name');
 const codeHelper = require('../lib/code-helper');
@@ -166,8 +167,8 @@ function signup(userAttributes, email, password, req, res) {
                                     "validation-email",
                                     {log: false},
                                     {
-                                        confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                        host: config.mail.host,
+                                        confirmLink: requestHelper.getIdpRoot() + '/email_verify?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                        host: requestHelper.getIdpRoot(),
                                         mail: localLogin.login,
                                         code: code
                                     },

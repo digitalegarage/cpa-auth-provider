@@ -8,6 +8,7 @@ var config = require('../../config');
 var uuid = require('uuid');
 var finder = require('../../lib/finder');
 const Op = db.sequelize.Op;
+const requestHelper = require ('../../lib/request-helper');
 
 var STATES = {
     INVALID_TOKEN: 'INVALID_TOKEN',
@@ -270,9 +271,9 @@ function triggerAccountChangeEmails(email, user, client, newUsername, overrideRe
                 user_id: user.id,
                 redirect_uri: redirectUri,
                 oauth2_client_id: client ? client.id : undefined
-            })
-            .then((verifyToken) => {
-                    let host = config.mail.host || '';
+            }).then(
+                function(verifyToken) {
+                    let host = requestHelper.getIdpRoot() || '';
                     let confirmLink = host + '/api/v2/all/user/email/move/' + encodeURIComponent(key) + '?use_custom_redirect=' + overrideRedirect;
                     if (redirectUri) {
                         confirmLink = redirectUri + APPEND_MOVED + '&username=' + encodeURIComponent(user.email) + '&token=' + encodeURIComponent(key);

@@ -178,8 +178,8 @@ module.exports = {
         password: process.env.DB_PASSWORD,
 
         // The database type, 'mysql', 'sqlite', etc.
-        type: process.env.DB_TYPE,//'sqlite',
-        database: process.env.DB_DATABASE,
+        type: process.env.DB_TYPE || 'mysql',//'sqlite',
+        database: process.env.DB_DATABASE || 'idp',
 
         // Database filename for SQLite.
         filename: process.env.DB_FILENAME,
