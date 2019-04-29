@@ -190,17 +190,22 @@ function signup(userAttributes, email, password, req, res) {
 function login(req, res) {
     return new Promise((resolve, reject) => {
 
-        return db.LocalLogin.findOne({
-            where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), req.body.email.toLowerCase()),
-            include: [db.User]
-        }).then(function (localLogin) {
-            if (localLogin && req.body.password) {
-                localLogin.verifyPassword(req.body.password)
+        return db.User.findOne(
+            {
+                include: [
+                    {
+                        model: db.LocalLogin,
+                        where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), req.body.email.toLowerCase())
+                    }]
+            }
+        ).then(function (user) {
+            if (user && user.LocalLogin && req.body.password) {
+                user.LocalLogin.verifyPassword(req.body.password)
                     .then(function (isMatch) {
                         if (isMatch) {
-                            localLogin.logLogin(localLogin.User);
-                            afterLoginHelper.afterLogin(localLogin.User, req.body.email || req.query.email, res);
-                            resolve(localLogin.User);
+                            user.LocalLogin.logLogin(user);
+                            afterLoginHelper.afterLogin(user, req.body.email || req.query.email, res);
+                            resolve(user);
                         } else {
                             reject(apiErrorHelper.buildError(401, 'INCORRECT_LOGIN_OR_PASSWORD', 'Incorrect login or password', req.__('API_INCORRECT_LOGIN_OR_PASS')));
                         }
