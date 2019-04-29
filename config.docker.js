@@ -185,7 +185,9 @@ module.exports = {
         filename: process.env.DB_FILENAME,
 
         // If true, SQL statements are logged to the console.
-        debug: 'true' === process.env.DB_LOGGING
+        debug: 'true' === process.env.DB_LOGGING,
+        poolSizeMax: process.env.DB_POOL_SIZE_MAX,
+        poolSizeMin: process.env.DB_POOL_SIZE_MIN
     },
 
     // Session cookie is signed with this secret to prevent tampering
