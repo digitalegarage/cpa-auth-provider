@@ -6,6 +6,7 @@ var config = require('../../../../config');
 var login = require('../setup/login');
 var userHelper = require('../../../../lib/user-helper');
 var db = require('../../../../models');
+var codeHelper = require('../../../../lib/code-helper');
 
 
 // Google reCAPTCHA
@@ -29,9 +30,6 @@ const DATE_OF_BIRTH = '31.08.1978';
 
 const WHITELISTED_REDIRECT_URI = 'http://whitelistedredirecturl.com'
 const NOT_WHITELISTED_REDIRECT_URI = 'http://notwhitelistedredirecturl.com'
-
-const API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA = 'Something went wrong with the reCAPTCHA';
-const API_PASSWORD_RECOVER_USER_NOT_FOUND = 'User not found';
 
 const AFTER_LOGIN = {
     activated: true,
@@ -71,10 +69,7 @@ describe('API-V2 LOGIN', function () {
 
                 it('should return a success false', function () {
                     expect(ctx.res.statusCode).to.equal(400);
-                    expect(ctx.res.body.error);
-                    expect(ctx.res.body.error.code).to.equal('S8');
-                    expect(ctx.res.body.error.key).to.equal('API_SIGNUP_SOMETHING_WRONG_RECAPTCHA');
-                    expect(ctx.res.body.error.message).to.equal('recaptcha error');
+                    expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- reCaptcha is empty or wrong.","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Fail to validate Recaptcha","message":"reCaptcha is empty or wrong.","data":"invalid-input-response"}]}}');
                 });
 
             });
@@ -94,11 +89,8 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.error);
-                        expect(ctx.res.body.error.code).to.equal('S2');
-                        expect(ctx.res.body.error.key).to.equal('PASSWORD_WEAK');
-                        expect(ctx.res.body.error.message).to.equal('Password is not strong enough');
-                    });
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is too weak","message":"Password too simple. Use numbers and upper and lower case letters."}]}}');
+                     });
 
                 });
 
@@ -111,11 +103,8 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.error);
-                        expect(ctx.res.body.error.code).to.equal('S2');
-                        expect(ctx.res.body.error.key).to.equal('PASSWORD_WEAK');
-                        expect(ctx.res.body.error.message).to.equal('Password is not strong enough');
-                    });
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is too weak","message":"Password too simple. Use numbers and upper and lower case letters."}]}}');
+                     });
 
                 });
 
@@ -142,14 +131,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.error);
-                        expect(ctx.res.body.error.code).to.equal('S3');
-                        expect(ctx.res.body.error.key).to.equal('MISSING_FIELDS');
-                        expect(ctx.res.body.error.message).to.equal('Missing required fields');
-                        expect(ctx.res.body.error.missingFields);
-                        expect(ctx.res.body.error.data.missingFields);
-                        expect(ctx.res.body.error.data.missingFields.length).to.equal(1);
-                        expect(ctx.res.body.error.data.missingFields[0]).to.equal('password');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Missing password","errors":[{"field":"password","type":"MISSING","hint":"Password is mandatory","message":"Missing password"}]}}');
                     });
 
                 });
@@ -163,14 +145,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.error);
-                        expect(ctx.res.body.error.code).to.equal('S3');
-                        expect(ctx.res.body.error.key).to.equal('MISSING_FIELDS');
-                        expect(ctx.res.body.error.message).to.equal('Missing required fields');
-                        expect(ctx.res.body.error.missingFields);
-                        expect(ctx.res.body.error.data.missingFields);
-                        expect(ctx.res.body.error.data.missingFields.length).to.equal(1);
-                        expect(ctx.res.body.error.data.missingFields[0]).to.equal('email');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Email is empty","errors":[{"field":"email","type":"MISSING","hint":"\\"email\\" is not present in request body","message":"Email is empty"}]}}');
                     });
 
                 });
@@ -188,10 +163,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.error);
-                        expect(ctx.res.body.error.code).to.equal('S1');
-                        expect(ctx.res.body.error.key).to.equal('EMAIL_TAKEN');
-                        expect(ctx.res.body.error.message).to.equal('Email already exists');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email mail@mail.mail already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
                     });
 
                 });
@@ -209,10 +181,7 @@ describe('API-V2 LOGIN', function () {
 
                     it('should return a success false', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.error);
-                        expect(ctx.res.body.error.code).to.equal('S1');
-                        expect(ctx.res.body.error.key).to.equal('EMAIL_TAKEN');
-                        expect(ctx.res.body.error.message).to.equal('Email already exists');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email MAIL@MAIL.MAIL already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
                     });
 
                 });
@@ -239,14 +208,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.body.error);
-                            expect(ctx.res.body.error.code).to.equal('S3');
-                            expect(ctx.res.body.error.key).to.equal('MISSING_FIELDS');
-                            expect(ctx.res.body.error.message).to.equal('Missing required fields');
-                            expect(ctx.res.body.error.missingFields);
-                            expect(ctx.res.body.error.data.missingFields);
-                            expect(ctx.res.body.error.data.missingFields.length).to.equal(1);
-                            expect(ctx.res.body.error.data.missingFields[0]).to.equal('date_of_birth');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- date_of_birth  is missing","errors":[{"field":"date_of_birth","type":"MISSING","hint":"field \\"date_of_birth\\" is missing","message":"date_of_birth  is missing"}]}}');
                         });
 
                     });
@@ -264,10 +226,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a success false', function () {
                             expect(ctx.res.statusCode).equal(400);
-                            expect(ctx.res.body.error);
-                            expect(ctx.res.body.error.code).to.equal('S4');
-                            expect(ctx.res.body.error.key).to.equal('UNKNOWN_GENDER');
-                            expect(ctx.res.body.error.message).to.equal('Unknown gender');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- undefined","errors":[{"field":"gender","type":"BAD_FORMAT","custom_type":"Unknown gender \'jedi\' should one of the following (male|female|other)","hint":" - gender doesn\'t have the expected format"}]}}');
                         });
                     });
 
@@ -462,7 +421,7 @@ describe('API-V2 LOGIN', function () {
 
                         it('should return a 400', function () {
                             expect(ctx.res.statusCode).to.equal(400);
-                            expect(ctx.res.body.msg).to.equal('redirect uri ' + NOT_WHITELISTED_REDIRECT_URI + ' is not an allowed redirection');
+                            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"UNAUTHORIZED_REDIRECT_URI","hint":"redirect uri http://notwhitelistedredirecturl.com is not an allowed redirection","errors":[]}}');
                         });
                     });
                 });
@@ -504,32 +463,6 @@ describe('API-V2 LOGIN', function () {
                         expect(ctx.res.statusCode).to.equal(200);
                     });
 
-                });
-            });
-            context('when user request to be redirected', function () {
-                var ctx = this;
-
-                context('with code', function () {
-
-                    before(function (done) {
-                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, WHITELISTED_REDIRECT_URI, true, done);
-                    });
-
-                    it('should return a 302', function () {
-                        expect(ctx.res.statusCode).to.equal(302);
-                        expect(ctx.res.header.location).to.equal(WHITELISTED_REDIRECT_URI + '?token=' + ctx.token);
-                    });
-                });
-                context('without code', function () {
-
-                    before(function (done) {
-                        login.jwtSignup(ctx, AN_EMAIL, STRONG_PASSWORD, WHITELISTED_REDIRECT_URI, null, done);
-                    });
-
-                    it('should return a 302', function () {
-                        expect(ctx.res.statusCode).to.equal(302);
-                        expect(ctx.res.header.location).to.equal(WHITELISTED_REDIRECT_URI);
-                    });
                 });
             });
         });
@@ -588,7 +521,7 @@ describe('API-V2 LOGIN', function () {
                     });
                     it('should return a 400', function () {
                         expect(ctx.res.statusCode).to.equal(400);
-                        expect(ctx.res.body.msg).to.equal('redirect uri ' + NOT_WHITELISTED_REDIRECT_URI + ' is not an allowed redirection');
+                        expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"UNAUTHORIZED_REDIRECT_URI","hint":"redirect uri http://notwhitelistedredirecturl.com is not an allowed redirection","errors":[]}}');
                     });
 
 
@@ -680,7 +613,31 @@ describe('API-V2 LOGIN', function () {
                 expect(ctx.res.statusCode).to.equal(204);
             });
         });
+        context('using session (with local login)', function () {
+            before(function (done) {
+                login.cookieSignup(ctx, AN_EMAIL, STRONG_PASSWORD, null, null, done);
+            });
+            before(function (done) {
+                requestHelper.sendRequest(ctx, '/api/v2/session/user', {method: 'delete', cookie: ctx.cookie}, done);
+            });
 
+            before(function (done) {
+                db.User.count({}).then(function (count) {
+                    ctx.count = count;
+                    done();
+                });
+            });
+
+            it('user should not be deleted', function () {
+                expect(ctx.countBefore + 1).to.equal(ctx.count);
+            });
+
+            it('should return a 412', function () {
+                expect(ctx.res.statusCode).to.equal(412);
+                expect(ctx.res.text).to.equal('{"error":{"status":412,"code":"USER_HAS_LOCAL_LOGIN","hint":"When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user","errors":[]}}');
+            });
+
+        });
 
     });
     context('retrieve session token', function () {
@@ -938,7 +895,7 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}]}}');
         });
     });
 
@@ -957,11 +914,145 @@ describe('API-V2 PASSWORD RECOVERY', function() {
 
         it('should return a 400 error', function() {
             expect(ctx.res.statusCode).to.equal(400);
-            expect(ctx.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[]}}');
         });
     });
 
 });
+
+
+describe('API-V2 PASSWORD UPDATE', function() {
+
+    let ctx = this;
+
+    let validCode;
+
+    let updatePassword = function(email, newPassword, code, done) {
+        let data = {}
+        if (email){
+            data.email = email;
+        }
+        if (newPassword){
+            data.password = newPassword;
+        }
+        if (code){
+            data.code = code;
+        }
+        requestHelper.sendRequest(ctx, '/api/v2/all/password/update', {
+            method: 'post',
+            cookie: ctx.cookie,
+            data: data
+        }, done);
+    };
+
+
+    before(initData.resetDatabase);
+
+    before(function(done) {
+        codeHelper.generatePasswordRecoveryCode(initData.USER_1_ID).then(function (code) {
+            validCode = code;
+            done();
+        });
+    });
+
+    context('When user try to update his password with wrong code', function() {
+
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, "WrongCode", done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"They might be several causes see errors array","message":"Wrong recovery code.","errors":[{"field":"code","type":"CUSTOM","custom_type":"WRONG_CODE","hint":"wrong code","message":"Wrong recovery code."}]}}');
+        });
+    });
+
+    context('When user try to update his password without code', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, undefined, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(JSON.parse(ctx.res.text).error.hint).to.equal('They might be several causes see errors array');
+        });
+    });
+
+    context('When user try to update his password with a weak password', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, 'w', validCode, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(JSON.parse(ctx.res.text).error.hint).to.equal('They might be several causes see errors array');
+        });
+    });
+
+    context('When user try to update his password with an unexisting email', function() {
+
+        before(function(done) {
+            updatePassword("unexisting@unexisting.ebu.io", STRONG_PASSWORD, validCode, done);
+        });
+
+        it('should return a 400 with expect standard error ', function() {
+            expect(ctx.res.statusCode).to.equal(400);
+            expect(ctx.res.body.error.status).to.equal(400);
+            expect(ctx.res.body.error.code).to.equal("NO_USER_FOR_THIS_MAIL");
+            expect(ctx.res.body.error.hint).to.equal("No user found for the following email 'unexisting@unexisting.ebu.io'");
+            expect(ctx.res.body.error.message).to.equal("User not found.");
+            expect(ctx.res.body.error.errors.length).to.equal(0);
+        });
+    });
+
+    context('When user try to update his password with correct data', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, validCode, done);
+        });
+
+        it('should return a 204', function() {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+    });
+
+    context('When user try to update his password with correct data and tries to login', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, validCode, done);
+        });
+
+        before(function(done) {
+            login.cookieLoginWithCustomCrendentials(ctx, initData.USER_1.email, STRONG_PASSWORD, done);
+        });
+
+        it('should return a 204', function() {
+            expect(ctx.res.statusCode).to.equal(204);
+        });
+
+    });
+
+    context('When user try to update his password with correct data and tries to login with previous password', function() {
+
+        before(function(done) {
+            updatePassword(initData.USER_1.email, STRONG_PASSWORD, validCode, done);
+        });
+
+        before(function(done) {
+            login.cookieLoginWithCustomCrendentials(ctx, initData.USER_1.email, initData.USER_1.password, done);
+        });
+
+        it('should return a 401', function() {
+            expect(ctx.res.statusCode).to.equal(401);
+        });
+
+    });
+
+});
+
 
 function getCookieValue(cookieStr) {
     //cookie format: connect.sid=s%3A0Xf6JiMbGdO9XJ_EUOY7kJnV832uLd9m.GNjQavwpwWIM6sqaDjxVQNxVIdYSzzSUS3%2Bjo%2BhD4RY; Path=/; HttpOnly

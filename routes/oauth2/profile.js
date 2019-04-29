@@ -102,6 +102,7 @@ var user_profile_update = [
                 },
                 function (err) {
                     logger.error('[PUT /user/profile][ERROR', err, ']');
+                    // TODO:
                     res.status(500).json({msg: req.__('BACK_PROFILE_UPDATE_FAIL') + err});
                 }
             );

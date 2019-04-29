@@ -4,23 +4,24 @@ var socialLoginHelper = require('../../lib/social-login-helper');
 var cors = require('../../lib/cors');
 var googleHelper = require('../../lib/google-helper');
 var finder = require ('../../lib/finder');
+var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
 
-    app.post('/oauth/google/signup', cors, function (req, res) {
+    app.post('/oauth/google/signup', cors, function (req, res, next) {
         if (!req.body.client_id) {
-            res.status(400).json({error: "Missing client id"});
+            apiErrorHelper.throwError(400, 'MISSING_CLIENT_ID', 'Missing client id.');
         } else {
-            googleSignup(req, res);
+            googleSignup(req, res, next);
         }
     });
 
-    app.post('/api/google/signup', cors, function (req, res) {
-        googleSignup(req, res);
+    app.post('/api/google/signup', cors, function (req, res, next) {
+        googleSignup(req, res, next);
     });
 };
 
-function googleSignup(req, res) {
+function googleSignup(req, res, next) {
     var googleIdToken = req.body.idToken;
     var remoteProfile;
 
@@ -35,25 +36,25 @@ function googleSignup(req, res) {
         ).then(
             function (localLoginInDb) {
                 if (localLoginInDb && !localLoginInDb.verified) {
-                    res.status(400).json({error: req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE")});
+                    next(apiErrorHelper.buildError(400, 'LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE', 'Login invalid by google.', req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE")));
                 } else {
                     socialLoginHelper.performLogin(remoteProfile, socialLoginHelper.GOOGLE, req.body.client_id, function (error, response) {
                         if (response) {
                             res.status(200).json(response);
                         } else {
-                            res.status(500).json({error: error.message});
+                            next(500, 'INTERNAL_SERVER_ERROR.GOOGLE_LOGIN', 'Google login error.', '', [], error.message);
                         }
                     });
                 }
             }
         ).catch(
             function (error) {
-                res.status(500).json({error: error.message});
+                next(500, 'INTERNAL_SERVER_ERROR.GOOGLE_LOGIN', 'Google login error.', '', [], error.message);
             }
         );
     }
     else {
-        res.status(400).json({error: 'Missing google IDtoken to connect with Google account'});
+        next(apiErrorHelper.buildError(401,'GOOGLE_PROFILE_NOT_FOUND',"Missing google IDtoken to connect with Google account."));
     }
 }
 
