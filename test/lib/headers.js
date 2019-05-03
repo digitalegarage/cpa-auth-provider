@@ -23,6 +23,6 @@ describe('Check response for headers', function () {
       expect(this.res.header['content-security-policy']).to.equal("default-src data: https: 'self'; script-src https: 'self' 'unsafe-inline' http://connect.facebook.com/ https://broadcarster.org; style-src https: 'self' 'unsafe-inline' https://broadcarster.org; img-src *; frame-src 'self' http://staticxx.facebook.com https://www.google.com https://accounts.google.com/ https://broadcarster.org; connect-src https:; font-src 'self' https://broadcarster.org");
     });
     it('health check endpoint must not contain session cookie', function() {
-      expect(this.res.header['set-cookie']).to.be.undefined;
+      expect(this.res.header['set-cookie']).to.equal(undefined);
     });
 });
