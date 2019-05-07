@@ -47,7 +47,7 @@ module.exports = function (sequelize, DataTypes) {
     SocialLogin.prototype.logLogin = function (user, transaction) {
         var self = this;
         return self.updateAttributes({last_login_at: Date.now()}, {transaction: transaction}).then(function () {
-            return user.logLastSeen();
+            return user.logLastSeen(transaction);
         });
     };
     
