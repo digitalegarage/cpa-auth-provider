@@ -159,7 +159,7 @@ function signup(userAttributes, email, password, req, res) {
                             }
                         ).then(
                             function (code) {
-                                localLogin.logLogin(user);
+                                localLogin.logLogin(user, transaction);
                                 afterLoginHelper.afterLogin(user, email, res);
                                 emailHelper.send(
                                     config.mail.from,
