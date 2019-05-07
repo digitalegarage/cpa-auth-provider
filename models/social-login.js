@@ -44,10 +44,10 @@ module.exports = function (sequelize, DataTypes) {
         }
     });
 
-    SocialLogin.prototype.logLogin = function (user, transaction) {
+    SocialLogin.prototype.logLogin = function (user) {
         var self = this;
-        return self.updateAttributes({last_login_at: Date.now()}, {transaction: transaction}).then(function () {
-            return user.logLastSeen(transaction);
+        return self.updateAttributes({last_login_at: Date.now()}).then(function () {
+            return user.logLastSeen();
         });
     };
     
