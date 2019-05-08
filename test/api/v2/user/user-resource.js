@@ -58,7 +58,7 @@ describe('API-V2 JWT get user id', function() {
 
         it('should return success 401', function() {
             expect(ctx.res.statusCode).equal(401);
-            expect(JSON.parse(ctx.res.text).error.code).equal('INVALID_JWT_TOKEN');
+            expect(ctx.res.text).equal('{"error":"Cannot parse JWT token"}');
         });
 
     });
@@ -78,7 +78,7 @@ describe('API-V2 JWT get user id', function() {
 
         it('should return 400', function() {
             expect(ctx.res.statusCode).equal(400);
-            expect(JSON.parse(ctx.res.text).error.code).equal('AUTHORIZATION_HEADER_MISSING');
+            expect(ctx.res.text).equal('{"error":"missing header Authorization"}');
         });
 
     });
@@ -171,12 +171,13 @@ describe('API-V2 add local login', function() {
                     cookie: ctx.cookie,
                     data: {
                         email: EMAIL,
+                        password: PASSWORD,
+                        confirm_password: 'different password',
                     },
                 }, done);
             });
 
             it(' should be 400', function() {
-                expect(ctx.res.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- \'New Password\' field is empty","errors":[{"field":"password","type":"MISSING","hint":"password is mandatory","message":"\'New Password\' field is empty"}]}}');
                 expect(ctx.res.statusCode).to.equal(400);
             });
         });
@@ -190,7 +191,8 @@ describe('API-V2 add local login', function() {
                     cookie: ctx.cookie,
                     data: {
                         email: EMAIL,
-                        password: PASSWORD
+                        password: PASSWORD,
+                        confirm_password: PASSWORD,
                     },
                 }, done);
             });
@@ -244,13 +246,13 @@ describe('API-V2 add local login', function() {
                     accessToken: ctx.token,
                     data: {
                         email: EMAIL,
-                        password: "weak"
+                        password: PASSWORD,
+                        confirm_password: 'different password',
                     },
                 }, done);
             });
 
             it(' should be 400', function() {
-                expect(ctx.res.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"You did not supply all required information<br/>- Password too simple. Use numbers and upper and lower case letters.","errors":[{"field":"password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is not strong enough","message":"Password too simple. Use numbers and upper and lower case letters.","data":{"password_strength_errors":["The password must be at least 10 characters long.","The password must contain at least one uppercase letter.","The password must contain at least one number.","The password must contain at least one special character."],"score":false}}]}}');
                 expect(ctx.res.statusCode).to.equal(400);
             });
         });
@@ -324,7 +326,6 @@ describe('API-V2 add local login', function() {
 
             it(' should be 400', function() {
                 expect(ctx.res.statusCode).to.equal(400);
-                expect(ctx.res.text).to.equal('{"error":{"status":400,"code":"LOCAL_LOGIN_ALREADY_EXISTS","hint":"Current user already has a local login.","message":"Local user already exists","errors":[]}}');
             });
         });
 
@@ -381,6 +382,25 @@ describe('API-V2 change password', function() {
         before(initData.resetDatabase);
 
         context('with incorrect data', function() {
+            context('(password are different)', function() {
+
+                before(function(done) {
+
+                    requestHelper.sendRequest(ctx, '/api/v2/all/user/password', {
+                        method: 'post',
+                        data: {
+                            email: initData.USER_1.email,
+                            previous_password: initData.USER_1.password,
+                            new_password: NEW_PASSWORD,
+                            confirm_password: 'different password',
+                        },
+                    }, done);
+                });
+
+                it(' should be 400', function() {
+                    expect(ctx.res.statusCode).to.equal(400);
+                });
+            });
             context('(new password is weak)', function() {
 
                 before(function(done) {
@@ -390,13 +410,13 @@ describe('API-V2 change password', function() {
                         data: {
                             email: initData.USER_1.email,
                             previous_password: initData.USER_1.password,
-                            new_password: "weak"
+                            new_password: "weak",
+                            confirm_password: "weak",
                         },
                     }, done);
                 });
 
                 it(' should be 400', function() {
-                    expect(ctx.res.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Cannot change password.","message":"Some fields are missing or have a bad format see errors arrays","errors":[{"field":"new_password","type":"CUSTOM","custom_type":"PASSWORD_WEAK","hint":"Password is not strong enough","message":"Password too simple. Use numbers and upper and lower case letters.","data":{"password_strength_errors":["The password must be at least 10 characters long.","The password must contain at least one uppercase letter.","The password must contain at least one number.","The password must contain at least one special character."],"score":false}}]}}');
                     expect(ctx.res.statusCode).to.equal(400);
                 });
             });
@@ -409,14 +429,14 @@ describe('API-V2 change password', function() {
                         data: {
                             email: "unexistig@user.com",
                             previous_password: initData.USER_1.password,
-                            new_password: NEW_PASSWORD
+                            new_password: NEW_PASSWORD,
+                            confirm_password: NEW_PASSWORD,
                         },
                     }, done);
                 });
 
                 it(' should be 401', function() {
                     expect(ctx.res.statusCode).to.equal(401);
-                    expect(ctx.res.text).equal('{"error":{"status":401,"code":"USER_NOT_FOUND","hint":"Local login not found.","message":"User not found","errors":[]}}');
                 });
             });
         });
@@ -430,14 +450,15 @@ describe('API-V2 change password', function() {
                     data: {
                         email: initData.USER_1.email,
                         previous_password: initData.USER_1.password,
-                        new_password: NEW_PASSWORD
+                        new_password: NEW_PASSWORD,
+                        confirm_password: NEW_PASSWORD,
                     },
                 }, done);
             });
             context('response', function() {
 
-                it(' should be 204', function() {
-                    expect(ctx.res.statusCode).to.equal(204);
+                it(' should be 200', function() {
+                    expect(ctx.res.statusCode).to.equal(200);
                 });
             });
             context('User can login using new credentials', function() {

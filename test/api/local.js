@@ -161,17 +161,36 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.text).to.equal('{"error":{"status":400,"code":"BAD_DATA","hint":"they might be several causes see errors array","errors":[{"field":"g-recaptcha-response","type":"BAD_FORMAT_OR_MISSING","hint":"Bad recaptcha","message":"Something went wrong with the reCAPTCHA"}]}}');
+            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_SOMETHING_WRONG_RECAPTCHA);
         });
     });
 
-    context('When user try to recover password with not existing email and good recaptcha', function () {
+    context('When user try to recover password with valid email and bad recaptcha', function () {
         before(resetDatabase);
 
         // Google reCAPTCHA
         before(function (done) {
             recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
             done();
+        });
+
+        before(function (done) {
+            requestHelper.sendRequest(this, '/api/v2/session/signup', {
+                method: 'post',
+                cookie: this.cookie,
+                type: 'form',
+                data: {
+                    email: 'qsdf@qsdf.fr',
+                    password: STRONG_PASSWORD,
+                    'g-recaptcha-response': recaptchaResponse
+                }
+            }, done);
+        });
+
+        it('should return a success false', function () {
+            // if Test fail  here google should have change the recaptcha algorithm
+            // => update recaptchaResponse by getting the value post as parameter g-recaptcha-response in signup query using a browser
+            expect(this.res.body.msg).to.not.equal("msg:Something went wrong with the reCAPTCHA");
         });
 
         before(function (done) {
@@ -188,7 +207,7 @@ describe('POST /api/local/password/recover', function () {
 
         it('should return a 400 error', function () {
             expect(this.res.statusCode).to.equal(400);
-            expect(this.res.text).to.equal('{"error":{"status":400,"code":"USER_NOT_FOUND","hint":"Cannot find an account with email \'qsdfcewhfuwehweih@qsdf.fr\' as local login","message":"User not found","errors":[]}}');
+            expect(this.res.body.msg).to.equal(API_PASSWORD_RECOVER_USER_NOT_FOUND);
         });
     });
 
@@ -309,7 +328,7 @@ describe('POST /api/v2/jwt/login', function () {
                 type: 'form',
                 data: {
                     email: 'first-email@mail.com',
-                    password: STRONG_PASSWORD,
+                    password: 'first-password',
                     'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
@@ -323,7 +342,7 @@ describe('POST /api/v2/jwt/login', function () {
                 type: 'form',
                 data: {
                     email: 'email@mail.com',
-                    password: STRONG_PASSWORD + "2",
+                    password: 'second-password',
                     'g-recaptcha-response': recaptchaResponse
                 }
             }, done);
@@ -337,7 +356,7 @@ describe('POST /api/v2/jwt/login', function () {
                 type: 'form',
                 data: {
                     email: 'email@mail.com',
-                    password: STRONG_PASSWORD
+                    password: 'first-password'
                 }
             }, done);
         });
@@ -383,7 +402,10 @@ describe('POST /api/v2/jwt/login', function () {
         it('/api/local/info should return a 401 ', function () {
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASSWORD","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
+            expect(this.res.body.error);
+            expect(this.res.body.error.code).to.equal("L1");
+            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
+            expect(this.res.body.error.message).to.equal("incorrect login or password");
         });
     });
 
@@ -419,7 +441,10 @@ describe('POST /api/v2/jwt/login', function () {
         it('should return a 401 ', function () {
             expect(this.token).to.be.undefined;
             expect(this.res.statusCode).to.equal(401);
-            expect(this.res.text).to.equal('{"error":{"status":401,"code":"INCORRECT_LOGIN_OR_PASSWORD","hint":"Incorrect login or password","message":"The username or password is incorrect","errors":[]}}');
+            expect(this.res.body.error);
+            expect(this.res.body.error.code).to.equal("L1");
+            expect(this.res.body.error.key).to.equal("API_INCORRECT_LOGIN_OR_PASS");
+            expect(this.res.body.error.message).to.equal("incorrect login or password");
         });
     });
 

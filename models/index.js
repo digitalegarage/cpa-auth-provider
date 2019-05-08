@@ -16,11 +16,10 @@ var sequelize = new Sequelize(config.db.database, config.db.user, config.db.pass
     logging: config.db.debug ? console.log : false,
     operatorsAliases: false,
     pool: {
-        max: config.db.poolSizeMax || 50,
-        min: config.db.poolSizeMin || 10,
-        idle: 20000,
-        acquire: 40000,
-        evict: 20000
+        max: 50,
+        min: 5,
+        acquire: 30000,
+        idle: 10000
     }
 });
 

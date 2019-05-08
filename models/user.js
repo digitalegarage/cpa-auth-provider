@@ -64,8 +64,8 @@ module.exports = function (sequelize, DataTypes) {
         return defaultDisplayName;
     };
 
-    User.prototype.logLastSeen = function () {
-        return this.updateAttributes({last_seen: Date.now()});
+    User.prototype.logLastSeen = function (transaction) {
+        return this.updateAttributes({last_seen: Date.now()}, {transaction: transaction});
     };
 
     User.prototype.isScheduledForDeletion = function () {

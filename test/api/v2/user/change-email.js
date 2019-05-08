@@ -195,8 +195,8 @@ function change_email_test_suite(authenticate, change_password) {
         });
 
         it('should report a failure forbidden', function() {
-            expect(this.res.statusCode).equal(401);
-            expect(this.res.text).equal('{"error":{"status":401,"code":"WRONG_PASSWORD","hint":"wrong password","message":"Wrong password.","errors":[]}}');
+            expect(this.res.statusCode).equal(403);
+            expect(this.res.body.reason).equal('WRONG_PASSWORD');
         });
 
         it('should not have generated a token', function(done) {
@@ -215,7 +215,7 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure email token', function() {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.text).equal('{"error":{"status":400,"code":"EMAIL_ALREADY_TAKEN","hint":"test2@test.com is already taken","message":"This email is not available.","errors":[]}}');
+            expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
         });
 
         it('should not have generated a token', function(done) {
@@ -233,7 +233,7 @@ function change_email_test_suite(authenticate, change_password) {
 
         it('should report a failure email token', function() {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.text).equal('{"error":{"status":400,"code":"EMAIL_ALREADY_TAKEN","hint":"TEST2@TEST.COM is already taken","message":"This email is not available.","errors":[]}}');
+            expect(this.res.body.reason).equal('EMAIL_ALREADY_TAKEN');
         });
 
         it('should not have generated a token', function(done) {

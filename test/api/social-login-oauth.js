@@ -19,7 +19,7 @@ describe('Social login using oauth without client id', function () {
 
         it('should redirect to /ap/ 200 OK', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.text).equal('{"error":{"status":400,"code":"MISSING_CLIENT_ID","hint":"Missing client id.","errors":[]}}');
+            expect(this.res.text).equal("{\"error\":\"Missing client id\"}");
         });
     });
     describe('with google', function () {
@@ -37,7 +37,7 @@ describe('Social login using oauth without client id', function () {
 
         it('should redirect to /ap/ 200 OK', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.text).equal('{"error":{"status":400,"code":"MISSING_CLIENT_ID","hint":"Missing client id.","errors":[]}}');
+            expect(this.res.text).equal("{\"error\":\"Missing client id\"}");
         });
     });
 });

@@ -23,9 +23,9 @@ module.exports = function (sequelize, DataTypes) {
     });
 
 
-    LocalLogin.prototype.logLogin = function (user) {
+    LocalLogin.prototype.logLogin = function (user, transaction) {
         var self = this;
-        return self.updateAttributes({last_login_at: Date.now()}).then(function () {
+        return self.updateAttributes({last_login_at: Date.now()}, {transaction: transaction}).then(function () {
             return user.logLastSeen();
         });
     };

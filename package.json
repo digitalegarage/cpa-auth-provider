@@ -14,9 +14,7 @@
     "dev": "bin/server",
     "docker-dev": "yarn install && nodemon --watch package.json --exec \"yarn install && yarn run dev\"",
     "test-dev": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib/setup",
-    "test": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user test/oauth",
-    "test-api-profile": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user/profile-resource",
-    "test-api-user": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user/user-resource"
+    "test": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user test/oauth"
   },
   "dependencies": {
     "accept-language-parser": "^1.5.0",
@@ -30,7 +28,7 @@
     "chai-visible": "^0.1.5",
     "connect-flash": "~0.1.1",
     "connect-roles": "^3.1.2",
-    "connect-session-sequelize": "^6.0.0",
+    "connect-session-sequelize": "^4.1.0",
     "connect-sqlite3": "^0.9.11",
     "cookie-parser": "~1.4.3",
     "cors": "~2.8.4",

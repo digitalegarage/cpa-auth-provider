@@ -5,20 +5,19 @@ var socialLoginHelper = require('../../lib/social-login-helper');
 var request = require('request');
 var cors = require('../../lib/cors');
 var facebookHelper = require('../../lib/facebook-helper');
-var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
 
-    app.post('/oauth/facebook/signup', cors, function (req, res, next) {
+    app.post('/oauth/facebook/signup', cors, function (req, res) {
         if (!req.body.client_id) {
-            apiErrorHelper.throwError(400, 'MISSING_CLIENT_ID', 'Missing client id.');
+            res.status(400).json({error: "Missing client id"});
         } else {
-            facebookSignup(req, res, next);
+            facebookSignup(req, res);
         }
     });
 
-    app.post('/api/facebook/signup', cors, function (req, res, next) {
-        facebookSignup(req, res, next);
+    app.post('/api/facebook/signup', cors, function (req, res) {
+        facebookSignup(req, res);
     });
 };
 
@@ -35,7 +34,7 @@ function verifyFacebookUserAccessToken(token, done) {
     });
 }
 
-function facebookSignup(req, res, next) {
+function facebookSignup(req, res) {
     var facebookAccessToken = req.body.fbToken;
     if (facebookAccessToken && facebookAccessToken.length > 0) {
         // Get back user object from Facebook
@@ -49,30 +48,30 @@ function facebookSignup(req, res, next) {
                     }
                 }).then(function (localLoginInDb) {
                     if (localLoginInDb && !localLoginInDb.verified) {
-                        next(apiErrorHelper.buildError(400, 'LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB', 'Login invalid by facebook.', req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB")));
+                        res.status(400).json({error: req.__("LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB")});
                     } else {
                         socialLoginHelper.performLogin(remoteProfile, socialLoginHelper.FB, req.body.client_id, function (error, response) {
 
                             if (response) {
                                 res.status(200).json(response);
                             } else {
-                                next(500, 'INTERNAL_SERVER_ERROR.FACEBOOK_LOGIN', 'Facebook login error.', '', [], error.message);
+                                res.status(500).json({error: error.message});
                             }
                         });
                     }
                 });
 
             } else {
-                next(apiErrorHelper.buildError(401,'FACEBOOK_PROFILE_NOT_FOUND',"No valid facebook profile found."));
+                res.status(401).json({error: "No valid facebook profile found"});
             }
+
         });
     }
     else {
         // 400 BAD REQUEST
         console.log('error', 'Bad login request from ' +
             req.connection.remoteAddress + '. Reason: facebook access token and application name are required.');
-        next(apiErrorHelper.buildError(400, 'BAD_REQUEST.FACEBOOK', 'Bad login request from ' +
-            req.connection.remoteAddress + '. Reason: facebook access token and application name are required.'));
+        res.status(400);
     }
 }
 

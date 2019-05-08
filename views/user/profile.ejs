@@ -21,7 +21,7 @@
         <div class="col-sm-3">
             <h4 class="hidden-xs"><%= __('PROFILE_PERSONAL_DATA_TITLE') %></h4>
             <h4 class="visible-xs-inline-block hidden-sm mobile-title"><%= __('PROFILE_PERSONAL_DATA_TITLE_MOBILE') %></h4>
-            <button id="modify-data" type="button" class="btn btn-link"><i class="glyphicon glyphicon-pencil"></i>&nbsp;<%= __('PROFILE_EDIT_LINK') %></button>
+            <button id="modify-data" type="button" class="btn btn-link"><%= __('PROFILE_EDIT_LINK') %></button>
             <hr class="visible-xs-block hidden-sm"/>
         </div>
         <div class="col-sm-9">
@@ -383,8 +383,7 @@
                         <span class="text"></span>
                     </span>
         
-                    <span id="export-success-feed-back" class="text-success">
-                        <span class="glyphicon glyphicon-ok"></span>
+                    <span id="export-success-feed-back" class="text-green">
                         <span class="text"></span>
                     </span>
                 <p><%= __('PROFILE_EXPORT_YOUR_ACCOUNT_LABEL') %></p>
@@ -578,10 +577,10 @@
                     error: function (result) {
                         $spinner.hide();
                         $label.show();
-                        if (!result.responseJSON.error.message)
+                        if (!result.responseJSON.msg)
                             $verifError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_RESEND_VALIDATION') %>");
                         else
-                            $verifError.find(".text").first().text(result.responseJSON.error.message);
+                            $verifError.find(".text").first().text(result.responseJSON.msg);
 
                         $verifError.show();
                     },
@@ -663,11 +662,8 @@
                         },
                         error: function (error) {
                             $changeEmailPassword.val('');
-                            if (error.responseJSON && error.responseJSON.error.message) {
-                                $changeEmailError.html(error.responseJSON.error.message);
-                                if (error.responseJSON && error.responseJSON.error && error.responseJSON.error.message) {
-                                    $changeEmailError.html(error.responseJSON.message);
-                                }
+                            if (error.responseJSON && error.responseJSON.msg) {
+                                $changeEmailError.html(error.responseJSON.msg);
                                 $changeEmailForm.first('div.form-group').addClass('has-error');
                                 $changeEmailError.show();
                                 spinner.hide()
@@ -726,8 +722,8 @@
 
                 var deleteFail = function (error) {
                     console.log('error: ', error);
-                    if (error.responseJSON && error.responseJSON.error.message) {
-                        $passwordError.html(error.responseJSON.error.message);
+                    if (error.responseJSON && error.responseJSON.msg) {
+                        $passwordError.html(error.responseJSON.msg);
                         $deleteUserForm.first('div.form-group').addClass('has-error');
                         $spinner.hide()
                         $label.show();
@@ -818,7 +814,7 @@
                 $passwordError.html("");
 
                 if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true") {
-                    $passwordError.html("<%- __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>"); //TODO
+                    $passwordError.html("<%= __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>"); //TODO
                     $exportUserForm.first('div.form-group').addClass('has-error');
                     $spinner.hide()
                     $label.show();
@@ -838,8 +834,8 @@
                 };
 
                 var exportFail = function (error) {
-                    if (error.responseJSON && error.responseJSON.error.message) {
-                        $passwordError.html(error.responseJSON.error.message);
+                    if (error.responseJSON && error.responseJSON.msg) {
+                        $passwordError.html(error.responseJSON.msg);
                         $exportUserForm.first('div.form-group').addClass('has-error');
                         $spinner.hide()
                         $label.show();
@@ -847,8 +843,8 @@
                     } else {
                         $exportUserModal.modal('toggle');
                         $('.modal-backdrop').remove();
-                        $.notify({message:  "<%- __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>"},{type: 'danger'});
-                        $exportError.find(".text").first().text("<%- __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>");
+                        $.notify({message:  "<%= __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>"},{type: 'danger'});
+                        $exportError.find(".text").first().text("<%= __('PROFILE_JS_ERROR_EXPORT_ACCOUNT') %>");
                         $spinner.hide();
                         $label.show();
                         $exportError.show();
@@ -957,11 +953,9 @@
                         location.reload();
                     },
                     error: function (result) {
-                        if(result.responseJSON.error.errors){
-                            $.each(result.responseJSON.error.errors, function (index, error) {
-                                $("#personnal-data-errors").append($('<p>').text(error.message));
-                            });
-                        }
+                        $.each(result.responseJSON.errors, function (index, error) {
+                            $("#personnal-data-errors").append($('<p>').text(error.msg));
+                        });
                         $("#form-personnal-data-errors").show("fast");
                         $('html, body').animate({
                             scrollTop: $("#personnal-data-errors").offset().top
@@ -1042,15 +1036,9 @@
                         }, 500);
                     },
                     error: function (result) {
-                        
-                        if(result.responseJSON.error.errors && result.responseJSON.error.errors.length > 0){
-                            $.each(result.responseJSON.error.errors, function (index, error) {
-                                $("#security-errors").append($('<p>').html(error.message));
-                            });
-                        } else {
-                            $("#security-errors").append($('<p>').append(result.responseJSON.error.message));
-                        }
-                        
+                        $.each(result.responseJSON.errors, function (index, error) {
+                            $("#security-errors").append($('<p>').html(error.msg));
+                        });
                         $("#form-security-errors").show("fast");
                         $('html, body').animate({
                             scrollTop: $("#security-errors").offset().top

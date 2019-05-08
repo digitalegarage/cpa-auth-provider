@@ -8,7 +8,7 @@ const auth = require('basic-auth');
 const jwtHelper = require('../../../../lib/jwt-helper');
 const passwordHelper = require('../../../../lib/password-helper');
 const authHelper = require('../../../../lib/auth-helper');
-const apiErrorHelper = require('../../../../lib/api-error-helper');
+const errorHelper = require('../../../../lib/error-helper');
 const appHelper = require('../../../../lib/app-helper');
 const userHelper = require('../../../../lib/user-helper');
 const changeEmailHelper = require('../../../email/change-email-helper');
@@ -18,7 +18,6 @@ const codeHelper = require('../../../../lib/code-helper');
 const limiterHelper = require('../../../../lib/limiter-helper');
 const i18n = require('i18n');
 const _ = require('underscore');
-const requestHelper = require('../../../../lib/request-helper');
 
 function delete_user_by_id(userId, res) {
 // Transactional part
@@ -46,26 +45,28 @@ function delete_user(req, res) {
     return delete_user_by_id(req.user.id, res);
 }
 
-const delete_user_with_credentials = function(req, res, next) {
+const delete_user_with_credentials = function(req, res) {
     logger.debug('[API-V2][User][DELETE]');
 
     var user = auth(req);
 
     if (!user) {
-        apiErrorHelper.throwError(400, 'MISSING_CREDENTIALS', 'Missing credentials');
+        return res.json({error: 'missing credentials'}).status(400).send();
     } else {
         var login = user.name;
         var password = user.pass;
 
         db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
-                next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
+                logger.info('locallogin not found');
+                return res.status(401).send();
             } else {
                 return localLogin.verifyPassword(password).then(function(isMatch) {
+                    logger.info('isMatch', isMatch);
                     if (isMatch) {
                         return delete_user_by_id(localLogin.user_id, res);
                     } else {
-                        next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
+                        return res.status(401).send();
                     }
                 });
             }
@@ -73,14 +74,14 @@ const delete_user_with_credentials = function(req, res, next) {
     }
 };
 
-const delete_user_without_credentials = function(req, res, next) {
+const delete_user_without_credentials = function(req, res) {
     logger.debug('[API-V2][User][DELETE]');
 
     db.LocalLogin.findOne({where: {user_id: req.user.id}}).then(function(localLogin) {
         if (!localLogin) {
             delete_user_by_id(req.user.id, res);
         } else {
-            next(apiErrorHelper.buildError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user"));
+            return res.status(412).json(errorHelper.buildError(412, "USER_HAS_LOCAL_LOGIN", "When user has local login, he has to use the authenticated endpoint /api/v2/basicauth/user")).send();
         }
     });
 
@@ -89,7 +90,7 @@ const delete_user_without_credentials = function(req, res, next) {
 const get_user_id_from_jwt = function(req, res) {
     var auth = req.headers.authorization;
     if (!auth) {
-        apiErrorHelper.throwError(400,'AUTHORIZATION_HEADER_MISSING', 'Authorization header missing.');
+        return res.status(400).send({error: 'missing header Authorization'});
     } else {
         if (auth.indexOf('Bearer ') == 0) {
             var token = auth.substring('Bearer '.length);
@@ -97,25 +98,26 @@ const get_user_id_from_jwt = function(req, res) {
                 let userId = jwtHelper.decode(token).id;
                 return res.status(200).send({id: userId});
             } catch (err) {
-                apiErrorHelper.throwError(401,'INVALID_JWT_TOKEN', 'Invalid JWT token. Not able to decode JWT token.');
+                return res.status(401).send({error: 'Cannot parse JWT token'});
             }
         } else {
-            apiErrorHelper.throwError(400, 'AUTHORIZATION_TOKEN_NOT_AS_EXPECTED','Authorization doesn\'t have the expect format "Bearer [token]"');
+            return res.status(400).send({error: 'Authorization doesn\'t have the expect format "Bearer [token]"'});
         }
     }
 
 };
 
-const get_user = function(req, res, next) {
+const get_user = function(req, res) {
     if (!req.headers.authorization || !auth(req)) {
-        apiErrorHelper.throwError(401, 'AUTHORIZATION_HEADER_MISSING', 'Missing or bad credential in authorization header.');
+        return res.status(401).send({error: 'missing or bad credential in header Authorization'});
     } else {
         var user = auth(req);
         var login = user.name;
         var password = user.pass;
         db.LocalLogin.findOne({where: {login: login}}).then(function(localLogin) {
             if (!localLogin) {
-                next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
+                logger.info('locallogin not found');
+                return res.status(401).send();
             } else {
                 return localLogin.verifyPassword(password).then(function(isMatch) {
                     logger.info('isMatch', isMatch);
@@ -127,10 +129,12 @@ const get_user = function(req, res, next) {
                             // be sure about what we send? here we go.
                             res.json(_.pick(user, 'id', 'display_name', 'firstname', 'lastname', 'gender', 'language', 'permission_id', 'public_uid'));
                         }).catch(function(error) {
-                            next(error);
+                            logger.error(error);
+                            res.sendStatus(500);
                         });
                     } else {
-                        next(apiErrorHelper.buildError(401,'INCORRECT_LOGIN_OR_PASSWORD','Incorrect login or password.'));
+                        logger.debug('Authentication failed for ' + user.name);
+                        res.sendStatus(401);
                     }
                 });
             }
@@ -138,145 +142,113 @@ const get_user = function(req, res, next) {
     }
 };
 
-const create_local_login = function(req) {
-    return new Promise(function(resolve, reject) {
-        var errors = [];
-        if (!req.body.email){
-            errors.push(apiErrorHelper.buildFieldError("email", apiErrorHelper.TYPE.MISSING, null, "email is mandatory", req.__('BACK_CHANGE_PWD_MAIL_EMPTY')));
-        } else {
-            req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).isEmail();
-        }
-        if (!req.body.password){
-            errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.MISSING, null, "password is mandatory", req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')));
+const create_local_login = function(req, res) {
+    req.checkBody('email', req.__('BACK_CHANGE_PWD_MAIL_EMPTY')).notEmpty();
+    req.checkBody('password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
+    req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
+    req.checkBody('password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
+    req.getValidationResult().then(function(result) {
+        if (!result.isEmpty()) {
+            res.status(400).json({errors: result.array()});
         } else {
             if (!passwordHelper.isStrong(req.body.email, req.body.password)) {
-                errors.push(apiErrorHelper.buildFieldError("password", apiErrorHelper.TYPE.CUSTOM, "PASSWORD_WEAK", req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'), req.__('PASSWORD_WEAK'), {
+                res.status(400).json({
+                    errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}],
                     password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
                     score: passwordHelper.getQuality(req.body.email, req.body.password)
-                }));
-            }
-        }
-
-        return req.getValidationResult()
-        .then((result) => {
-            result.array().map((r) => {errors.push(apiErrorHelper.buildFieldError(r.param, apiErrorHelper.TYPE.BAD_FORMAT_OR_MISSING, null, r.msg));});
-
-            if (errors.length > 0) {
-                var message = req.__('BACK_SIGNUP_MISSING_FIELDS');
-                for (var i = 0; i < errors.length; i++) {
-                    message += '<br/>' + '- ' + errors[i].message;
-                }
-                reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Some fields are missing or have a bad format see errors arrays', message, errors));
-            } else {
-                userHelper.addLocalLogin(req.user, req.body.email, req.body.password)
-                .then(() => {
-                    resolve();
-                })
-                .catch((err)=> {
-                    if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
-                        reject(apiErrorHelper.buildError(400,
-                            apiErrorHelper.COMMON_ERROR.BAD_DATA,
-                            'Some fields are missing or have a bad format see errors arrays',
-                            message,
-                            [
-                                apiErrorHelper.buildFieldError("email", apiErrorHelper.TYPE.CUSTOM, 'EMAIL_TAKEN', 'Email ' + req.body.email + ' already taken as social or local login',
-                                    '<br/>' + '- ' + req.__('BACK_SIGNUP_EMAIL_TAKEN'))
-                            ]
-                        ));
-                    } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
-                        reject(apiErrorHelper.buildError(400,
-                            'LOCAL_LOGIN_ALREADY_EXISTS',
-                            'Current user already has a local login.',
-                            req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')));
-                    } else {
-                        reject(err);
-                    }
                 });
+            } else {
+                userHelper.addLocalLogin(req.user, req.body.email, req.body.password).then(
+                    function() {
+                        res.sendStatus(204);
+                    },
+                    function(err) {
+                        if (err.message === userHelper.EXCEPTIONS.EMAIL_TAKEN) {
+                            return res.status(400).json({
+                                msg: req.__('API_SIGNUP_EMAIL_ALREADY_EXISTS')
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.PASSWORD_WEAK) {
+                            return res.status(400).json({
+                                msg: req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'),
+                                password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.password, req),
+                                errors: [{msg: passwordHelper.getWeaknessesMsg(req.body.email, req.body.password, req)}]
+                            });
+                        } else if (err.message === userHelper.EXCEPTIONS.ACCOUNT_EXISTS) {
+                            return res.status(400).json({
+                                msg: req.__('API_LOCAL_LOGIN_ALREADY_EXISTS')
+                            });
+                        } else {
+                            logger.error('[POST /api/v2/<security>/user/login/create][email', req.body.email, '][ERR', err, ']');
+                            res.status(500).json({
+                                msg: req.__('API_ERROR') + err
+                            });
+                        }
+                    }
+                );
             }
-        })
-        .catch((err)=>{
-            reject(err);
-        });
+
+        }
     });
 };
 
-const change_password = function(req) {
-    return new Promise(function(resolve, reject) {
+const change_password = function(req, res) {
+    req.checkBody('email', req.__('API_PASSWORD_RECOVER_PLEASE_PASS_EMAIL')).isEmail();
+    req.checkBody('previous_password', req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')).notEmpty();
+    req.checkBody('new_password', req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')).notEmpty();
+    req.checkBody('confirm_password', req.__('BACK_CHANGE_PWD_CONFIRM_PASS_EMPTY')).notEmpty();
+    req.checkBody('new_password', req.__('BACK_CHANGE_PWD_PASS_DONT_MATCH')).equals(req.body.confirm_password);
 
-        var errors = [];
-
-        if (!req.body.email){
-            errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.MISSING, null, '"email" is not present in request body', req.__('BACK_SIGNUP_EMAIL_EMPTY')));
-        } else {
-            if (!emailHelper.isEmailAddress(req.body.email)) {
-                errors.push(apiErrorHelper.buildFieldError('email', apiErrorHelper.TYPE.BAD_FORMAT, null, 'Cannot validate email using our reg exp', req.__('BACK_SIGNUP_EMAIL_INVALID')));
-            }
-        }
-
-        if (!req.body.previous_password) {
-            errors.push(apiErrorHelper.buildFieldError("previous_password", apiErrorHelper.TYPE.MISSING, null, "previous password is mandatory", req.__('BACK_CHANGE_PWD_PREV_PASS_EMPTY')));
-        }
-
-        if (!req.body.new_password){
-            errors.push(apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.MISSING, null, "new password is mandatory", req.__('BACK_CHANGE_PWD_NEW_PASS_EMPTY')));
-        } else {
-            if (!passwordHelper.isStrong(req.body.email, req.body.new_password)) {
-                errors.push(apiErrorHelper.buildFieldError("new_password", apiErrorHelper.TYPE.CUSTOM, "PASSWORD_WEAK", req.__('API_SIGNUP_PASS_IS_NOT_STRONG_ENOUGH'), req.__('PASSWORD_WEAK'), {
-                    password_strength_errors: passwordHelper.getWeaknesses(req.body.email, req.body.new_password, req),
-                    score: passwordHelper.getQuality(req.body.email, req.body.new_password)
-                }));
-            }
-        }
-        
-        if (errors.length > 0) {
-            reject(apiErrorHelper.buildError(400, apiErrorHelper.COMMON_ERROR.BAD_DATA, 'Cannot change password.', 'Some fields are missing or have a bad format see errors arrays', errors));
+    req.getValidationResult().then(function(result) {
+        if (!result.isEmpty()) {
+            res.status(400).json({errors: result.array()});
         } else {
             let email = req.body.email;
+            let newPassword = req.body.new_password;
+            if (!passwordHelper.isStrong(email, newPassword)) {
+                res.status(400).json({
+                    errors: [{msg: passwordHelper.getWeaknessesMsg(email, newPassword, req)}],
+                    password_strength_errors: passwordHelper.getWeaknesses(email, newPassword, req),
+                    score: passwordHelper.getQuality(email, newPassword)
+                });
+            } else {
                 db.LocalLogin.findOne({
                     where: db.sequelize.where(db.sequelize.fn('lower', db.sequelize.col('login')), email.toLowerCase()),
                     include: [db.User]
                 }).then(function(localLogin) {
                     if (!localLogin) {
-                        reject(apiErrorHelper.buildError(401,
-                            'USER_NOT_FOUND',
-                            'Local login not found.',
-                            req.__('BACK_USER_NOT_FOUND'))
-                            );
-
+                        return res.status(401).send({errors: [{msg: req.__('BACK_USER_NOT_FOUND')}]});
                     } else {
                         localLogin.verifyPassword(req.body.previous_password).then(function(isMatch) {
                             // if user is found and password is right change password
                             if (isMatch) {
-                                localLogin.setPassword(req.body.new_password)
-                                .then(() => {
+                                localLogin.setPassword(req.body.new_password).then(
+                                    function() {
                                         appHelper.destroySessionsByUserId(localLogin.User.id, req.sessionID).then(function() {
-                                            resolve();
-                                        }).catch((err) => {
-                                            reject(err);
+                                            return res.json({msg: req.__('BACK_SUCCESS_PASS_CHANGED')});
+                                        }).catch(function(e) {
+                                            logger.error(e);
+                                            return res.sendStatus(500);
                                         });
-                                }).catch((err) => {
-                                    reject(err);
-                                });
+                                    },
+                                    function(err) {
+                                        logger.error(err);
+                                        res.status(500).json({errors: [err]});
+                                    }
+                                );
                             } else {
-                                reject(apiErrorHelper.buildError(401,
-                                    apiErrorHelper.COMMON_ERROR.BAD_DATA,
-                                    'Cannot change password.',
-                                    'Some fields are missing or have a bad format see errors arrays',
-                                    [
-                                        apiErrorHelper.buildFieldError("previous_password", apiErrorHelper.TYPE.CUSTOM, 'INCORRECT_PREVIOUS_PASSWORD', "Previous password is wrong", req.__('BACK_INCORRECT_PREVIOUS_PASS'))
-                                    ]));
+                                res.status(401).json({errors: [{msg: req.__('BACK_INCORRECT_PREVIOUS_PASS')}]});
                             }
                         });
                     }
                 });
-            //}
+            }
         }
     });
 };
 
 const resend_validation_email = function(req, res) {
     if (req.recaptcha.error){
-        apiErrorHelper.throwError(400, 'RESEND_VALIDATION_EMAIL_ERROR', 'ReCaptcha is empty or wrong.');
+        return res.status(400).json({msg: 'reCaptcha is empty or wrong. '});
     }
 
     var user = req.user;
@@ -288,8 +260,8 @@ const resend_validation_email = function(req, res) {
             'validation-email',
             {log: false},
             {
-                confirmLink: requestHelper.getIdpRoot() + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
-                host: requestHelper.getIdpRoot(),
+                confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
+                host: config.mail.host,
                 mail: email,
                 code: code
             },
@@ -370,13 +342,9 @@ module.exports = function(router) {
      *          "204":
      *            description: "user had been deleted"
      *          "400":
-     *            description: "Possible error are: MISSING_CREDENTIALS"
-     *            schema:
-     *              $ref: '#/definitions/error'
+     *            description: "missing credentials"
      *          "401":
-     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
-     *            schema:
-     *              $ref: '#/definitions/error'
+     *            description: "wrong login or password"
      *   get:
      *     description: get a users profile by credentials
      *     tags: [Basic Auth]
@@ -395,16 +363,7 @@ module.exports = function(router) {
      *          "200":
      *            description: "user profile including permissions in json body"
      *            schema:
-     *              $ref: '#/definitions/User'
-     *          "400":
-     *            description: "Possible error are: AUTHORIZATION_HEADER_MISSING"
-     *            schema:
-     *              $ref: '#/definitions/error'
-     *          "401":
-     *            description: "Possible error are: INCORRECT_LOGIN_OR_PASSWORD"
-     *            schema:
-     *              $ref: '#/definitions/error'
-     */
+     *              $ref: '#/definitions/User'     */
     router.options('/api/v2/basicauth/user', cors);
     router.delete('/api/v2/basicauth/user', cors, delete_user_with_credentials);
     router.get('/api/v2/basicauth/user', cors, get_user);
@@ -437,7 +396,7 @@ module.exports = function(router) {
      * @swagger
      * /api/v2/session/user:
      *   delete:
-     *     description: delete the account authenticated via session (cookie)
+     *     description: delete the session (cookie) logged user
      *     tags: [Session]
      *     operationId: "deleteUserWithoutCredentials"
      *     content:
@@ -497,6 +456,10 @@ module.exports = function(router) {
      *              type: string
      *              example: passw0rd
      *              description: the password to set
+     *          confirm_password:
+     *              type: string
+     *              example: passw0rd
+     *              description:  confirm password
      */
 
     /**
@@ -520,21 +483,13 @@ module.exports = function(router) {
      *        "204":
      *          description: "local login had been created"
      *        "400":
-     *          description: "Possible error are: BAD_DATA (with embedded errors)"
-     *          schema:
-     *            $ref: '#/definitions/error'
+     *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
+     *        "500":
+     *          description: "unexpected error"
      */
 
     router.options('/api/v2/session/user/login/create', cors);
-    router.post('/api/v2/session/user/login/create', cors, authHelper.ensureAuthenticated, function (req, res, next){
-        create_local_login(req)
-        .then(()=>{
-            res.sendStatus(204);
-        })
-        .catch((err)=>{
-            next(err);
-        });
-    });
+    router.post('/api/v2/session/user/login/create', cors, authHelper.ensureAuthenticated, create_local_login);
 
     /**
      * @swagger
@@ -570,15 +525,7 @@ module.exports = function(router) {
      */
 
     router.options('/api/v2/jwt/user/login/create', cors);
-    router.post('/api/v2/jwt/user/login/create', cors, passport.authenticate('jwt', {session: false}), function (req, res, next){
-        create_local_login(req)
-        .then(()=>{
-            res.sendStatus(204);
-        })
-        .catch((err)=>{
-            next(err);
-        });
-    });
+    router.post('/api/v2/jwt/user/login/create', cors, passport.authenticate('jwt', {session: false}), create_local_login);
 
     // Those endpoints are not available since there is no way in IDP to get an oAuth access token from a facebook or google login. So there is no way to have a valid oAuth access token without a local login
     // router.options('/api/v2/oauth2/user/login/create', cors);
@@ -618,15 +565,7 @@ module.exports = function(router) {
      */
 
     router.options('/api/v2/cpa/user/login/create', cors);
-    router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, function (req, res, next){
-        create_local_login(req)
-        .then(()=>{
-            res.sendStatus(204);
-        })
-        .catch((err)=>{
-            next(err);
-        });
-    });
+    router.post('/api/v2/cpa/user/login/create', cors, authHelper.ensureCpaAuthenticated, create_local_login);
 
     /**
      * @swagger
@@ -645,6 +584,10 @@ module.exports = function(router) {
      *              type: string
      *              example: passw0rd
      *              description: the password to set
+     *          confirm_password:
+     *              type: string
+     *              example: passw0rd
+     *              description:  confirm password
      */
 
     /**
@@ -659,7 +602,7 @@ module.exports = function(router) {
      *          -
      *            name: "ChangePassword"
      *            in: "body"
-     *            description: "changing password"
+     *            description: "changing password data"
      *            required: true
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
@@ -668,23 +611,13 @@ module.exports = function(router) {
      *          description: "local login had been created"
      *        "400":
      *          description: "bad data. Could be both password doesn't match, Password not strong enough. Email already taken"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "401":
      *          description: "wrong previous password and or login"
-     *          schema:
-     *            $ref: '#/definitions/error'
+     *        "500":
+     *          description: "unexpected error"
      */
     router.options('/api/v2/all/user/password', cors);
-    router.post('/api/v2/all/user/password', cors, function(req, res, next){
-        change_password(req)
-        .then(()=> {
-            res.sendStatus(204);
-        })
-        .catch((err)=> {
-            next(err);
-        });
-    }); // Password is checked in change password so security is not checked
+    router.post('/api/v2/all/user/password', cors, change_password); // Password is checked in change password so security is not checked
 
     /**
      * @swagger
@@ -719,7 +652,7 @@ module.exports = function(router) {
      *          -
      *            name: "ChangeEmail"
      *            in: "body"
-     *            description: "changing email"
+     *            description: "changing password data"
      *            required: true
      *            schema:
      *              $ref: "#/definitions/ChangePassword"
@@ -728,27 +661,13 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
-     *          schema:
-     *            $ref: '#/definitions/error'
      */
     router.options('/api/v2/session/user/email/change', cors);
-    router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, function(req, res, next){
-        changeEmailHelper.change_email(req)
-        .then(() => {
-            res.sendStatus(204);
-        })
-        .catch((err)=> {
-           next(err);
-        });
-    });
+    router.post('/api/v2/session/user/email/change', cors, authHelper.ensureAuthenticated, changeEmailHelper.change_email);
 
     /**
      * @swagger
@@ -779,26 +698,12 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
-     *          schema:
-     *            $ref: '#/definitions/error'
      */
-    router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), function(req, res, next){
-        changeEmailHelper.change_email(req)
-        .then(() => {
-            res.sendStatus(204);
-        })
-        .catch((err)=> {
-            next(err);
-        });
-    });
+    router.post('/api/v2/jwt/user/email/change', cors, passport.authenticate('jwt', {session: false}), changeEmailHelper.change_email);
 
     /**
      * @swagger
@@ -829,26 +734,12 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
-     *          schema:
-     *            $ref: '#/definitions/error'
      */
-    router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, function(req, res, next){
-        changeEmailHelper.change_email(req)
-        .then(() => {
-            res.sendStatus(204);
-        })
-        .catch((err)=> {
-            next(err);
-        });
-    });
+    router.post('/api/v2/cpa/user/email/change', cors, authHelper.ensureCpaAuthenticated, changeEmailHelper.change_email);
 
     /**
      * @swagger
@@ -872,26 +763,12 @@ module.exports = function(router) {
      *          description: "Change email request had been done"
      *        "401":
      *          description: "Unauthorized"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "403":
      *          description: "Wrong password"
-     *          schema:
-     *            $ref: '#/definitions/error'
      *        "429":
      *          description: "Too many request"
-     *          schema:
-     *            $ref: '#/definitions/error'
      */
-    router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), function(req, res, next){
-        changeEmailHelper.change_email(req)
-        .then(() => {
-            res.sendStatus(204);
-        })
-        .catch((err)=> {
-            next(err);
-        });
-    });
+    router.post('/api/v2/oauth/user/email/change', cors, passport.authenticate('bearer', {session: false}), changeEmailHelper.change_email);
 
     /**
      * @swagger
@@ -921,36 +798,7 @@ module.exports = function(router) {
      *        "302":
      *          description: User is to broadcaster specified redirect URI post fixed with '?success=true/false' depending on the success of email change. That happens when use_custom_redirect query parameter is set to true
      */
-    router.get('/api/v2/all/user/email/move/:token', function (req, res) {
-        changeEmailHelper.move_email(req)
-        .then((newUsername)=>{
-            if (config.broadcaster.changeMoveEmailConfirmationPage) {
-                if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
-                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=true');
-                } else {
-                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=true');
-                }
-            } else {
-                res.render('./verify-mail-changed.ejs', {success: true, newMail: newUsername, redirect: null, message: null});
-            }
-        })
-        .catch((err) => {
-            if (config.broadcaster.changeMoveEmailConfirmationPage) {
-                if (config.broadcaster.changeMoveEmailConfirmationPage.indexOf('?') >= 0) {
-                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '&success=false');
-                } else {
-                    return res.redirect(config.broadcaster.changeMoveEmailConfirmationPage + '?success=false');
-                }
-            } else {
-                res.render('./verify-mail-changed.ejs', {
-                    success: false,
-                    message: err.message,
-                    redirect: err.redirect,
-                    newMail: err.newMail
-                });
-            }
-        });
-    });
+    router.get('/api/v2/all/user/email/move/:token', changeEmailHelper.move_email);
 
 
     /**

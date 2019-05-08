@@ -178,16 +178,14 @@ module.exports = {
         password: process.env.DB_PASSWORD,
 
         // The database type, 'mysql', 'sqlite', etc.
-        type: process.env.DB_TYPE || 'mysql',//'sqlite',
-        database: process.env.DB_DATABASE || 'idp',
+        type: process.env.DB_TYPE,//'sqlite',
+        database: process.env.DB_DATABASE,
 
         // Database filename for SQLite.
         filename: process.env.DB_FILENAME,
 
         // If true, SQL statements are logged to the console.
-        debug: 'true' === process.env.DB_LOGGING,
-        poolSizeMax: process.env.DB_POOL_SIZE_MAX,
-        poolSizeMin: process.env.DB_POOL_SIZE_MIN
+        debug: 'true' === process.env.DB_LOGGING
     },
 
     // Session cookie is signed with this secret to prevent tampering

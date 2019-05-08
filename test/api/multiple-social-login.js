@@ -57,9 +57,9 @@ describe('Local login after', function () {
             localSignup.call(this, done);
         });
 
-        it('should return 400', function () {
+        it('should return 400 OK', function () {
             expect(this.res.statusCode).equal(400);
-            expect(this.res.error.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
+            expect(this.res.error.text).equal('{"error":{"key":"EMAIL_TAKEN","message":"Email already exists","code":"S1"}}');
         });
     });
     describe('Google API login first', function () {
@@ -83,9 +83,9 @@ describe('Local login after', function () {
             localSignup.call(this, done);
         });
 
-        it('should return 400', function () {
+        it('should return 400 OK', function () {
                 expect(this.res.statusCode).equal(400);
-                expect(this.res.error.text).equal('{"error":{"status":400,"code":"BAD_DATA","hint":"Some fields are missing or have a bad format see errors arrays","message":"That email is already taken","errors":[{"field":"email","type":"CUSTOM","custom_type":"EMAIL_TAKEN","hint":"Email someone@gmail.com already taken as social or local login","message":"<br/>- That email is already taken"}]}}');
+                expect(this.res.error.text).equal('{"error":{"key":"EMAIL_TAKEN","message":"Email already exists","code":"S1"}}');
             }
         );
     });
@@ -332,7 +332,7 @@ describe('Facebook', function () {
 
             it('should return 400 OK', function () {
                     expect(this.res.statusCode).equal(400);
-                    expect(this.res.error.text).equal('{"error":{"status":400,"code":"LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_FB","hint":"Login invalid by facebook.","message":"You must validate your email before connecting with Facebook","errors":[]}}');
+                    expect(this.res.error.text).equal('{"error":"You must validate your email before connecting with Facebook"}');
 
                 }
             );
@@ -690,7 +690,7 @@ describe('Google', function () {
 
             it('should return 400 OK', function () {
                     expect(this.res.statusCode).equal(400);
-                    expect(this.res.error.text).equal('{"error":{"status":400,"code":"LOGIN_INVALID_EMAIL_BECAUSE_NOT_VALIDATED_GOOGLE","hint":"Login invalid by google.","message":"You must validate your email before connecting with Google","errors":[]}}');
+                    expect(this.res.error.text).equal('{"error":"You must validate your email before connecting with Google"}');
                 }
             );
         });

@@ -10,8 +10,6 @@ var passwordHelper = require('../../lib/password-helper');
 var finder = require('../../lib/finder');
 var limiterHelper = require('../../lib/limiter-helper');
 var afterLogoutHelper = require('../../lib/afterlogout-helper');
-var requestHelper = require('../../lib/request-helper');
-var apiErrorHelper = require('../../lib/api-error-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
@@ -128,8 +126,8 @@ module.exports = function (app, options) {
                             "password-recovery-email",
                             {log: false},
                             {
-                                forceLink: requestHelper.getIdpRoot() + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
-                                host: requestHelper.getIdpRoot(),
+                                forceLink: config.mail.host + '/password/edit?email=' + encodeURIComponent(localLogin.login) + '&code=' + encodeURIComponent(code),
+                                host: config.mail.host,
                                 mail: encodeURIComponent(localLogin.login),
                                 code: encodeURIComponent(code)
                             },
@@ -160,7 +158,6 @@ module.exports = function (app, options) {
 
         req.getValidationResult().then(function (result) {
             if (!result.isEmpty()) {
-                next(apiErrorHelper.buildError(400, 'VALIDATION_ERROR', 'Validation error', '',[], result.array()));
                 res.status(400).json({errors: result.array()});
                 return;
             }

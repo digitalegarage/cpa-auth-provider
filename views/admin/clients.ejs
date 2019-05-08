@@ -156,10 +156,10 @@
                 function (errors) {
                     var modalMessage = $addClientModal.find('.alert .message').first();
                     modalMessage.append("<%= __('ADMIN_CLIENT_MESSAGE_ADD_CLIENT_FAIL') %>");
-                    if (typeof errors.responseJSON.error.errors !== 'undefined' && errors.responseJSON.error.errors.length !== 0) {
+                    if (typeof errors.responseJSON.errors !== 'undefined' && errors.responseJSON.errors.length !== 0) {
                         modalMessage.append('<ul>');
-                        errors.responseJSON.error.errors.forEach(function (error) {
-                            modalMessage.append('<li>' + error.message + '</li>');
+                        errors.responseJSON.errors.forEach(function (error) {
+                            modalMessage.append('<li>' + error.msg + '</li>');
                         });
                         modalMessage.append('</ul>');
                     }
@@ -199,10 +199,10 @@
                 function (errors) {
                     var modalMessage = $updateClientModal.find('.alert .message').first();
                     modalMessage.append("<%= __('ADMIN_CLIENT_MESSAGE_EDIT_CLIENT_FAIL') %>");
-                    if (typeof errors.responseJSON.error.errors !== 'undefined' && errors.responseJSON.error.errors.length !== 0) {
+                    if (typeof errors.responseJSON.errors !== 'undefined' && errors.responseJSON.errors.length !== 0) {
                         modalMessage.append('<ul>');
-                        errors.responseJSON.error.errors.forEach(function (error) {
-                            modalMessage.append('<li>' + error.message + '</li>');
+                        errors.responseJSON.errors.forEach(function (error) {
+                            modalMessage.append('<li>' + error.msg + '</li>');
                         });
                         modalMessage.append('</ul>');
                     }
