@@ -16,6 +16,8 @@ var codeHelper = require('../../lib/code-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 var userHelper = require ('../../lib/user-helper');
 
+var requestHelper = require('../../lib/request-helper');
+
 
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromExtractors(
@@ -44,7 +46,15 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 
 module.exports = function (app, options) {
 
-    app.post('/api/local/password/recover', cors, limiterHelper.verify, userHelper.password_recover);
+    app.post('/api/local/password/recover', cors, limiterHelper.verify, function (req, res, next){
+        userHelper.password_recover(req)
+        .then(()=>{
+            res.sendStatus(204);
+        })
+        .catch((err)=> {
+            next(err);
+        });
+    });
 
     // This is needed because when configuring a custom header JQuery automaticaly send options request to the server.
     // That following line avoid cross domain error like
@@ -87,8 +97,8 @@ module.exports = function (app, options) {
                     "validation-email",
                     {log: false},
                     {
-                        confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : '') + '&code=' + encodeURIComponent(code),
-                        host: config.mail.host,
+                        confirmLink: requestHelper.getIdpRoot() + '/email_verify?email=' + encodeURIComponent(user.LocalLogin ? user.LocalLogin.login : '') + '&code=' + encodeURIComponent(code),
+                        host: requestHelper.getIdpRoot(),
                         mail: user.LocalLogin ? user.LocalLogin.login : '',
                         code: user.verificationCode
                     },

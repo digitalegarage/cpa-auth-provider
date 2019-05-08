@@ -191,6 +191,7 @@ describe('API-V2 profile', function () {
             });
             it('should return an error', function(done) {
                 expect(ctx.res.statusCode).to.equal(400);
+                expect(JSON.parse(ctx.res.text).error.code).to.equal('BAD_REQUEST_INVALID_UUIDV4');
                 done();
             });
         });
@@ -213,7 +214,9 @@ describe('API-V2 profile', function () {
                 getNameByUid(ctx,done);
             });
             it('should return an error', function(done) {
+
                 expect(ctx.res.statusCode).to.equal(404);
+                expect(JSON.parse(ctx.res.text).error.code).to.equal('USER_WITH_UUID_NOT_FOUND');
                 done();
             });
         });
@@ -238,6 +241,7 @@ describe('API-V2 profile', function () {
             });
             it('should return an error', function(done) {
                 expect(ctx.res.statusCode).to.equal(409);
+                expect(JSON.parse(ctx.res.text).error.code).to.equal('SERVICE_DISABLED_BY_CONFIGURATION');
                 done();
             });
         });

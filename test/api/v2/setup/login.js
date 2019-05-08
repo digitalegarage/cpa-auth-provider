@@ -93,12 +93,6 @@ function cookieLogout(httpContext, done) {
 function jwtSignup(context, email, password, redirect, code, done) {
 
     var uri = '/api/v2/jwt/signup';
-    if (redirect) {
-        uri += '?redirect=' + redirect;
-        if (code) {
-            uri += '&withcode=true';
-        }
-    }
     requestHelper.sendRequest(context, uri, {
         method: 'post',
         data: {
@@ -107,13 +101,7 @@ function jwtSignup(context, email, password, redirect, code, done) {
             'g-recaptcha-response': 'a dummy recaptcha response'
         }
     }, function() {
-        if (redirect) {
-            const TOKEN_QUERY_STRING = '?token=';
-            const LOCATION_HEADER = context.res.header.location;
-            context.token = LOCATION_HEADER.substring(LOCATION_HEADER.indexOf(TOKEN_QUERY_STRING) + TOKEN_QUERY_STRING.length);
-        } else {
-            context.token = context.res.body.token.substring(4); //Remove "JWT " prefix
-        }
+        context.token = context.res.body.token.substring(4); //Remove "JWT " prefix
         done();
     });
 }
