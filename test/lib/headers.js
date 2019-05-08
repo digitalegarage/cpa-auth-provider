@@ -26,3 +26,14 @@ describe('Check response for headers', function () {
       expect(this.res.header['set-cookie']).to.equal(undefined);
     });
 });
+
+describe('Check response for headers', function () {
+    before(function (done) {
+        requestHelper.sendRequest(this, '/', {method: 'options'}, done);
+    });
+
+    it('health check endpoint must not contain session cookie', function() {
+        expect(this.res.header['set-cookie']).to.equal(undefined);
+    });
+});
+
