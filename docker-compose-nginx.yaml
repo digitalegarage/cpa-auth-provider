@@ -20,6 +20,7 @@ services:
       - TRACKING_COOKIE=true
       - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
       - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=false
+      - AUTH_SESSION_COOKIE_SAMESITE=strict
     depends_on:
       - postgres
     links:

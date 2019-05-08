@@ -13,7 +13,8 @@ module.exports = {
     },
 
     auth_session_cookie :{
-        name: 'connect.sid'
+        name: 'connect.sid',
+        sameSite: 'strict'
     },
 
     limiter: {
