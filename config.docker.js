@@ -104,7 +104,7 @@ module.exports = {
             cookieName: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_NAME,
             // cookie domain
             domain: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DOMAIN,
-            duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION || 365 * 24 * 60 * 60 * 1000,
+            duration: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_DURATION || 365 * 24 * 60 * 60 * 1000 * 10,
             // if true cookie will contain userId as json property
             storeUserId: process.env.AFTER_LOGIN_STORE_USER_INFO_IN_COOKIE_STORE_USER_ID,
             // if true cookie will contain displayName as json property
