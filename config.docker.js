@@ -205,6 +205,7 @@ module.exports = {
         js_accessible: process.env.AUTH_SESSION_COOKIE_JS_ACCESSIBLE || false,
         // set accessible_over_non_https to true to send cookie via HTTP (not S) too
         accessible_over_non_https: process.env.AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS || false,
+        sameSite: process.env.AUTH_SESSION_COOKIE_SAMESITE || 'strict'
     },
 
     session_authorization_header_qualifier:process.env.SESSION_AUTHORIZATION_HEADER_QUALIFIER,

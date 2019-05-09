@@ -21,6 +21,11 @@ services:
       - TRACKING_COOKIE=true
       - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
       - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
+<<<<<<< HEAD
+      - AUTH_SESSION_COOKIE_SAMESITE=lax
+=======
+      - AUTH_SESSION_COOKIE_SAMESITE=strict
+>>>>>>> 8b4cfef282452024ecb36654ec0ccaa8a21cc4b9
       - FACEBOOK_LOGIN_ENABLED=false
       - FACEBOOK_LOGIN_ID=fake
       - FACEBOOK_LOGIN_SECRET=bad
