@@ -8,7 +8,7 @@ var STRONG_PASSWORD = 'correct horse battery staple';
 
 describe('Check same site cookie policy', function () {
     before(done => {
-        resetDatabase(done)
+        resetDatabase(done);
     });
 
     before(done => {
@@ -28,7 +28,7 @@ describe('Check same site cookie policy', function () {
             if (this.cookie[i].indexOf('SameSite=Strict') !== -1)
                 found = true;
         }
-        expect(found).to.be.true;
+        expect(found).to.equal(true);
     });
 });
 
