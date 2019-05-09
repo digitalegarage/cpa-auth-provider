@@ -34,7 +34,7 @@ services:
     - CPA_RECAPCHA_SECRETKEY=6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe
     - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
     - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
-    - AUTH_SESSION_COOKIE_SAMESITE=strict
+    - AUTH_SESSION_COOKIE_SAMESITE=lax
     depends_on:
       - postgres
     links:

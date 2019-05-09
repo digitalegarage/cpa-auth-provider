@@ -14,7 +14,7 @@ module.exports = {
 
     auth_session_cookie :{
         name: 'connect.sid',
-        sameSite: 'strict'
+        sameSite: 'lax'
     },
 
     limiter: {
