@@ -25,7 +25,7 @@ describe('Check same site cookie policy', function () {
     it('should set samesite on cookie', () => {
         var found = false;
         for (var i = 0; i < this.cookie.length; i++) {
-            if (this.cookie[i].indexOf('SameSite=Strict') !== -1)
+            if (this.cookie[i].indexOf('SameSite=Lax') !== -1)
                 found = true;
         }
         expect(found).to.equal(true);
