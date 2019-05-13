@@ -18,16 +18,6 @@ RUN mkdir /src/seeders
 
 ENV NODE_ENV development
 
-ENV IDP_RECAPTCHA_SITEKEY 6LeQIjEUAAAAAPiu3jPaTcu_0jwxSTI9RF9FpX1W
-ENV IDP_RECAPTCHA_SECRETKEY 6LeQIjEUAAAAAEQJnX_MeM1lM-8OjwwcXf3csCXl
-
-ENV JWT_SECRET AlteredCarbonFly
-ENV DEFAULT_LOCALE fr
-
-# default settings for database
-ENV DB_TYPE sqlite
-ENV DB_FILENAME "data/identity-provider.sqlite"
-
 COPY bin /src/bin
 COPY lib /src/lib
 COPY models /src/models
