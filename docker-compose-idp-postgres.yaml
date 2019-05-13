@@ -22,6 +22,7 @@ services:
       - CUSTOM_OAUTH_MSG={client} souhaite accéder à votre compte maRTS.
       - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
       - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
+      - AUTH_SESSION_COOKIE_SAMESITE=lax
       - DB_LOGGING=true
       - TZ=Europe/Amsterdam
       - BASE_URL=http://localhost:3000

@@ -19,7 +19,7 @@ services:
     - MAIL_HOST=mail.maximator.org
     - MAIL_PORT=25
     - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
-
+    - AUTH_SESSION_COOKIE_SAMESITE=lax
     - GOOGLE_LOGIN_ENABLED=true
     - GOOGLE_LOGIN_ID=428910240917-u18132kf0qrp347gjb5ddnsco6mp8u3g.apps.googleusercontent.com
     - GOOGLE_LOGIN_SECRET=9nG_oREywyfzDWwASVVFVQOr

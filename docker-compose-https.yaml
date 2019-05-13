@@ -33,6 +33,7 @@ services:
     - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
     # Needed since we are using a self signed certificate => browser doesn't trust the cert => auth cookie won't be sent.
     - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
+    - AUTH_SESSION_COOKIE_SAMESITE=lax
   nginx:
     image: nginx
     restart: always
