@@ -34,6 +34,7 @@ services:
     # Needed since we are using a self signed certificate => browser doesn't trust the cert => auth cookie won't be sent.
     - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=true
     - AUTH_SESSION_COOKIE_SAMESITE=lax
+    - AUTH_SESSION_COOKIE_DATA_LENGTH=50000
   nginx:
     image: nginx
     restart: always
