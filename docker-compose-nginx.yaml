@@ -21,6 +21,7 @@ services:
       - SESSION_SECRET=LKASDMjnr234n90lasndfsadf
       - AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS=false
       - AUTH_SESSION_COOKIE_SAMESITE=lax
+      - AUTH_SESSION_COOKIE_DATA_LENGTH=50000
     depends_on:
       - postgres
     links:
