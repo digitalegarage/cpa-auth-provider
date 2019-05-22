@@ -41,7 +41,7 @@ let initSequelizeStore = (done) => {
 function extendDefaultFields(defaults, session) {
     return {
         data: defaults.data,
-        expires: defaults.expire,
+        expires: defaults.expires,
         userId: (session && session.passport && session.passport.user) ? session.passport.user : ''
     };
 }
