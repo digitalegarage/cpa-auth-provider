@@ -190,6 +190,11 @@ module.exports = {
 
     // Session cookie is signed with this secret to prevent tampering
     session_secret: process.env.SESSION_SECRET,
+
+    session: {
+        clean: 'true' === process.env.ENABLE_SESSION_CLEANING
+    },
+
     quality_check: {
         enabled: 'true' === process.env.ENABLE_QUALITY_CHECK_ENDPOINT
     },
