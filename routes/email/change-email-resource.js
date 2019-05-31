@@ -2,7 +2,7 @@
 
 var cors = require('cors');
 var passport = require('passport');
-const changeEmailHelper = require('./change-email-helper');
+const changeEmailHelper = require('./legacy-change-email-helper');
 
 module.exports = function(app, options) {
 

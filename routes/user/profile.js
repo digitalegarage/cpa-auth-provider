@@ -10,6 +10,7 @@ var logger = require('../../lib/logger');
 var i18n = require('i18n');
 var db = require('../../models/index');
 var limiterHelper = require('../../lib/limiter-helper');
+var requestHelper = require('../../lib/request-helper');
 
 
 var routes = function (router) {
@@ -56,8 +57,8 @@ var routes = function (router) {
                     "validation-email",
                     {log: false},
                     {
-                        confirmLink: config.mail.host + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
-                        host: config.mail.host,
+                        confirmLink: requestHelper.getIdpRoot() + '/email_verify?email=' + encodeURIComponent(email) + '&code=' + encodeURIComponent(code),
+                        host: requestHelper.getIdpRoot(),
                         mail: email,
                         code: code
                     },
