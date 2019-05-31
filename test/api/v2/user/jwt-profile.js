@@ -26,7 +26,7 @@ describe('log in and check JWT', () => {
             expect(ctx.res.body.token.indexOf("JWT ")).equal(0);
             expect(clearJwt.id).to.equal(initData.USER_1.id);
             expect(clearJwt.public_uid).to.equal(initData.USER_1_PROFILE.public_uid);
-            expect(clearJwt.LocalLogin.login).to.equal(initData.USER_1.email);
+            expect(clearJwt.login).to.equal(initData.USER_1.email);
         });
     });
 });

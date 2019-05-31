@@ -6,6 +6,7 @@ var passport = require('passport');
 var cors = require('../../lib/cors');
 var authHelper = require('../../lib/auth-helper');
 var userHelper = require('../../lib/user-helper');
+var apiErrorHelper = require('../../lib/api-error-helper');
 var logger = require('../../lib/logger');
 
 module.exports = function (app, options) {
@@ -21,23 +22,22 @@ module.exports = function (app, options) {
         var user = authHelper.getAuthenticatedUser(req);
 
         if (!user) {
-            return res.status(401).send({success: false, msg: req.__('API_PROFILE_AUTH_FAIL')});
+            apiErrorHelper.throwError(401, 'PROFILE_AUTHENTICATION_ERROR', 'Authentication error.', req.__('API_PROFILE_AUTH_FAIL'), [], {sucsess: false});
         } else {
             returnProfileAsJson(user, res, req);
         }
     });
 
     // A route for getting profile data when authed by a cpa token.
-    app.get('/api/cpa/profile', function (req, res) {
+    app.get('/api/cpa/profile', function (req, res, next) {
         getCpaAuthedUser(req).then(function (user) {
             if (!user) {
-                res.sendStatus(401);
+                next(apiErrorHelper.buildError(401, 'PROFILE_CPA_AUTHENTICATION_ERROR', ' Cpa authentication error.'));
             } else {
                 returnProfileAsJson(user, res, req);
             }
         }).catch(function (err) {
-            res.statusMessage = JSON.stringify(err);
-            res.status(401).end();
+            next(apiErrorHelper.buildError(401, 'PROFILE_CPA_AUTHENTICATION_ERROR', ' Cpa authentication error.', '', [], err));
         });
     });
 
@@ -50,15 +50,14 @@ module.exports = function (app, options) {
 
     app.get('/api/session/profile', cors, authHelper.ensureAuthenticated, function (req, res) {
         var user = authHelper.getAuthenticatedUser(req);
-
         if (!user) {
-            return res.status(401).send({success: false, msg: req.__('API_PROFILE_AUTH_FAIL')});
+            apiErrorHelper.throwError(401, 'PROFILE_SESSION_AUTHENTICATION_ERROR', 'Authentication error.', req.__('API_PROFILE_AUTH_FAIL'), [], {sucsess: false});
         } else {
             returnProfileAsJson(user, res, req);
         }
     });
 
-    app.put('/api/local/profile', cors, passport.authenticate('jwt', {session: false}), function (req, res) {
+    app.put('/api/local/profile', cors, passport.authenticate('jwt', {session: false}), function (req, res, next) {
         // Data validation
         if (req.body.firstname) {
             req.checkBody('firstname', req.__('API_PROFILE_FIRSTNAME_INVALIDE')).matches(userHelper.NAME_REGEX);
@@ -81,10 +80,17 @@ module.exports = function (app, options) {
                 if (!result.isEmpty()) {
                     result.useFirstErrorOnly();
                     // console.log('There have been validation errors: ' + util.inspect(result.array()));
-                    res.status(400).json({
-                        success: false,
-                        msg: req.__('API_PROFILE_VALIDATION_ERRORS') + result.array({onlyFirstError: true})
-                    });
+                    let _e = result.array({onlyFirstError: true})[0];
+                    let _param = _e.param ? '.' + (_e.param).toUpperCase() : '';
+                    next(apiErrorHelper.buildError(
+                        400,
+                        'API_PROFILE_VALIDATION_ERRORS.' + _param, 
+                        'Invalid param.',
+                        req.__('API_PROFILE_VALIDATION_ERRORS'),
+                        [], 
+                        {success: false})
+                    );
+                    
                 } else {
                     userHelper.updateProfileLegacy(authHelper.getAuthenticatedUser(req), req.body).then(
                         function (userProfile) {
@@ -92,20 +98,30 @@ module.exports = function (app, options) {
                                 maxAge: config.i18n.cookie_duration,
                                 httpOnly: true
                             });
-                            res.json({success: true, msg: req.__('API_PROFILE_SUCCESS')});
+                            res.json({success: true, msg: req.__('API_PROFILE_SUCCESS')}); // FIXME standard message
                         },
                         function (err) {
                             if (err.message === userHelper.EXCEPTIONS.MISSING_FIELDS) {
-                                return res.status(400).json({
-                                    success: false,
-                                    msg: req.__('API_SIGNUP_MISSING_FIELDS'),
-                                    missingFields: err.data.missingFields
-                                });
+                                next(apiErrorHelper.buildError(400,
+                                        'API_SIGNUP_MISSING_FIELDS', 
+                                        'Missing required fields.', 
+                                        req.__('API_SIGNUP_MISSING_FIELDS'),
+                                        [],
+                                        {
+                                            missingFields: err.data.missingFields
+                                        }
+                                    )
+                                );
                             } else {
-                                res.status(500).json({
-                                    success: false,
-                                    msg: req.__('API_PROFILE_FAIL') + err
-                                });
+                                next(apiErrorHelper.buildError(
+                                        500, 
+                                        'INTERNAL_SERVER_ERROR.API_PROFILE_FAIL', 
+                                        'Internal server error. Profile api failure.',  
+                                        req.__('API_PROFILE_FAIL'), 
+                                        [], 
+                                        {success: false}
+                                        )
+                                    );
                             }
                         }
                     );
