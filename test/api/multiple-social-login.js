@@ -695,6 +695,53 @@ describe('Google', function () {
             );
         });
 
+        describe('When user has a local (unvalidated) and a social login and that he tries to login with his social login', function () {
+            var ctx = this;
+
+            before(function (done) {
+                recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
+                done();
+            });
+
+            before(resetDatabase);
+
+            before(function () {
+                sinon.stub(googleHelper, "verifyGoogleIdToken").returns(
+                    mockVerifyGoogleIdToken()
+                );
+            });
+
+            after(function () {
+                googleHelper.verifyGoogleIdToken.restore();
+            });
+
+            before(function (done) {
+                googleAPISignup.call(this, done);
+
+            });
+
+            before(function(done) {
+
+                requestHelper.sendRequest(ctx, '/api/v2/session/user/login/create', {
+                    method: 'post',
+                    cookie: ctx.cookie,
+                    data: {
+                        email: GOOGLE_EMAIL,
+                        //password: "very_str0nG_P@ssw0rd!",
+                    },
+                }, done);
+            });
+
+            before(function (done) {
+                googleAPISignup.call(this, done);
+            });
+
+            it('should return 200', function () {
+                    expect(this.res.statusCode).equal(200);
+                }
+            );
+        });
+
         describe('When user is in the system and has validated his mail', function () {
 
             before(function (done) {
