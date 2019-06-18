@@ -34,13 +34,12 @@
 					"raw": "{\n  \"software_id\": \"cpa-test-client\",\n  \"software_version\": \"1.0.0\",\n  \"client_name\": \"My demo test device v1\"\n}"
 				},
 				"url": {
-					"raw": "https://id.rts.ch/register",
-					"protocol": "https",
+					"raw": "http://localhost:3000/register",
+					"protocol": "http",
 					"host": [
-						"id",
-						"rts",
-						"ch"
+						"localhost"
 					],
+					"port": "3000",
 					"path": [
 						"register"
 					]
@@ -77,16 +76,15 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"client_id\": \"{{client_id}}\",\n\t\"client_secret\": \"{{client_secret}}\",\n\t\"domain\": \"*.rts.ch\"\n}"
+					"raw": "{\n\t\"client_id\": \"{{client_id}}\",\n\t\"client_secret\": \"{{client_secret}}\",\n\t\"domain\": \"cpa.rts.ch\"\n}"
 				},
 				"url": {
-					"raw": "https://id.rts.ch/associate",
-					"protocol": "https",
+					"raw": "http://localhost:3000/associate",
+					"protocol": "http",
 					"host": [
-						"id",
-						"rts",
-						"ch"
+						"localhost"
 					],
+					"port": "3000",
 					"path": [
 						"associate"
 					]
@@ -123,7 +121,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"client_id\": \"{{client_id}}\",\n\t\"domain\": \"localhost\",\n\t\"device_code\": \"{{device_code}}\",\n\t\"client_secret\": \"{{client_secret}}\",\n\t\"grant_type\": \"http://tech.ebu.ch/cpa/1.0/device_code\"\n}"
+					"raw": "{\n\t\"client_id\": \"{{client_id}}\",\n\t\"domain\": \"cpa.rts.ch\",\n\t\"device_code\": \"{{device_code}}\",\n\t\"client_secret\": \"{{client_secret}}\",\n\t\"grant_type\": \"http://tech.ebu.ch/cpa/1.0/device_code\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:3000/token",
@@ -137,39 +135,6 @@
 					]
 				},
 				"description": "Device starts a register process by sending a few information about itself\n"
-			},
-			"response": []
-		},
-		{
-			"name": "http://locallhost:3000/authorize",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Authorization",
-						"value": "Basic aWJpc0Bici5kZTpTdXBlclBldGVyMTIzIQ=="
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n\t\"optype\": \"EXTRACT\",\n\t\"name\": \"Local Dummy Service\",\n\t\"mode\": \"sync\",\n\t\"auth\": \"JWT\",\n\t\"uri\": \"http://localhost/test\",\n\t\"method\": \"get\"\n}"
-				},
-				"url": {
-					"raw": "http://localhost:3005/api/service",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3005",
-					"path": [
-						"api",
-						"service"
-					]
-				}
 			},
 			"response": []
 		}
