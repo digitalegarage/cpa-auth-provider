@@ -11,7 +11,7 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "07b21fd2-6988-4b38-bc39-63e47123ce64",
+						"id": "0489b996-5c73-4036-b793-ac90ca839e15",
 						"type": "text/javascript",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
@@ -68,14 +68,14 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "184dcd2f-5a6e-4875-86c1-7958c1099438",
+						"id": "3b897690-b695-49f9-9c40-95eec66d6681",
 						"type": "text/javascript",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"postman.setEnvironmentVariable(\"device_code\",jsonData.device_code);",
 							"postman.setEnvironmentVariable(\"user_code\",jsonData.user_code);",
 							"postman.setEnvironmentVariable(\"verification_uri\",jsonData.verification_uri);",
-							"postman.setEnvironmentVariable(\"sid2\",postman.getResponseCookie(\"identity.provider.sid2\").value);"
+							"postman.setEnvironmentVariable(\"sid2\",postman.getResponseCookie(\"identity.provider.sid\").value);"
 						]
 					}
 				}
