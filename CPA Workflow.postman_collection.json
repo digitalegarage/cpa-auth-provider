@@ -23,13 +23,14 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"id": "cdf5c253-e95a-4c71-90a4-40a0ff09878e",
+						"id": "3e4e0fd7-1dba-45ee-87a3-975f1201ab79",
 						"type": "text/javascript",
 						"exec": [
-							"pm.globals.set(\"idp_port\", \"3000\");",
+							"pm.globals.set(\"idp_port\", \"3000\"); // use \"80\" or \"443\" when needed!",
 							"pm.globals.set(\"idp_host\", \"localhost\");",
-							"pm.globals.set(\"idp_prefix\", \"\");",
-							"pm.globals.set(\"idp_proto\",\"http\");"
+							"pm.globals.set(\"idp_prefix\", \"\"); // \"idp/\"",
+							"pm.globals.set(\"idp_proto\", \"http\");",
+							"pm.globals.set(\"cpa_domain\", \"cpa.rts.ch\");"
 						]
 					}
 				}
@@ -89,7 +90,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"client_id\": \"{{client_id}}\",\n\t\"client_secret\": \"{{client_secret}}\",\n\t\"domain\": \"cpa.rts.ch\"\n}"
+					"raw": "{\n\t\"client_id\": \"{{client_id}}\",\n\t\"client_secret\": \"{{client_secret}}\",\n\t\"domain\": \"{{cpa_domain}}\"\n}"
 				},
 				"url": {
 					"raw": "{{idp_proto}}://{{idp_host}}:{{idp_port}}/{{idp_prefix}}associate",
