@@ -16,7 +16,7 @@
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"postman.setEnvironmentVariable(\"client_id\",jsonData.client_id);",
-							"postman.setEnvironmentVariable(\"client_secret\",jsonData.client_secret);"
+							"postman.setEnvironmentVariable(\"client_secret\",jsonData.client_secret);     "
 						]
 					}
 				},
@@ -68,14 +68,15 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "3b897690-b695-49f9-9c40-95eec66d6681",
+						"id": "5dfca31c-1b21-4565-9bf7-0146d582dd08",
 						"type": "text/javascript",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"postman.setEnvironmentVariable(\"device_code\",jsonData.device_code);",
 							"postman.setEnvironmentVariable(\"user_code\",jsonData.user_code);",
 							"postman.setEnvironmentVariable(\"verification_uri\",jsonData.verification_uri);",
-							"postman.setEnvironmentVariable(\"sid2\",postman.getResponseCookie(\"identity.provider.sid\").value);"
+							"postman.setEnvironmentVariable(\"sid\",postman.getResponseCookie(\"identity.provider.sid\").value);",
+							""
 						]
 					}
 				}
@@ -108,6 +109,97 @@
 			"response": []
 		},
 		{
+			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4cf0ef95-60fc-4bcb-86ac-a302c0a2d7d7",
+						"type": "text/javascript",
+						"exec": [
+							"postman.setEnvironmentVariable(\"sid\",postman.getResponseCookie(\"identity.provider.sid\").value);",
+							"console.log(postman.getResponseCookie(\"identity.provider.sid\").value);"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "identity.provider.sid={{sid}}"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "admin@admin.com",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "admin",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{idp_proto}}://{{idp_host}}:{{idp_port}}/{{idp_prefix}}login?redirect=%2F",
+					"protocol": "{{idp_proto}}",
+					"host": [
+						"{{idp_host}}"
+					],
+					"port": "{{idp_port}}",
+					"path": [
+						"{{idp_prefix}}login"
+					],
+					"query": [
+						{
+							"key": "redirect",
+							"value": "%2F"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					},
+					{
+						"key": "Cookie",
+						"value": "identity.provider.sid={{sid}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "verification_type=user_code&user_code={{user_code}}"
+				},
+				"url": {
+					"raw": "{{verification_uri}}",
+					"host": [
+						"{{verification_uri}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Poll",
 			"event": [
 				{
@@ -130,7 +222,7 @@
 					},
 					{
 						"key": "Cookie",
-						"value": "identity.provider.sid2=s%3AppH50pAz1t218iMGvr0ovab6t-6myjkC.q7C9oz%2BJxERe7JpmWf5xtofHkNpcenfJzloMdJWk938"
+						"value": "identity.provider.sid={{sid}}"
 					}
 				],
 				"body": {
