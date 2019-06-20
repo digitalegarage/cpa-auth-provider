@@ -937,7 +937,7 @@ var migrationCommands = [{
 		{
 						fn: "createTable",
 						params: [
-										"Session",
+										"Sessions",
 										{
                 			"sid": {
                     		"type": Sequelize.STRING,
@@ -991,7 +991,7 @@ var migrationCommands = [{
 		{
 				fn: "addIndex",
 				params: [
-								"Session",
+								"Sessions",
 								["id"],
 								{
 												"indexName": "sessions_sid_idx"
