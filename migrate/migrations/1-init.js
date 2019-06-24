@@ -934,30 +934,30 @@ var migrationCommands = [{
             {}
         ]
     },
-		{
-						fn: "createTable",
-						params: [
-										"Sessions",
-										{
-                			"sid": {
-                    		"type": Sequelize.STRING,
-                    		"primaryKey": true,
-												"field": "id",
-												"allowNull": false
-                			},
-			                "userId": {
-												"type": Sequelize.STRING,
-												"field": "userId"
-											},
-											"expires": {
-												"type": Sequelize.DATE,
-											},
-											"data": {
-												"type": Sequelize.STRING(10000)
-											}
-										}
-						]
-		},
+    {
+        fn: "createTable",
+        params: [
+            "Sessions",
+            {
+            "sid": {
+                "type": Sequelize.STRING,
+                "primaryKey": true,
+                "field": "id",
+                "allowNull": false
+            },
+            "userId": {
+                    "type": Sequelize.STRING,
+                    "field": "userId"
+                },
+                "expires": {
+                    "type": Sequelize.DATE,
+                },
+                "data": {
+                    "type": Sequelize.STRING(10000)
+                }
+            }
+        ]
+    },
     {
         fn: "addIndex",
         params: [
@@ -978,47 +978,70 @@ var migrationCommands = [{
             }
         ]
     },
-		{
-				fn: "addIndex",
-				params: [
-					"Session",
-					["expires"],
-					{
-						"indexName": "sessions_expire_idx"
-					}
-				]
-		},
-		{
-				fn: "addIndex",
-				params: [
-								"Sessions",
-								["id"],
-								{
-												"indexName": "sessions_sid_idx"
-								}
-				]
-		}
+    {
+        fn: "addIndex",
+        params: [
+            "Sessions",
+            ["expires"],
+            {
+                "indexName": "sessions_expire_idx"
+            }
+        ]
+    },
+    {
+        fn: "addIndex",
+        params: [
+            "Sessions",
+            ["id"],
+            {
+                "indexName": "sessions_sid_idx"
+            }
+        ]
+    }
 ];
+
+var db = require('../../models');
+
+function initDb(queryInterface, pos) {
+    var index = pos;
+    return new Promise(function(resolve, reject) {
+        function next() {
+            if (index < migrationCommands.length)
+            {
+                let command = migrationCommands[index];
+                console.log("[#"+index+"] execute: " + command.fn);
+                index++;
+                queryInterface[command.fn].apply(queryInterface, command.params).then(next, reject);
+            }
+            else
+                resolve();
+        }
+        next();
+    });
+}
 
 module.exports = {
     pos: 0,
     up: function(queryInterface, Sequelize)
     {
-        var index = this.pos;
-        return new Promise(function(resolve, reject) {
-            function next() {
-                if (index < migrationCommands.length)
-                {
-                    let command = migrationCommands[index];
-                    console.log("[#"+index+"] execute: " + command.fn);
-                    index++;
-                    queryInterface[command.fn].apply(queryInterface, command.params).then(next, reject);
-                }
-                else
+        return db.sequelize.query('SELECT count(*) FROM `SequelizeMeta`', { type: db.sequelize.QueryTypes.SELECT}).then(count => {
+            console.log('count', count[0]['count(*)']);
+            if (count[0]['count(*)'] > 0) {
+                return new Promise(function(resolve, reject) {
+                    //nothing
+                    console.log('Legacy database => nothing to do.');
                     resolve();
+                });
+            } else {
+                console.log('initDb...');
+                return initDb(queryInterface, this.pos);
             }
-            next();
+        }).catch((e) => {
+            // Table doesn't exists
+            console.log('Table doesn\'t exists', e);
+            return initDb(queryInterface, this.pos);
         });
+
     },
     info: info
 };
