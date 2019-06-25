@@ -105,6 +105,7 @@
     "chai-jquery": "^2.0.0",
     "cheerio": "~0.22.0",
     "mocha": "^5.2.0",
+    "sequelize-auto-migrations": "^1.0.3",
     "sinon": "~3.2.1",
     "sinon-chai": "~2.13.0",
     "supertest": "~3.0.0"

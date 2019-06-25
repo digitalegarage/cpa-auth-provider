@@ -1,0 +1,896 @@
+{
+    "tables": {
+        "AccessTokens": {
+            "tableName": "AccessTokens",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "token": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "token",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "client_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Clients",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "client_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "domain_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Domains",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "domain_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "Clients": {
+            "tableName": "Clients",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "secret": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "secret",
+                    "seqType": "Sequelize.STRING"
+                },
+                "name": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "software_id": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "software_id",
+                    "seqType": "Sequelize.STRING"
+                },
+                "software_version": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "software_version",
+                    "seqType": "Sequelize.STRING"
+                },
+                "ip": {
+                    "validate": {
+                        "isIP": true
+                    },
+                    "field": "ip",
+                    "seqType": "Sequelize.STRING"
+                },
+                "registration_type": {
+                    "defaultValue": {
+                        "value": "dynamic"
+                    },
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "registration_type",
+                    "seqType": "Sequelize.ENUM('dynamic', 'static')"
+                },
+                "redirect_uri": {
+                    "allowNull": true,
+                    "field": "redirect_uri",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "Domains": {
+            "tableName": "Domains",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "name": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "display_name": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "display_name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "access_token": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "access_token",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "IdentityProviders": {
+            "tableName": "IdentityProviders",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "name": {
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "LocalLogins": {
+            "tableName": "LocalLogins",
+            "schema": {
+                "id": {
+                    "allowNull": false,
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "login": {
+                    "unique": true,
+                    "field": "login",
+                    "seqType": "Sequelize.STRING"
+                },
+                "password": {
+                    "field": "password",
+                    "seqType": "Sequelize.STRING"
+                },
+                "verified": {
+                    "field": "verified",
+                    "seqType": "Sequelize.BOOLEAN"
+                },
+                "password_changed_at": {
+                    "field": "password_changed_at",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "last_login_at": {
+                    "field": "last_login_at",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "OAuth2AuthorizationCodes": {
+            "tableName": "OAuth2AuthorizationCodes",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "authorization_code": {
+                    "field": "authorization_code",
+                    "seqType": "Sequelize.STRING"
+                },
+                "redirect_uri": {
+                    "field": "redirect_uri",
+                    "seqType": "Sequelize.STRING"
+                },
+                "state": {
+                    "field": "state",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "oauth2_client_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "OAuth2Clients",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "oauth2_client_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "o_auth2_client_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "OAuth2Clients",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "o_auth2_client_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "OAuth2Clients": {
+            "tableName": "OAuth2Clients",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "client_id": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "client_id",
+                    "seqType": "Sequelize.STRING"
+                },
+                "client_secret": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "client_secret",
+                    "seqType": "Sequelize.STRING"
+                },
+                "jwt_code": {
+                    "allowNull": true,
+                    "field": "jwt_code",
+                    "seqType": "Sequelize.STRING"
+                },
+                "name": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "redirect_uri": {
+                    "allowNull": false,
+                    "field": "redirect_uri",
+                    "seqType": "Sequelize.STRING"
+                },
+                "use_template": {
+                    "allowNull": true,
+                    "field": "use_template",
+                    "seqType": "Sequelize.STRING"
+                },
+                "email_redirect_uri": {
+                    "allowNull": true,
+                    "field": "email_redirect_uri",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "OAuth2RefreshTokens": {
+            "tableName": "OAuth2RefreshTokens",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "key": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "key",
+                    "seqType": "Sequelize.STRING"
+                },
+                "expires_at": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "expires_at",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "scope": {
+                    "field": "scope",
+                    "seqType": "Sequelize.STRING"
+                },
+                "consumed": {
+                    "field": "consumed",
+                    "seqType": "Sequelize.BOOLEAN"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "oauth2_client_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "OAuth2Clients",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "oauth2_client_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": {
+                "80c5e5853c5338f47222359c4ca029c4ed475ec8": {
+                    "unique": true,
+                    "fields": [
+                        "key"
+                    ],
+                    "options": {
+                        "indicesType": "UNIQUE"
+                    }
+                }
+            }
+        },
+        "PairingCodes": {
+            "tableName": "PairingCodes",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "device_code": {
+                    "field": "device_code",
+                    "seqType": "Sequelize.STRING"
+                },
+                "user_code": {
+                    "field": "user_code",
+                    "seqType": "Sequelize.STRING"
+                },
+                "verification_uri": {
+                    "field": "verification_uri",
+                    "seqType": "Sequelize.STRING"
+                },
+                "state": {
+                    "defaultValue": {
+                        "value": "pending"
+                    },
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "state",
+                    "seqType": "Sequelize.ENUM('pending', 'verified', 'denied')"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "client_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Clients",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "client_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "domain_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Domains",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "domain_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "Permissions": {
+            "tableName": "Permissions",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "label": {
+                    "unique": true,
+                    "field": "label",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                }
+            },
+            "indexes": []
+        },
+        "SocialLogins": {
+            "tableName": "SocialLogins",
+            "schema": {
+                "id": {
+                    "allowNull": false,
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "name": {
+                    "field": "name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "uid": {
+                    "field": "uid",
+                    "seqType": "Sequelize.STRING"
+                },
+                "email": {
+                    "field": "email",
+                    "seqType": "Sequelize.STRING"
+                },
+                "firstname": {
+                    "field": "firstname",
+                    "seqType": "Sequelize.STRING"
+                },
+                "lastname": {
+                    "field": "lastname",
+                    "seqType": "Sequelize.STRING"
+                },
+                "gender": {
+                    "field": "gender",
+                    "seqType": "Sequelize.STRING"
+                },
+                "date_of_birth": {
+                    "field": "date_of_birth",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "date_of_birth_ymd": {
+                    "field": "date_of_birth_ymd",
+                    "seqType": "Sequelize.DATEONLY"
+                },
+                "language": {
+                    "field": "language",
+                    "seqType": "Sequelize.STRING"
+                },
+                "last_login_at": {
+                    "field": "last_login_at",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "cascade",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": {
+                "848b25ce4ed20356ecbb325b61825f40d532fc6e": {
+                    "unique": true,
+                    "fields": [
+                        "user_id",
+                        "name"
+                    ],
+                    "options": {
+                        "indicesType": "UNIQUE"
+                    }
+                }
+            }
+        },
+        "UserEmailTokens": {
+            "tableName": "UserEmailTokens",
+            "schema": {
+                "key": {
+                    "primaryKey": true,
+                    "field": "key",
+                    "seqType": "Sequelize.STRING"
+                },
+                "type": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "type",
+                    "seqType": "Sequelize.STRING"
+                },
+                "sub": {
+                    "field": "sub",
+                    "seqType": "Sequelize.STRING"
+                },
+                "redirect_uri": {
+                    "allowNull": true,
+                    "field": "redirect_uri",
+                    "seqType": "Sequelize.STRING"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "oauth2_client_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "OAuth2Clients",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "oauth2_client_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "Users": {
+            "tableName": "Users",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "tracking_uid": {
+                    "field": "tracking_uid",
+                    "seqType": "Sequelize.STRING"
+                },
+                "enable_sso": {
+                    "field": "enable_sso",
+                    "seqType": "Sequelize.BOOLEAN"
+                },
+                "display_name": {
+                    "field": "display_name",
+                    "seqType": "Sequelize.STRING"
+                },
+                "photo_url": {
+                    "field": "photo_url",
+                    "seqType": "Sequelize.STRING"
+                },
+                "firstname": {
+                    "field": "firstname",
+                    "seqType": "Sequelize.STRING"
+                },
+                "lastname": {
+                    "field": "lastname",
+                    "seqType": "Sequelize.STRING"
+                },
+                "gender": {
+                    "field": "gender",
+                    "seqType": "Sequelize.STRING"
+                },
+                "date_of_birth": {
+                    "field": "date_of_birth",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "date_of_birth_ymd": {
+                    "field": "date_of_birth_ymd",
+                    "seqType": "Sequelize.DATEONLY"
+                },
+                "language": {
+                    "field": "language",
+                    "seqType": "Sequelize.STRING"
+                },
+                "last_seen": {
+                    "field": "last_seen",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "scheduled_for_deletion_at": {
+                    "field": "scheduled_for_deletion_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "public_uid": {
+                    "defaultValue": {
+                        "internal": true,
+                        "value": "Sequelize.UUIDV4"
+                    },
+                    "field": "public_uid",
+                    "seqType": "Sequelize.UUID"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "identity_provider_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "IdentityProviders",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "identity_provider_id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "permission_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Permissions",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "permission_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        },
+        "ValidationCodes": {
+            "tableName": "ValidationCodes",
+            "schema": {
+                "id": {
+                    "primaryKey": true,
+                    "autoIncrement": true,
+                    "field": "id",
+                    "seqType": "Sequelize.INTEGER"
+                },
+                "date": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "date",
+                    "seqType": "Sequelize.BIGINT"
+                },
+                "value": {
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "value",
+                    "seqType": "Sequelize.STRING"
+                },
+                "type": {
+                    "defaultValue": {
+                        "value": "email"
+                    },
+                    "validate": {
+                        "notEmpty": true
+                    },
+                    "field": "type",
+                    "seqType": "Sequelize.ENUM('email', 'account')"
+                },
+                "created_at": {
+                    "allowNull": false,
+                    "field": "created_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "updated_at": {
+                    "allowNull": false,
+                    "field": "updated_at",
+                    "seqType": "Sequelize.DATE"
+                },
+                "user_id": {
+                    "allowNull": true,
+                    "references": {
+                        "model": "Users",
+                        "key": "id"
+                    },
+                    "onDelete": "SET NULL",
+                    "onUpdate": "CASCADE",
+                    "field": "user_id",
+                    "seqType": "Sequelize.INTEGER"
+                }
+            },
+            "indexes": []
+        }
+    },
+    "revision": 1
+}
