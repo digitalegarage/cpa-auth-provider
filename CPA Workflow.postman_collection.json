@@ -12,26 +12,28 @@
 					"listen": "test",
 					"script": {
 						"id": "0489b996-5c73-4036-b793-ac90ca839e15",
-						"type": "text/javascript",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"postman.setEnvironmentVariable(\"client_id\",jsonData.client_id);",
 							"postman.setEnvironmentVariable(\"client_secret\",jsonData.client_secret);     "
-						]
+						],
+						"type": "text/javascript"
 					}
 				},
 				{
 					"listen": "prerequest",
 					"script": {
 						"id": "3e4e0fd7-1dba-45ee-87a3-975f1201ab79",
-						"type": "text/javascript",
 						"exec": [
 							"pm.globals.set(\"idp_port\", \"3000\"); // use \"80\" or \"443\" when needed!",
 							"pm.globals.set(\"idp_host\", \"localhost\");",
 							"pm.globals.set(\"idp_prefix\", \"\"); // \"idp/\"",
 							"pm.globals.set(\"idp_proto\", \"http\");",
-							"pm.globals.set(\"cpa_domain\", \"cpa.rts.ch\");"
-						]
+							"pm.globals.set(\"cpa_domain\", \"cpa.rts.ch\");",
+							"pm.globals.set(\"login_user\",\"ibis@br.de\");",
+							"pm.globals.set(\"login_pass\", \"peter123\");"
+						],
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -114,12 +116,14 @@
 				{
 					"listen": "test",
 					"script": {
-						"id": "4cf0ef95-60fc-4bcb-86ac-a302c0a2d7d7",
-						"type": "text/javascript",
+						"id": "dbfe6470-2686-4a3d-911f-457b81e2fe0c",
 						"exec": [
+							"console.log(postman.getEnvironmentVariable(\"sid\"));",
 							"postman.setEnvironmentVariable(\"sid\",postman.getResponseCookie(\"identity.provider.sid\").value);",
-							"console.log(postman.getResponseCookie(\"identity.provider.sid\").value);"
-						]
+							"console.log(postman.getEnvironmentVariable(\"sid\"));",
+							""
+						],
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -136,24 +140,22 @@
 					}
 				],
 				"body": {
-					"mode": "formdata",
-					"formdata": [
+					"mode": "urlencoded",
+					"urlencoded": [
 						{
 							"key": "email",
-							"value": "admin@admin.com",
-							"description": "",
+							"value": "{{login_user}}",
 							"type": "text"
 						},
 						{
 							"key": "password",
-							"value": "admin",
-							"description": "",
+							"value": "{{login_pass}}",
 							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "{{idp_proto}}://{{idp_host}}:{{idp_port}}/{{idp_prefix}}login?redirect=%2F",
+					"raw": "{{idp_proto}}://{{idp_host}}:{{idp_port}}/{{idp_prefix}}login?redirect=/user/profile",
 					"protocol": "{{idp_proto}}",
 					"host": [
 						"{{idp_host}}"
@@ -165,7 +167,7 @@
 					"query": [
 						{
 							"key": "redirect",
-							"value": "%2F"
+							"value": "/user/profile"
 						}
 					]
 				}
@@ -187,8 +189,19 @@
 					}
 				],
 				"body": {
-					"mode": "raw",
-					"raw": "verification_type=user_code&user_code={{user_code}}"
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "verification_type",
+							"value": "user_code",
+							"type": "text"
+						},
+						{
+							"key": "user_code",
+							"value": "{{user_code}}",
+							"type": "text"
+						}
+					]
 				},
 				"url": {
 					"raw": "{{verification_uri}}",
