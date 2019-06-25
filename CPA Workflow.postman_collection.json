@@ -30,8 +30,8 @@
 							"pm.globals.set(\"idp_prefix\", \"\"); // \"idp/\"",
 							"pm.globals.set(\"idp_proto\", \"http\");",
 							"pm.globals.set(\"cpa_domain\", \"cpa.rts.ch\");",
-							"pm.globals.set(\"login_user\",\"ibis@br.de\");",
-							"pm.globals.set(\"login_pass\", \"peter123\");"
+							"pm.globals.set(\"login_user\",\"admin@admin.com\");",
+							"pm.globals.set(\"login_pass\", \"admin\");"
 						],
 						"type": "text/javascript"
 					}
