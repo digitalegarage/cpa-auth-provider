@@ -30,8 +30,8 @@
 							"pm.globals.set(\"idp_prefix\", \"\"); // \"idp/\"",
 							"pm.globals.set(\"idp_proto\", \"http\");",
 							"pm.globals.set(\"cpa_domain\", \"cpa.rts.ch\");",
-							"pm.globals.set(\"login_user\",\"ibis@br.de\");",
-							"pm.globals.set(\"login_pass\", \"peter123\");"
+							"pm.globals.set(\"login_user\",\"admin@admin.com\");",
+							"pm.globals.set(\"login_pass\", \"admin\");"
 						],
 						"type": "text/javascript"
 					}
@@ -71,15 +71,14 @@
 					"listen": "test",
 					"script": {
 						"id": "5dfca31c-1b21-4565-9bf7-0146d582dd08",
-						"type": "text/javascript",
 						"exec": [
 							"var jsonData = JSON.parse(responseBody);",
 							"postman.setEnvironmentVariable(\"device_code\",jsonData.device_code);",
 							"postman.setEnvironmentVariable(\"user_code\",jsonData.user_code);",
 							"postman.setEnvironmentVariable(\"verification_uri\",jsonData.verification_uri);",
-							"postman.setEnvironmentVariable(\"sid\",postman.getResponseCookie(\"identity.provider.sid\").value);",
 							""
-						]
+						],
+						"type": "text/javascript"
 					}
 				}
 			],
@@ -118,9 +117,6 @@
 					"script": {
 						"id": "dbfe6470-2686-4a3d-911f-457b81e2fe0c",
 						"exec": [
-							"console.log(postman.getEnvironmentVariable(\"sid\"));",
-							"postman.setEnvironmentVariable(\"sid\",postman.getResponseCookie(\"identity.provider.sid\").value);",
-							"console.log(postman.getEnvironmentVariable(\"sid\"));",
 							""
 						],
 						"type": "text/javascript"
@@ -132,7 +128,8 @@
 				"header": [
 					{
 						"key": "Cookie",
-						"value": "identity.provider.sid={{sid}}"
+						"value": "identity.provider.sid={{sid}}",
+						"disabled": true
 					},
 					{
 						"key": "Content-Type",
@@ -185,7 +182,8 @@
 					},
 					{
 						"key": "Cookie",
-						"value": "identity.provider.sid={{sid}}"
+						"value": "identity.provider.sid={{sid}}",
+						"disabled": true
 					}
 				],
 				"body": {
