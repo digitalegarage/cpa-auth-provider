@@ -36,26 +36,14 @@ module.exports = {
             client_id: '',
             client_secret: ''
         },
-        twitter: {
-            enabled: false,
-            consumer_key: '',
-            consumer_secret: '',
-            callback_url: ''
-        },
-        github: {
-            enabled: false,
-            client_id: '',
-            client_secret: '',
-            callback_url: ''
-        },
-        ebu: {
-            enabled: false
-        },
         local: {
             enabled: true
         }
     },
 
+    userProfiles: {
+        requiredFields: []//, 'gender','date_of_birth', 'firstname', 'lastname'],
+    },
 
     gdprManager: {
         // useGDPRManagerDeleteWithURL: 'https://gdprmanager.org',
@@ -71,6 +59,11 @@ module.exports = {
         keep_recovery_code_until: 900,
         // additional endpoint for password setting (/user/password)
         additional_endpoint: true,
+    },
+
+    // enable password quality check endpoint
+    quality_check: {
+        enabled: true
     },
 
     // define the name of the cookie used to store user locale
@@ -171,6 +164,11 @@ module.exports = {
 
     // Session cookie is signed with this secret to prevent tampering
     session_secret: 'putYourSessionSecretHere',
+
+    // enable automatique session cleaning (if true, unauthed session created more that 24h ago are deleted every day at 2am)
+    session: {
+        clean: true
+    },
 
     auth_session_cookie: {
         // Name of the session cookie. Must be something different than 'connect.sid'
@@ -348,16 +346,6 @@ module.exports = {
     monitoring: {
         enabled: true,
     },
-
-    // The length of time that a access tokens are valid, in seconds.
-    access_token_lifetime: 24 * 60 * 60, // 1 day
-
-    // The length of time that an authorization code is valid, in seconds.
-    authorization_code_lifetime: 10 * 60, // 10 minutes
-
-    // The maximum rate at which clients should poll to obtain an access token,
-    // in seconds.
-    max_poll_interval: 5,
 
     access_log_format: '[ACCESS-LOG] url=":url" method=":method" statusCode=":statusCode" delta=":delta" ip=":ip"'
 };
