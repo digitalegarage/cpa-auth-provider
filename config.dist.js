@@ -185,8 +185,7 @@ module.exports = {
     session_authorization_header_qualifier : 'sessionToken',
 
     sentry: {
-	    // this is a staging URI, see https://sentry.ebu.io/ebu/peach-staging/
-        dsn: 'https://49027fa4be8b4c359c8e90dcc72a65fe@sentry.ebu.io/9'
+        // dsn: ''
     },
     //
 
@@ -194,7 +193,7 @@ module.exports = {
     cors: {
         enabled: true,
         allowed_domains: [
-            'http://localhost', 'http://localhost:8090', 'http://cpa.rts.ch:8090', 'https://cpa.rts.ch', 'http://localhost.rts.ch:8090', 'http://localhost.rts.ch:8080', 'http://localhost.rts.ch:8080', 'http://localhost.rts.ch:8080', 'localhost.rts.ch', 'localhost.rts.ch:8080', '*.rts.ch', "*", "http://hummingbird-sandbox-marts.rts.ch"
+            'http://localhost'
         ]
         // possible other options, will extend allowed_domains:
         // wildcard_domains: ['.ebu.io','.kornherr.net'] // (no stars or so, just a string for .endsWith())
