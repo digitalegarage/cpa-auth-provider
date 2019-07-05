@@ -8,6 +8,8 @@ RUN npm install -g node-gyp
 
 COPY package.json package-lock.json /src/
 
+RUN mkdir /certs
+
 # Install Node.js dependencies
 WORKDIR /src
 RUN apk add --no-cache --virtual build python build-base && npm install && npm rebuild bcrypt --build-from-source && apk del build
