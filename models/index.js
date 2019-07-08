@@ -16,7 +16,6 @@ var sequelize = new Sequelize(
     dialectOptions: config.db.dialectOptions,
     host: config.db.host,
     port: config.db.port,
-    ssl: config.db.dialectOptions.ssl,
     storage: config.db.filename,
     logging: config.db.debug ? console.log : false,
     operatorsAliases: false,
