@@ -15,8 +15,6 @@ if (dialectOptions) {
     }
 }
 
-console.log(dialectOptions);
-
 module.exports = {
     "development": {
         "host": process.env.DB_HOST,

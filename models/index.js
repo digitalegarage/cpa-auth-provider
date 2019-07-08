@@ -7,6 +7,8 @@ var lodash = require("lodash");
 var db = {};
 var config = require("../config");
 
+console.log(dialectOptions);
+
 var sequelize = new Sequelize(
   config.db.database,
   config.db.user,
