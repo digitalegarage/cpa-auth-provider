@@ -1,10 +1,6 @@
 const fs = require('fs');
 
-console.log("HELLOOOO");
-
 let dialectOptions = process.env.DB_DIALECT_OPTIONS;
-
-console.log(dialectOptions);
 
 if (dialectOptions) {
     const dopts = JSON.parse(dialectOptions);
