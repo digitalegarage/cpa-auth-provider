@@ -7,14 +7,17 @@ let dialectOptions = process.env.DB_DIALECT_OPTIONS;
 console.log(dialectOptions);
 
 if (dialectOptions) {
-    const dopts = JSON.parse(process.env.DB_DIALECT_OPTIONS);
-    if (dopts.ssl && (!dopts.ssl.key || !dopts.ssl.cert || !dopts.ca)) {
-        console.error("not all cert files");
-        process.exit(-1);
-    } else {
-        dopts.ssl.key = fs.readFileSync(dopts.ssl.key);
-        dopts.ssl.cert = fs.readFileSync(dopts.ssl.cert);
-        dopts.ssl.ca = fs.readFileSync(dopts.ssl.ca);
+    const dopts = JSON.parse(dialectOptions);
+    console.log(dopts);
+    if (dopts.ssl) {
+        if (dopts.ssl.key && dopts.ssl.cert && dopts.ca) {
+            dopts.ssl.key = fs.readFileSync(dopts.ssl.key);
+            dopts.ssl.cert = fs.readFileSync(dopts.ssl.cert);
+            dopts.ssl.ca = fs.readFileSync(dopts.ssl.ca);
+        } else {
+            console.error("not all cert files");
+            process.exit(-1);
+        }
     }
 }
 
