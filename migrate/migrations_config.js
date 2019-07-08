@@ -4,7 +4,6 @@ let dialectOptions = process.env.DB_DIALECT_OPTIONS;
 
 if (dialectOptions) {
     const dopts = JSON.parse(dialectOptions);
-    console.log(dopts);
     if (dopts.ssl) {
         if (dopts.ssl.key && dopts.ssl.cert && dopts.ssl.ca) {
             dopts.ssl.key = fs.readFileSync(dopts.ssl.key);
