@@ -1,14 +1,13 @@
 const fs = require('fs');
 
-let dialectOptions = process.env.DB_DIALECT_OPTIONS;
+let dialectOptions = process.env.DB_DIALECT_OPTIONS ? JSON.parse(process.env.DB_DIALECT_OPTIONS) : undefined;
 
 if (dialectOptions) {
-    const dopts = JSON.parse(dialectOptions);
-    if (dopts.ssl) {
-        if (dopts.ssl.key && dopts.ssl.cert && dopts.ssl.ca) {
-            dopts.ssl.key = fs.readFileSync(dopts.ssl.key);
-            dopts.ssl.cert = fs.readFileSync(dopts.ssl.cert);
-            dopts.ssl.ca = fs.readFileSync(dopts.ssl.ca);
+    if (dialectOptions.ssl) {
+        if (dialectOptions.ssl.key && dialectOptions.ssl.cert && dialectOptions.ssl.ca) {
+            dialectOptions.ssl.key = fs.readFileSync(dialectOptions.ssl.key);
+            dialectOptions.ssl.cert = fs.readFileSync(dialectOptions.ssl.cert);
+            dialectOptions.ssl.ca = fs.readFileSync(dialectOptions.ssl.ca);
         } else {
             console.error("not all cert files");
             process.exit(-1);
