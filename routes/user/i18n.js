@@ -4,7 +4,9 @@ var config = require('../../config');
 var authHelper = require('../../lib/auth-helper');
 
 var routes = function (router) {
-
+    
+    // TODO migrate to V2.
+    // Used to change user language to browser language on white label profile page
     router.post('/i18n/cookie', function (req, res) {
 
         if (req.body.language) {
@@ -19,6 +21,8 @@ var routes = function (router) {
 
     });
 
+    // TODO migrate to V2.
+    // Used to change user language to browser language on white label profile page
     router.post('/i18n/profile', authHelper.ensureAuthenticated, function (req, res, next) {
 
         if (!req.body.language) {
