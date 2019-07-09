@@ -35,19 +35,6 @@ module.exports = function (app, options) {
 
     });
 
-    app.get('/password/edit', function (req, res) {
-        if (config.broadcaster.changeRecoverPasswordPage) {
-            var queryString = 'email='+req.query.email+'&code='+req.query.code;
-            if (config.broadcaster.changeRecoverPasswordPage.indexOf('?') >= 0) {
-                return res.redirect(config.broadcaster.changeRecoverPasswordPage + '&'+ queryString);
-            } else {
-                return res.redirect(config.broadcaster.changeRecoverPasswordPage + '?' + queryString);
-            }
-        } else {
-            res.render('password-edit.ejs', {email: req.query.email, code: req.query.code});
-        }
-    });
-
     // For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
     app.get('/logout', function (req, res, next) {
         req.logout();
