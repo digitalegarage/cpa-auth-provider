@@ -2,13 +2,9 @@
 
 var db = require('../../models');
 var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
-
-var emailHelper = require('../../lib/email-helper');
-var passwordHelper = require('../../lib/password-helper');
-var limiterHelper = require('../../lib/limiter-helper');
 var afterLogoutHelper = require('../../lib/afterlogout-helper');
 var requestHelper = require('../../lib/request-helper');
+var finder = require('../lib/finder');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
