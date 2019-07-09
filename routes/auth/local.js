@@ -5,6 +5,7 @@ var config = require('../../config');
 var afterLogoutHelper = require('../../lib/afterlogout-helper');
 var requestHelper = require('../../lib/request-helper');
 var finder = require('../../lib/finder');
+var codeHelper = require('../../lib/code-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
