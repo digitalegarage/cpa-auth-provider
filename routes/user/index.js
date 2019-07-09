@@ -1,13 +1,8 @@
 "use strict";
 
-var config = require('../../config');
-var appHelper = require('../../lib/app-helper');
 var db = require('../../models');
 var authHelper = require('../../lib/auth-helper');
-var passwordHelper = require('../../lib/password-helper');
 var socialLoginHelper = require('../../lib/social-login-helper');
-var userHelper = require('../../lib/user-helper');
-var logger = require('../../lib/logger');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
