@@ -8,7 +8,7 @@ var passport = require('passport');
 var JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 
-
+//TODO move or delete the following
 var opts = {};
 opts.jwtFromRequest = ExtractJwt.fromExtractors(
     [
