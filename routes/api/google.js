@@ -8,14 +8,6 @@ var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
 
-    app.post('/oauth/google/signup', cors, function (req, res, next) {
-        if (!req.body.client_id) {
-            apiErrorHelper.throwError(400, 'MISSING_CLIENT_ID', 'Missing client id.');
-        } else {
-            googleSignup(req, res, next);
-        }
-    });
-
     app.post('/api/google/signup', cors, function (req, res, next) {
         googleSignup(req, res, next);
     });

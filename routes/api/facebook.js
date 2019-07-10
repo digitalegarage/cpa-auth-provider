@@ -9,14 +9,6 @@ var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
 
-    app.post('/oauth/facebook/signup', cors, function (req, res, next) {
-        if (!req.body.client_id) {
-            apiErrorHelper.throwError(400, 'MISSING_CLIENT_ID', 'Missing client id.');
-        } else {
-            facebookSignup(req, res, next);
-        }
-    });
-
     app.post('/api/facebook/signup', cors, function (req, res, next) {
         facebookSignup(req, res, next);
     });
