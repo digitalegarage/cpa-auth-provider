@@ -939,13 +939,13 @@ var migrationCommands = [{
         params: [
             "Sessions",
             {
-            "sid": {
-                "type": Sequelize.STRING,
-                "primaryKey": true,
-                "field": "id",
-                "allowNull": false
-            },
-            "userId": {
+                "sid": {
+                    "type": Sequelize.STRING,
+                    "primaryKey": true,
+                    "field": "sid",
+                    "allowNull": false
+                },
+                "userId": {
                     "type": Sequelize.STRING,
                     "field": "userId"
                 },
@@ -954,6 +954,16 @@ var migrationCommands = [{
                 },
                 "data": {
                     "type": Sequelize.STRING(10000)
+                },
+                "createdAt": {
+                    "type": Sequelize.DATE,
+                    "field": "createdAt",
+                    "allowNull": false
+                },
+                "updatedAt": {
+                    "type": Sequelize.DATE,
+                    "field": "updatedAt",
+                    "allowNull": false
                 }
             }
         ]
