@@ -46,16 +46,17 @@ module.exports = {
     down: function (queryInterface, Sequelize) {
         return new Promise((resolve,reject) => {
             // only remove if we're on mysql. Other DBs are handled in another migration.
-            if (process.env.DB_TYPE !== 'mysql')
+//            if (process.env.DB_TYPE !== 'mysql')
+//                resolve();
+//            else {
+//                queryInterface.removeColumn('Sessions', 'userId')
+//                .then(() => {
+//                    resolve();
+//                })
+//                .catch(e => {
+//                    reject(e);
+//                });
                 resolve();
-            else {
-                queryInterface.removeColumn('Sessions', 'userId')
-                .then(() => {
-                    resolve();
-                })
-                .catch(e => {
-                    reject(e);
-                });
             }
         });
     }
