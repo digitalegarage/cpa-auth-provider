@@ -35,19 +35,21 @@ var routes = function (router) {
      *         description: language had been updated
      *       400:
      *         description: "Missing language in request body"
+     *         schema:
+     *            $ref: '#/definitions/error'
      */
-    //TODO ERROR
     router.post('/api/v2/i18n/cookie', function (req, res) {
 
-        if (req.body.language) {
-            res.cookie(config.i18n.cookie_name, req.body.language, {
-                maxAge: config.i18n.cookie_duration,
-                httpOnly: true
-            });
-            return res.status(201).send();
-        } else {
-            return res.status(400).send();
+        if (!req.body.language) {
+            apiErrorHelper.throwError(400, 'MISSING_LANGUAGE', 'Missing language in request body');
         }
+
+        res.cookie(config.i18n.cookie_name, req.body.language, {
+            maxAge: config.i18n.cookie_duration,
+            httpOnly: true
+        });
+
+        return res.status(201).send();
 
     });
 
@@ -70,12 +72,13 @@ var routes = function (router) {
      *         description: language had been updated
      *       400:
      *         description: "Missing language in request body"
+     *         schema:
+     *            $ref: '#/definitions/error'
      */
-    //TODO ERROR
     router.post('/api/v2/i18n/profile', authHelper.ensureAuthenticated, function (req, res, next) {
 
         if (!req.body.language) {
-            return res.status(400).send();
+            apiErrorHelper.throwError(400, 'MISSING_LANGUAGE', 'Missing language in request body');
         }
 
         res.cookie(config.i18n.cookie_name, req.body.language, {
