@@ -8,6 +8,9 @@ var limiterHelper = require('../../lib/limiter-helper');
 var finder = require('../../lib/finder');
 var codeHelper = require('../../lib/code-helper');
 var passwordHelper = require('../../lib/password-helper');
+var emailHelper = require('../../lib/email-helper');
+var i18n = require('i18n');
+var apiErrorHelper = require('../../lib/api-error-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
