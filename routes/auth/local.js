@@ -7,6 +7,7 @@ var requestHelper = require('../../lib/request-helper');
 var limiterHelper = require('../../lib/limiter-helper');
 var finder = require('../../lib/finder');
 var codeHelper = require('../../lib/code-helper');
+var passwordHelper = require('../../lib/password-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');

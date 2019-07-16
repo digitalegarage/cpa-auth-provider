@@ -46,7 +46,7 @@ function googleSignup(req, res, next) {
         );
     }
     else {
-        next(apiErrorHelper.buildError(401,'GOOGLE_PROFILE_NOT_FOUND',"Missing google IDtoken to connect with Google account."));
+        next(apiErrorHelper.buildError(401,'GOOGLE_PROFILE_NOT_FOUND',"Missing google ID token to connect with Google account."));
     }
 }
 
