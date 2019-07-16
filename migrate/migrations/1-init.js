@@ -992,7 +992,7 @@ var migrationCommands = [{
         fn: "addIndex",
         params: [
             "Sessions",
-            ["id"],
+            ["sid"],
             {
                 "indexName": "sessions_sid_idx"
             }
