@@ -2,6 +2,7 @@
 
 var config = require('../../../../config');
 var authHelper = require('../../../../lib/auth-helper');
+var apiErrorHelper = require('../../../../lib/api-error-helper');
 
 var routes = function (router) {
 
