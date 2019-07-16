@@ -52,6 +52,16 @@ module.exports = function (app, options) {
         }
     });
 
+    /**
+     * @swagger
+     * /logout:
+     *   get:
+     *     description: Convenient GET disconnect endpoint for development. For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
+     *     tags: [Session]
+     *     responses:
+     *          "201":
+     *            description: "User is disconnected"
+     */
     // For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
     app.get('/logout', function (req, res, next) {
         req.logout();
@@ -60,7 +70,7 @@ module.exports = function (app, options) {
                 next(err);
             } else {
                 afterLogoutHelper.afterLogout(res);
-                requestHelper.redirect(res, '/');
+                return res.status(201).send();
             }
         });
     });
@@ -104,6 +114,7 @@ module.exports = function (app, options) {
         });
     });
 
+    // deprecated (used at BR)
     app.post('/password/code', limiterHelper.verify, function (req, res, next) {
 
         if (req.recaptcha.error) {
@@ -152,6 +163,7 @@ module.exports = function (app, options) {
 
     });
 
+    // deprecated (used at BR)
     app.post('/password/update', function (req, res, next) {
 
         req.checkBody('password', req.__('BACK_PWD_UPDATE_PWD_EMPTY')).notEmpty();

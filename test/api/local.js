@@ -280,7 +280,7 @@ describe('POST /api/v2/jwt/login', function () {
         // Test get user info
         before(function (done) {
             this.accessToken = this.res.body.token.substring(4, this.res.body.token.size);
-            requestHelper.sendRequest(this, '/api/local/info', {
+            requestHelper.sendRequest(this, '/api/v2/jwt/user/profile', {
                     method: 'get',
                     accessToken: this.accessToken,
                     tokenType: 'JWT'
@@ -291,7 +291,6 @@ describe('POST /api/v2/jwt/login', function () {
         it('/api/local/info should return a success ', function () {
             expect(this.accessToken.length).to.be.greaterThan(0);
             expect(this.res.statusCode).to.equal(200);
-            expect(this.res.body.success).to.equal(true);
             expect(this.res.body.user.email).to.equal('qsdf@qsdf.fr');
             expect(this.res.body.user.display_name).to.equal('qsdf@qsdf.fr');
 
