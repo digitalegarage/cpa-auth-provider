@@ -20,10 +20,10 @@ $(document).ready(function () {
 });
 
 function setLanguage(language, logged) {
-    var url = '/i18n/cookie';
+    var url = '/api/v2/i18n/cookie';
 
     if (logged) {
-        url = '/i18n/profile';
+        url = '/api/v2/i18n/profile';
     }
 
     $.ajax({
