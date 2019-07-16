@@ -295,7 +295,7 @@ describe('Facebook', function () {
     });
 
 
-    describe('POST /api/facebook/signup', function () {
+    describe('POST /api/v2/signup/facebook', function () {
 
         describe('When user is not in the system', function () {
 
@@ -635,7 +635,7 @@ describe('Google', function () {
 
     });
 
-    describe('POST /api/google/signup', function () {
+    describe('POST /api/v2/signup/google', function () {
         describe('When user is not in the system', function () {
 
             before(resetDatabase);
@@ -1146,7 +1146,7 @@ function mockFB() {
 
 function facebookAPISignup(done) {
     mockFB();
-    requestHelper.sendRequest(this, '/api/facebook/signup', {
+    requestHelper.sendRequest(this, '/api/v2/signup/facebook', {
         method: 'post',
         type: 'form',
         data: {
@@ -1233,7 +1233,7 @@ function googleUISignup(done) {
 function googleAPISignup(done) {
     mockGoogle();
 
-    requestHelper.sendRequest(this, '/api/google/signup', {
+    requestHelper.sendRequest(this, '/api/v2/signup/google', {
         method: 'post',
         type: 'form',
         data: {

@@ -9,7 +9,39 @@ var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
 
-    app.post('/api/facebook/signup', cors, function (req, res, next) {
+    /**
+     * @swagger
+     * definitions:
+     *  FBToken:
+     *      type: "object"
+     *      properties:
+     *           fbToken:
+     *               type: "string"
+     *               example: "345678765432345678765432aef"
+     *               description: "Facebook token"
+     */
+
+    /**
+     * @swagger
+     * /api/v2/signup/facebook:
+     *   post:
+     *     description: facebook signup
+     *     tags: [AUTH]
+     *     operationId: "facebookSignup"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "facebookToken"
+     *            description: "facebook token"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/FBToken"
+     *     responses:
+     *          "200":
+     *            description: "signup succeed"
+     */
+    app.post('/api/v2/signup/facebook', cors, function (req, res, next) {
         facebookSignup(req, res, next);
     });
 };

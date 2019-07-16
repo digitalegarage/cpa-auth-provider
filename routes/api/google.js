@@ -7,8 +7,41 @@ var finder = require ('../../lib/finder');
 var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
+    /**
+     * @swagger
+     * definitions:
+     *  GoogleToken:
+     *      type: "object"
+     *      properties:
+     *           googleToken:
+     *               type: "string"
+     *               example: "345678765432345678765432aef"
+     *               description: "Google token"
+     */
 
-    app.post('/api/google/signup', cors, function (req, res, next) {
+    /**
+     * @swagger
+     * /api/v2/signup/google:
+     *   post:
+     *     description: facegooglebook signup
+     *     tags: [AUTH]
+     *     operationId: "googleSignup"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "googleToken"
+     *            description: "google token"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/googleToken"
+     *     responses:
+     *          "200":
+     *            description: "signup succeed"
+     */
+
+
+    app.post('/api/v2/signup/google', cors, function (req, res, next) {
         googleSignup(req, res, next);
     });
 };
