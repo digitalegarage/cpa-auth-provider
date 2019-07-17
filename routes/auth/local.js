@@ -57,8 +57,8 @@ module.exports = function (app, options) {
      *     description: Convenient GET disconnect endpoint for development. For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
      *     tags: [Session]
      *     responses:
-     *          "201":
-     *            description: "User is disconnected"
+     *          "302":
+     *            description: "User redirected to idp root page"
      */
     // For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
     app.get('/logout', function (req, res, next) {
@@ -68,7 +68,7 @@ module.exports = function (app, options) {
                 next(err);
             } else {
                 afterLogoutHelper.afterLogout(res);
-                return res.status(201).send();
+                requestHelper.redirect(res, '/');
             }
         });
     });
