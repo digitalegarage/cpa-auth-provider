@@ -121,40 +121,6 @@ describe("oldapi: creating a localLogin", () => {
     });
 });
 
-describe("oldapi: creating a localLogin but rejecting the 2nd", () => {
-    let allUsers;
-    let ctx = this;
-
-    before(done => {
-        resetDatabase(done);
-    });
-
-    before(function (done) {
-        recaptcha.init(OK_RECATCHA_KEY, OK_RECATCHA_SECRET);
-        done();
-    });
-
-    before(function (done) {
-        failing_request(ctx,old_api_url,done);
-    });
-    before(done => {
-        db.User.findAll({include: ['LocalLogin']})
-        .then(users => {
-            allUsers = users;
-            done();
-        });
-    })
-
-    it('should return a success and create a localLogin, but denying the 2nd', () => {
-        expect(allUsers).not.to.be.undefined;
-        expect(allUsers).not.to.be.empty;
-        expect(allUsers.length).to.equal(1);
-        expect(allUsers[0].LocalLogin).not.to.be.undefined;
-        expect(allUsers[0].LocalLogin.login).to.equal(EMAIL);
-        expect(ctx.res.statusCode).to.equal(500);
-    });
-});
-
 describe("newapi: creating a localLogin", () => {
     let ctx = this;
     let allUsers;

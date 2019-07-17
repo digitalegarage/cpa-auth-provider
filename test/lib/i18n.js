@@ -4,7 +4,6 @@ var db = require('../../models');
 
 var requestHelper = require('../request-helper');
 var dbHelper = require('../db-helper');
-var config = require('../../config');
 
 var initDatabase = function (done) {
 
@@ -48,7 +47,7 @@ var resetDatabase = function (done) {
     });
 };
 
-describe('POST /i18n/cookie', function () {
+describe('POST /api/v2/i18n/cookie', function () {
 
     context('When the user is not authenticated', function () {
 
@@ -57,20 +56,20 @@ describe('POST /i18n/cookie', function () {
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.sendRequest(self, '/i18n/cookie', {
+            requestHelper.sendRequest(self, '/api/v2/i18n/cookie', {
                 method: 'post',
                 data: {language: 'fr'}
             }, done);
         });
 
         it('should return status 200 and cookie should be updated', function () {
-            expect(self.res.statusCode).to.equal(200);
+            expect(self.res.statusCode).to.equal(201);
             //TODO expect cookies
         });
 
     });
 });
-describe('POST /i18n/profile', function () {
+describe('POST /api/v2/i18n/profile', function () {
 
     context('When the user is authenticated and he request to update profile', function () {
 
@@ -83,7 +82,7 @@ describe('POST /i18n/profile', function () {
         });
 
         before(function (done) {
-            requestHelper.sendRequest(self, '/i18n/profile', {
+            requestHelper.sendRequest(self, '/api/v2/i18n/profile', {
                 cookie: self.cookie,
                 method: 'post',
                 data: {language: 'fr'}
@@ -117,7 +116,7 @@ describe('POST /i18n/profile', function () {
         before(resetDatabase);
 
         before(function (done) {
-            requestHelper.sendRequest(self, '/i18n/profile', {
+            requestHelper.sendRequest(self, '/api/v2/i18n/profile', {
                 cookie: self.cookie,
                 method: 'post',
                 data: {language: 'fr'}

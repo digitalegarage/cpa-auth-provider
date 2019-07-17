@@ -6,6 +6,8 @@ var cors = require('cors');
 const pwHelper = require('../lib/password-helper');
 var finder = require ('../lib/finder');
 
+// TODO validate that this file is used at BR (it's not used at RTS)
+
 module.exports = function (router) {
     if (!config.quality_check || !config.quality_check.enabled) {
         return;

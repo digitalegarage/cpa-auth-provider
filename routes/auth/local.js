@@ -2,20 +2,18 @@
 
 var db = require('../../models');
 var config = require('../../config');
-var requestHelper = require('../../lib/request-helper');
-
-var emailHelper = require('../../lib/email-helper');
-var codeHelper = require('../../lib/code-helper');
-var passwordHelper = require('../../lib/password-helper');
-var finder = require('../../lib/finder');
-var limiterHelper = require('../../lib/limiter-helper');
 var afterLogoutHelper = require('../../lib/afterlogout-helper');
 var requestHelper = require('../../lib/request-helper');
+var limiterHelper = require('../../lib/limiter-helper');
+var finder = require('../../lib/finder');
+var codeHelper = require('../../lib/code-helper');
+var passwordHelper = require('../../lib/password-helper');
+var emailHelper = require('../../lib/email-helper');
+var i18n = require('i18n');
 var apiErrorHelper = require('../../lib/api-error-helper');
 
 // Google reCAPTCHA
 var recaptcha = require('express-recaptcha');
-var i18n = require('i18n');
 
 
 module.exports = function (app, options) {
@@ -52,6 +50,16 @@ module.exports = function (app, options) {
         }
     });
 
+    /**
+     * @swagger
+     * /logout:
+     *   get:
+     *     description: Convenient GET disconnect endpoint for development. For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
+     *     tags: [Session]
+     *     responses:
+     *          "302":
+     *            description: "User redirected to idp root page"
+     */
     // For AJAX call use DELETE method on /api/v2/session/logout in order to avoid have 304 unmodified and user no disconnected
     app.get('/logout', function (req, res, next) {
         req.logout();
@@ -104,6 +112,7 @@ module.exports = function (app, options) {
         });
     });
 
+    // deprecated (used at BR)
     app.post('/password/code', limiterHelper.verify, function (req, res, next) {
 
         if (req.recaptcha.error) {
@@ -152,6 +161,7 @@ module.exports = function (app, options) {
 
     });
 
+    // deprecated (used at BR)
     app.post('/password/update', function (req, res, next) {
 
         req.checkBody('password', req.__('BACK_PWD_UPDATE_PWD_EMPTY')).notEmpty();
