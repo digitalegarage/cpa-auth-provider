@@ -56,8 +56,8 @@ module.exports = {
 //                .catch(e => {
 //                    reject(e);
 //                });
-                resolve();
-            }
+//            }
+              resolve();
         });
     }
 };
