@@ -19,6 +19,7 @@
     "test-api-user": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user/user-resource"
   },
   "dependencies": {
+    "@sep/br-logging": "1.1.1",
     "accept-language-parser": "^1.5.0",
     "access-log": "^0.4.1",
     "async": "~2.5.0",
