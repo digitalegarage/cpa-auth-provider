@@ -7,6 +7,7 @@ RUN npm install -g sequelize-cli
 RUN npm install -g node-gyp
 
 COPY package.json package-lock.json /src/
+COPY .npmrc /src/
 
 # Install Node.js dependencies
 WORKDIR /src
