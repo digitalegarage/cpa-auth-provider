@@ -54,7 +54,16 @@ module.exports = {
         },
         local: {
             enabled: true
-        }
+        },
+        apple: {
+            enabled: ('true' == process.env.APPLE_LOGIN_ENABLED),
+            client_id: process.env.APPLE_LOGIN_CLIENT_ID,
+            teamId: process.env.APPLE_TEAM_ID, // Apple Developer Team ID.
+            privateKeyPath: process.env.PRIVATE_KEY_PATH, // path to private key associated with your client ID.
+            keyIdentifier: process.env.KEY_IDENTIFIER // identifier of the private key.
+        },
+
+
     },
 
     gdprManager: {

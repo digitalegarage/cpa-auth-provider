@@ -577,7 +577,8 @@ module.exports = function (app, options) {
             forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
             target: requestHelper.getPath('/login' + redirect),
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
-            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect),
+            state: encodeURIComponent(JSON.stringify({afterLoginRedirect: req.query.redirect ? req.query.redirect : '/', withCode: req.query.withCode ? true : false}))
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         const path = './login/broadcaster/' + broadcaster + 'login.ejs';
@@ -805,7 +806,8 @@ function handleErrorForHtmlCalls(req, res, err) {
         forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
         target: requestHelper.getPath('/login' + redirect),
         fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
-        googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+        googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect),
+        state: encodeURIComponent(JSON.stringify({afterLoginRedirect: req.query.redirect ? req.query.redirect : '/', withCode: req.query.withCode ? true : false}))
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     const path = './login/broadcaster/' + broadcaster + 'login.ejs';
