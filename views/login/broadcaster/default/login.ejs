@@ -40,14 +40,12 @@
 
                             <button type="submit"
                                     class="btn btn-primary btn-block btn-large-submit"><%= __('LOGIN_LOGIN_BUTTON') %></button>
+                            <p class="last-link"><%= __('LOGIN_NEED_AN_ACCOUNT_LINK') %>
+                                <a class="btn-link" href="<%= signup %>"><%= __('LOGIN_SIGNUP_LINK') %></a>
+                            </p>
                         </form>
 
                         <% include ../../../alternative-logins.ejs %>
-
-
-                        <p class="last-link"><%= __('LOGIN_NEED_AN_ACCOUNT_LINK') %>
-                            <a class="btn-link" href="<%= signup %>"><%= __('LOGIN_SIGNUP_LINK') %></a>
-                        </p>
 
                     </div>
                 </div>
