@@ -58,6 +58,7 @@ var routes = function (router) {
                             hasPassword: user.LocalLogin && !!user.LocalLogin.password,
                             facebook: logins.indexOf(socialLoginHelper.FB) > -1,
                             google: logins.indexOf(socialLoginHelper.GOOGLE) > -1,
+                            apple: logins.indexOf(socialLoginHelper.APPLE) > -1,
                             hasSocialLogin: logins.length > 0,
                             public_uid: user.public_uid
                         },
