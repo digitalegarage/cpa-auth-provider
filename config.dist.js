@@ -36,32 +36,46 @@ module.exports = {
             client_id: '',
             client_secret: ''
         },
+        apple: {
+            enabled: true,
+            client_id: 'ch.rts.marts.dev', // Apple client id
+            teamId: 'a_team_id', // Apple Developer Team ID.
+            privateKeyPath: './AuthKey_MB8JH97AHJ.p8', // path to private key associated with your client ID.
+            keyIdentifier: 'a_secret' // identifier of the private key.
+        },
         local: {
             enabled: true
         }
     },
 
+    // The list of fields that are required by the API
     userProfiles: {
         requiredFields: []//, 'gender','date_of_birth', 'firstname', 'lastname'],
     },
 
     gdprManager: {
-        // useGDPRManagerDeleteWithURL: 'https://gdprmanager.org',
+        // by setting a value to useGDPRManagerDeleteWithURL it would enable deletion using GDPR manager
+        //useGDPRManagerDeleteWithURL: "http://localhost/gdpr/api/user",
+        // by setting a value to useGDPRManagerExportWithURL it would enable export using GDPR manager
+        //useGDPRManagerExportWithURL: "http://localhost/gdpr/api/collect"
     },
 
     // configuration for password using local identity provider
     password: {
         // one of [no,simple,owasp] - defaults to owasp
-        quality_check: '',
+        // 'no' means tha no check is done
+        // 'simple' uses score and based on password length and complexity
+        // 'owasp' uses owasp recommendation
+        quality_check: 'simple',
         // in sec
         recovery_code_validity_duration: 1800,
         // a new recovery code will be generated only if the current one has less that TTL
         keep_recovery_code_until: 900,
-        // additional endpoint for password setting (/user/password)
+        // additional endpoint (/user/password) to check if the password strong enough according to plolicy see quality_check
         additional_endpoint: true,
     },
 
-    // enable password quality check endpoint
+    // enable password quality check endpoint (/check/password)
     quality_check: {
         enabled: true
     },
@@ -82,8 +96,11 @@ module.exports = {
             // transport: 'smtp'
             // transport: 'aws'
             // transport: 'gmail',
-            username: 'username',
-            password: 'password',
+            // username: 'username',
+            // password: 'password',
+            // host: 'somehost.org',
+            // port: 25,
+            // secure: false,
         },
         from: 'no-reply@broadcaster.com',
         // host is used for to generate link in mail (like password recovery)
@@ -98,6 +115,9 @@ module.exports = {
 
     limiter: {
         type: 'recaptcha', // 'no' || 'rate' || 'recaptcha-optional' || 'recaptcha'
+        // Applies to signup / password recovery and all endpoint that could spam
+        // no: no limit
+        // rate: after a certain number of request (rate.delayAfter) the request response time will increase of rate.delayMs. Rate is reset after rate.windowMs
         parameters: {
             recaptcha: {
                 site_key: '6Lc6NCYUAAAAAPiyvFO2jig6jXGtYEhgZWtWFzml',
@@ -114,6 +134,7 @@ module.exports = {
     // When accessing the home page, if defined, users are automatically
     // redirected to the specified identity_providers (ie: 'github')
     auto_idp_redirect: 'local',
+    // Go to a page with a link to profile and device instead of landing on the user profile page.
     use_landing_page: true,
 
     afterLogin: {
@@ -218,38 +239,15 @@ module.exports = {
         additional_styles_src:'https://some-trusted-domain.org https://another-trusted-domain.org',
         // Unless you have to load font using AJAX and set it directly as B64 in a font HTML tag, it's not recommended to enable allow_fonts_data
         //allow_fonts_data: true,
+
+        //'https: \'self\'; script-src https: \'self\' \'unsafe-inline\' http://connect.facebook.com/; style-src https: \'self\' \'unsafe-inline\'; img-src *; frame-src \'self\' http://staticxx.facebook.com https://www.google.com https://accounts.google.com/; connect-src https:; font-src \'self\'',
     },
 
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 
-    // CPA
 
-    // The length of time that user (pairing) codes are valid, in seconds.
-    pairing_code_lifetime: 60 * 60, // 1 hour
-
-    // The length of time that a access tokens are valid, in seconds.
-    access_token_lifetime: 24 * 60 * 60, // 1 day
-
-    // The length of time that an authorization code is valid, in seconds.
-    authorization_code_lifetime: 10 * 60, // 10 minutes
-
-    // The maximum rate at which clients should poll to obtain an access token,
-    // in seconds.
-    max_poll_interval: 5,
-
-    // JWT configuration for CPA https://tech.ebu.ch/groups/CPA
-    jwtSecret: 'CHANGE_BEFORE_MOVING_IN_PRODUCTION',
-    jwt: {
-        audience: 'cpa',
-        issuer: 'cpa'
-    },
-
-    // The end-user verification URI on the authorization server. The URI should
-    // be short and easy to remember as end-users will be asked to manually type
-    // it into their user-agent.
-    verification_uri: 'http://localhost:3000/verify',
-
+    ////////////////////////
     // Data that will be inserted when running bin/initdb
     domains: [
         {
@@ -280,16 +278,6 @@ module.exports = {
         }
     ],
 
-    // use_secure_headers: true,
-    // content_security_policy:{
-    //     additional_scripts_src: 'https://www.rts.ch/',
-    //     additional_fonts_src: 'https://www.rts.ch/',
-    //     additional_frames_src: 'https://www.rts.ch/',
-    //     additional_styles_src:'https://www.rts.ch/'
-    // },
-
-        //'https: \'self\'; script-src https: \'self\' \'unsafe-inline\' http://connect.facebook.com/; style-src https: \'self\' \'unsafe-inline\'; img-src *; frame-src \'self\' http://staticxx.facebook.com https://www.google.com https://accounts.google.com/; connect-src https:; font-src \'self\'',
-
     admin:
         {
             id: 1,
@@ -312,6 +300,38 @@ module.exports = {
             redirect_uri: "https://boutique.rts.ch/rts-oauth2-redirect"
         }
     ],
+
+    // End of data that will be inserted when running bin/initdb
+    ////////////////////////
+
+    /////////////
+    // Following is CPA stuff
+
+    // The length of time that user (pairing) codes are valid, in seconds.
+    pairing_code_lifetime: 60 * 60, // 1 hour
+
+    // The length of time that a access tokens are valid, in seconds.
+    access_token_lifetime: 24 * 60 * 60, // 1 day
+
+    // The length of time that an authorization code is valid, in seconds.
+    authorization_code_lifetime: 10 * 60, // 10 minutes
+
+    // The maximum rate at which clients should poll to obtain an access token,
+    // in seconds.
+    max_poll_interval: 5,
+
+    // JWT configuration for CPA https://tech.ebu.ch/groups/CPA
+    jwtSecret: 'CHANGE_BEFORE_MOVING_IN_PRODUCTION',
+    jwt: {
+        audience: 'cpa',
+        issuer: 'cpa'
+    },
+
+    // The end-user verification URI on the authorization server. The URI should
+    // be short and easy to remember as end-users will be asked to manually type
+    // it into their user-agent.
+    verification_uri: 'http://localhost:3000/verify',
+
 
     // This option controls how the authorization server responds to requests to
     // associate an existing client with a new domain:
@@ -342,9 +362,15 @@ module.exports = {
         verification_time: 7 * 24 * 60 * 60 // 7 days
     },
 
+
+    // End of CPA stuff
+    //////////////
+
+    // Enable prometheus
     monitoring: {
         enabled: true,
     },
 
+    // access log format for each incoming HTTP request
     access_log_format: '[ACCESS-LOG] url=":url" method=":method" statusCode=":statusCode" delta=":delta" ip=":ip"'
 };
