@@ -28,7 +28,11 @@ exports.authorization_code = function (client, code, redirectURI, done) {
             logger.debug('[AuthorizationCode][Exchange][client_id', client ? client.id : null, '][expected', authorizationCode.oauth2_client_id, ']');
             return done(null, false);
         }
-        if (redirectURI !== authorizationCode.redirect_uri) {
+        if (! (redirectURI == authorizationCode.redirect_uri) ||
+            (redirectURI == authorizationCode.redirect_uri_2) ||
+            (redirectURI == authorizationCode.redirect_uri_3) ||
+            (redirectURI == authorizationCode.redirect_uri_4) ||
+            (redirectURI == authorizationCode.redirect_uri_5)) {
             logger.debug('[AuthorizationCode][Exchange][redirectURI', redirectURI, '][expected', authorizationCode.redirect_uri, ']');
             return done(null, false);
         }
