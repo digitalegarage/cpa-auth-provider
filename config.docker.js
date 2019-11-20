@@ -97,7 +97,7 @@ module.exports = {
             password: process.env.MAIL_PASSWORD,
             host: process.env.MAIL_HOST,
             port: process.env.MAIL_PORT,
-            secure: process.env.MAIL_SECURE,
+            secure: ('true' === process.env.MAIL_SECURE),
         },
         from: process.env.MAIL_FROM,
         host: process.env.IDP_HOST,
