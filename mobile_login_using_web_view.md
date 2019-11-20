@@ -1,5 +1,4 @@
 
-
 # Login with mobile view
 
 That login flow was designed for RTS but could apply to any broadcaster aiming to have a single login widow that could be used with mobile via a web view or as a stand alone web page for web login.
@@ -19,7 +18,7 @@ Note that redirect url parameter is checked against a white list configured on I
 
 ### redirect + cookie extraction
 
-That flow is not supposed to be used in a pur web mode since it can leak the session cookie to an evil JS. It has been designed for mobile login using a web view and that require to get the session cookie value for later use in a native context. 
+That flow is not supposed to be used in a pure web mode since it can leak the session cookie to an evil JS. It has been designed for mobile login using a web view that requires to get the session cookie value for later use in a native context. 
 Expected flow is the following: 
 - mobile native app open a web view on the IDP login page with a redirect in the HTTP request. That redirect url has a custom schema (like: `ios://login`) that could be easily intercepted by mobile framework.
 - once the login or signup succeed the web view is redirected to the requested custom url with the session cookie has a query parameter (like : `ios://login?token=<cookie_value>`)
@@ -30,7 +29,7 @@ Expected flow is the following:
 #### the hidden redirect:
 
 It's possible to get the cookie value from the `npm-session` lib only after the header are sent to the client, so it's too late to try to set the cookie value as a query parameter in the header `location`. So an additional redirect to `/api/v2/session/cookie` had been added to that flow in order to get the cookie and to finally return it as a query parameter.
-So in term of HTTP cal the flow would be the following:
+So in term of HTTP call the flow would be the following:
 - GET `https://idp/login?redirect=iso%3A%2F%2Flogin` (redirect contains `iso://login` but url encoded)
 - POST `https://idp/api/v2/session/login <user> <password>` responds with 302 `location: https://idp/api/v2/session/cookie?redirect=iso%3A%2F%2Flogin`
 - GET `https://idp/api/v2/session/cookie?redirect=iso%3A%2F%2Flogin` responds with 302 `location: iso://login?token=<cookie_value>`
