@@ -130,6 +130,10 @@ module.exports = function (router) {
                                     name: xssFilters.inHTMLData(client.name),
                                     jwt_code: xssFilters.inHTMLData(client.jwt_code),
                                     redirect_uri: xssFilters.inHTMLData(client.redirect_uri),
+                                    redirect_uri_2: xssFilters.inHTMLData(client.redirect_uri_2),
+                                    redirect_uri_3: xssFilters.inHTMLData(client.redirect_uri_3),
+                                    redirect_uri_4: xssFilters.inHTMLData(client.redirect_uri_4),
+                                    redirect_uri_5: xssFilters.inHTMLData(client.redirect_uri_5),
                                     email_redirect_uri: xssFilters.inHTMLData(client.email_redirect_uri),
                                     use_template: xssFilters.inHTMLData(client.use_template),
                                     client_secret: hash

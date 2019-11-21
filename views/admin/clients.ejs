@@ -24,6 +24,10 @@
                 <th><%= __('ADMIN_CLIENT_CLIENT_ID_TABLE_COL_TITLE') %></th>
                 <th><%= __('ADMIN_CLIENT_JWT_CODE_TABLE_COL_TITLE') %></th>
                 <th><%= __('ADMIN_CLIENT_REDIRECT_URI_TABLE_COL_TITLE') %></th>
+                <th><%= __('ADMIN_CLIENT_REDIRECT_URI_2_TABLE_COL_TITLE') %></th>
+                <th><%= __('ADMIN_CLIENT_REDIRECT_URI_3_TABLE_COL_TITLE') %></th>
+                <th><%= __('ADMIN_CLIENT_REDIRECT_URI_4_TABLE_COL_TITLE') %></th>
+                <th><%= __('ADMIN_CLIENT_REDIRECT_URI_5_TABLE_COL_TITLE') %></th>
                 <th><%= __('ADMIN_CLIENT_EMAIL_REDIRECT_URI_TABLE_COL_TITLE') %></th>
                 <th><%= __('ADMIN_CLIENT_TEMPLATE_TABLE_COL_TITLE') %></th>
                 <th><%= __('ADMIN_CLIENT_SECRET_TABLE_COL_TITLE') %></th>
@@ -240,7 +244,7 @@
                     $("#clientsTable").find("tr:gt(0)").remove();
 
                     for (var i = 0; i < data.length; i++) {
-                        $('#clientsTable tr:last').after(buildRow(data[i].id, data[i].name, data[i].client_id, data[i].jwt_code, data[i].redirect_uri, data[i].email_redirect_uri, data[i].use_template));
+                        $('#clientsTable tr:last').after(buildRow(data[i].id, data[i].name, data[i].client_id, data[i].jwt_code, data[i].redirect_uri, data[i].redirect_uri_2, data[i].redirect_uri_3, data[i].redirect_uri_4, data[i].redirect_uri_5, data[i].email_redirect_uri, data[i].use_template));
                     }
                     eventListeners();
                 },
@@ -266,6 +270,10 @@
             row += '                <td class="client-id">' + client_id + '</td>\n';
             row += '                <td class="client-jwtCode">' + client_jwt_code + '</td>\n';
             row += '                <td class="client-redirect">' + redirect_uri + '</td>\n';
+            row += '                <td class="client-redirect">' + redirect_uri_2 + '</td>\n';
+            row += '                <td class="client-redirect">' + redirect_uri_3 + '</td>\n';
+            row += '                <td class="client-redirect">' + redirect_uri_4 + '</td>\n';
+            row += '                <td class="client-redirect">' + redirect_uri_5 + '</td>\n';
             row += '                <td class="client-emailRedirect">' + email_redirect_uri + '</td>\n';
             row += '                <td class="client-template">' + template + '</td>\n';
             row += '                <td class="client-secret">****************</td>\n';
