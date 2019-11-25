@@ -35,19 +35,23 @@ module.exports = function (sequelize, DataTypes) {
         },
         redirect_uri_2: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            defaultValue: ''
         },
         redirect_uri_3: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            defaultValue: ''
         },
         redirect_uri_4: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            defaultValue: ''
         },
         redirect_uri_5: {
             type: DataTypes.STRING,
-            allowNull: false
+            allowNull: false,
+            defaultValue: ''
         },
         use_template: {
             type: DataTypes.STRING,
