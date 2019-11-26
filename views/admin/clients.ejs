@@ -54,8 +54,8 @@
 <% include ./modales/clients-update.ejs %>
 
 <script type="text/javascript">
-
     (function () {
+        var apiUrl = "<%= apiUrl%>";
         var $alertError = $('#alert-error');
         var $alertSuccess = $('#alert-success');
         var $errorMessage = $('#alert-error .message');
@@ -76,7 +76,7 @@
                 refreshMessages();
                 var realId = getRealId(this);
                 $.ajax({
-                    url: '/api/admin/clients/' + encodeURIComponent(realId),
+                    url: apiUrl + '/api/admin/clients/' + encodeURIComponent(realId),
                     method: 'DELETE'
                 }).then(
                     function (data, status, jqXHR) {
@@ -93,7 +93,7 @@
             $('.refresh-secret').on('click', function (event) {
                 refreshMessages();
                 var realId = getRealId(this);
-                $.ajax('/api/admin/clients/' + encodeURIComponent(realId) + '/secret').then(
+                $.ajax(apiUrl + '/api/admin/clients/' + encodeURIComponent(realId) + '/secret').then(
                     function (data, status, jqXHR) {
                         $successMessage.append("<%= __('ADMIN_CLIENT_MESSAGE_REFRESH_SECRET_SUCCESS_PREFIX') %>", data.client_id, "<%= __('ADMIN_CLIENT_MESSAGE_REFRESH_SECRET_SUCCESS_SUFFIX') %>", data.secret);
                         $alertSuccess.show();
@@ -152,7 +152,7 @@
             var jwtCode = $addClientModal.find('#jwtCode').val();
 
             $.ajax({
-                url: '/api/admin/clients',
+                url: apiUrl + '/api/admin/clients',
                 method: 'POST',
                 data: {
                     name: name,
@@ -202,7 +202,7 @@
             var jwtCode = $updateClientModal.find('#update-jwtCode').val();
 
             $.ajax({
-                url: '/api/admin/clients/',
+                url: apiUrl + '/api/admin/clients/',
                 method: 'POST',
                 data: {
                     id: encodeURIComponent(id),
@@ -260,7 +260,7 @@
         //Get all clients and rebuild the view
         function displayList() {
             $.ajax({
-                url: '/api/admin/clients/',
+                url: apiUrl + '/api/admin/clients/',
                 method: 'GET'
             }).then(
                 function (data, status, jqXHR) {

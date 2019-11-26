@@ -25,7 +25,7 @@ module.exports = function (router) {
         return db.OAuth2Client.findAll()
             .then(
                 function (oAuth2Clients) {
-                    return res.render('./admin/clients.ejs', {oAuth2Clients: oAuth2Clients});
+                    return res.render('./admin/clients.ejs', {oAuth2Clients: oAuth2Clients, apiUrl: config.baseUrl + config.urlPrefix});
                 },
                 function (err) {
                     logger.debug('[Admins][get /admin/clients/all][error', err, ']');
