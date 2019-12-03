@@ -16,7 +16,8 @@ var CLIENT = {
     client_id: "ClientA",
     client_secret: "ClientSecret",
     name: "OAuth 2.0 Client",
-    redirect_uri: 'http://localhost'
+    redirect_uri: 'http://localhost',
+    redirect_uri_2: 'http://localhost_2_oauth_js'
 };
 var USER = {
     id: 123,
@@ -309,7 +310,7 @@ describe('GET /oauth2/dialog/authorize', function () {
             before(function (done) {
                 requestHelper.sendRequest(
                     this,
-                    baseUrl + '&client_id=' + encodeURIComponent(CLIENT.client_id) + '&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri),
+                    baseUrl + '&client_id=' + encodeURIComponent(CLIENT.client_id) + '&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri_2),
                     {},
                     done
                 );
@@ -317,7 +318,7 @@ describe('GET /oauth2/dialog/authorize', function () {
 
             it('should redirect to login page', function () {
                 expect(this.res.statusCode).equal(302);
-                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=code&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri)));
+                expect(this.res.headers.location).equal(URL_PREFIX + '/login?redirect=' + encodeURIComponent('/ap/oauth2/dialog/authorize?response_type=code&state=a&client_id=ClientA&redirect_uri=' + encodeURIComponent(CLIENT.redirect_uri_2)));
             });
         });
     });
