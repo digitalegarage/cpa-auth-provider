@@ -33,7 +33,7 @@ exports.authorization_code = function (client, code, redirectURI, done) {
                 authorizationCode.redirect_uri_3,
                 authorizationCode.redirect_uri_4,
                 authorizationCode.redirect_uri_5];
-        if (redirects.indexOf(redirectURI) == -1) {
+        if (redirects.indexOf(redirectURI) === -1) {
             logger.debug('[AuthorizationCode][Exchange][redirectURI', redirectURI, '][expected', authorizationCode.redirect_uri, ']');
             return done(null, false);
         }
