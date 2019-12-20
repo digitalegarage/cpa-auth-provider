@@ -154,6 +154,39 @@ describe('API-V2 profile', function () {
                 expectedGetUpdatedProfile(ctx);
             });
         });
+
+        context('updating null-DOB using jwt', function () {
+            var ctx = this;
+            before(function (done) {
+                login.jwtLogin(ctx, done);
+            });
+            before(function (done) {
+                jwtUpdateNullDOB(ctx, done);
+            });
+            before(function (done) {
+                jwtGetProfile(ctx, done);
+            });
+            it('should return a success', function () {
+                expectNullDOB(ctx);
+            });
+        });
+
+        context('updating valid DOB using jwt', function () {
+            var ctx = this;
+            before(function (done) {
+                login.jwtLogin(ctx, done);
+            });
+            before(function (done) {
+                jwtUpdateValidDOB(ctx, done);
+            });
+            before(function (done) {
+                jwtGetProfile(ctx, done);
+            });
+            it('should return a success', function () {
+                expectValidDOB(ctx);
+            });
+        });
+
         context('using CPA', function () {
             var ctx = this;
             ctx.token = initData.USER_1_CPA_TOKEN;
@@ -328,6 +361,26 @@ function jwtUpdateProfile(context, done) {
     );
 }
 
+function jwtUpdateNullDOB(context,done) {
+    requestHelper.sendRequest(context, "/api/v2/jwt/user/profile", {
+        method: 'put',
+        accessToken: context.token,
+        data: {
+            date_of_birth: ''
+        }
+    }, done);
+}
+
+function jwtUpdateValidDOB(context,done) {
+    requestHelper.sendRequest(context, "/api/v2/jwt/user/profile", {
+        method: 'put',
+        accessToken: context.token,
+        data: {
+            date_of_birth: NEW_DAB
+        }
+    }, done);
+}
+
 //---------------
 // cpa calls
 
@@ -420,4 +473,15 @@ function expectedGetUpdatedProfile(context) {
     expect(context.res.body.user.gender).equal(NEW_GENDER);
     expect(context.res.body.user.date_of_birth).equal(NEW_DAB);
     expect(context.res.body.user.public_uid).equal(initData.USER_1_PROFILE.public_uid);
+}
+
+function expectNullDOB(context) {
+    expect(context.res.statusCode).equal(200);
+    expect(context.res.body.user.date_of_birth).to.be.null;
+    expect(context.res.body.user.date_of_birth_ymd).to.be.undefined;
+}
+
+function expectValidDOB(context) {
+    expect(context.res.statusCode).to.equal(200);
+    expect(context.res.body.user.date_of_birth).to.equal(NEW_DAB);
 }
