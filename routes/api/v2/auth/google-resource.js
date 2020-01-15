@@ -159,7 +159,7 @@ module.exports = function (app, options) {
                         reject(err);
                     });
                 }
-            });
+            }).catch((err) => {reject(err)});
         });
     }
 
@@ -174,7 +174,7 @@ module.exports = function (app, options) {
                     socialLoginHelper.GOOGLE,
                     gmailUser.email,
                     gmailUser.provider_uid,
-                    gmailUser.display_name,
+                    null, //gmailUser.display_name,
                     null,
                     null,
                     null,
