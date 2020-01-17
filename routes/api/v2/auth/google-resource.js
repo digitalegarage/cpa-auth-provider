@@ -159,7 +159,7 @@ module.exports = function (app, options) {
                         reject(err);
                     });
                 }
-            }).catch((err) => {reject(err)});
+            }).catch((err) => {reject(err);});
         });
     }
 
