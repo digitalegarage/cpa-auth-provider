@@ -1,7 +1,7 @@
 FROM node:10.15.3-slim
 
 # Install dependencies
-RUN apt-get update -yq && apt-get install -yq bcrypt
+RUN apt-get update -yq && apt-get install -yq bcrypt && apt-get install -yq git
 
 RUN npm install -g sequelize-cli
 RUN npm install -g node-gyp
