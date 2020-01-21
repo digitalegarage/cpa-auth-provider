@@ -63,7 +63,7 @@
     "method-override": "~2.3.9",
     "morgan": "^1.9.1",
     "mysql": "git+https://github.com/mysqljs/mysql#master",
-    "mysql2": "1.7.0",
+    "mysql2": "2.1.0",
     "nock": "^9.0.17",
     "nodemailer": "^4.0.1",
     "nodemailer-ses-transport": "^1.5.1",
