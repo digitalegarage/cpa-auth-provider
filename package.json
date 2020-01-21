@@ -19,6 +19,7 @@
     "test-api-user": "NODE_ENV=test mocha --bail --timeout 10000 --exit --reporter dot --require test/test-helper test/lib test/api test/api/v2/user/user-resource"
   },
   "dependencies": {
+    "@sentry/node": "^5.4.3",
     "accept-language-parser": "^1.5.0",
     "access-log": "^0.4.1",
     "async": "~2.5.0",
@@ -81,7 +82,6 @@
     "pg": "6.4.2",
     "pg-hstore": "2.3.2",
     "prom-client": "^10.2.0",
-    "raven": "^2.1.2",
     "request": "^2.87.0",
     "request-promise": "^4.2.2",
     "sequelize": "^4.7.5",
@@ -105,6 +105,7 @@
     "chai-jquery": "^2.0.0",
     "cheerio": "~0.22.0",
     "mocha": "^5.2.0",
+    "sequelize-auto-migrations": "^1.0.3",
     "sinon": "~3.2.1",
     "sinon-chai": "~2.13.0",
     "supertest": "~3.0.0"
