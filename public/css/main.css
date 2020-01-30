@@ -243,6 +243,7 @@ nav .peach-title {
     width: calc(100% - 98px);
     text-align: center;
     font-family: "Roboto";
+    font-weight: 500;
 }
 #login .googleplus {
     background: #4285F4 !important;
