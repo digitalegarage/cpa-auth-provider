@@ -578,7 +578,7 @@ module.exports = function (app, options) {
             target: requestHelper.getPath('/login' + redirect),
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
             googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect),
-            state: encodeURIComponent(JSON.stringify({afterLoginRedirect: req.query.redirect ? req.query.redirect : '/', withCode: req.query.withCode ? true : false}))
+            state: encodeURIComponent(JSON.stringify({afterLoginRedirect: req.query.redirect ? req.query.redirect : '/', withCode: req.query.withcode ? true : false}))
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         const path = './login/broadcaster/' + broadcaster + 'login.ejs';
