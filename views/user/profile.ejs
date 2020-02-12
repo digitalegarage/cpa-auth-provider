@@ -259,7 +259,7 @@
 
     </div>
 
-    <% if (profile.facebook || profile.twitter || profile.google) { %>
+    <% if (profile.facebook || profile.apple || profile.google) { %>
 
     <hr/>
 
@@ -286,8 +286,8 @@
             <% } %>
             <% if (profile.google) { %>
             <div class="providers-container first">
-                <span class="google-text"><i class="fa fa-google-plus-square" aria-hidden="true"></i></span>
-                <span><%= __('PROFILE_ACCOUNT_LINKED_PROVIDER_GOOGLEPLUS') %></span>
+                <span class="google-text"><i class="fa fa-google" aria-hidden="true"></i></span>
+                <span><%= __('PROFILE_ACCOUNT_LINKED_PROVIDER_GOOGLE') %></span>
             </div>
             <% } %>
         </div>
@@ -698,6 +698,7 @@
                 var $deleteUserForm = $("#deleteUserForm");
                 var isFacebookAccount = '<%= profile.facebook %>';
                 var isGoogleAccount = '<%= profile.google %>';
+                var isAppleAccount = '<%= profile.apple %>';
                 var $passwordError = $('#password-error');
 
                 $deleteError.hide();
@@ -707,7 +708,7 @@
                 $passwordError.hide();
                 $passwordError.html("");
 
-                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true") {
+                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true" && isAppleAccount !== "true") {
                     $passwordError.html("<%= __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>");
                     $deleteUserForm.first('div.form-group').addClass('has-error');
                     $spinner.hide()
@@ -808,6 +809,7 @@
                 var $exportUserForm = $("#exportUserForm");
                 var isFacebookAccount = '<%= profile.facebook %>';
                 var isGoogleAccount = '<%= profile.google %>';
+                var isAppleAccount = '<%= profile.apple %>';
                 var $passwordError = $('#export-password-error');
 
                 $exportError.hide();
@@ -817,7 +819,7 @@
                 $passwordError.hide();
                 $passwordError.html("");
 
-                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true") {
+                if (!$password.val() && isFacebookAccount !== "true" && isGoogleAccount !== "true" && isAppleAccount !== "true") {
                     $passwordError.html("<%- __('PROFILE_API_DELETE_YOUR_ACCOUNT_MISSING_PASSWORD') %>"); //TODO
                     $exportUserForm.first('div.form-group').addClass('has-error');
                     $spinner.hide()

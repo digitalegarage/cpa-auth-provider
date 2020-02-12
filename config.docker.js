@@ -54,7 +54,16 @@ module.exports = {
         },
         local: {
             enabled: true
-        }
+        },
+        apple: {
+            enabled: ('true' == process.env.APPLE_LOGIN_ENABLED),
+            client_id: process.env.APPLE_LOGIN_CLIENT_ID,
+            teamId: process.env.APPLE_TEAM_ID, // Apple Developer Team ID.
+            privateKeyPath: process.env.PRIVATE_KEY_PATH, // path to private key associated with your client ID.
+            keyIdentifier: process.env.KEY_IDENTIFIER // identifier of the private key.
+        },
+
+
     },
 
     gdprManager: {
@@ -88,7 +97,7 @@ module.exports = {
             password: process.env.MAIL_PASSWORD,
             host: process.env.MAIL_HOST,
             port: process.env.MAIL_PORT,
-            secure: process.env.MAIL_SECURE,
+            secure: ('true' === process.env.MAIL_SECURE),
         },
         from: process.env.MAIL_FROM,
         host: process.env.IDP_HOST,
@@ -212,7 +221,7 @@ module.exports = {
         accessible_over_non_https: process.env.AUTH_SESSION_COOKIE_ACCESSIBLE_OVER_NON_HTTPS || false,
         sameSite: process.env.AUTH_SESSION_COOKIE_SAMESITE || 'lax',
         // this depends on the max size of your mysql/mariadbs varchar when using `use_sequelize_sessions`
-        session_data_length: process.env.AUTH_SESSION_COOKIE_DATA_LENGTH || 50000
+        session_data_length: process.env.AUTH_SESSION_COOKIE_DATA_LENGTH || 10000
     },
 
     session_authorization_header_qualifier:process.env.SESSION_AUTHORIZATION_HEADER_QUALIFIER,

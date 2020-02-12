@@ -12,13 +12,45 @@ const cors = require('../../../../lib/cors'),
     socialLoginHelper = require('../../../../lib/social-login-helper'),
     jwt = require('jwt-simple'),
     loginService = require('../../../../services/login-service'),
-    _ = require('underscore');
+    trackingCookie = require('../../../../lib/tracking-cookie'),
+    db = require('../../../../models'),
+    _ = require('underscore'),
+    recaptcha = require('express-recaptcha'),
+    passport = require('passport'),
+    fs = require('fs');
 
 
+////////////
+// JWT Strategy
 
-var trackingCookie = require('../../../../lib/tracking-cookie');
-var recaptcha = require('express-recaptcha');
-var fs = require('fs');
+var JwtStrategy = require('passport-jwt').Strategy,
+    ExtractJwt = require('passport-jwt').ExtractJwt;
+
+var opts = {};
+opts.jwtFromRequest = ExtractJwt.fromExtractors(
+    [
+        ExtractJwt.fromAuthHeaderWithScheme('JWT'),
+        ExtractJwt.fromAuthHeaderAsBearerToken()
+    ]
+);
+opts.secretOrKey = config.jwtSecret;
+// opts.issuer = "accounts.examplesoft.com";
+// opts.audience = "yoursite.net";
+passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
+    if (!jwt_payload) {
+        done(null, false);
+        return;
+    }
+    db.User.findOne({where: {id: jwt_payload.id}, include: [db.LocalLogin]})
+    .then(function (user) {
+        if (user) {
+            done(null, user);
+        } else {
+            done(null, false);
+        }
+    });
+}));
+////////////
 
 
 const SESSION_LOGIN_PATH = '/api/v2/session/cookie';
@@ -545,7 +577,8 @@ module.exports = function (app, options) {
             forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
             target: requestHelper.getPath('/login' + redirect),
             fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
-            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+            googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect),
+            state: encodeURIComponent(JSON.stringify({afterLoginRedirect: req.query.redirect ? req.query.redirect : '/', withCode: req.query.withcode ? true : false}))
         };
         let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
         const path = './login/broadcaster/' + broadcaster + 'login.ejs';
@@ -773,7 +806,8 @@ function handleErrorForHtmlCalls(req, res, err) {
         forgotPassword: requestHelper.getPath('/forgotpassword' + redirect),
         target: requestHelper.getPath('/login' + redirect),
         fbTarget: requestHelper.getPath('/api/v2/auth/facebook' + redirect),
-        googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect)
+        googleTarget: requestHelper.getPath('/api/v2/auth/google' + redirect),
+        state: encodeURIComponent(JSON.stringify({afterLoginRedirect: req.query.redirect ? req.query.redirect : '/', withCode: req.query.withCode ? true : false}))
     };
     let broadcaster = config.broadcaster && config.broadcaster.layout ? config.broadcaster.layout + '/' : 'default/';
     const path = './login/broadcaster/' + broadcaster + 'login.ejs';

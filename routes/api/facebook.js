@@ -9,15 +9,39 @@ var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
 
-    app.post('/oauth/facebook/signup', cors, function (req, res, next) {
-        if (!req.body.client_id) {
-            apiErrorHelper.throwError(400, 'MISSING_CLIENT_ID', 'Missing client id.');
-        } else {
-            facebookSignup(req, res, next);
-        }
-    });
+    /**
+     * @swagger
+     * definitions:
+     *  FBToken:
+     *      type: "object"
+     *      properties:
+     *           fbToken:
+     *               type: "string"
+     *               example: "345678765432345678765432aef"
+     *               description: "Facebook token"
+     */
 
-    app.post('/api/facebook/signup', cors, function (req, res, next) {
+    /**
+     * @swagger
+     * /api/v2/signup/facebook:
+     *   post:
+     *     description: facebook signup
+     *     tags: [AUTH]
+     *     operationId: "facebookSignup"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "facebookToken"
+     *            description: "facebook token"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/FBToken"
+     *     responses:
+     *          "200":
+     *            description: "signup succeed"
+     */
+    app.post('/api/v2/signup/facebook', cors, function (req, res, next) {
         facebookSignup(req, res, next);
     });
 };

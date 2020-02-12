@@ -6,6 +6,12 @@ const changeEmailHelper = require('./legacy-change-email-helper');
 
 module.exports = function(app, options) {
 
+    /*
+    *
+    * Following endpoints are deprecated (used at BR only)
+    *
+    */
+    
     app.options('/email/change', cors());
     app.post('/email/change', cors(), function(req, res, next) {
             if (!!req.user) {

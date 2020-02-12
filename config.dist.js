@@ -1,9 +1,10 @@
 "use strict";
 
 module.exports = {
-
-    allow_name_access_by_puid: false,
+    allow_name_access_by_puid: true,
     
+    baseUrl: 'http://localhost:3000',
+
     broadcaster: {
         // Name of the Broadcaster
         name: 'rts',
@@ -35,41 +36,48 @@ module.exports = {
             client_id: '',
             client_secret: ''
         },
-        twitter: {
-            enabled: false,
-            consumer_key: '',
-            consumer_secret: '',
-            callback_url: ''
-        },
-        github: {
-            enabled: false,
-            client_id: '',
-            client_secret: '',
-            callback_url: ''
-        },
-        ebu: {
-            enabled: false
+        apple: {
+            enabled: true,
+            client_id: 'ch.rts.marts.dev', // Apple client id
+            teamId: 'a_team_id', // Apple Developer Team ID.
+            privateKeyPath: './AuthKey_MB8JH97AHJ.p8', // path to private key associated with your client ID.
+            keyIdentifier: 'a_secret' // identifier of the private key.
         },
         local: {
             enabled: true
         }
     },
 
+    // The list of fields that are required by the API
+    userProfiles: {
+        requiredFields: []//, 'gender','date_of_birth', 'firstname', 'lastname'],
+    },
 
     gdprManager: {
-        // useGDPRManagerDeleteWithURL: 'https://gdprmanager.org',
+        // by setting a value to useGDPRManagerDeleteWithURL it would enable deletion using GDPR manager
+        //useGDPRManagerDeleteWithURL: "http://localhost/gdpr/api/user",
+        // by setting a value to useGDPRManagerExportWithURL it would enable export using GDPR manager
+        //useGDPRManagerExportWithURL: "http://localhost/gdpr/api/collect"
     },
 
     // configuration for password using local identity provider
     password: {
         // one of [no,simple,owasp] - defaults to owasp
-        quality_check: '',
+        // 'no' means tha no check is done
+        // 'simple' uses score and based on password length and complexity
+        // 'owasp' uses owasp recommendation
+        quality_check: 'simple',
         // in sec
         recovery_code_validity_duration: 1800,
         // a new recovery code will be generated only if the current one has less that TTL
         keep_recovery_code_until: 900,
-        // additional endpoint for password setting (/user/password)
+        // additional endpoint (/user/password) to check if the password strong enough according to plolicy see quality_check
         additional_endpoint: true,
+    },
+
+    // enable password quality check endpoint (/check/password)
+    quality_check: {
+        enabled: true
     },
 
     // define the name of the cookie used to store user locale
@@ -88,8 +96,11 @@ module.exports = {
             // transport: 'smtp'
             // transport: 'aws'
             // transport: 'gmail',
-            username: 'username',
-            password: 'password',
+            // username: 'username',
+            // password: 'password',
+            // host: 'somehost.org',
+            // port: 25,
+            // secure: false,
         },
         from: 'no-reply@broadcaster.com',
         // host is used for to generate link in mail (like password recovery)
@@ -104,6 +115,9 @@ module.exports = {
 
     limiter: {
         type: 'recaptcha', // 'no' || 'rate' || 'recaptcha-optional' || 'recaptcha'
+        // Applies to signup / password recovery and all endpoint that could spam
+        // no: no limit
+        // rate: after a certain number of request (rate.delayAfter) the request response time will increase of rate.delayMs. Rate is reset after rate.windowMs
         parameters: {
             recaptcha: {
                 site_key: '6Lc6NCYUAAAAAPiyvFO2jig6jXGtYEhgZWtWFzml',
@@ -117,7 +131,11 @@ module.exports = {
         }
     },
 
-    use_landing_page: false,
+    // When accessing the home page, if defined, users are automatically
+    // redirected to the specified identity_providers (ie: 'github')
+    auto_idp_redirect: 'local',
+    // Go to a page with a link to profile and device instead of landing on the user profile page.
+    use_landing_page: true,
 
     afterLogin: {
         // Store information in a custom cookie in json format
@@ -127,7 +145,7 @@ module.exports = {
             // name of the cookie
             cookieName: 'peach_infos',
             // cookie domain
-            domain: '.broadcaster.com',
+            domain: 'localhost:3000',
             duration: 999999999,
             // if true cookie will contain userId as json property
             storeUserId: true,
@@ -149,7 +167,7 @@ module.exports = {
 
     // Database configuration
     db: {
-        host: '',
+        host: 'localhost',
         port: 3306,
         user: '',
         password: '',
@@ -168,6 +186,11 @@ module.exports = {
     // Session cookie is signed with this secret to prevent tampering
     session_secret: 'putYourSessionSecretHere',
 
+    // enable automatique session cleaning (if true, unauthed session created more that 24h ago are deleted every day at 2am)
+    session: {
+        clean: true
+    },
+
     auth_session_cookie: {
         // Name of the session cookie. Must be something different than 'connect.sid'
         name: 'identity.provider.sid',
@@ -182,11 +205,16 @@ module.exports = {
     // Can be use to use an authorization header instead of a cookie in mobile app for instance.
     session_authorization_header_qualifier : 'sessionToken',
 
+    sentry: {
+        // dsn: ''
+    },
+    //
+
     // Cross-origin resource sharing
     cors: {
         enabled: true,
         allowed_domains: [
-            "http://cpa-client.ebu.io"
+            'http://localhost'
         ]
         // possible other options, will extend allowed_domains:
         // wildcard_domains: ['.ebu.io','.kornherr.net'] // (no stars or so, just a string for .endsWith())
@@ -211,12 +239,73 @@ module.exports = {
         additional_styles_src:'https://some-trusted-domain.org https://another-trusted-domain.org',
         // Unless you have to load font using AJAX and set it directly as B64 in a font HTML tag, it's not recommended to enable allow_fonts_data
         //allow_fonts_data: true,
+
+        //'https: \'self\'; script-src https: \'self\' \'unsafe-inline\' http://connect.facebook.com/; style-src https: \'self\' \'unsafe-inline\'; img-src *; frame-src \'self\' http://staticxx.facebook.com https://www.google.com https://accounts.google.com/; connect-src https:; font-src \'self\'',
     },
 
     // URL path prefix, e.g., '/myapp'
     urlPrefix: '',
 
-    // CPA
+
+    ////////////////////////
+    // Data that will be inserted when running bin/initdb
+    domains: [
+        {
+            name: 'bbc1-cpa.ebu.io',
+            display_name: 'BBC1',
+            access_token: 'b4949eba147f4cf88985b43c039cd05b'
+        },
+        {
+            name: 'bbc2-cpa.ebu.io',
+            display_name: 'BBC2',
+            access_token: 'b3dd734356524ef9b9ab3d03f1b1558e'
+        },
+        {
+            name: 'cpa.rts.ch',
+            display_name: 'CPA RTS',
+            access_token: 'f1a1329c934ccf0e45162f1c594c08f9'
+        }
+    ],
+
+    permissions: [
+        {
+            id: 1,
+            label: "admin"
+        },
+        {
+            id: 2,
+            label: "user"
+        }
+    ],
+
+    admin:
+        {
+            id: 1,
+            login: "admin@admin.com",
+            display_name: "Admin",
+            verified: true,
+            permission_id: 1
+        },
+
+    oauth2: {
+        refresh_tokens_enabled: true
+    },
+    oauth2_clients: [
+        {
+            id: 1,
+            client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
+            client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
+            use_template: "boutique-rts",
+            name: "La boutique RTS",
+            redirect_uri: "https://boutique.rts.ch/rts-oauth2-redirect"
+        }
+    ],
+
+    // End of data that will be inserted when running bin/initdb
+    ////////////////////////
+
+    /////////////
+    // Following is CPA stuff
 
     // The length of time that user (pairing) codes are valid, in seconds.
     pairing_code_lifetime: 60 * 60, // 1 hour
@@ -241,7 +330,7 @@ module.exports = {
     // The end-user verification URI on the authorization server. The URI should
     // be short and easy to remember as end-users will be asked to manually type
     // it into their user-agent.
-    verification_uri: 'http://vagrant.ebu.io:3000/',
+    verification_uri: 'http://localhost:3000/verify',
 
 
     // This option controls how the authorization server responds to requests to
@@ -255,64 +344,16 @@ module.exports = {
         software_id: '',
         software_version: '',
         ip: '127.0.0.1',
-        secret: '',
+        secret: 'thisismysecret',
         registration_type: 'static',
         redirect_uri: ''
     }],
-
-    // Data that will be inserted when running bin/initdb
-    domains: [
-        {
-            name: 'bbc1-cpa.ebu.io',
-            display_name: 'BBC1',
-            access_token: 'b4949eba147f4cf88985b43c039cd05b'
-        },
-        {
-            name: 'bbc2-cpa.ebu.io',
-            display_name: 'BBC2',
-            access_token: 'b3dd734356524ef9b9ab3d03f1b1558e'
-        }
-    ],
-
-    permissions: [
-        {
-            id: 1,
-            label: "admin"
-        },
-        {
-            id: 2,
-            label: "other"
-        }
-    ],
-
-    // admin: {
-    //     id:           1,
-    //     login:        "admin@admin.com",
-    //     display_name: "Admin",
-    //     verified:     true,
-    //     permission_id:1
-    //   },
-
-    // Init dev environment purpose (RTS sample)
-    // oauth2_clients: [
-    //     {
-    //         id: 1,
-    //         client_id: "db05acb0c6ed902e5a5b7f5ab79e7144",
-    //         client_secret: "49b7448061fed2319168eb2449ef3b58226a9c554b3ff0b138abe8ffad98",
-    //         user_template: "boutique-rts",
-    //         name: "La boutique RTS"
-    //     }
-    // ],
-
-    oauth2: {
-        refresh_tokens_enabled: true
-    },
 
     deletion: {
         // enable automatic deletion
         automatic_deletion_activated: false,
         // allow DELETE /oauth2/me
-        endpoint_enabled: false,
+        endpoint_enabled: true,
         // how long before a deletion request is processed
         delay_in_days: 7,
         // check to delete in seconds
@@ -321,10 +362,15 @@ module.exports = {
         verification_time: 7 * 24 * 60 * 60 // 7 days
     },
 
+
+    // End of CPA stuff
+    //////////////
+
+    // Enable prometheus
     monitoring: {
         enabled: true,
     },
 
-    access_log_format: '[ACCESS-LOG] url=":url" method=":method" statusCode=":statusCode" delta=":delta"'
-
+    // access log format for each incoming HTTP request
+    access_log_format: '[ACCESS-LOG] url=":url" method=":method" statusCode=":statusCode" delta=":delta" ip=":ip"'
 };
