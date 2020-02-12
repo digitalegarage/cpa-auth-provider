@@ -1,11 +1,11 @@
-<% if(config.identity_providers.facebook.enabled || config.identity_providers.google.enabled || config.identity_providers.twitter.enabled) { %>
-
+<% if(config.identity_providers.facebook.enabled || config.identity_providers.google.enabled || config.identity_providers.twitter.enabled || config.identity_providers.apple.enabled) { %>
+    <div class="social-header"><%= __('LOGIN_OR') %></div>
     <div class="social">
         <% if(config.identity_providers.google.enabled) { %>
-            <div class="social-entry text-center">
+            <div class="social-entry">
                 <a href="<%= googleTarget %>"
                    class="identity_provider googleplus">
-                    <img class="login-images" src="<%= link('/assets/img/logoroundg+.svg') %>"/>
+                    <img class="login-images google-logo" src="<%= link('/assets/img/btn_google_dark_normal_ios.svg') %>"/>
                     <p class="login-social-labels">
                         <%= __('LOGIN_GOOGLE_PLUS_BUTTON') %>
                     </p>
@@ -13,10 +13,11 @@
             </div>
         <% } %>
         <% if(config.identity_providers.facebook.enabled) { %>
-            <div class="social-entry text-center">
+            <div class="social-entry">
+                    <div class="fb-login-button" data-width="" data-size="large" data-button-type="login_with" data-auto-logout-link="false" data-use-continue-as="false"></div>
                 <a href="<%= fbTarget %>"
                    class="identity_provider facebook">
-                    <img class="login-images" src="<%= link('/assets/img/logoroundfacebook.svg') %>"/>
+                    <img class="login-images" src="<%= link('/assets/img/btn_facebook.svg') %>"/>
                     <p class="login-social-labels">
                         <%= __('LOGIN_FACEBOOK_BUTTON') %>
                     </p>
@@ -28,6 +29,28 @@
                 <img class="login-images" src="<%= link('/assets/img/logoroundtwitter.svg') %>"/>
                 <p class="login-social-labels"><%= __('LOGIN_TWITTER_BUTTON') %></p>
             </div>
+        <% } %>
+        <% if(config.identity_providers.apple && config.identity_providers.apple.enabled) { %>
+            <script type="text/javascript" src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"></script>
+            <div class="social-entry text-center">
+                <div id="appleid-signin" class="apple-signin-button" 
+                    data-color="black" 
+                    data-border="true" 
+                    data-type="sign-in"
+                    data-height="42px"
+                    data-width="160px"
+                    data-borderRadius="0"></div>
+            </div>
+            <script type="text/javascript">
+                // Scope should returns email and name...
+                AppleID.auth.init({
+                    clientId : '<%=config.identity_providers.apple.client_id%>',
+                    scope : 'openid email name',
+                    redirectURI: '<%= config.baseUrl + (config.urlPrefix || '') + '/api/v2/auth/apple/callback' %>',
+                    state : '<%= state %>'
+                });
+
+            </script>
         <% } %>
     </div>
 <% } %>

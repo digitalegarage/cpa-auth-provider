@@ -64,6 +64,13 @@ module.exports = {
         twitter: {
             enabled: false
         },
+        apple: {
+            enabled: true,
+            client_id: 'ch.rts.marts.dev',
+            teamId: '8779C367VK', // Apple Developer Team ID.
+            privateKeyPath: './AuthKey_MB8JH97AHJ.p8', // path to private key associated with your client ID.
+            keyIdentifier: 'MB8JH97AHJ' // identifier of the private key.
+        },
         local: {
             enabled: true
         }
