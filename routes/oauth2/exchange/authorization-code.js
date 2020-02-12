@@ -28,7 +28,12 @@ exports.authorization_code = function (client, code, redirectURI, done) {
             logger.debug('[AuthorizationCode][Exchange][client_id', client ? client.id : null, '][expected', authorizationCode.oauth2_client_id, ']');
             return done(null, false);
         }
-        if (redirectURI !== authorizationCode.redirect_uri) {
+        let redirects = [authorizationCode.redirect_uri, 
+                authorizationCode.redirect_uri_2,
+                authorizationCode.redirect_uri_3,
+                authorizationCode.redirect_uri_4,
+                authorizationCode.redirect_uri_5];
+        if (redirects.indexOf(redirectURI) === -1) {
             logger.debug('[AuthorizationCode][Exchange][redirectURI', redirectURI, '][expected', authorizationCode.redirect_uri, ']');
             return done(null, false);
         }

@@ -7,16 +7,41 @@ var finder = require ('../../lib/finder');
 var apiErrorHelper = require('../../lib/api-error-helper');
 
 module.exports = function (app, options) {
+    /**
+     * @swagger
+     * definitions:
+     *  GoogleToken:
+     *      type: "object"
+     *      properties:
+     *           googleToken:
+     *               type: "string"
+     *               example: "345678765432345678765432aef"
+     *               description: "Google token"
+     */
 
-    app.post('/oauth/google/signup', cors, function (req, res, next) {
-        if (!req.body.client_id) {
-            apiErrorHelper.throwError(400, 'MISSING_CLIENT_ID', 'Missing client id.');
-        } else {
-            googleSignup(req, res, next);
-        }
-    });
+    /**
+     * @swagger
+     * /api/v2/signup/google:
+     *   post:
+     *     description: facegooglebook signup
+     *     tags: [AUTH]
+     *     operationId: "googleSignup"
+     *     content:
+     *        - application/json
+     *     parameters:
+     *          - in: body
+     *            name: "googleToken"
+     *            description: "google token"
+     *            required: true
+     *            schema:
+     *              $ref: "#/definitions/googleToken"
+     *     responses:
+     *          "200":
+     *            description: "signup succeed"
+     */
 
-    app.post('/api/google/signup', cors, function (req, res, next) {
+
+    app.post('/api/v2/signup/google', cors, function (req, res, next) {
         googleSignup(req, res, next);
     });
 };
@@ -54,7 +79,7 @@ function googleSignup(req, res, next) {
         );
     }
     else {
-        next(apiErrorHelper.buildError(401,'GOOGLE_PROFILE_NOT_FOUND',"Missing google IDtoken to connect with Google account."));
+        next(apiErrorHelper.buildError(401,'GOOGLE_PROFILE_NOT_FOUND',"Missing google ID token to connect with Google account."));
     }
 }
 

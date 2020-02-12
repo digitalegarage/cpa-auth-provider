@@ -48,6 +48,26 @@ module.exports = function (sequelize, DataTypes) {
         redirect_uri: { //TODO: Move to its own table
             type: DataTypes.STRING,
             allowNull: true
+        },
+        redirect_uri_2: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: ''
+        },
+        redirect_uri_3: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: ''
+        },
+        redirect_uri_4: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: ''
+        },
+        redirect_uri_5: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: ''
         }
     }, {
         underscored: true,

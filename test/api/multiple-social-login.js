@@ -295,7 +295,7 @@ describe('Facebook', function () {
     });
 
 
-    describe('POST /api/facebook/signup', function () {
+    describe('POST /api/v2/signup/facebook', function () {
 
         describe('When user is not in the system', function () {
 
@@ -496,6 +496,7 @@ describe('Google', function () {
                 }
             );
         });
+
         describe('When user is in the system and hasn\'t validated his mail', function () {
 
             before(function (done) {
@@ -572,13 +573,13 @@ describe('Google', function () {
             before(function (done) {
                 db.User.findOne().then(function (user) {
                     self.user = user;
+
                 }).then(function () {
                     done();
                 });
             });
 
             it('Profile should be completed', function () {
-                    expect(USER_PROFILE.gender).equal(self.user.gender);
                     expect(USER_PROFILE.first_name).equal(self.user.firstname);
                     expect(USER_PROFILE.last_name).equal(self.user.lastname);
                 }
@@ -635,7 +636,7 @@ describe('Google', function () {
 
     });
 
-    describe('POST /api/google/signup', function () {
+    describe('POST /api/v2/signup/google', function () {
         describe('When user is not in the system', function () {
 
             before(resetDatabase);
@@ -1146,7 +1147,7 @@ function mockFB() {
 
 function facebookAPISignup(done) {
     mockFB();
-    requestHelper.sendRequest(this, '/api/facebook/signup', {
+    requestHelper.sendRequest(this, '/api/v2/signup/facebook', {
         method: 'post',
         type: 'form',
         data: {
@@ -1172,6 +1173,18 @@ function facebookUISignup(done) {
 ///////////////// Google utilities
 
 function mockGoogle() {
+    nock('https://www.googleapis.com')
+        .get('/oauth2/v3/userinfo?access_token=access-token-g1')
+        .reply(200, {
+            sub: 'aa123',
+            name: USER_PROFILE.first_name + ' ' + USER_PROFILE.last_name, 
+            family_name: USER_PROFILE.last_name, 
+            given_name: USER_PROFILE.first_name,
+            gender: USER_PROFILE.gender,
+            email: GOOGLE_EMAIL,
+            email_verified: true,
+        });
+
     nock('https://accounts.google.com/')
         .get('o/oauth2/v2/auth?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fgoogle%2Fcallback&scope=profile%20email&client_id=621117323323-j048lcbv5khh6lhr1lok4vv17mekijvm.apps.googleusercontent.com')
         .reply(302);
@@ -1233,7 +1246,7 @@ function googleUISignup(done) {
 function googleAPISignup(done) {
     mockGoogle();
 
-    requestHelper.sendRequest(this, '/api/google/signup', {
+    requestHelper.sendRequest(this, '/api/v2/signup/google', {
         method: 'post',
         type: 'form',
         data: {

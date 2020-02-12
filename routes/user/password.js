@@ -11,6 +11,7 @@ module.exports = setupRoutes;
 
 var registeredRoutes = {};
 
+// TODO validate that this file is used at BR (it's not used at RTS)
 
 function setupRoutes(router) {
     if (!config.password.additional_endpoint) {
